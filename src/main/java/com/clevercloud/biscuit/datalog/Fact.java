@@ -1,6 +1,7 @@
 package com.clevercloud.biscuit.datalog;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public final class Fact implements Serializable {
    private final Predicate predicate;
@@ -15,5 +16,18 @@ public final class Fact implements Serializable {
 
    public Fact(final Predicate predicate) {
       this.predicate = predicate;
+   }
+
+   @Override
+   public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      Fact fact = (Fact) o;
+      return Objects.equals(predicate, fact.predicate);
+   }
+
+   @Override
+   public int hashCode() {
+      return Objects.hash(predicate);
    }
 }

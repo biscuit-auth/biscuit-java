@@ -1,8 +1,9 @@
 package com.clevercloud.biscuit.datalog;
 
 import java.io.Serializable;
+import java.util.Objects;
 
-public abstract class ID implements Serializable { // FIXME: impl equals
+public abstract class ID implements Serializable {
    public abstract boolean match(final ID other);
 
    public final class Date extends ID implements Serializable {
@@ -21,6 +22,19 @@ public abstract class ID implements Serializable { // FIXME: impl equals
 
       public Date(final long value) {
          this.value = value;
+      }
+
+      @Override
+      public boolean equals(Object o) {
+         if (this == o) return true;
+         if (o == null || getClass() != o.getClass()) return false;
+         Date date = (Date) o;
+         return value == date.value;
+      }
+
+      @Override
+      public int hashCode() {
+         return Objects.hash(value);
       }
    }
 
@@ -44,6 +58,19 @@ public abstract class ID implements Serializable { // FIXME: impl equals
       public Integer(final long value) {
          this.value = value;
       }
+
+      @Override
+      public boolean equals(Object o) {
+         if (this == o) return true;
+         if (o == null || getClass() != o.getClass()) return false;
+         Integer integer = (Integer) o;
+         return value == integer.value;
+      }
+
+      @Override
+      public int hashCode() {
+         return Objects.hash(value);
+      }
    }
 
    public final class Str extends ID implements Serializable {
@@ -65,6 +92,19 @@ public abstract class ID implements Serializable { // FIXME: impl equals
 
       public Str(final String value) {
          this.value = value;
+      }
+
+      @Override
+      public boolean equals(Object o) {
+         if (this == o) return true;
+         if (o == null || getClass() != o.getClass()) return false;
+         Str str = (Str) o;
+         return Objects.equals(value, str.value);
+      }
+
+      @Override
+      public int hashCode() {
+         return Objects.hash(value);
       }
    }
 
@@ -88,6 +128,19 @@ public abstract class ID implements Serializable { // FIXME: impl equals
       public Symbol(final long value) {
          this.value = value;
       }
+
+      @Override
+      public boolean equals(Object o) {
+         if (this == o) return true;
+         if (o == null || getClass() != o.getClass()) return false;
+         Symbol symbol = (Symbol) o;
+         return value == symbol.value;
+      }
+
+      @Override
+      public int hashCode() {
+         return Objects.hash(value);
+      }
    }
 
    public final class Variable extends ID implements Serializable {
@@ -103,6 +156,19 @@ public abstract class ID implements Serializable { // FIXME: impl equals
 
       public Variable(final long value) {
          this.value = value;
+      }
+
+      @Override
+      public boolean equals(Object o) {
+         if (this == o) return true;
+         if (o == null || getClass() != o.getClass()) return false;
+         Variable variable = (Variable) o;
+         return value == variable.value;
+      }
+
+      @Override
+      public int hashCode() {
+         return Objects.hash(value);
       }
    }
 }

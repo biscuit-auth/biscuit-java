@@ -1,10 +1,7 @@
 package com.clevercloud.biscuit.datalog;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 public final class Predicate implements Serializable {
    private final long name;
@@ -42,5 +39,19 @@ public final class Predicate implements Serializable {
    public Predicate(final long name, final List<ID> ids) {
       this.name = name;
       this.ids = ids;
+   }
+
+   @Override
+   public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      Predicate predicate = (Predicate) o;
+      return name == predicate.name &&
+            Objects.equals(ids, predicate.ids);
+   }
+
+   @Override
+   public int hashCode() {
+      return Objects.hash(name, ids);
    }
 }
