@@ -21,6 +21,10 @@ public final class MatchedVariables implements Serializable {
       }
    }
 
+   public boolean is_complete() {
+      return this.variables.values().stream().allMatch((v) -> v.isPresent());
+   }
+
    public Optional<Map<Long, ID>> complete() {
       final Map<Long, ID> variables = new HashMap<>();
       for (final Map.Entry<Long, Optional<ID>> entry : this.variables.entrySet()) {
