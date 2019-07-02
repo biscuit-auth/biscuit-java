@@ -16,6 +16,11 @@ public abstract class SymbolConstraint implements Serializable {
       public InSet(final Set<Long> value) {
          this.value = value;
       }
+
+      @Override
+      public String toString() {
+         return "in " + this.value;
+      }
    }
 
    public final class NotInSet extends SymbolConstraint implements Serializable {
@@ -27,6 +32,11 @@ public abstract class SymbolConstraint implements Serializable {
 
       public NotInSet(final Set<Long> value) {
          this.value = value;
+      }
+
+      @Override
+      public String toString() {
+         return "not in " + this.value;
       }
    }
 }

@@ -16,6 +16,11 @@ public abstract class StrConstraint implements Serializable {
       public Prefix(final String value) {
          this.value = value;
       }
+
+      @Override
+      public String toString() {
+         return "matches " + this.value + "*";
+      }
    }
 
    public final class Suffix extends StrConstraint implements Serializable {
@@ -27,6 +32,11 @@ public abstract class StrConstraint implements Serializable {
 
       public Suffix(final String value) {
          this.value = value;
+      }
+
+      @Override
+      public String toString() {
+         return "matches *" + this.value;
       }
    }
 
@@ -40,6 +50,11 @@ public abstract class StrConstraint implements Serializable {
       public Equal(final String value) {
          this.value = value;
       }
+
+      @Override
+      public String toString() {
+         return "== " + this.value;
+      }
    }
 
    public final class InSet extends StrConstraint implements Serializable {
@@ -52,6 +67,11 @@ public abstract class StrConstraint implements Serializable {
       public InSet(final Set<String> value) {
          this.value = value;
       }
+
+      @Override
+      public String toString() {
+         return "in " + this.value;
+      }
    }
 
    public final class NotInSet extends StrConstraint implements Serializable {
@@ -63,6 +83,11 @@ public abstract class StrConstraint implements Serializable {
 
       public NotInSet(final Set<String> value) {
          this.value = value;
+      }
+
+      @Override
+      public String toString() {
+         return "not in " + this.value;
       }
    }
 }

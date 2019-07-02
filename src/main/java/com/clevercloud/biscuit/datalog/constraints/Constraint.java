@@ -33,4 +33,9 @@ public final class Constraint implements Serializable {
          return false;
       }
    }
+
+   @Override
+   public String toString() {
+      return this.id + "? " + this.kind.toString();
+   }
 }

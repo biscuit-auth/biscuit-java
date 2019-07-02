@@ -1,11 +1,18 @@
 package com.clevercloud.biscuit.datalog;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Objects;
 
 public final class Predicate implements Serializable {
    private final long name;
    private final List<ID> ids;
+
+   public long name() {
+      return this.name;
+   }
 
    public final List<ID> ids() {
       return this.ids;

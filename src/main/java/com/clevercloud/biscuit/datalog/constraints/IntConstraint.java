@@ -16,6 +16,11 @@ public abstract class IntConstraint implements Serializable {
       public Equal(final long value) {
          this.value = value;
       }
+
+      @Override
+      public String toString() {
+         return "== " + this.value;
+      }
    }
 
    public final class Greater extends IntConstraint implements Serializable {
@@ -27,6 +32,11 @@ public abstract class IntConstraint implements Serializable {
 
       public Greater(final long value) {
          this.value = value;
+      }
+
+      @Override
+      public String toString() {
+         return "> " + this.value;
       }
    }
 
@@ -40,6 +50,11 @@ public abstract class IntConstraint implements Serializable {
       public GreaterOrEqual(final long value) {
          this.value = value;
       }
+
+      @Override
+      public String toString() {
+         return ">= " + this.value;
+      }
    }
 
    public final class Lower extends IntConstraint implements Serializable {
@@ -51,6 +66,11 @@ public abstract class IntConstraint implements Serializable {
 
       public Lower(final long value) {
          this.value = value;
+      }
+
+      @Override
+      public String toString() {
+         return "< " + this.value;
       }
    }
 
@@ -64,6 +84,11 @@ public abstract class IntConstraint implements Serializable {
       public LowerOrEqual(final long value) {
          this.value = value;
       }
+
+      @Override
+      public String toString() {
+         return "<= " + this.value;
+      }
    }
 
    public final class InSet extends IntConstraint implements Serializable {
@@ -76,6 +101,11 @@ public abstract class IntConstraint implements Serializable {
       public InSet(final Set<Long> value) {
          this.value = value;
       }
+
+      @Override
+      public String toString() {
+         return "in " + this.value;
+      }
    }
 
    public final class NotInSet extends IntConstraint implements Serializable {
@@ -87,6 +117,11 @@ public abstract class IntConstraint implements Serializable {
 
       public NotInSet(final Set<Long> value) {
          this.value = value;
+      }
+
+      @Override
+      public String toString() {
+         return "not in " + this.value;
       }
    }
 }

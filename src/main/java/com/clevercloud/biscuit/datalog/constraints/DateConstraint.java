@@ -16,6 +16,11 @@ public abstract class DateConstraint implements Serializable {
       public Before(final long value) {
          this.value = value;
       }
+
+      @Override
+      public String toString() {
+         return "<= " + this.value;
+      }
    }
 
    public final class After extends DateConstraint implements Serializable {
@@ -27,6 +32,11 @@ public abstract class DateConstraint implements Serializable {
 
       public After(final long value) {
          this.value = value;
+      }
+
+      @Override
+      public String toString() {
+         return ">= " + this.value;
       }
    }
 }

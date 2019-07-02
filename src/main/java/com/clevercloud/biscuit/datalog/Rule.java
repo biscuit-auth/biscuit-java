@@ -11,6 +11,18 @@ public final class Rule implements Serializable {
    private final List<Predicate> body;
    private final List<Constraint> constraints;
 
+   public final Predicate head() {
+      return this.head;
+   }
+
+   public final List<Predicate> body() {
+      return this.body;
+   }
+
+   public final List<Constraint> constraints() {
+      return this.constraints;
+   }
+
    public void apply(final Set<Fact> facts, final Set<Fact> new_facts) {
       final Set<Long> variables_set = new HashSet<>();
       for (final Predicate pred : this.body) {
