@@ -6,6 +6,8 @@ import junit.framework.TestSuite;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class WorldTest extends TestCase {
    public WorldTest(String testName) {
@@ -37,5 +39,7 @@ public class WorldTest extends TestCase {
       ), new ArrayList<>());
 
       System.out.println("testing r1: " + syms.print_rule(r1));
+      Set<Fact> query_rule_result = w.query_rule(r1);
+      System.out.println("grandparents query_rules: [" + String.join(", ", query_rule_result.stream().map((f) -> syms.print_predicate(f.predicate())).collect(Collectors.toList())) + "]");
    }
 }

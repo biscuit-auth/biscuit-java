@@ -67,9 +67,10 @@ public final class Combinator implements Serializable {
                for (int i = pit.nextIndex(); i < this.predicates.size(); ++i) {
                   next_predicates.add(this.predicates.get(i));
                }
-               final List<Map<Long, ID>> next = new Combinator(vars, next_predicates, this.constraints, this.all_facts).combine();
-               variables.addAll(next);
-               break;
+               if (!next_predicates.isEmpty()) {
+                  final List<Map<Long, ID>> next = new Combinator(vars, next_predicates, this.constraints, this.all_facts).combine();
+                  variables.addAll(next);
+               }
             }
          }
       }

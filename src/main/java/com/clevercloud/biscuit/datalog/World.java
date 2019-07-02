@@ -33,6 +33,12 @@ public final class World implements Serializable {
       assert "world ran more than 100 iterations" == null;
    }
 
+   public Set<Fact> query_rule(final Rule rule) {
+      final Set<Fact> new_facts = new HashSet<>();
+      rule.apply(this.facts, new_facts);
+      return new_facts;
+   }
+
    public World() {
       this.facts = new HashSet<>();
       this.rules = new ArrayList<>();

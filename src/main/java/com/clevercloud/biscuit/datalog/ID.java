@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.Instant;
-import java.util.Date;
 import java.util.Objects;
 
 public abstract class ID implements Serializable {
@@ -40,11 +38,6 @@ public abstract class ID implements Serializable {
       @Override
       public int hashCode() {
          return Objects.hash(value);
-      }
-
-      @Override
-      public String toString() {
-         return java.util.Date.from(Instant.ofEpochSecond(this.value)).toString();
       }
    }
 
@@ -81,11 +74,6 @@ public abstract class ID implements Serializable {
       public int hashCode() {
          return Objects.hash(value);
       }
-
-      @Override
-      public String toString() {
-         return "" + this.value;
-      }
    }
 
    public final static class Str extends ID implements Serializable {
@@ -120,11 +108,6 @@ public abstract class ID implements Serializable {
       @Override
       public int hashCode() {
          return Objects.hash(value);
-      }
-
-      @Override
-      public String toString() {
-         return this.value;
       }
    }
 
@@ -161,11 +144,6 @@ public abstract class ID implements Serializable {
       public int hashCode() {
          return Objects.hash(value);
       }
-
-      @Override
-      public String toString() {
-         return "#" + this.value;
-      }
    }
 
    public final static class Variable extends ID implements Serializable {
@@ -188,9 +166,7 @@ public abstract class ID implements Serializable {
          try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] res = digest.digest(name.getBytes(StandardCharsets.UTF_8));
-            System.out.println("name was encoded to " + Byte.toUnsignedLong(res[0]) + " " + Byte.toUnsignedLong(res[1]) + " " + Byte.toUnsignedLong(res[2]) + " " + Byte.toUnsignedLong(res[3]));
             value = Byte.toUnsignedLong(res[0]) + (Byte.toUnsignedLong(res[1]) << 8) + (Byte.toUnsignedLong(res[2]) << 16) + (Byte.toUnsignedLong(res[3]) << 24);
-            System.out.println("name value is " + value);
          } catch (NoSuchAlgorithmException e) {
             assert e == null;
          }
@@ -208,11 +184,6 @@ public abstract class ID implements Serializable {
       @Override
       public int hashCode() {
          return Objects.hash(value);
-      }
-
-      @Override
-      public String toString() {
-         return this.value + "?";
       }
    }
 }

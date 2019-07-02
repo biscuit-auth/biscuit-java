@@ -1,9 +1,9 @@
 package com.clevercloud.biscuit.datalog;
 
-import com.clevercloud.biscuit.datalog.constraints.Constraint;
-
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -34,8 +34,22 @@ public final class SymbolTable implements Serializable {
    }
 
    public String print_predicate(final Predicate p) {
-      List<String> ids = p.ids().stream().map((i) -> i.toString()).collect(Collectors.toList());
-      return Optional.ofNullable(this.symbols.get((int)p.name())).orElse("<?>") + "(" + String.join(", ", ids) + ")";
+      List<String> ids = p.ids().stream().map((i) -> {
+         if (i instanceof ID.Variable) {
+            return ((ID.Variable) i).value() + "?";
+         } else if (i instanceof ID.Symbol) {
+            return "#" + this.symbols.get((int) ((ID.Symbol) i).value());
+         } else if (i instanceof ID.Date) {
+            return Date.from(Instant.ofEpochSecond(((ID.Date) i).value())).toString();
+         } else if (i instanceof ID.Integer) {
+            return "" + ((ID.Integer) i).value();
+         } else if (i instanceof ID.Str) {
+            return ((ID.Str) i).value();
+         } else {
+            return "???";
+         }
+      }).collect(Collectors.toList());
+      return Optional.ofNullable(this.symbols.get((int) p.name())).orElse("<?>") + "(" + String.join(", ", ids) + ")";
    }
 
    public SymbolTable() {
