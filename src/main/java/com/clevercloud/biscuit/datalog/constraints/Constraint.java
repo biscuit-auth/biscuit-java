@@ -13,7 +13,7 @@ public final class Constraint implements Serializable {
       this.kind = kind;
    }
 
-   public boolean check(long name, ID id) {
+   public boolean check(final long name, final ID id) {
       if (name != this.id) {
          return true;
       }

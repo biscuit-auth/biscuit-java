@@ -10,7 +10,7 @@ public final class Rule implements Serializable {
    private final List<Predicate> body;
    private final List<Constraint> constraints;
 
-   public Rule(Predicate head, List<Predicate> body, List<Constraint> constraints) {
+   public Rule(final Predicate head, final List<Predicate> body, final List<Constraint> constraints) {
       this.head = head;
       this.body = body;
       this.constraints = constraints;

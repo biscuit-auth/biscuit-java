@@ -4,12 +4,12 @@ import java.io.Serializable;
 import java.util.Set;
 
 public abstract class StrConstraint implements Serializable {
-   public abstract boolean check(String value);
+   public abstract boolean check(final String value);
 
    public final class Prefix extends StrConstraint implements Serializable {
       private final String value;
 
-      public boolean check(String value) {
+      public boolean check(final String value) {
          return value.startsWith(this.value);
       }
 
@@ -21,7 +21,7 @@ public abstract class StrConstraint implements Serializable {
    public final class Suffix extends StrConstraint implements Serializable {
       private final String value;
 
-      public boolean check(String value) {
+      public boolean check(final String value) {
          return value.endsWith(this.value);
       }
 
@@ -33,7 +33,7 @@ public abstract class StrConstraint implements Serializable {
    public final class Equal extends StrConstraint implements Serializable {
       private final String value;
 
-      public boolean check(String value) {
+      public boolean check(final String value) {
          return this.value.equals(value);
       }
 
@@ -45,7 +45,7 @@ public abstract class StrConstraint implements Serializable {
    public final class InSet extends StrConstraint implements Serializable {
       private final Set<String> value;
 
-      public boolean check(String value) {
+      public boolean check(final String value) {
          return this.value.contains(value);
       }
 
@@ -57,7 +57,7 @@ public abstract class StrConstraint implements Serializable {
    public final class NotInSet extends StrConstraint implements Serializable {
       private final Set<String> value;
 
-      public boolean check(String value) {
+      public boolean check(final String value) {
          return !this.value.contains(value);
       }
 

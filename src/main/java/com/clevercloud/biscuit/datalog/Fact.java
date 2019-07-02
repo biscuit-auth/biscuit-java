@@ -5,6 +5,10 @@ import java.io.Serializable;
 public final class Fact implements Serializable {
    private final Predicate predicate;
 
+   public final Predicate predicate() {
+      return this.predicate;
+   }
+
    public boolean match_predicate(final Predicate predicate) {
       return this.predicate.match(predicate);
    }

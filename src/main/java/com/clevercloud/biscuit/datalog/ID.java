@@ -2,7 +2,7 @@ package com.clevercloud.biscuit.datalog;
 
 import java.io.Serializable;
 
-public abstract class ID implements Serializable {
+public abstract class ID implements Serializable { // FIXME: impl equals
    public abstract boolean match(final ID other);
 
    public final class Date extends ID implements Serializable {

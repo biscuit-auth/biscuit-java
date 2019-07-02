@@ -8,6 +8,10 @@ public final class Predicate implements Serializable {
    private final long name;
    private final List<ID> ids;
 
+   public final List<ID> ids() {
+      return this.ids;
+   }
+
    public boolean match(final Predicate other) {
       if (this.name != other.name) {
          return false;
