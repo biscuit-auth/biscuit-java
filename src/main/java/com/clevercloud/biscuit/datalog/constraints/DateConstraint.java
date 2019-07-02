@@ -4,8 +4,14 @@ import java.io.Serializable;
 import java.util.Set;
 
 public abstract class DateConstraint implements Serializable {
+   public abstract boolean check(long value);
+
    public final class Before extends DateConstraint implements Serializable {
       private final long value;
+
+      public boolean check(long value) {
+         return this.value > value;
+      }
 
       public Before(final long value) {
          this.value = value;
@@ -14,6 +20,10 @@ public abstract class DateConstraint implements Serializable {
 
    public final class After extends DateConstraint implements Serializable {
       private final long value;
+
+      public boolean check(long value) {
+         return this.value < value;
+      }
 
       public After(final long value) {
          this.value = value;
