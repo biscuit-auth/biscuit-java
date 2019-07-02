@@ -6,7 +6,7 @@ import java.util.Objects;
 public abstract class ID implements Serializable {
    public abstract boolean match(final ID other);
 
-   public final class Date extends ID implements Serializable {
+   public final static class Date extends ID implements Serializable {
       private final long value;
 
       public long value() {
@@ -38,7 +38,7 @@ public abstract class ID implements Serializable {
       }
    }
 
-   public final class Integer extends ID implements Serializable {
+   public final static class Integer extends ID implements Serializable {
       private final long value;
 
       public long value() {
@@ -73,7 +73,7 @@ public abstract class ID implements Serializable {
       }
    }
 
-   public final class Str extends ID implements Serializable {
+   public final static class Str extends ID implements Serializable {
       private final String value;
 
       public String value() {
@@ -108,7 +108,7 @@ public abstract class ID implements Serializable {
       }
    }
 
-   public final class Symbol extends ID implements Serializable {
+   public final static class Symbol extends ID implements Serializable {
       private final long value;
 
       public long value() {
@@ -143,7 +143,7 @@ public abstract class ID implements Serializable {
       }
    }
 
-   public final class Variable extends ID implements Serializable {
+   public final static class Variable extends ID implements Serializable {
       private final long value;
 
       public long value() {
