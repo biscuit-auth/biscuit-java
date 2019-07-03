@@ -3,6 +3,7 @@ package com.clevercloud.biscuit.datalog;
 import com.clevercloud.biscuit.datalog.constraints.Constraint;
 import com.clevercloud.biscuit.datalog.constraints.ConstraintKind;
 import com.clevercloud.biscuit.datalog.constraints.IntConstraint;
+import com.clevercloud.biscuit.datalog.constraints.StrConstraint;
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -121,6 +122,45 @@ public class WorldTest extends TestCase {
          System.out.println("\t" + syms.print_fact(f));
       }
       expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(join, Arrays.asList(abc, aaa))), new Fact(new Predicate(join, Arrays.asList(abc, bbb)))));
+      Assert.assertEquals(expected, res);
+   }
+
+   private final Set<Fact> testSuffix(final World w, final long suff, final long route, final String suffix) {
+      return w.query_rule(new Rule(new Predicate(suff, Arrays.asList(new ID.Variable("app_id"), new ID.Variable(1234))), Arrays.asList(
+            new Predicate(route, Arrays.asList(new ID.Variable(0), new ID.Variable("app_id"), new ID.Variable(1234)))
+      ), Arrays.asList(
+            new Constraint(1234, new ConstraintKind.Str(new StrConstraint.Suffix(suffix)))
+      )));
+   }
+
+   public void testStr() {
+      final World w = new World();
+      final SymbolTable syms = new SymbolTable();
+
+      final ID app_0 = syms.add("app_0");
+      final ID app_1 = syms.add("app_1");
+      final ID app_2 = syms.add("app_2");
+      final long route = syms.insert("route");
+      final long suff = syms.insert("route suffix");
+
+      w.add_fact(new Fact(new Predicate(route, Arrays.asList(new ID.Integer(0), app_0, new ID.Str("example.com")))));
+      w.add_fact(new Fact(new Predicate(route, Arrays.asList(new ID.Integer(1), app_1, new ID.Str("test.com")))));
+      w.add_fact(new Fact(new Predicate(route, Arrays.asList(new ID.Integer(2), app_2, new ID.Str("test.fr")))));
+      w.add_fact(new Fact(new Predicate(route, Arrays.asList(new ID.Integer(3), app_0, new ID.Str("www.example.com")))));
+      w.add_fact(new Fact(new Predicate(route, Arrays.asList(new ID.Integer(4), app_1, new ID.Str("mx.example.com")))));
+
+      Set<Fact> res = testSuffix(w, suff, route, ".fr");
+      for (final Fact f : res) {
+         System.out.println("\t" + syms.print_fact(f));
+      }
+      Set<Fact> expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(suff, Arrays.asList(app_2, new ID.Str("test.fr"))))));
+      Assert.assertEquals(expected, res);
+
+      res = testSuffix(w, suff, route, "example.com");
+      for (final Fact f : res) {
+         System.out.println("\t" + syms.print_fact(f));
+      }
+      expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(suff, Arrays.asList(app_0, new ID.Str("example.com")))), new Fact(new Predicate(suff, Arrays.asList(app_0, new ID.Str("www.example.com")))), new Fact(new Predicate(suff, Arrays.asList(app_1, new ID.Str("mx.example.com"))))));
       Assert.assertEquals(expected, res);
    }
 }
