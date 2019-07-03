@@ -30,4 +30,9 @@ public final class Fact implements Serializable {
    public int hashCode() {
       return Objects.hash(predicate);
    }
+
+   @Override
+   public String toString() {
+      return this.predicate.toString();
+   }
 }

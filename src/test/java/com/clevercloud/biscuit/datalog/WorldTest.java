@@ -1,11 +1,13 @@
 package com.clevercloud.biscuit.datalog;
 
+import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -62,6 +64,10 @@ public class WorldTest extends TestCase {
       w.add_fact(new Fact(new Predicate(parent, Arrays.asList(c, e))));
       w.run();
 
-      System.out.println("grandparents after inserting parent(C, E): [" + String.join(", ", w.query(new Predicate(grandparent, Arrays.asList(new ID.Variable("grandparent"), new ID.Variable("grandchild")))).stream().map((f) -> syms.print_fact(f)).collect(Collectors.toSet())) + "]");
+      final Set<Fact> res = w.query(new Predicate(grandparent, Arrays.asList(new ID.Variable("grandparent"), new ID.Variable("grandchild"))));
+      System.out.println("grandparents after inserting parent(C, E): [" + String.join(", ", res.stream().map((f) -> syms.print_fact(f)).collect(Collectors.toSet())) + "]");
+
+      final Set<Fact> expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(grandparent, Arrays.asList(a, c))), new Fact(new Predicate(grandparent, Arrays.asList(b, d))), new Fact(new Predicate(grandparent, Arrays.asList(b, e)))));
+      Assert.assertEquals(expected, res);
    }
 }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public final class Predicate implements Serializable {
    private final long name;
@@ -60,5 +61,10 @@ public final class Predicate implements Serializable {
    @Override
    public int hashCode() {
       return Objects.hash(name, ids);
+   }
+
+   @Override
+   public String toString() {
+      return this.name + "(" + String.join(", ", this.ids.stream().map((i) -> i.toString()).collect(Collectors.toSet())) + ")";
    }
 }

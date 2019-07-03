@@ -39,6 +39,11 @@ public abstract class ID implements Serializable {
       public int hashCode() {
          return Objects.hash(value);
       }
+
+      @Override
+      public String toString() {
+         return "@" + this.value;
+      }
    }
 
    public final static class Integer extends ID implements Serializable {
@@ -73,6 +78,11 @@ public abstract class ID implements Serializable {
       @Override
       public int hashCode() {
          return Objects.hash(value);
+      }
+
+      @Override
+      public String toString() {
+         return "" + this.value;
       }
    }
 
@@ -109,6 +119,11 @@ public abstract class ID implements Serializable {
       public int hashCode() {
          return Objects.hash(value);
       }
+
+      @Override
+      public String toString() {
+         return this.value;
+      }
    }
 
    public final static class Symbol extends ID implements Serializable {
@@ -143,6 +158,11 @@ public abstract class ID implements Serializable {
       @Override
       public int hashCode() {
          return Objects.hash(value);
+      }
+
+      @Override
+      public String toString() {
+         return "#" + this.value;
       }
    }
 
@@ -184,6 +204,11 @@ public abstract class ID implements Serializable {
       @Override
       public int hashCode() {
          return Objects.hash(value);
+      }
+
+      @Override
+      public String toString() {
+         return this.value + "?";
       }
    }
 }
