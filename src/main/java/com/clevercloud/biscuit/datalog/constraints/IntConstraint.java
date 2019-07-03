@@ -6,7 +6,7 @@ import java.util.Set;
 public abstract class IntConstraint implements Serializable {
    public abstract boolean check(final long value);
 
-   public final class Equal extends IntConstraint implements Serializable {
+   public static final class Equal extends IntConstraint implements Serializable {
       private final long value;
 
       public boolean check(final long value) {
@@ -23,7 +23,7 @@ public abstract class IntConstraint implements Serializable {
       }
    }
 
-   public final class Greater extends IntConstraint implements Serializable {
+   public static final class Greater extends IntConstraint implements Serializable {
       private final long value;
 
       public boolean check(final long value) {
@@ -40,7 +40,7 @@ public abstract class IntConstraint implements Serializable {
       }
    }
 
-   public final class GreaterOrEqual extends IntConstraint implements Serializable {
+   public static final class GreaterOrEqual extends IntConstraint implements Serializable {
       private final long value;
 
       public boolean check(final long value) {
@@ -57,7 +57,7 @@ public abstract class IntConstraint implements Serializable {
       }
    }
 
-   public final class Lower extends IntConstraint implements Serializable {
+   public static final class Lower extends IntConstraint implements Serializable {
       private final long value;
 
       public boolean check(final long value) {
@@ -74,7 +74,7 @@ public abstract class IntConstraint implements Serializable {
       }
    }
 
-   public final class LowerOrEqual extends IntConstraint implements Serializable {
+   public static final class LowerOrEqual extends IntConstraint implements Serializable {
       private final long value;
 
       public boolean check(final long value) {
@@ -91,7 +91,7 @@ public abstract class IntConstraint implements Serializable {
       }
    }
 
-   public final class InSet extends IntConstraint implements Serializable {
+   public static final class InSet extends IntConstraint implements Serializable {
       private final Set<Long> value;
 
       public boolean check(final long value) {
@@ -108,7 +108,7 @@ public abstract class IntConstraint implements Serializable {
       }
    }
 
-   public final class NotInSet extends IntConstraint implements Serializable {
+   public static final class NotInSet extends IntConstraint implements Serializable {
       private final Set<Long> value;
 
       public boolean check(final long value) {

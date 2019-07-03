@@ -1,5 +1,8 @@
 package com.clevercloud.biscuit.datalog;
 
+import com.clevercloud.biscuit.datalog.constraints.Constraint;
+import com.clevercloud.biscuit.datalog.constraints.ConstraintKind;
+import com.clevercloud.biscuit.datalog.constraints.IntConstraint;
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -30,6 +33,7 @@ public class WorldTest extends TestCase {
       final ID e = syms.add("e");
       final long parent = syms.insert("parent");
       final long grandparent = syms.insert("grandparent");
+      final long sibling = syms.insert("syblings");
 
       w.add_fact(new Fact(new Predicate(parent, Arrays.asList(a, b))));
       w.add_fact(new Fact(new Predicate(parent, Arrays.asList(b, c))));
@@ -68,6 +72,55 @@ public class WorldTest extends TestCase {
       System.out.println("grandparents after inserting parent(C, E): [" + String.join(", ", res.stream().map((f) -> syms.print_fact(f)).collect(Collectors.toSet())) + "]");
 
       final Set<Fact> expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(grandparent, Arrays.asList(a, c))), new Fact(new Predicate(grandparent, Arrays.asList(b, d))), new Fact(new Predicate(grandparent, Arrays.asList(b, e)))));
+      Assert.assertEquals(expected, res);
+
+      w.add_rule(new Rule(new Predicate(sibling, Arrays.asList(new ID.Variable("sibling1"), new ID.Variable("sibling2"))), Arrays.asList(
+            new Predicate(parent, Arrays.asList(new ID.Variable("parent"), new ID.Variable("sibling1"))),
+            new Predicate(parent, Arrays.asList(new ID.Variable("parent"), new ID.Variable("sibling2")))
+      ), new ArrayList<>()));
+      w.run();
+
+      System.out.println("siblings: [" + String.join(", ", w.query(new Predicate(sibling, Arrays.asList(new ID.Variable("sibling1"), new ID.Variable("sibling2")))).stream().map((f) -> syms.print_fact(f)).collect(Collectors.toSet())) + "]");
+   }
+
+   public void testNumbers() {
+      final World w = new World();
+      final SymbolTable syms = new SymbolTable();
+
+      final ID abc = syms.add("abc");
+      final ID def = syms.add("def");
+      final ID ghi = syms.add("ghi");
+      final ID jkl = syms.add("jkl");
+      final ID mno = syms.add("mno");
+      final ID aaa = syms.add("AAA");
+      final ID bbb = syms.add("BBB");
+      final ID ccc = syms.add("CCC");
+      final long t1 = syms.insert("t1");
+      final long t2 = syms.insert("t2");
+      final long join = syms.insert("join");
+
+      w.add_fact(new Fact(new Predicate(t1, Arrays.asList(new ID.Integer(0), abc))));
+      w.add_fact(new Fact(new Predicate(t1, Arrays.asList(new ID.Integer(1), def))));
+      w.add_fact(new Fact(new Predicate(t1, Arrays.asList(new ID.Integer(2), ghi))));
+      w.add_fact(new Fact(new Predicate(t1, Arrays.asList(new ID.Integer(3), jkl))));
+      w.add_fact(new Fact(new Predicate(t1, Arrays.asList(new ID.Integer(4), mno))));
+
+      w.add_fact(new Fact(new Predicate(t2, Arrays.asList(new ID.Integer(0), aaa, new ID.Integer(0)))));
+      w.add_fact(new Fact(new Predicate(t2, Arrays.asList(new ID.Integer(1), bbb, new ID.Integer(0)))));
+      w.add_fact(new Fact(new Predicate(t2, Arrays.asList(new ID.Integer(2), ccc, new ID.Integer(1)))));
+
+      Set<Fact> res = w.query_rule(new Rule(new Predicate(join, Arrays.asList(new ID.Variable("left"), new ID.Variable("right"))), Arrays.asList(new Predicate(t1, Arrays.asList(new ID.Variable("id"), new ID.Variable("left"))), new Predicate(t2, Arrays.asList(new ID.Variable("t2_id"), new ID.Variable("right"), new ID.Variable("id")))), new ArrayList<>()));
+      for (final Fact f : res) {
+         System.out.println("\t" + syms.print_fact(f));
+      }
+      Set<Fact> expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(join, Arrays.asList(abc, aaa))), new Fact(new Predicate(join, Arrays.asList(abc, bbb))), new Fact(new Predicate(join, Arrays.asList(def, ccc)))));
+      Assert.assertEquals(expected, res);
+
+      res = w.query_rule(new Rule(new Predicate(join, Arrays.asList(new ID.Variable("left"), new ID.Variable("right"))), Arrays.asList(new Predicate(t1, Arrays.asList(new ID.Variable(1234), new ID.Variable("left"))), new Predicate(t2, Arrays.asList(new ID.Variable("t2_id"), new ID.Variable("right"), new ID.Variable(1234)))), Arrays.asList(new Constraint(1234, new ConstraintKind.Int(new IntConstraint.Lower(1))))));
+      for (final Fact f : res) {
+         System.out.println("\t" + syms.print_fact(f));
+      }
+      expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(join, Arrays.asList(abc, aaa))), new Fact(new Predicate(join, Arrays.asList(abc, bbb)))));
       Assert.assertEquals(expected, res);
    }
 }

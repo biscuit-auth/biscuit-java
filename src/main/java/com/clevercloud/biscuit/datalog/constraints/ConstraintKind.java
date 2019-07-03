@@ -3,7 +3,7 @@ package com.clevercloud.biscuit.datalog.constraints;
 import java.io.Serializable;
 
 public abstract class ConstraintKind implements Serializable {
-   public final class Int extends ConstraintKind implements Serializable {
+   public static final class Int extends ConstraintKind implements Serializable {
       private final IntConstraint constraint;
 
       public boolean check(final long value) {
@@ -15,7 +15,7 @@ public abstract class ConstraintKind implements Serializable {
       }
    }
 
-   public final class Str extends ConstraintKind implements Serializable {
+   public static final class Str extends ConstraintKind implements Serializable {
       private final StrConstraint constraint;
 
       public boolean check(final String value) {
@@ -27,7 +27,7 @@ public abstract class ConstraintKind implements Serializable {
       }
    }
 
-   public final class Date extends ConstraintKind implements Serializable {
+   public static final class Date extends ConstraintKind implements Serializable {
       private final DateConstraint constraint;
 
       public boolean check(final long value) {
@@ -39,7 +39,7 @@ public abstract class ConstraintKind implements Serializable {
       }
    }
 
-   public final class Symbol extends ConstraintKind implements Serializable {
+   public static final class Symbol extends ConstraintKind implements Serializable {
       private final SymbolConstraint constraint;
 
       public boolean check(final long value) {
