@@ -53,15 +53,7 @@ public final class Combinator implements Serializable {
                continue;
             }
 
-            if (this.predicates.size() == 1) {
-               final Optional<Map<Long, ID>> v = vars.complete();
-               if (v.isPresent()) {
-                  variables.add(v.get());
-                  return variables;
-               } else {
-                  continue;
-               }
-            } else {
+            if (pit.hasNext()) {
                final List<Predicate> next_predicates = new ArrayList<>();
                for (int i = pit.nextIndex(); i < this.predicates.size(); ++i) {
                   next_predicates.add(this.predicates.get(i));
@@ -69,6 +61,14 @@ public final class Combinator implements Serializable {
                if (!next_predicates.isEmpty()) {
                   final List<Map<Long, ID>> next = new Combinator(vars, next_predicates, this.constraints, this.all_facts).combine();
                   variables.addAll(next);
+               }
+            } else {
+               final Optional<Map<Long, ID>> v = vars.complete();
+               if (v.isPresent()) {
+                  variables.add(v.get());
+                  return variables;
+               } else {
+                  continue;
                }
             }
          }
