@@ -52,6 +52,10 @@ public final class SymbolTable implements Serializable {
       return Optional.ofNullable(this.symbols.get((int) p.name())).orElse("<?>") + "(" + String.join(", ", ids) + ")";
    }
 
+   public String print_fact(final Fact f) {
+      return this.print_predicate(f.predicate());
+   }
+
    public SymbolTable() {
       this.symbols = new ArrayList<>();
    }

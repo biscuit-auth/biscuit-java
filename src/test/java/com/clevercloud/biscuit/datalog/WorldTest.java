@@ -40,6 +40,28 @@ public class WorldTest extends TestCase {
 
       System.out.println("testing r1: " + syms.print_rule(r1));
       Set<Fact> query_rule_result = w.query_rule(r1);
-      System.out.println("grandparents query_rules: [" + String.join(", ", query_rule_result.stream().map((f) -> syms.print_predicate(f.predicate())).collect(Collectors.toList())) + "]");
+      System.out.println("grandparents query_rules: [" + String.join(", ", query_rule_result.stream().map((f) -> syms.print_fact(f)).collect(Collectors.toList())) + "]");
+      System.out.println("current facts: [" + String.join(", ", w.facts().stream().map((f) -> syms.print_fact(f)).collect(Collectors.toList())) + "]");
+
+      final Rule r2 = new Rule(new Predicate(grandparent, Arrays.asList(new ID.Variable("grandparent"), new ID.Variable("grandchild"))), Arrays.asList(
+            new Predicate(parent, Arrays.asList(new ID.Variable("grandparent"), new ID.Variable("parent"))),
+            new Predicate(parent, Arrays.asList(new ID.Variable("parent"), new ID.Variable("grandchild")))
+      ), new ArrayList<>());
+
+      System.out.println("adding r2: " + syms.print_rule(r2));
+      w.add_rule(r2);
+      w.run();
+
+      System.out.println("parents:");
+      for (final Fact fact : w.query(new Predicate(parent, Arrays.asList(new ID.Variable("parent"), new ID.Variable("child"))))) {
+         System.out.println("\t" + syms.print_fact(fact));
+      }
+      System.out.println("parents of B: [" + String.join(", ", w.query(new Predicate(parent, Arrays.asList(new ID.Variable("parent"), b))).stream().map((f) -> syms.print_fact(f)).collect(Collectors.toSet())) + "]");
+      System.out.println("grandparents: [" + String.join(", ", w.query(new Predicate(grandparent, Arrays.asList(new ID.Variable("grandparent"), new ID.Variable("grandchild")))).stream().map((f) -> syms.print_fact(f)).collect(Collectors.toSet())) + "]");
+
+      w.add_fact(new Fact(new Predicate(parent, Arrays.asList(c, e))));
+      w.run();
+
+      System.out.println("grandparents after inserting parent(C, E): [" + String.join(", ", w.query(new Predicate(grandparent, Arrays.asList(new ID.Variable("grandparent"), new ID.Variable("grandchild")))).stream().map((f) -> syms.print_fact(f)).collect(Collectors.toSet())) + "]");
    }
 }

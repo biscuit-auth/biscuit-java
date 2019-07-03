@@ -22,7 +22,6 @@ public final class Combinator implements Serializable {
          }
       }
       final ListIterator<Predicate> pit = this.predicates.listIterator();
-      predicates:
       while (pit.hasNext()) {
          final Predicate pred = pit.next();
          for (final Fact current_fact : this.current_facts) {
@@ -58,7 +57,7 @@ public final class Combinator implements Serializable {
                final Optional<Map<Long, ID>> v = vars.complete();
                if (v.isPresent()) {
                   variables.add(v.get());
-                  break predicates;
+                  return variables;
                } else {
                   continue;
                }
