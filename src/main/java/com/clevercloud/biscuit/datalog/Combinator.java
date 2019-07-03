@@ -66,7 +66,6 @@ public final class Combinator implements Serializable {
                final Optional<Map<Long, ID>> v = vars.complete();
                if (v.isPresent()) {
                   variables.add(v.get());
-                  return variables;
                } else {
                   continue;
                }
