@@ -13,6 +13,11 @@ public abstract class ConstraintKind implements Serializable {
       public Int(final IntConstraint constraint) {
          this.constraint = constraint;
       }
+
+      @Override
+      public String toString() {
+         return this.constraint.toString();
+      }
    }
 
    public static final class Str extends ConstraintKind implements Serializable {
@@ -24,6 +29,11 @@ public abstract class ConstraintKind implements Serializable {
 
       public Str(final StrConstraint constraint) {
          this.constraint = constraint;
+      }
+
+      @Override
+      public String toString() {
+         return this.constraint.toString();
       }
    }
 
@@ -37,6 +47,11 @@ public abstract class ConstraintKind implements Serializable {
       public Date(final DateConstraint constraint) {
          this.constraint = constraint;
       }
+
+      @Override
+      public String toString() {
+         return this.constraint.toString();
+      }
    }
 
    public static final class Symbol extends ConstraintKind implements Serializable {
@@ -48,6 +63,11 @@ public abstract class ConstraintKind implements Serializable {
 
       public Symbol(final SymbolConstraint constraint) {
          this.constraint = constraint;
+      }
+
+      @Override
+      public String toString() {
+         return this.constraint.toString();
       }
    }
 }

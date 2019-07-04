@@ -1,18 +1,13 @@
 package com.clevercloud.biscuit.datalog;
 
-import com.clevercloud.biscuit.datalog.constraints.Constraint;
-import com.clevercloud.biscuit.datalog.constraints.ConstraintKind;
-import com.clevercloud.biscuit.datalog.constraints.IntConstraint;
-import com.clevercloud.biscuit.datalog.constraints.StrConstraint;
+import com.clevercloud.biscuit.datalog.constraints.*;
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.time.Instant;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class WorldTest extends TestCase {
@@ -161,6 +156,116 @@ public class WorldTest extends TestCase {
          System.out.println("\t" + syms.print_fact(f));
       }
       expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(suff, Arrays.asList(app_0, new ID.Str("example.com")))), new Fact(new Predicate(suff, Arrays.asList(app_0, new ID.Str("www.example.com")))), new Fact(new Predicate(suff, Arrays.asList(app_1, new ID.Str("mx.example.com"))))));
+      Assert.assertEquals(expected, res);
+   }
+
+   public void testDate() {
+      final World w = new World();
+      final SymbolTable syms = new SymbolTable();
+
+      final Instant t1 = new Date().toInstant();
+      System.out.println("t1 = " + t1);
+      final Instant t2 = t1.plusSeconds(10);
+      System.out.println("t2 = " + t2);
+      final Instant t3 = t2.plusSeconds(30);
+      System.out.println("t3 = " + t3);
+
+      final long t2_timestamp = t2.getEpochSecond();
+
+      final ID abc = syms.add("abc");
+      final ID def = syms.add("def");
+      final long x = syms.insert("x");
+      final long before = syms.insert("before");
+      final long after = syms.insert("after");
+
+      w.add_fact(new Fact(new Predicate(x, Arrays.asList(new ID.Date(t1.getEpochSecond()), abc))));
+      w.add_fact(new Fact(new Predicate(x, Arrays.asList(new ID.Date(t3.getEpochSecond()), def))));
+
+      final Rule r1 = new Rule(new Predicate(before, Arrays.asList(new ID.Variable(1234), new ID.Variable("val"))), Arrays.asList(
+            new Predicate(x, Arrays.asList(new ID.Variable(1234), new ID.Variable("val")))
+      ), Arrays.asList(
+            new Constraint(1234, new ConstraintKind.Date(new DateConstraint.Before(t2_timestamp))),
+            new Constraint(1234, new ConstraintKind.Date(new DateConstraint.After(0)))
+      ));
+
+      System.out.println("testing r1: " + syms.print_rule(r1));
+      Set<Fact> res = w.query_rule(r1);
+      for (final Fact f : res) {
+         System.out.println("\t" + syms.print_fact(f));
+      }
+      Set<Fact> expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(before, Arrays.asList(new ID.Date(t1.getEpochSecond()), abc)))));
+      Assert.assertEquals(expected, res);
+
+      final Rule r2 = new Rule(new Predicate(after, Arrays.asList(new ID.Variable(1234), new ID.Variable("val"))), Arrays.asList(
+            new Predicate(x, Arrays.asList(new ID.Variable(1234), new ID.Variable("val")))
+      ), Arrays.asList(
+            new Constraint(1234, new ConstraintKind.Date(new DateConstraint.After(t2_timestamp))),
+            new Constraint(1234, new ConstraintKind.Date(new DateConstraint.After(0)))
+      ));
+
+      System.out.println("testing r2: " + syms.print_rule(r2));
+      res = w.query_rule(r2);
+      for (final Fact f : res) {
+         System.out.println("\t" + syms.print_fact(f));
+      }
+      expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(after, Arrays.asList(new ID.Date(t3.getEpochSecond()), def)))));
+      Assert.assertEquals(expected, res);
+   }
+
+   public void testSet() {
+      final World w = new World();
+      final SymbolTable syms = new SymbolTable();
+
+      final ID abc = syms.add("abc");
+      final ID def = syms.add("def");
+      final long x = syms.insert("x");
+      final long int_set = syms.insert("int_set");
+      final long symbol_set = syms.insert("symbol_set");
+      final long string_set = syms.insert("string_set");
+
+      w.add_fact(new Fact(new Predicate(x, Arrays.asList(abc, new ID.Integer(0), new ID.Str("test")))));
+      w.add_fact(new Fact(new Predicate(x, Arrays.asList(def, new ID.Integer(2), new ID.Str("hello")))));
+
+      final Rule r1 = new Rule(new Predicate(int_set, Arrays.asList(new ID.Variable("sym"), new ID.Variable("str"))), Arrays.asList(
+            new Predicate(x, Arrays.asList(new ID.Variable("sym"), new ID.Variable(0), new ID.Variable("str")))
+      ), Arrays.asList(
+            new Constraint(0, new ConstraintKind.Int(new IntConstraint.InSet(new HashSet<>(Arrays.asList(0l, 1l)))))
+      ));
+      System.out.println("testing r1: " + syms.print_rule(r1));
+      Set<Fact> res = w.query_rule(r1);
+      for (final Fact f : res) {
+         System.out.println("\t" + syms.print_fact(f));
+      }
+      Set<Fact> expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(int_set, Arrays.asList(abc, new ID.Str("test"))))));
+      Assert.assertEquals(expected, res);
+
+      final long abc_sym_id = syms.insert("abc");
+      final long ghi_sym_id = syms.insert("ghi");
+
+      final Rule r2 = new Rule(new Predicate(symbol_set, Arrays.asList(new ID.Variable(0), new ID.Variable("int"), new ID.Variable("str"))), Arrays.asList(
+            new Predicate(x, Arrays.asList(new ID.Variable(0), new ID.Variable("int"), new ID.Variable("str")))
+      ), Arrays.asList(
+            new Constraint(0, new ConstraintKind.Symbol(new SymbolConstraint.NotInSet(new HashSet<>(Arrays.asList(abc_sym_id, ghi_sym_id)))))
+      ));
+      System.out.println("testing r2: " + syms.print_rule(r2));
+      res = w.query_rule(r2);
+      for (final Fact f : res) {
+         System.out.println("\t" + syms.print_fact(f));
+      }
+      expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(symbol_set, Arrays.asList(def, new ID.Integer(2), new ID.Str("hello"))))));
+      Assert.assertEquals(expected, res);
+
+      final Rule r3 = new Rule(new Predicate(string_set, Arrays.asList(new ID.Variable("sym"), new ID.Variable("int"), new ID.Variable(0))), Arrays.asList(
+            new Predicate(x, Arrays.asList(new ID.Variable("sym"), new ID.Variable("int"), new ID.Variable(0)))
+      ), Arrays.asList(
+            new Constraint(0, new ConstraintKind.Str(new StrConstraint.InSet(new HashSet<>(Arrays.asList("test", "aaa")))))
+      ));
+      System.out.println("testing r3: " + syms.print_rule(r3));
+      res = w.query_rule(r3);
+      for (final Fact f : res) {
+         System.out.println("\t" + syms.print_fact(f));
+      }
+      expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(string_set, Arrays.asList(abc, new ID.Integer(0), new ID.Str("test"))))));
       Assert.assertEquals(expected, res);
    }
 }
