@@ -1,8 +1,8 @@
 package com.clevercloud.biscuit.crypto;
 
-import cafe.cryptography.curve25519.Constants;
-import cafe.cryptography.curve25519.RistrettoElement;
-import cafe.cryptography.curve25519.Scalar;
+import biscuit.format.schema.Schema;
+import cafe.cryptography.curve25519.*;
+import com.google.protobuf.ByteString;
 
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -107,6 +107,33 @@ public class TokenSignature {
         return res.ctEquals(RistrettoElement.IDENTITY) == 1;
     }
 
+    public Schema.Signature serialize() {
+        Schema.Signature.Builder sig = Schema.Signature.newBuilder()
+                .setZ(ByteString.copyFrom(this.z.toByteArray()));
+
+        System.out.println(this.parameters.size());
+        for (int i = 0; i < this.parameters.size(); i++) {
+            System.out.println(i);
+            sig.addParameters(ByteString.copyFrom(this.parameters.get(i).compress().toByteArray()));
+        }
+
+        return sig.build();
+    }
+
+    static public TokenSignature deserialize(Schema.Signature sig) throws InvalidEncodingException {
+        ArrayList<RistrettoElement> parameters = new ArrayList<>();
+        for (ByteString parameter: sig.getParametersList()) {
+            parameters.add((new CompressedRistretto(parameter.toByteArray())).decompress());
+        }
+
+        System.out.println(hex(sig.getZ().toByteArray()));
+        System.out.println(sig.getZ().toByteArray().length);
+
+        Scalar z = Scalar.fromBytesModOrder(sig.getZ().toByteArray());
+
+        return new TokenSignature(parameters, z);
+    }
+
     static public Scalar hash_points(List<RistrettoElement> points) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-512");
@@ -138,7 +165,7 @@ public class TokenSignature {
         return null;
     }
 
-    public String hex(byte[] byteArray) {
+    static public String hex(byte[] byteArray) {
         StringBuilder result = new StringBuilder();
         for (byte bb : byteArray) {
             result.append(String.format("%02X", bb));

@@ -48,7 +48,7 @@ public class SignatureTest extends TestCase {
         String message2 = "world";
         KeyPair keypair2 = new KeyPair(rng);
         Token token2 = token1.append(rng, keypair2, message2.getBytes());
-        token2.messages.set(1, "you".getBytes());
+        token2.blocks.set(1, "you".getBytes());
         Assert.assertFalse(token2.verify());
 
         String message3 = "!!";
