@@ -64,9 +64,8 @@ public class TokenSignature {
 
     public Either<Error, Void> verify(List<RistrettoElement> public_keys, List<byte[]> messages) {
         if (!(public_keys.size() == messages.size() && public_keys.size() == this.parameters.size())) {
-            //FIXME error
             System.out.println(("lists are not the same size"));
-            return Left(Error.InvalidFormat);
+            return Left(new Error().new FormatError().new Signature().new InvalidFormat());
         }
 
 
@@ -112,7 +111,7 @@ public class TokenSignature {
         if (res.ctEquals(RistrettoElement.IDENTITY) == 1) {
             return Right(null);
         } else {
-            return Left(Error.InvalidSignature);
+            return Left(new Error().new FormatError().new Signature().new InvalidSignature());
         }
     }
 
