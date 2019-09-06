@@ -2,7 +2,7 @@ package com.clevercloud.biscuit.crypto;
 
 import biscuit.format.schema.Schema;
 import cafe.cryptography.curve25519.*;
-import com.clevercloud.biscuit.Error;
+import com.clevercloud.biscuit.error.Error;
 import com.google.protobuf.ByteString;
 import io.vavr.control.Either;
 

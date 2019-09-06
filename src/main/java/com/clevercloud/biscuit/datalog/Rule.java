@@ -1,10 +1,16 @@
 package com.clevercloud.biscuit.datalog;
 
+import biscuit.format.schema.Schema;
 import com.clevercloud.biscuit.datalog.constraints.Constraint;
+import com.clevercloud.biscuit.error.Error;
+import io.vavr.control.Either;
 
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static io.vavr.API.Left;
+import static io.vavr.API.Right;
 
 public final class Rule implements Serializable {
    private final Predicate head;
@@ -48,5 +54,22 @@ public final class Rule implements Serializable {
       this.head = head;
       this.body = body;
       this.constraints = constraints;
+   }
+
+   public Schema.Rule serialize() {
+      Schema.Rule.Builder b = Schema.Rule.newBuilder()
+              .setHead(this.head.serialize());
+
+      return b.build();
+   }
+
+   static public Either<Error.FormatError, Fact> deserialize(Schema.Fact fact) {
+      Either<Error.FormatError, Predicate> res = Predicate.deserialize(fact.getPredicate());
+      if(res.isLeft()) {
+         Error.FormatError e = res.getLeft();
+         return Left(e);
+      } else {
+         return Right(new Fact(res.get()));
+      }
    }
 }
