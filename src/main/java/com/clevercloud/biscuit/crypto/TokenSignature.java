@@ -2,12 +2,18 @@ package com.clevercloud.biscuit.crypto;
 
 import biscuit.format.schema.Schema;
 import cafe.cryptography.curve25519.*;
+import com.clevercloud.biscuit.Error;
 import com.google.protobuf.ByteString;
+import io.vavr.control.Either;
 
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+
+import static io.vavr.API.Left;
+import static io.vavr.API.Right;
+
 
 public class TokenSignature {
     final public ArrayList<RistrettoElement> parameters;
@@ -56,12 +62,11 @@ public class TokenSignature {
         return sig;
     }
 
-    // FIXME: rust version returns a Result<(), error::Signature>
-    public boolean verify(List<RistrettoElement> public_keys, List<byte[]> messages) {
+    public Either<Error, Void> verify(List<RistrettoElement> public_keys, List<byte[]> messages) {
         if (!(public_keys.size() == messages.size() && public_keys.size() == this.parameters.size())) {
             //FIXME error
             System.out.println(("lists are not the same size"));
-            return false;
+            return Left(Error.InvalidFormat);
         }
 
 
@@ -104,7 +109,11 @@ public class TokenSignature {
         System.out.println(hex(RistrettoElement.IDENTITY.compress().toByteArray()));
         System.out.println(hex(res.compress().toByteArray()));
 
-        return res.ctEquals(RistrettoElement.IDENTITY) == 1;
+        if (res.ctEquals(RistrettoElement.IDENTITY) == 1) {
+            return Right(null);
+        } else {
+            return Left(Error.InvalidSignature);
+        }
     }
 
     public Schema.Signature serialize() {

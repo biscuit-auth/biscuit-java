@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.security.SecureRandom;
 
 import static com.clevercloud.biscuit.crypto.TokenSignature.hex;
+import static io.vavr.API.Right;
 
 public class BiscuitTest extends TestCase {
     public BiscuitTest(String testName) {
@@ -32,7 +33,7 @@ public class BiscuitTest extends TestCase {
         String message1 = "hello";
         KeyPair keypair1 = new KeyPair(rng);
         Token token1 = new Token(rng, keypair1, message1.getBytes());
-        Assert.assertTrue(token1.verify());
+        Assert.assertEquals(Right(null), token1.verify());
 
         Schema.Biscuit biscuitSer = token1.serialize();
 
@@ -43,7 +44,7 @@ public class BiscuitTest extends TestCase {
         Schema.Biscuit biscuitDeser = Schema.Biscuit.parseFrom(data);
 
         Token tokenDeser = Token.deserialize(biscuitDeser);
-        Assert.assertTrue(tokenDeser.verify());
+        Assert.assertEquals(Right(null), tokenDeser.verify());
         System.out.println("token1");
         for(byte[] block: token1.blocks) {
             System.out.println(hex(block));

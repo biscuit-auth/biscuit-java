@@ -5,7 +5,9 @@ import cafe.cryptography.curve25519.CompressedRistretto;
 import cafe.cryptography.curve25519.InvalidEncodingException;
 import cafe.cryptography.curve25519.RistrettoElement;
 import cafe.cryptography.curve25519.Scalar;
+import com.clevercloud.biscuit.Error;
 import com.google.protobuf.ByteString;
+import io.vavr.control.Either;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -42,7 +44,7 @@ public class Token {
     }
 
     // FIXME: rust version returns a Result<(), error::Signature>
-    public boolean verify() {
+    public Either<Error, Void> verify() {
         return this.signature.verify(this.keys, this.blocks);
     }
 
