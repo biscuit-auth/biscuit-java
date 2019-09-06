@@ -7,9 +7,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import io.vavr.control.Option;
 
 public final class SymbolTable implements Serializable {
-   private final List<String> symbols;
+   public final List<String> symbols;
 
    public long insert(final String symbol) {
       int index = this.symbols.indexOf(symbol);
@@ -23,6 +24,15 @@ public final class SymbolTable implements Serializable {
 
    public ID add(final String symbol) {
       return new ID.Symbol(this.insert(symbol));
+   }
+
+   public Option<Long> get(final String symbol) {
+      long index = this.symbols.indexOf(symbol);
+      if (index == -1) {
+         return Option.none();
+      } else {
+         return Option.some(index);
+      }
    }
 
    public String print_rule(final Rule r) {

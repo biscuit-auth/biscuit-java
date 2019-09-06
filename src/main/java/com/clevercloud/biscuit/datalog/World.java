@@ -1,6 +1,7 @@
 package com.clevercloud.biscuit.datalog;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -68,5 +69,21 @@ public final class World implements Serializable {
    public World() {
       this.facts = new HashSet<>();
       this.rules = new ArrayList<>();
+   }
+
+   public World(Set<Fact> facts, List<Rule> rules) {
+      this.facts = facts;
+      this.rules = rules;
+   }
+
+   public World(World w) {
+      this.facts = new HashSet<>();
+      for(Fact fact: w.facts) {
+         this.facts.add(fact);
+      }
+      this.rules = new ArrayList<>();
+      for(Rule rule: w.rules) {
+         this.rules.add(rule);
+      }
    }
 }
