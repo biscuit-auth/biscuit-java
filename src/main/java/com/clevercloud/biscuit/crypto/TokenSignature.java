@@ -68,27 +68,26 @@ public class TokenSignature {
             return Left(new Error().new FormatError().new Signature().new InvalidFormat());
         }
 
-
-        System.out.println("z, zp");
+        //System.out.println("z, zp");
         RistrettoElement zP = Constants.RISTRETTO_GENERATOR.multiply(this.z);
-        System.out.println(hex(z.toByteArray()));
-        System.out.println(hex(zP.compress().toByteArray()));
+        //System.out.println(hex(z.toByteArray()));
+        //System.out.println(hex(zP.compress().toByteArray()));
 
 
-        System.out.println("eiXi");
+        //System.out.println("eiXi");
         RistrettoElement eiXi = RistrettoElement.IDENTITY;
         for(int i = 0; i < public_keys.size(); i++) {
             Scalar e = hash_message(public_keys.get(i), messages.get(i));
-            System.out.println(hex(e.toByteArray()));
-            System.out.println(hex((public_keys.get(i).multiply(e)).compress().toByteArray()));
+            //System.out.println(hex(e.toByteArray()));
+            //System.out.println(hex((public_keys.get(i).multiply(e)).compress().toByteArray()));
 
 
             eiXi = eiXi.add(public_keys.get(i).multiply(e));
-            System.out.println(hex(eiXi.compress().toByteArray()));
+            //System.out.println(hex(eiXi.compress().toByteArray()));
 
         }
 
-        System.out.println("diAi");
+        //System.out.println("diAi");
         RistrettoElement diAi = RistrettoElement.IDENTITY;
         for (RistrettoElement A: parameters) {
             ArrayList<RistrettoElement> l = new ArrayList<>();
@@ -98,15 +97,15 @@ public class TokenSignature {
             diAi = diAi.add(A.multiply(d));
         }
 
-        System.out.println(hex(eiXi.compress().toByteArray()));
-        System.out.println(hex(diAi.compress().toByteArray()));
+        //System.out.println(hex(eiXi.compress().toByteArray()));
+        //System.out.println(hex(diAi.compress().toByteArray()));
 
 
 
         RistrettoElement res = zP.add(eiXi).subtract(diAi);
 
-        System.out.println(hex(RistrettoElement.IDENTITY.compress().toByteArray()));
-        System.out.println(hex(res.compress().toByteArray()));
+        //System.out.println(hex(RistrettoElement.IDENTITY.compress().toByteArray()));
+        //System.out.println(hex(res.compress().toByteArray()));
 
         if (res.ctEquals(RistrettoElement.IDENTITY) == 1) {
             return Right(null);
