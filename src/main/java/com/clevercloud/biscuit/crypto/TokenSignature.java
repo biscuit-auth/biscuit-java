@@ -42,8 +42,7 @@ public class TokenSignature {
     }
 
 
-    public TokenSignature sign(final SecureRandom rng, List<RistrettoElement> public_keys, List<byte[]> messages,
-                               KeyPair keypair, byte[] message) {
+    public TokenSignature sign(final SecureRandom rng, KeyPair keypair, byte[] message) {
         byte[] b = new byte[64];
         rng.nextBytes(b);
         Scalar r = Scalar.fromBytesModOrderWide(b);

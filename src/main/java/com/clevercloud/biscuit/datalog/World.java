@@ -20,6 +20,10 @@ public final class World implements Serializable {
       this.rules.add(rule);
    }
 
+   public void clearRules() {
+      this.rules.clear();
+   }
+
    public void run() {
       for (int i = 0; i < 100; ++i) {
          final Set<Fact> new_facts = new HashSet<>();

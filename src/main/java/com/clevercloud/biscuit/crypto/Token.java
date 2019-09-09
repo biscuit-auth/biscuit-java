@@ -4,14 +4,12 @@ import biscuit.format.schema.Schema;
 import cafe.cryptography.curve25519.CompressedRistretto;
 import cafe.cryptography.curve25519.InvalidEncodingException;
 import cafe.cryptography.curve25519.RistrettoElement;
-import cafe.cryptography.curve25519.Scalar;
-import com.clevercloud.biscuit.Error;
+import com.clevercloud.biscuit.error.Error;
 import com.google.protobuf.ByteString;
 import io.vavr.control.Either;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.List;
 
 public class Token {
     public final ArrayList<byte[]> blocks; //= new ArrayList<>();
@@ -33,7 +31,7 @@ public class Token {
     }
 
     public Token append(final SecureRandom rng, KeyPair keypair, byte[] message) {
-        TokenSignature signature = this.signature.sign(rng, this.keys, this.blocks, keypair, message);
+        TokenSignature signature = this.signature.sign(rng, keypair, message);
 
 
         Token token = new Token(this.blocks, this.keys, signature);
@@ -46,40 +44,5 @@ public class Token {
     // FIXME: rust version returns a Result<(), error::Signature>
     public Either<Error, Void> verify() {
         return this.signature.verify(this.keys, this.blocks);
-    }
-
-    public Schema.Biscuit serialize() {
-        Schema.Biscuit.Builder token = Schema.Biscuit.newBuilder()
-                .setSignature(this.signature.serialize());
-
-        for (int i = 0; i < this.keys.size(); i++) {
-            token.addKeys(ByteString.copyFrom(this.keys.get(i).compress().toByteArray()));
-        }
-
-        //FIXME: assert at least one element
-        token.setAuthority(ByteString.copyFrom(this.blocks.get(0)));
-
-        for (int i = 1; i < this.keys.size(); i++) {
-            token.addBlocks(ByteString.copyFrom(this.blocks.get(i)));
-        }
-
-        return token.build();
-    }
-
-    static public Token deserialize(Schema.Biscuit token) throws InvalidEncodingException {
-        TokenSignature signature = TokenSignature.deserialize(token.getSignature());
-
-        ArrayList<RistrettoElement> keys = new ArrayList<>();
-        for (ByteString key: token.getKeysList()) {
-            keys.add((new CompressedRistretto(key.toByteArray())).decompress());
-        }
-
-        ArrayList<byte[]> blocks = new ArrayList<>();
-        blocks.add(token.getAuthority().toByteArray());
-        for (ByteString block: token.getBlocksList()) {
-            blocks.add(block.toByteArray());
-        }
-
-        return new Token(blocks, keys, signature);
     }
 }
