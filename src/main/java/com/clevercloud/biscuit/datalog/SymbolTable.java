@@ -69,4 +69,10 @@ public final class SymbolTable implements Serializable {
    public SymbolTable() {
       this.symbols = new ArrayList<>();
    }
+   public SymbolTable(SymbolTable s) {
+      this.symbols = new ArrayList<>();
+      for(String symbol: s.symbols) {
+         this.symbols.add(symbol);
+      }
+   }
 }

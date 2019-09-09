@@ -28,7 +28,7 @@ public class Biscuit {
     public Either<Error, Biscuit> make(final SecureRandom rng, final KeyPair root, final Block authority) {
         SymbolTable symbols = default_symbol_table();
 
-        if(Collections.disjoint(symbols.symbols, authority.symbols.symbols)) {
+        if(!Collections.disjoint(symbols.symbols, authority.symbols.symbols)) {
             return Left(new Error().new SymbolTableOverlap());
         }
 
@@ -180,13 +180,64 @@ public class Biscuit {
         }
     }
 
-    public BlockBuilder create_block() {}
+    //FIXME
+    //public BlockBuilder create_block() {}
 
-    public Either<Error, SerializedBiscuit> append(final SecureRandom rng, final KeyPair keypair, Block block) {}
+    public Either<Error, Biscuit> append(final SecureRandom rng, final KeyPair keypair, Block block) {
+        if(this.container.isEmpty()) {
+            return Left(new Error().new Sealed());
+        }
 
+        if(!Collections.disjoint(this.symbols.symbols, block.symbols.symbols)) {
+            return Left(new Error().new SymbolTableOverlap());
+        }
+
+        if(block.index != 1 + this.blocks.size()) {
+            return Left(new Error().new InvalidBlockIndex(1 + this.blocks.size(), block.index));
+        }
+
+        Either<Error.FormatError, SerializedBiscuit> containerRes = this.container.get().append(rng, keypair, block);
+        if(containerRes.isLeft()) {
+            Error.FormatError e = containerRes.getLeft();
+            return Left(e);
+        }
+        SerializedBiscuit container = containerRes.get();
+
+        SymbolTable symbols = new SymbolTable(this.symbols);
+        for(String s: block.symbols.symbols) {
+            symbols.add(s);
+        }
+
+        ArrayList<Block> blocks = new ArrayList<>();
+        for(Block b: this.blocks) {
+            blocks.add(b);
+        }
+        blocks.add(block);
+
+        return Right(new Biscuit(this.authority, blocks, symbols, Option.some(container)));
+    }
+
+    /*
     public void adjust_authority_symbols(Block block){}
     public void adjust_block_symbols(Block block){}
-    public String print() {}
+    */
+
+    public String print() {
+        StringBuilder s = new StringBuilder();
+        s.append("Biscuit {\n\tsymbols: ");
+        s.append(this.symbols);
+        s.append("\n\tauthority: ");
+        s.append(this.authority.print(this.symbols));
+        s.append("\n\tblocks: [\n");
+        for(Block b: this.blocks) {
+            s.append("\t\t");
+            s.append(b.print(this.symbols));
+            s.append("\n");
+        }
+        s.append("\t]\n}");
+
+        return s.toString();
+    }
 
     static public SymbolTable default_symbol_table() {
         SymbolTable syms = new SymbolTable();
@@ -199,5 +250,5 @@ public class Biscuit {
         syms.insert("revocation_id");
 
         return syms;
-    }*/
+    }
 }

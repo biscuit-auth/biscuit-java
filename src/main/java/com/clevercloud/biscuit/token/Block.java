@@ -86,6 +86,28 @@ public class Block {
         }
     }
 
+    public String print(SymbolTable symbol_table) {
+        StringBuilder s = new StringBuilder();
+
+        s.append("Block[");
+        s.append(this.index);
+        s.append("] {\n\tsymbols: ");
+        s.append(this.symbols.symbols);
+        s.append("\n\t\tfacts: [");
+        for(Fact f: this.facts) {
+            s.append("\n\t\t\t");
+            s.append(symbol_table.print_fact(f));
+        }
+        s.append("\n\t\t]\n\trules: [");
+        for(Rule r: this.caveats) {
+            s.append("\n\t\t\t");
+            s.append(symbol_table.print_rule(r));
+        }
+        s.append("\n\t\t]\n\t}");
+
+        return s.toString();
+    }
+
     public Schema.Block serialize() {
         Schema.Block.Builder b = Schema.Block.newBuilder()
                 .setIndex((int) this.index);
