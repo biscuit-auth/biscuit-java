@@ -1,8 +1,14 @@
 package com.clevercloud.biscuit.datalog.constraints;
 
+import biscuit.format.schema.Schema;
 import com.clevercloud.biscuit.datalog.ID;
+import com.clevercloud.biscuit.error.Error;
+import io.vavr.control.Either;
 
 import java.io.Serializable;
+
+import static io.vavr.API.Left;
+import static io.vavr.API.Right;
 
 public final class Constraint implements Serializable {
    private final long id;
@@ -37,5 +43,20 @@ public final class Constraint implements Serializable {
    @Override
    public String toString() {
       return this.id + "? " + this.kind.toString();
+   }
+
+   public Schema.Constraint serialize() {
+      return this.kind.serialize(this.id);
+   }
+
+   static public Either<Error.FormatError, Constraint> deserialize(Schema.Constraint c) {
+      long id = c.getId();
+      Either<Error.FormatError, ConstraintKind> res = ConstraintKind.deserialize_enum(c);
+      if(res.isLeft()) {
+         Error.FormatError e = res.getLeft();
+         return Left(e);
+      } else {
+         return Right(new Constraint(id, res.get()));
+      }
    }
 }
