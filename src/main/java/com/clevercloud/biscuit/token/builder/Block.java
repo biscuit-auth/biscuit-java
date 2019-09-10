@@ -6,8 +6,12 @@ import com.clevercloud.biscuit.datalog.ID;
 import com.clevercloud.biscuit.datalog.Rule;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.datalog.constraints.Constraint;
+import com.clevercloud.biscuit.datalog.constraints.ConstraintKind;
+import com.clevercloud.biscuit.datalog.constraints.DateConstraint;
+import com.clevercloud.biscuit.datalog.constraints.StrConstraint;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -50,6 +54,56 @@ public class Block {
         }
 
         return new com.clevercloud.biscuit.token.Block(this.index, symbols, this.facts, this.caveats);
+    }
+
+    public Boolean add_right(String resource, String right) {
+        if(this.index != 0) {
+            return false;
+        } else {
+            this.add_fact(fact("right", Arrays.asList(s("authority"), string(resource), s(right))));
+            return true;
+        }
+    }
+
+    public void check_right(String right) {
+        this.add_caveat(rule(
+                "check_right",
+                Arrays.asList(s(right)),
+                Arrays.asList(
+                        pred("resource", Arrays.asList(s("ambient"), var(0))),
+                        pred("operation", Arrays.asList(s("ambient"), s(right))),
+                        pred("right", Arrays.asList(s("authority"), var(0), s(right)))
+                )
+        ));
+    }
+
+    public void resource_prefix(String prefix) {
+        this.add_caveat(constrained_rule(
+                "prefix",
+                Arrays.asList(var(0)),
+                Arrays.asList(pred("resource", Arrays.asList(s("ambient"), var(0)))),
+                Arrays.asList(
+                        new Constraint(0, new ConstraintKind.Str(new StrConstraint.Prefix(prefix))))
+        ));
+    }
+
+    public void resource_suffix(String suffix) {
+        this.add_caveat(constrained_rule(
+                "suffix",
+                Arrays.asList(var(0)),
+                Arrays.asList(pred("resource", Arrays.asList(s("ambient"), var(0)))),
+                Arrays.asList(new Constraint(0, new ConstraintKind.Str(new StrConstraint.Suffix(suffix))))
+        ));
+    }
+
+    public void expiration_date(Date d) {
+        this.add_caveat(constrained_rule(
+                "expiration",
+                Arrays.asList(var(0)),
+                Arrays.asList(pred("time", Arrays.asList(s("ambient"), var(0)))),
+                //FIXME: seconds or milliseconds
+                Arrays.asList(new Constraint(0, new ConstraintKind.Date(new DateConstraint.Before(d.getTime()))))
+        ));
     }
 
     public static com.clevercloud.biscuit.token.builder.Fact fact(String name, List<Atom> ids) {
