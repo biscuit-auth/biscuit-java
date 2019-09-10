@@ -115,7 +115,7 @@ public class Biscuit {
         long ambient_index = this.symbols.get("ambient").get();
 
         for(Fact fact: this.authority.facts) {
-            if(fact.predicate().ids().get(0) != new ID.Symbol(authority_index)) {
+            if(!fact.predicate().ids().get(0).equals(new ID.Symbol(authority_index))) {
                 return Left(new LogicError().new InvalidAuthorityFact(this.symbols.print_fact(fact)));
             }
 
@@ -128,7 +128,7 @@ public class Biscuit {
 
         // check that all generated facts have the authority ID
         for(Fact fact: world.facts()) {
-            if(fact.predicate().ids().get(0) != new ID.Symbol(authority_index)) {
+            if(!fact.predicate().ids().get(0).equals(new ID.Symbol(authority_index))) {
                 return Left(new LogicError().new InvalidAuthorityFact(this.symbols.print_fact(fact)));
             }
 
@@ -136,7 +136,7 @@ public class Biscuit {
         }
 
         for(Fact fact: ambient_facts) {
-            if(fact.predicate().ids().get(0) != new ID.Symbol(ambient_index)) {
+            if(!fact.predicate().ids().get(0).equals(new ID.Symbol(ambient_index))) {
                 return Left(new LogicError().new InvalidAmbientFact(this.symbols.print_fact(fact)));
             }
 

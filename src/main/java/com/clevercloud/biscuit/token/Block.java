@@ -47,8 +47,8 @@ public class Block {
 
     public Either<LogicError, Void> check(long i, World w, SymbolTable symbols, List<Rule> verifier_caveats) {
         World world = new World(w);
-        long authority_index = this.symbols.get("authority").get().longValue();
-        long ambient_index = this.symbols.get("ambient").get().longValue();
+        long authority_index = symbols.get("authority").get().longValue();
+        long ambient_index = symbols.get("ambient").get().longValue();
 
         for (Fact fact : this.facts) {
             if (fact.predicate().ids().get(0) == new ID.Symbol(authority_index) ||

@@ -2,6 +2,9 @@ package com.clevercloud.biscuit.token;
 
 import com.clevercloud.biscuit.crypto.KeyPair;
 import com.clevercloud.biscuit.datalog.*;
+import com.clevercloud.biscuit.error.LogicError;
+import io.vavr.control.Either;
+import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -90,6 +93,64 @@ public class BiscuitTest extends TestCase {
 
         System.out.println(deser2.print());
 
+        // THIRD BLOCK
+        System.out.println("preparing the third block");
+
+        KeyPair keypair3 = new KeyPair(rng);
+
+        Block builder3 = deser2.create_block();
+        builder3.add_caveat(rule(
+                "caveat2",
+                Arrays.asList(s("file1")),
+                Arrays.asList(
+                        pred("resource", Arrays.asList(s("ambient"), s("file1")))
+                )
+        ));
+
+        Biscuit b3 = deser2.append(rng, keypair3, builder3.build()).get();
+
+        System.out.println(b3.print());
+
+        System.out.println("serializing the third token");
+
+        byte[] data3 = b3.serialize().get();
+
+        System.out.print("data len: ");
+        System.out.println(data3.length);
+        System.out.println(hex(data3));
+
+        System.out.println("deserializing the third token");
+        Biscuit final_token = Biscuit.from_bytes(data3, root.public_key).get();
+
+        System.out.println(final_token.print());
+
+        // check
+
+        /*
+        System.out.println("will check the token for resource=file1 and operation=read");
+
+        SymbolTable check_symbols = new SymbolTable(final_token.symbols);
+        List<Fact> ambient_facts = Arrays.asList(
+                fact("resource", Arrays.asList(s("ambient"), s("file1"))).convert(check_symbols),
+                fact("operation", Arrays.asList(s("ambient"), s("read"))).convert(check_symbols)
+        );
+
+        Either<LogicError, Void> res = final_token.check(ambient_facts, new ArrayList<>(), new ArrayList<>());
+
+        Assert.assertTrue(res.isRight());
+        */
+
+        System.out.println("will check the token for resource=file2 and operation=write");
+
+        SymbolTable check_symbols2 = new SymbolTable(final_token.symbols);
+        List<Fact> ambient_facts2 = Arrays.asList(
+                fact("resource", Arrays.asList(s("ambient"), s("file2"))).convert(check_symbols2),
+                fact("operation", Arrays.asList(s("ambient"), s("write"))).convert(check_symbols2)
+        );
+
+        Either<LogicError, Void> res2 = final_token.check(ambient_facts2, new ArrayList<>(), new ArrayList<>());
+        Assert.assertTrue(res2.isLeft());
+        System.out.println(res2.getLeft());
         /*
         String message1 = "hello";
         KeyPair keypair1 = new KeyPair(rng);
