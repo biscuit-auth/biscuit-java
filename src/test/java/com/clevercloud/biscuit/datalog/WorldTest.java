@@ -268,4 +268,58 @@ public class WorldTest extends TestCase {
       expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(string_set, Arrays.asList(abc, new ID.Integer(0), new ID.Str("test"))))));
       Assert.assertEquals(expected, res);
    }
+
+   public void testResource() {
+      final World w = new World();
+      final SymbolTable syms = new SymbolTable();
+
+      final ID authority = syms.add("authority");
+      final ID ambient = syms.add("ambient");
+      final long resource = syms.insert("resource");
+      final long operation = syms.insert("operation");
+      final long right = syms.insert("right");
+      final ID file1 = syms.add("file1");
+      final ID file2 = syms.add("file2");
+      final ID read = syms.add("read");
+      final ID write = syms.add("write");
+
+
+      w.add_fact(new Fact(new Predicate(resource, Arrays.asList(ambient, file2))));
+      w.add_fact(new Fact(new Predicate(operation, Arrays.asList(ambient, write))));
+      w.add_fact(new Fact(new Predicate(right, Arrays.asList(authority, file1, read))));
+      w.add_fact(new Fact(new Predicate(right, Arrays.asList(authority, file2, read))));
+      w.add_fact(new Fact(new Predicate(right, Arrays.asList(authority, file1, write))));
+
+      final long caveat1 = syms.insert("caveat1");
+      //r1: caveat2(#file1) <- resource(#ambient, #file1)
+      final Rule r1 = new Rule(
+              new Predicate(caveat1, Arrays.asList(file1)),
+              Arrays.asList(new Predicate(resource, Arrays.asList(ambient, file1))
+      ), new ArrayList<>());
+
+      System.out.println("testing caveat 1: " + syms.print_rule(r1));
+      Set<Fact>res = w.query_rule(r1);
+      for (final Fact f : res) {
+         System.out.println("\t" + syms.print_fact(f));
+      }
+      Assert.assertTrue(res.isEmpty());
+
+      final long caveat2 = syms.insert("caveat2");
+      final ID var0 = new ID.Variable(0);
+      //r2: caveat1(0?) <- resource(#ambient, 0?) && operation(#ambient, #read) && right(#authority, 0?, #read)
+      final Rule r2 = new Rule(
+              new Predicate(caveat2, Arrays.asList(var0)),
+              Arrays.asList(
+                      new Predicate(resource, Arrays.asList(ambient, var0)),
+                      new Predicate(operation, Arrays.asList(ambient, read)),
+                      new Predicate(right, Arrays.asList(authority, var0, read))
+              ), new ArrayList<>());
+
+      System.out.println("testing caveat 2: " + syms.print_rule(r2));
+      res = w.query_rule(r2);
+      for (final Fact f : res) {
+         System.out.println("\t" + syms.print_fact(f));
+      }
+      Assert.assertTrue(res.isEmpty());
+   }
 }
