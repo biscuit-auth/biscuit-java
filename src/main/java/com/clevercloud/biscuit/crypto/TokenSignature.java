@@ -117,9 +117,9 @@ public class TokenSignature {
         Schema.Signature.Builder sig = Schema.Signature.newBuilder()
                 .setZ(ByteString.copyFrom(this.z.toByteArray()));
 
-        System.out.println(this.parameters.size());
+        //System.out.println(this.parameters.size());
         for (int i = 0; i < this.parameters.size(); i++) {
-            System.out.println(i);
+            //System.out.println(i);
             sig.addParameters(ByteString.copyFrom(this.parameters.get(i).compress().toByteArray()));
         }
 
@@ -132,8 +132,8 @@ public class TokenSignature {
             parameters.add((new CompressedRistretto(parameter.toByteArray())).decompress());
         }
 
-        System.out.println(hex(sig.getZ().toByteArray()));
-        System.out.println(sig.getZ().toByteArray().length);
+        //System.out.println(hex(sig.getZ().toByteArray()));
+        //System.out.println(sig.getZ().toByteArray().length);
 
         Scalar z = Scalar.fromBytesModOrder(sig.getZ().toByteArray());
 
