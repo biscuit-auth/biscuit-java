@@ -91,14 +91,14 @@ public class Block {
 
         s.append("Block[");
         s.append(this.index);
-        s.append("] {\n\tsymbols: ");
+        s.append("] {\n\t\tsymbols: ");
         s.append(this.symbols.symbols);
         s.append("\n\t\tfacts: [");
         for(Fact f: this.facts) {
             s.append("\n\t\t\t");
             s.append(symbol_table.print_fact(f));
         }
-        s.append("\n\t\t]\n\trules: [");
+        s.append("\n\t\t]\n\t\trules: [");
         for(Rule r: this.caveats) {
             s.append("\n\t\t\t");
             s.append(symbol_table.print_rule(r));

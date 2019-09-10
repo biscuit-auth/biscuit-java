@@ -72,7 +72,7 @@ public class SerializedBiscuit {
 
         b.setAuthority(ByteString.copyFrom(this.authority));
 
-        for (int i = 0; i < this.keys.size(); i++) {
+        for (int i = 0; i < this.blocks.size(); i++) {
             b.addBlocks(ByteString.copyFrom(this.blocks.get(i)));
         }
 
@@ -144,7 +144,13 @@ public class SerializedBiscuit {
             return Left(new Error().new FormatError().new UnknownPublicKey());
         }
 
-        return this.signature.verify(this.keys, this.blocks);
+        ArrayList<byte[]> blocks = new ArrayList<>();
+        blocks.add(this.authority);
+        for(byte[] bl: this.blocks) {
+            blocks.add(bl);
+        }
+
+        return this.signature.verify(this.keys, blocks);
     }
 
 

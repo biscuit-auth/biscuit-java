@@ -25,7 +25,7 @@ public class Biscuit {
     public final SymbolTable symbols;
     public final Option<SerializedBiscuit> container;
 
-    public Either<Error, Biscuit> make(final SecureRandom rng, final KeyPair root, final Block authority) {
+    static public Either<Error, Biscuit> make(final SecureRandom rng, final KeyPair root, final Block authority) {
         SymbolTable symbols = default_symbol_table();
 
         if(!Collections.disjoint(symbols.symbols, authority.symbols.symbols)) {
@@ -56,7 +56,7 @@ public class Biscuit {
         this.container = container;
     }
 
-    public Either<Error, Biscuit> from_bytes(byte[] data, RistrettoElement root)  {
+    static public Either<Error, Biscuit> from_bytes(byte[] data, RistrettoElement root)  {
         Either<Error, SerializedBiscuit> res = SerializedBiscuit.from_bytes(data, root);
         if(res.isLeft()) {
             Error e = res.getLeft();
@@ -225,7 +225,7 @@ public class Biscuit {
     public String print() {
         StringBuilder s = new StringBuilder();
         s.append("Biscuit {\n\tsymbols: ");
-        s.append(this.symbols);
+        s.append(this.symbols.symbols);
         s.append("\n\tauthority: ");
         s.append(this.authority.print(this.symbols));
         s.append("\n\tblocks: [\n");
