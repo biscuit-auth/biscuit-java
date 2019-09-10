@@ -20,8 +20,8 @@ import static io.vavr.API.Right;
 public class Block {
     final long index;
     final SymbolTable symbols;
-    final ArrayList<Fact> facts;
-    final ArrayList<Rule> caveats;
+    final List<Fact> facts;
+    final List<Rule> caveats;
 
     public Block(long index, SymbolTable base_symbols) {
         this.index = index;
@@ -30,7 +30,7 @@ public class Block {
         this.caveats = new ArrayList<>();
     }
 
-    public Block(long index, SymbolTable base_symbols, ArrayList<Fact> facts, ArrayList<Rule> caveats) {
+    public Block(long index, SymbolTable base_symbols, List<Fact> facts, List<Rule> caveats) {
         this.index = index;
         this.symbols = base_symbols;
         this.facts = facts;

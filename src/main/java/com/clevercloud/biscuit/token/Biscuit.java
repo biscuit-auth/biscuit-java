@@ -180,8 +180,9 @@ public class Biscuit {
         }
     }
 
-    //FIXME
-    //public BlockBuilder create_block() {}
+    public com.clevercloud.biscuit.token.builder.Block create_block() {
+        return new com.clevercloud.biscuit.token.builder.Block(1+this.blocks.size(), new SymbolTable(this.symbols));
+    }
 
     public Either<Error, Biscuit> append(final SecureRandom rng, final KeyPair keypair, Block block) {
         if(this.container.isEmpty()) {
