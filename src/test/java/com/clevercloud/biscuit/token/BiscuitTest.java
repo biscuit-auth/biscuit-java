@@ -125,8 +125,6 @@ public class BiscuitTest extends TestCase {
         System.out.println(final_token.print());
 
         // check
-
-        /*
         System.out.println("will check the token for resource=file1 and operation=read");
 
         SymbolTable check_symbols = new SymbolTable(final_token.symbols);
@@ -138,7 +136,6 @@ public class BiscuitTest extends TestCase {
         Either<LogicError, Void> res = final_token.check(ambient_facts, new ArrayList<>(), new ArrayList<>());
 
         Assert.assertTrue(res.isRight());
-        */
 
         System.out.println("will check the token for resource=file2 and operation=write");
 
@@ -151,31 +148,51 @@ public class BiscuitTest extends TestCase {
         Either<LogicError, Void> res2 = final_token.check(ambient_facts2, new ArrayList<>(), new ArrayList<>());
         Assert.assertTrue(res2.isLeft());
         System.out.println(res2.getLeft());
-        /*
-        String message1 = "hello";
-        KeyPair keypair1 = new KeyPair(rng);
-        Token token1 = new Token(rng, keypair1, message1.getBytes());
-        Assert.assertEquals(Right(null), token1.verify());
+    }
 
-        Schema.Biscuit biscuitSer = token1.serialize();
+    public void testFolders() {
+        byte[] seed = {0, 0, 0, 0};
+        SecureRandom rng = new SecureRandom(seed);
 
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        biscuitSer.writeTo(stream);
-        byte[] data = stream.toByteArray();
+        System.out.println("preparing the authority block");
 
-        Schema.Biscuit biscuitDeser = Schema.Biscuit.parseFrom(data);
+        KeyPair root = new KeyPair(rng);
 
-        Token tokenDeser = Token.deserialize(biscuitDeser);
-        Assert.assertEquals(Right(null), tokenDeser.verify());
-        System.out.println("token1");
-        for(byte[] block: token1.blocks) {
-            System.out.println(hex(block));
-        }
-        System.out.println("tokenDeser");
-        for(byte[] block: tokenDeser.blocks) {
-            System.out.println(hex(block));
-        }
-        Assert.assertEquals(token1.blocks, tokenDeser.blocks);
-        */
+        SymbolTable symbols = Biscuit.default_symbol_table();
+        Block authority_block = new Block(0, symbols);
+        authority_block.add_right("/folder1/file1", "read");
+        authority_block.add_right("/folder1/file1", "write");
+        authority_block.add_right("/folder1/file2", "read");
+        authority_block.add_right("/folder1/file2", "write");
+        authority_block.add_right("/folder2/file3", "read");
+
+        Biscuit b = Biscuit.make(rng, root, authority_block.build()).get();
+
+        System.out.println(b.print());
+
+        Block block2 = b.create_block();
+        block2.resource_prefix("/folder1/");
+        block2.check_right("read");
+
+        KeyPair keypair2 = new KeyPair(rng);
+        Biscuit b2 = b.append(rng, keypair2, block2.build()).get();
+
+        Verifier v1 = new Verifier();
+        v1.resource("/folder1/file1");
+        v1.operation("read");
+        Either<LogicError, Void> res = v1.verify(b2);
+        Assert.assertTrue(res.isRight());
+
+        Verifier v2 = new Verifier();
+        v2.resource("/folder2/file3");
+        v2.operation("read");
+        res = v2.verify(b2);
+        Assert.assertTrue(res.isLeft());
+
+        Verifier v3 = new Verifier();
+        v3.resource("/folder2/file1");
+        v3.operation("write");
+        res = v3.verify(b2);
+        Assert.assertTrue(res.isLeft());
     }
 }
