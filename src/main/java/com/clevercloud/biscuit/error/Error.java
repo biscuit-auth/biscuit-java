@@ -10,15 +10,48 @@ public class Error {
     public class FormatError extends Error {
         public class Signature extends FormatError {
             public class InvalidFormat extends Signature {
-                public InvalidFormat() {
+                public InvalidFormat() {}
+                @Override
+                public boolean equals(Object o) {
+                    if (this == o) return true;
+                    if (o == null || getClass() != o.getClass()) return false;
+                    return true;
                 }
             }
-            public class InvalidSignature extends Signature {}
+            public class InvalidSignature extends Signature {
+                @Override
+                public boolean equals(Object o) {
+                    if (this == o) return true;
+                    if (o == null || getClass() != o.getClass()) return false;
+                    return true;
+                }
+            }
         }
 
-        public class SealedSignature extends FormatError {}
-        public class EmptyKeys extends FormatError {}
-        public class UnknownPublicKey extends FormatError {}
+        public class SealedSignature extends FormatError {
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                return true;
+            }
+        }
+        public class EmptyKeys extends FormatError {
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                return true;
+            }
+        }
+        public class UnknownPublicKey extends FormatError {
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                return true;
+            }
+        }
         public class DeserializationError extends FormatError {
             final public String e;
 
@@ -172,8 +205,22 @@ public class Error {
             return "Error.InvalidBlockIndex{ expected: " + expected + ", found: " + found + " }";
         }
     }
-    public class SymbolTableOverlap extends Error {}
-    public class Sealed extends Error {}
+    public class SymbolTableOverlap extends Error {
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            return true;
+        }
+    }
+    public class Sealed extends Error {
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            return true;
+        }
+    }
     public class FailedLogic extends Error {
         final public List<LogicError> errors;
 
