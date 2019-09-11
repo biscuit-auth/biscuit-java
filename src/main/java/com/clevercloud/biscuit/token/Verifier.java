@@ -74,7 +74,7 @@ public class Verifier {
         for(Rule caveat: this.caveats) {
             ambient_caveats.add(caveat.convert(symbols));
         }
-
-        return token.check(ambient_facts, ambient_rules, ambient_caveats);
+        
+        return token.check(symbols, ambient_facts, ambient_rules, ambient_caveats);
     }
 }

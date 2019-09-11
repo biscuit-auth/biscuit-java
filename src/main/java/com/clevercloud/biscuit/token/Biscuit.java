@@ -109,14 +109,14 @@ public class Biscuit {
     }*/
     //public Either<Error.FormatError, byte[]> seal(byte[] secret) {}
 
-    public Either<LogicError, Void> check(List<Fact> ambient_facts, List<Rule> ambient_rules, List<Rule> ambient_caveats){
+    public Either<LogicError, Void> check(SymbolTable symbols, List<Fact> ambient_facts, List<Rule> ambient_rules, List<Rule> ambient_caveats){
         World world = new World();
-        long authority_index = this.symbols.get("authority").get();
-        long ambient_index = this.symbols.get("ambient").get();
+        long authority_index = symbols.get("authority").get();
+        long ambient_index = symbols.get("ambient").get();
 
         for(Fact fact: this.authority.facts) {
             if(!fact.predicate().ids().get(0).equals(new ID.Symbol(authority_index))) {
-                return Left(new LogicError().new InvalidAuthorityFact(this.symbols.print_fact(fact)));
+                return Left(new LogicError().new InvalidAuthorityFact(symbols.print_fact(fact)));
             }
 
             world.add_fact(fact);
@@ -129,7 +129,7 @@ public class Biscuit {
         // check that all generated facts have the authority ID
         for(Fact fact: world.facts()) {
             if(!fact.predicate().ids().get(0).equals(new ID.Symbol(authority_index))) {
-                return Left(new LogicError().new InvalidAuthorityFact(this.symbols.print_fact(fact)));
+                return Left(new LogicError().new InvalidAuthorityFact(symbols.print_fact(fact)));
             }
 
             world.add_fact(fact);
@@ -137,7 +137,7 @@ public class Biscuit {
 
         for(Fact fact: ambient_facts) {
             if(!fact.predicate().ids().get(0).equals(new ID.Symbol(ambient_index))) {
-                return Left(new LogicError().new InvalidAmbientFact(this.symbols.print_fact(fact)));
+                return Left(new LogicError().new InvalidAmbientFact(symbols.print_fact(fact)));
             }
 
             world.add_fact(fact);
@@ -158,7 +158,7 @@ public class Biscuit {
         ArrayList<FailedCaveat> errors = new ArrayList<>();
         for(int i = 0; i < this.blocks.size(); i++) {
             World w = new World(world);
-            Either<LogicError, Void> res = this.blocks.get(i).check(i, w, this.symbols, ambient_caveats);
+            Either<LogicError, Void> res = this.blocks.get(i).check(i, w, symbols, ambient_caveats);
             if(res.isLeft()) {
 
                 LogicError e = res.getLeft();
