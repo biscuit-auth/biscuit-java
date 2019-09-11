@@ -3,6 +3,7 @@ package com.clevercloud.biscuit.token;
 import cafe.cryptography.curve25519.CompressedRistretto;
 import cafe.cryptography.curve25519.InvalidEncodingException;
 import cafe.cryptography.curve25519.RistrettoElement;
+import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.error.LogicError;
 import io.vavr.control.Either;
 import junit.framework.Assert;
@@ -27,7 +28,7 @@ public class SamplesTest extends TestCase {
         return new TestSuite(SamplesTest.class);
     }
 
-    public void testBasic() throws IOException, InvalidEncodingException {
+    public void test1_Basic() throws IOException, InvalidEncodingException {
         byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
         RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
 
@@ -58,5 +59,37 @@ public class SamplesTest extends TestCase {
         for(int i = 0; i < data.length; i++) {
             Assert.assertEquals(data[i], serialized[i]);
         }
+    }
+
+    public void test2_DifferentRootKey() throws IOException, InvalidEncodingException {
+        byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
+        RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
+
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("test2_different_root_key.bc");
+
+        System.out.println("a");
+        byte[] data = new byte[inputStream.available()];
+        inputStream.read(data);
+
+        Error e = Biscuit.from_bytes(data, root).getLeft();
+        System.out.println("got error: "+ e);
+        Assert.assertEquals(new Error().new FormatError().new UnknownPublicKey(), e);
+    }
+
+    public void test3_InvalidSignature() throws IOException, InvalidEncodingException {
+        byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
+        RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
+
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("test3_invalid_signature.bc");
+
+        System.out.println("a");
+        byte[] data = new byte[inputStream.available()];
+        inputStream.read(data);
+
+        Error e = Biscuit.from_bytes(data, root).getLeft();
+        System.out.println("got error: "+ e);
+        Assert.assertEquals(new Error().new FormatError().new Signature().new InvalidSignature(), e);
     }
 }
