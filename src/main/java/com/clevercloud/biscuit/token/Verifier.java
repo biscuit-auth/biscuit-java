@@ -41,7 +41,7 @@ public class Verifier {
     }
 
     public void operation(String operation) {
-        this.facts.add(fact("operation", Arrays.asList(s("ambient"), string(operation))));
+        this.facts.add(fact("operation", Arrays.asList(s("ambient"), s(operation))));
     }
 
     public void time() {
