@@ -28,7 +28,7 @@ public abstract class DateConstraint implements Serializable {
       private final long value;
 
       public boolean check(final long value) {
-         return this.value > value;
+         return this.value >= value;
       }
 
       public Before(final long value) {
@@ -59,7 +59,7 @@ public abstract class DateConstraint implements Serializable {
       private final long value;
 
       public boolean check(final long value) {
-         return this.value < value;
+         return this.value <= value;
       }
 
       public After(final long value) {

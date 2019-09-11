@@ -101,8 +101,7 @@ public class Block {
                 "expiration",
                 Arrays.asList(var(0)),
                 Arrays.asList(pred("time", Arrays.asList(s("ambient"), var(0)))),
-                //FIXME: seconds or milliseconds
-                Arrays.asList(new Constraint(0, new ConstraintKind.Date(new DateConstraint.Before(d.getTime()))))
+                Arrays.asList(new Constraint(0, new ConstraintKind.Date(new DateConstraint.Before(d.getTime() / 1000))))
         ));
     }
 
@@ -138,7 +137,7 @@ public class Block {
     }
 
     public static Atom date(Date d) {
-        return new Atom.Date(d.getTime());
+        return new Atom.Date(d.getTime() / 1000);
     }
 
     public static Atom var(int i) {
