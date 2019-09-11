@@ -72,7 +72,7 @@ public final class Predicate implements Serializable {
 
    @Override
    public String toString() {
-      return this.name + "(" + String.join(", ", this.ids.stream().map((i) -> (i == null) ? "(null)" : i.toString()).collect(Collectors.toSet())) + ")";
+      return this.name + "(" + String.join(", ", this.ids.stream().map((i) -> (i == null) ? "(null)" : i.toString()).collect(Collectors.toList())) + ")";
    }
 
    public Schema.Predicate serialize() {
