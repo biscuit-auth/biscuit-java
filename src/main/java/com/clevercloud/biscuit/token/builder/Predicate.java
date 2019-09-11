@@ -25,4 +25,9 @@ public class Predicate {
 
         return new com.clevercloud.biscuit.datalog.Predicate(name, ids);
     }
+
+    @Override
+    public String toString() {
+        return ""+name+"("+ids+")";
+    }
 }

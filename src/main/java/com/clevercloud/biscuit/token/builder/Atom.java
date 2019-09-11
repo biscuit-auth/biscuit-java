@@ -17,6 +17,11 @@ public abstract class Atom {
         public ID convert(SymbolTable symbols) {
             return new ID.Symbol(symbols.insert(this.value));
         }
+
+        @Override
+        public String toString() {
+            return "#"+value;
+        }
     }
 
     public static class Variable extends Atom {
@@ -29,6 +34,11 @@ public abstract class Atom {
         @Override
         public ID convert(SymbolTable symbols) {
             return new ID.Variable(this.value);
+        }
+
+        @Override
+        public String toString() {
+            return ""+value+"?";
         }
     }
 
@@ -43,6 +53,11 @@ public abstract class Atom {
         public ID convert(SymbolTable symbols) {
             return new ID.Integer(this.value);
         }
+
+        @Override
+        public String toString() {
+            return ""+value;
+        }
     }
 
     public static class Str extends Atom {
@@ -56,6 +71,11 @@ public abstract class Atom {
         public ID convert(SymbolTable symbols) {
             return new ID.Str(this.value);
         }
+
+        @Override
+        public String toString() {
+            return "\""+value+"\"";
+        }
     }
 
     public static class Date extends Atom {
@@ -68,6 +88,11 @@ public abstract class Atom {
         @Override
         public ID convert(SymbolTable symbols) {
             return new ID.Date(this.value);
+        }
+
+        @Override
+        public String toString() {
+            return ""+value;
         }
     }
 }

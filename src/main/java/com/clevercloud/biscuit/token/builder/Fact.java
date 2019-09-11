@@ -14,4 +14,9 @@ public class Fact {
     public com.clevercloud.biscuit.datalog.Fact convert(SymbolTable symbols) {
         return new com.clevercloud.biscuit.datalog.Fact(this.predicate.convert(symbols));
     }
+
+    @Override
+    public String toString() {
+        return "fact("+predicate+")";
+    }
 }

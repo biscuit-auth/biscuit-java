@@ -54,7 +54,7 @@ public final class SymbolTable implements Serializable {
          } else if (i instanceof ID.Integer) {
             return "" + ((ID.Integer) i).value();
          } else if (i instanceof ID.Str) {
-            return ((ID.Str) i).value();
+            return "\""+((ID.Str) i).value()+"\"";
          } else {
             return "???";
          }
