@@ -38,7 +38,7 @@ public final class Predicate implements Serializable {
          return false;
       }
       for (int i = 0; i < this.ids.size(); ++i) {
-         if (!this.ids.get(0).match(other.ids.get(0))) {
+         if (!this.ids.get(i).match(other.ids.get(i))) {
             return false;
          }
       }
