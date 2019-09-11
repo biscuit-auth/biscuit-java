@@ -2,6 +2,7 @@ package com.clevercloud.biscuit.token;
 
 import com.clevercloud.biscuit.crypto.KeyPair;
 import com.clevercloud.biscuit.datalog.*;
+import com.clevercloud.biscuit.error.FailedCaveat;
 import com.clevercloud.biscuit.error.LogicError;
 import io.vavr.control.Either;
 import junit.framework.Assert;
@@ -148,6 +149,13 @@ public class BiscuitTest extends TestCase {
         Either<LogicError, Void> res2 = final_token.check(ambient_facts2, new ArrayList<>(), new ArrayList<>());
         Assert.assertTrue(res2.isLeft());
         System.out.println(res2.getLeft());
+
+        Assert.assertEquals(
+                new LogicError().new FailedCaveats(Arrays.asList(
+                        new FailedCaveat().new FailedBlock(0, 0, "caveat1(0?) <- resource(#ambient, 0?) && operation(#ambient, #read) && right(#authority, 0?, #read) | "),
+                        new FailedCaveat().new FailedBlock(1, 0, "caveat2(#file1) <- resource(#ambient, #file1) | ")
+                )),
+                res2.getLeft());
     }
 
     public void testFolders() {
@@ -193,6 +201,18 @@ public class BiscuitTest extends TestCase {
         v3.resource("/folder2/file1");
         v3.operation("write");
         res = v3.verify(b2);
+
+        LogicError e = res.getLeft();
         Assert.assertTrue(res.isLeft());
+
+        for(FailedCaveat f: e.failed_caveats().get()) {
+            System.out.println(f.toString());
+        }
+        Assert.assertEquals(
+                new LogicError().new FailedCaveats(Arrays.asList(
+                        new FailedCaveat().new FailedBlock(0, 0, "prefix(0?) <- resource(#ambient, 0?) | 0? matches /folder1/*"),
+                        new FailedCaveat().new FailedBlock(0, 1, "check_right(#read) <- resource(#ambient, 0?) && operation(#ambient, #read) && right(#authority, 0?, #read) | ")
+                )),
+                e);
     }
 }
