@@ -90,4 +90,22 @@ public final class World implements Serializable {
          this.rules.add(rule);
       }
    }
+
+   public String print(SymbolTable symbol_table) {
+      StringBuilder s = new StringBuilder();
+
+      s.append("World {\n\t\tfacts: [");
+      for(Fact f: this.facts) {
+         s.append("\n\t\t\t");
+         s.append(symbol_table.print_fact(f));
+      }
+      s.append("\n\t\t]\n\t\trules: [");
+      for(Rule r: this.rules) {
+         s.append("\n\t\t\t");
+         s.append(symbol_table.print_rule(r));
+      }
+      s.append("\n\t\t]\n\t}");
+
+      return s.toString();
+   }
 }
