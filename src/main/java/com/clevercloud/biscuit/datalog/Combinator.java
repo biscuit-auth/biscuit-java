@@ -20,9 +20,13 @@ public final class Combinator implements Serializable {
          if (vars.isPresent()) {
             variables.add(vars.get());
          }
+         return variables;
       }
       final ListIterator<Predicate> pit = this.predicates.listIterator();
       while (pit.hasNext()) {
+         if (this.current_facts.isEmpty()) {
+            return variables;
+         }
          final Predicate pred = pit.next();
          for (final Fact current_fact : this.current_facts) {
             // create a new MatchedVariables in which we fix variables we could unify from our first predicate and the current fact
@@ -60,6 +64,9 @@ public final class Combinator implements Serializable {
                }
                if (!next_predicates.isEmpty()) {
                   final List<Map<Long, ID>> next = new Combinator(vars, next_predicates, this.constraints, this.all_facts).combine();
+                  if (next.isEmpty()) {
+                     return variables;
+                  }
                   variables.addAll(next);
                }
             } else {
