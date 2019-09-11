@@ -222,10 +222,10 @@ public class Error {
         }
     }
     public class FailedLogic extends Error {
-        final public List<LogicError> errors;
+        final public LogicError error;
 
-        public FailedLogic(List<LogicError> errors) {
-            this.errors = errors;
+        public FailedLogic(LogicError error) {
+            this.error = error;
         }
 
         @Override
@@ -233,25 +233,17 @@ public class Error {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             FailedLogic other = (FailedLogic) o;
-            if((errors.size() != other.errors.size())) {
-                return false;
-            }
-            for(int i = 0; i < errors.size(); i++) {
-                if(!errors.get(i).equals(other.errors.get(i))) {
-                    return false;
-                }
-            }
-            return true;
+            return error.equals(other.error);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(errors);
+            return Objects.hash(error);
         }
 
         @Override
         public String toString() {
-            return "Error.FailedLogic{ errors: "+ errors + " }";
+            return "Error.FailedLogic{ error: "+ error + " }";
         }
     }
 }
