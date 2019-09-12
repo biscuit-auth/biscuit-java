@@ -149,7 +149,7 @@ public abstract class ID implements Serializable {
             return true;
          }
          if (other instanceof Str) {
-            return this.value == ((Str) other).value;
+            return this.value.equals(((Str) other).value);
          }
          return false;
       }
