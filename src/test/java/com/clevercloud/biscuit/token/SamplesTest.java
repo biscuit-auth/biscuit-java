@@ -11,7 +11,6 @@ import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import sun.misc.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -111,10 +110,10 @@ public class SamplesTest extends TestCase {
         v1.operation("read");
         v1.time();
         LogicError e = v1.verify(token).getLeft();
-        Assert.assertEquals(new Error().new FailedLogic(
+        Assert.assertEquals(
                 new LogicError().new FailedCaveats(Arrays.asList(
                         new FailedCaveat().new FailedBlock(0, 1, "expiration(0?) <- time(#ambient, 0?) | 0? <= 1545264000")
-                ))
+                )
         ), e);
     }
 }
