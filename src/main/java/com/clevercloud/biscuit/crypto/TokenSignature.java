@@ -126,18 +126,24 @@ public class TokenSignature {
         return sig.build();
     }
 
-    static public TokenSignature deserialize(Schema.Signature sig) throws InvalidEncodingException {
-        ArrayList<RistrettoElement> parameters = new ArrayList<>();
-        for (ByteString parameter: sig.getParametersList()) {
-            parameters.add((new CompressedRistretto(parameter.toByteArray())).decompress());
+    static public  Either<Error, TokenSignature> deserialize(Schema.Signature sig) {
+        try {
+            ArrayList<RistrettoElement> parameters = new ArrayList<>();
+            for (ByteString parameter : sig.getParametersList()) {
+                parameters.add((new CompressedRistretto(parameter.toByteArray())).decompress());
+            }
+
+            //System.out.println(hex(sig.getZ().toByteArray()));
+            //System.out.println(sig.getZ().toByteArray().length);
+
+            Scalar z = Scalar.fromBytesModOrder(sig.getZ().toByteArray());
+
+            return Right(new TokenSignature(parameters, z));
+        } catch (InvalidEncodingException e) {
+            return Left(new Error().new FormatError().new Signature().new InvalidFormat());
+        } catch(IllegalArgumentException e) {
+            return Left(new Error().new FormatError().new DeserializationError(e.toString()));
         }
-
-        //System.out.println(hex(sig.getZ().toByteArray()));
-        //System.out.println(sig.getZ().toByteArray().length);
-
-        Scalar z = Scalar.fromBytesModOrder(sig.getZ().toByteArray());
-
-        return new TokenSignature(parameters, z);
     }
 
     static public Scalar hash_points(List<RistrettoElement> points) {
