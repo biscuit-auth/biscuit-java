@@ -19,4 +19,8 @@ public class Fact {
     public String toString() {
         return "fact("+predicate+")";
     }
+
+    public String name() {
+        return this.predicate.name;
+    }
 }

@@ -36,15 +36,24 @@ public class Verifier {
         this.caveats.add(caveat);
     }
 
-    public void resource(String resource) {
+    public void add_resource(String resource) {
         this.facts.add(fact("resource", Arrays.asList(s("ambient"), string(resource))));
     }
 
-    public void operation(String operation) {
+    public void add_operation(String operation) {
         this.facts.add(fact("operation", Arrays.asList(s("ambient"), s(operation))));
     }
 
-    public void time() {
+    public void set_time() {
+        ArrayList<Fact> facts = new ArrayList<>();
+        for(Fact f: this.facts) {
+            if(!f.name().equals("time")) {
+                facts.add(f);
+            }
+        }
+
+        this.facts = facts;
+
         this.facts.add(fact("time", Arrays.asList(s("ambient"), date(new Date()))));
     }
 

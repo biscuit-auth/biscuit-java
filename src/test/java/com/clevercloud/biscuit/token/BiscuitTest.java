@@ -186,20 +186,20 @@ public class BiscuitTest extends TestCase {
         Biscuit b2 = b.append(rng, keypair2, block2.build()).get();
 
         Verifier v1 = new Verifier();
-        v1.resource("/folder1/file1");
-        v1.operation("read");
+        v1.add_resource("/folder1/file1");
+        v1.add_operation("read");
         Either<LogicError, Void> res = v1.verify(b2);
         Assert.assertTrue(res.isRight());
 
         Verifier v2 = new Verifier();
-        v2.resource("/folder2/file3");
-        v2.operation("read");
+        v2.add_resource("/folder2/file3");
+        v2.add_operation("read");
         res = v2.verify(b2);
         Assert.assertTrue(res.isLeft());
 
         Verifier v3 = new Verifier();
-        v3.resource("/folder2/file1");
-        v3.operation("write");
+        v3.add_resource("/folder2/file1");
+        v3.add_operation("write");
         res = v3.verify(b2);
 
         LogicError e = res.getLeft();
