@@ -82,7 +82,22 @@ public class SamplesTest extends TestCase {
         RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("test3_invalid_signature.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("test3_invalid_signature_format.bc");
+
+        byte[] data = new byte[inputStream.available()];
+        inputStream.read(data);
+
+        Error e = Biscuit.from_bytes(data, root).getLeft();
+        System.out.println("got error: "+ e);
+        Assert.assertEquals(new Error().new FormatError().new DeserializationError("java.lang.IllegalArgumentException: Input must by 32 bytes"), e);
+    }
+
+    public void test4_random_block() throws IOException, InvalidEncodingException {
+        byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
+        RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
+
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("test4_random_block.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
@@ -92,7 +107,145 @@ public class SamplesTest extends TestCase {
         Assert.assertEquals(new Error().new FormatError().new Signature().new InvalidSignature(), e);
     }
 
-    public void test4_ExpiredToken() throws IOException, InvalidEncodingException {
+    public void test5_InvalidSignature() throws IOException, InvalidEncodingException {
+        byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
+        RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
+
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("test5_invalid_signature.bc");
+
+        byte[] data = new byte[inputStream.available()];
+        inputStream.read(data);
+
+        Error e = Biscuit.from_bytes(data, root).getLeft();
+        System.out.println("got error: "+ e);
+        Assert.assertEquals(new Error().new FormatError().new Signature().new InvalidSignature(), e);
+    }
+
+    public void test6_reordered_blocks() throws IOException, InvalidEncodingException {
+        byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
+        RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
+
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("test6_reordered_blocks.bc");
+
+        byte[] data = new byte[inputStream.available()];
+        inputStream.read(data);
+
+        Biscuit token = Biscuit.from_bytes(data, root).get();
+
+        Verifier v1 = new Verifier();
+        v1.add_resource("file1");
+        v1.add_operation("read");
+        Either<Error, Void> res = v1.verify(token);
+        System.out.println(token.print());
+        System.out.println(res);
+        if(res.isLeft()) {
+            System.out.println("error: "+res.getLeft());
+        }
+        Assert.assertEquals(new Error().new InvalidBlockIndex(3, 2), res.getLeft());
+
+    }
+
+    public void test7_missing_authority_tag() throws IOException, InvalidEncodingException {
+        byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
+        RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
+
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("test7_missing_authority_tag.bc");
+
+        System.out.println("a");
+        byte[] data = new byte[inputStream.available()];
+        inputStream.read(data);
+
+        Biscuit token = Biscuit.from_bytes(data, root).get();
+        System.out.println(token.print());
+
+        Verifier v1 = new Verifier();
+        v1.add_resource("file1");
+        v1.add_operation("read");
+        Either<Error, Void> res = v1.verify(token);
+        if(res.isLeft()) {
+            System.out.println("error: "+res.getLeft());
+        }
+        Assert.assertEquals(new Error().new FailedLogic(new LogicError().new InvalidAuthorityFact("right(\"file1\", #write)")), res.getLeft());
+    }
+
+    public void test8_invalid_block_fact_authority() throws IOException, InvalidEncodingException {
+        byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
+        RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
+
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("test8_invalid_block_fact_authority.bc");
+
+        System.out.println("a");
+        byte[] data = new byte[inputStream.available()];
+        inputStream.read(data);
+
+        Biscuit token = Biscuit.from_bytes(data, root).get();
+        System.out.println(token.print());
+
+        Verifier v1 = new Verifier();
+        v1.add_resource("file1");
+        v1.add_operation("read");
+        Either<Error, Void> res = v1.verify(token);
+        if(res.isLeft()) {
+            System.out.println("error: "+res.getLeft());
+        }
+        Assert.assertEquals(new Error().new FailedLogic(new LogicError().new InvalidBlockFact(0, "right(#authority, \"file1\", #write)")), res.getLeft());
+    }
+
+    public void test9_invalid_block_fact_ambient() throws IOException, InvalidEncodingException {
+        byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
+        RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
+
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("test9_invalid_block_fact_ambient.bc");
+
+        System.out.println("a");
+        byte[] data = new byte[inputStream.available()];
+        inputStream.read(data);
+
+        Biscuit token = Biscuit.from_bytes(data, root).get();
+        System.out.println(token.print());
+
+        Verifier v1 = new Verifier();
+        v1.add_resource("file1");
+        v1.add_operation("read");
+        Either<Error, Void> res = v1.verify(token);
+        if(res.isLeft()) {
+            System.out.println("error: "+res.getLeft());
+        }
+        Assert.assertEquals(new Error().new FailedLogic(new LogicError().new InvalidBlockFact(0, "right(#ambient, \"file1\", #write)")), res.getLeft());
+    }
+
+    public void test10_separate_block_validation() throws IOException, InvalidEncodingException {
+        byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
+        RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
+
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("test10_separate_block_validation.bc");
+
+        byte[] data = new byte[inputStream.available()];
+        inputStream.read(data);
+
+        Biscuit token = Biscuit.from_bytes(data, root).get();
+        System.out.println(token.print());
+
+        Verifier v1 = new Verifier();
+        v1.add_resource("file1");
+        v1.add_operation("read");
+        v1.set_time();
+        Error e = v1.verify(token).getLeft();
+
+        Assert.assertEquals(
+                new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
+                        new FailedCaveat().new FailedBlock(1, 0, "caveat1(0?) <- test(0?) | ")
+                ))),
+                e);
+    }
+
+    public void test11_ExpiredToken() throws IOException, InvalidEncodingException {
         byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
         RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
 
