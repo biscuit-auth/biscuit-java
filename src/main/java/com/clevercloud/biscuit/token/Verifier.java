@@ -4,7 +4,7 @@ import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.datalog.constraints.Constraint;
 import com.clevercloud.biscuit.datalog.constraints.ConstraintKind;
 import com.clevercloud.biscuit.datalog.constraints.IntConstraint;
-import com.clevercloud.biscuit.error.LogicError;
+import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.token.builder.Fact;
 import com.clevercloud.biscuit.token.builder.Rule;
 import io.vavr.control.Either;
@@ -66,7 +66,7 @@ public class Verifier {
         ));
     }
 
-    public Either<LogicError, Void> verify(Biscuit token) {
+    public Either<Error, Void> verify(Biscuit token) {
         SymbolTable symbols = new SymbolTable(token.symbols);
 
         ArrayList<com.clevercloud.biscuit.datalog.Fact> ambient_facts = new ArrayList<>();

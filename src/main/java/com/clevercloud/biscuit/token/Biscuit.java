@@ -109,14 +109,14 @@ public class Biscuit {
     }*/
     //public Either<Error.FormatError, byte[]> seal(byte[] secret) {}
 
-    public Either<LogicError, Void> check(SymbolTable symbols, List<Fact> ambient_facts, List<Rule> ambient_rules, List<Rule> ambient_caveats){
+    public Either<Error, Void> check(SymbolTable symbols, List<Fact> ambient_facts, List<Rule> ambient_rules, List<Rule> ambient_caveats){
         World world = new World();
         long authority_index = symbols.get("authority").get();
         long ambient_index = symbols.get("ambient").get();
 
         for(Fact fact: this.authority.facts) {
             if(!fact.predicate().ids().get(0).equals(new ID.Symbol(authority_index))) {
-                return Left(new LogicError().new InvalidAuthorityFact(symbols.print_fact(fact)));
+                return Left(new Error().new FailedLogic(new LogicError().new InvalidAuthorityFact(symbols.print_fact(fact))));
             }
 
             world.add_fact(fact);
@@ -129,7 +129,7 @@ public class Biscuit {
         // check that all generated facts have the authority ID
         for(Fact fact: world.facts()) {
             if(!fact.predicate().ids().get(0).equals(new ID.Symbol(authority_index))) {
-                return Left(new LogicError().new InvalidAuthorityFact(symbols.print_fact(fact)));
+                return Left(new Error().new FailedLogic(new LogicError().new InvalidAuthorityFact(symbols.print_fact(fact))));
             }
 
             world.add_fact(fact);
@@ -137,7 +137,7 @@ public class Biscuit {
 
         for(Fact fact: ambient_facts) {
             if(!fact.predicate().ids().get(0).equals(new ID.Symbol(ambient_index))) {
-                return Left(new LogicError().new InvalidAmbientFact(symbols.print_fact(fact)));
+                return Left(new Error().new FailedLogic(new LogicError().new InvalidAmbientFact(symbols.print_fact(fact))));
             }
 
             world.add_fact(fact);
@@ -164,7 +164,7 @@ public class Biscuit {
                 LogicError e = res.getLeft();
                 Option<List<FailedCaveat>> optErr = e.failed_caveats();
                 if(optErr.isEmpty()) {
-                    return Left(e);
+                    return Left(new Error().new FailedLogic(e));
                 } else {
                     for(FailedCaveat f: optErr.get()) {
                         errors.add(f);
@@ -176,7 +176,7 @@ public class Biscuit {
         if(errors.isEmpty()) {
             return Right(null);
         } else {
-            return Left(new LogicError().new FailedCaveats(errors));
+            return Left(new Error().new FailedLogic(new LogicError().new FailedCaveats(errors)));
         }
     }
 

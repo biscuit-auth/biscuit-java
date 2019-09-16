@@ -46,7 +46,7 @@ public class SamplesTest extends TestCase {
         Verifier v1 = new Verifier();
         v1.add_resource("file1");
         v1.add_operation("read");
-        Either<LogicError, Void> res = v1.verify(token);
+        Either<Error, Void> res = v1.verify(token);
         if(res.isLeft()) {
             System.out.println("error: "+res.getLeft());
         }
@@ -109,11 +109,11 @@ public class SamplesTest extends TestCase {
         v1.add_resource("file1");
         v1.add_operation("read");
         v1.set_time();
-        LogicError e = v1.verify(token).getLeft();
+        Error e = v1.verify(token).getLeft();
         Assert.assertEquals(
-                new LogicError().new FailedCaveats(Arrays.asList(
+                new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
                         new FailedCaveat().new FailedBlock(0, 1, "expiration(0?) <- time(#ambient, 0?) | 0? <= 1545264000")
-                )
-        ), e);
+                ))),
+                e);
     }
 }

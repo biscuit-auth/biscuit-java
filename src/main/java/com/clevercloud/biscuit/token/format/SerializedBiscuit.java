@@ -44,7 +44,14 @@ public class SerializedBiscuit {
                 blocks.add(block.toByteArray());
             }
 
-            TokenSignature signature = TokenSignature.deserialize(data.getSignature());
+            Either<Error, TokenSignature> signatureRes = TokenSignature.deserialize(data.getSignature());
+
+            if(signatureRes.isLeft()) {
+                Error e = signatureRes.getLeft();
+                return Left(e);
+            }
+
+            TokenSignature signature = signatureRes.get();
 
             SerializedBiscuit b = new SerializedBiscuit(authority, blocks, keys, signature);
 

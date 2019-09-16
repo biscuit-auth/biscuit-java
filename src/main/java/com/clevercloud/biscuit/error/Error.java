@@ -1,9 +1,15 @@
 package com.clevercloud.biscuit.error;
 
+import io.vavr.control.Option;
+
 import java.util.List;
 import java.util.Objects;
 
 public class Error {
+    public Option<List<FailedCaveat>> failed_caveats() {
+        return Option.none();
+    }
+
 
     public class InternalError extends Error {}
 
@@ -245,5 +251,11 @@ public class Error {
         public String toString() {
             return "Error.FailedLogic{ error: "+ error + " }";
         }
+
+        @Override
+        public Option<List<FailedCaveat>> failed_caveats() {
+            return this.error.failed_caveats();
+        }
+
     }
 }

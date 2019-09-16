@@ -4,6 +4,7 @@ import com.clevercloud.biscuit.crypto.KeyPair;
 import com.clevercloud.biscuit.datalog.*;
 import com.clevercloud.biscuit.error.FailedCaveat;
 import com.clevercloud.biscuit.error.LogicError;
+import com.clevercloud.biscuit.error.Error;
 import io.vavr.control.Either;
 import junit.framework.Assert;
 import junit.framework.Test;
@@ -134,7 +135,7 @@ public class BiscuitTest extends TestCase {
                 fact("operation", Arrays.asList(s("ambient"), s("read"))).convert(check_symbols)
         );
 
-        Either<LogicError, Void> res = final_token.check(check_symbols, ambient_facts, new ArrayList<>(), new ArrayList<>());
+        Either<Error, Void> res = final_token.check(check_symbols, ambient_facts, new ArrayList<>(), new ArrayList<>());
 
         Assert.assertTrue(res.isRight());
 
@@ -146,15 +147,15 @@ public class BiscuitTest extends TestCase {
                 fact("operation", Arrays.asList(s("ambient"), s("write"))).convert(check_symbols2)
         );
 
-        Either<LogicError, Void> res2 = final_token.check(check_symbols2, ambient_facts2, new ArrayList<>(), new ArrayList<>());
+        Either<Error, Void> res2 = final_token.check(check_symbols2, ambient_facts2, new ArrayList<>(), new ArrayList<>());
         Assert.assertTrue(res2.isLeft());
         System.out.println(res2.getLeft());
 
         Assert.assertEquals(
-                new LogicError().new FailedCaveats(Arrays.asList(
+                new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
                         new FailedCaveat().new FailedBlock(0, 0, "caveat1(0?) <- resource(#ambient, 0?) && operation(#ambient, #read) && right(#authority, 0?, #read) | "),
                         new FailedCaveat().new FailedBlock(1, 0, "caveat2(#file1) <- resource(#ambient, #file1) | ")
-                )),
+                ))),
                 res2.getLeft());
     }
 
@@ -188,7 +189,7 @@ public class BiscuitTest extends TestCase {
         Verifier v1 = new Verifier();
         v1.add_resource("/folder1/file1");
         v1.add_operation("read");
-        Either<LogicError, Void> res = v1.verify(b2);
+        Either<Error, Void> res = v1.verify(b2);
         Assert.assertTrue(res.isRight());
 
         Verifier v2 = new Verifier();
@@ -202,17 +203,17 @@ public class BiscuitTest extends TestCase {
         v3.add_operation("write");
         res = v3.verify(b2);
 
-        LogicError e = res.getLeft();
+        Error e = res.getLeft();
         Assert.assertTrue(res.isLeft());
 
         for(FailedCaveat f: e.failed_caveats().get()) {
             System.out.println(f.toString());
         }
         Assert.assertEquals(
-                new LogicError().new FailedCaveats(Arrays.asList(
+                new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
                         new FailedCaveat().new FailedBlock(0, 0, "prefix(0?) <- resource(#ambient, 0?) | 0? matches /folder1/*"),
                         new FailedCaveat().new FailedBlock(0, 1, "check_right(#read) <- resource(#ambient, 0?) && operation(#ambient, #read) && right(#authority, 0?, #read) | ")
-                )),
+                ))),
                 e);
     }
 }
