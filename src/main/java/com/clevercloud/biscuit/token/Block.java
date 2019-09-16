@@ -51,8 +51,8 @@ public class Block {
         long ambient_index = symbols.get("ambient").get().longValue();
 
         for (Fact fact : this.facts) {
-            if (fact.predicate().ids().get(0) == new ID.Symbol(authority_index) ||
-                    fact.predicate().ids().get(0) == new ID.Symbol(ambient_index)) {
+            if (fact.predicate().ids().get(0).equals(new ID.Symbol(authority_index)) ||
+                    fact.predicate().ids().get(0).equals(new ID.Symbol(ambient_index))) {
                 return Left(new LogicError().new InvalidBlockFact(i, symbols.print_fact(fact)));
             }
 
