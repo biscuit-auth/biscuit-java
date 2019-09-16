@@ -157,6 +157,10 @@ public class Biscuit {
 
         ArrayList<FailedCaveat> errors = new ArrayList<>();
         for(int i = 0; i < this.blocks.size(); i++) {
+            if(this.blocks.get(i).index != i+1) {
+                return Left(new Error().new InvalidBlockIndex(1 + this.blocks.size(), this.blocks.get(i).index));
+            }
+
             World w = new World(world);
             Either<LogicError, Void> res = this.blocks.get(i).check(i, w, symbols, ambient_caveats);
             if(res.isLeft()) {
