@@ -77,7 +77,7 @@ public class SamplesTest extends TestCase {
         Assert.assertEquals(new Error().new FormatError().new UnknownPublicKey(), e);
     }
 
-    public void test3_InvalidSignature() throws IOException, InvalidEncodingException {
+    public void test3_InvalidSignatureFormat() throws IOException, InvalidEncodingException {
         byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
         RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
 
@@ -97,7 +97,7 @@ public class SamplesTest extends TestCase {
         RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("test4_expired_token.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("test11_expired_token.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
