@@ -87,4 +87,16 @@
             <version>0.10.2</version>
         </dependency>
     </dependencies>
+    <distributionManagement>
+      <repository>
+        <id>clevercloud-artifactory</id>
+        <name>clevercloud-artifactory-releases</name>
+        <url>http://4g073zkzub-artifactory.services.clever-cloud.com/maven</url>
+      </repository>
+      <snapshotRepository>
+        <id>clevercloud-artifactory-snapshots</id>
+        <name>clevercloud-artifactory-snapshots</name>
+        <url>http://4g073zkzub-artifactory.services.clever-cloud.com/maven</url>
+      </snapshotRepository>
+    </distributionManagement>
 </project>
