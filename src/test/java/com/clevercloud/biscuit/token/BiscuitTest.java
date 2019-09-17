@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.clevercloud.biscuit.crypto.TokenSignature.hex;
-import static com.clevercloud.biscuit.token.builder.Block.*;
+import static com.clevercloud.biscuit.token.builder.Utils.*;
 
 import com.clevercloud.biscuit.token.builder.Block;
 
@@ -167,15 +167,15 @@ public class BiscuitTest extends TestCase {
 
         KeyPair root = new KeyPair(rng);
 
-        SymbolTable symbols = Biscuit.default_symbol_table();
-        Block authority_block = new Block(0, symbols);
-        authority_block.add_right("/folder1/file1", "read");
-        authority_block.add_right("/folder1/file1", "write");
-        authority_block.add_right("/folder1/file2", "read");
-        authority_block.add_right("/folder1/file2", "write");
-        authority_block.add_right("/folder2/file3", "read");
+        com.clevercloud.biscuit.token.builder.Biscuit builder = Biscuit.builder(rng, root);
 
-        Biscuit b = Biscuit.make(rng, root, authority_block.build()).get();
+        builder.add_right("/folder1/file1", "read");
+        builder.add_right("/folder1/file1", "write");
+        builder.add_right("/folder1/file2", "read");
+        builder.add_right("/folder1/file2", "write");
+        builder.add_right("/folder2/file3", "read");
+
+        Biscuit b = builder.build().get();
 
         System.out.println(b.print());
 

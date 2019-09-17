@@ -2,13 +2,14 @@ package com.clevercloud.biscuit.token.builder;
 
 
 import com.clevercloud.biscuit.datalog.Fact;
-import com.clevercloud.biscuit.datalog.ID;
 import com.clevercloud.biscuit.datalog.Rule;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.datalog.constraints.Constraint;
 import com.clevercloud.biscuit.datalog.constraints.ConstraintKind;
 import com.clevercloud.biscuit.datalog.constraints.DateConstraint;
 import com.clevercloud.biscuit.datalog.constraints.StrConstraint;
+import static com.clevercloud.biscuit.token.builder.Utils.*;
+
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,14 +31,6 @@ public class Block {
         this.caveats = new ArrayList<>();
     }
 
-    public ID symbol_add(String s) {
-        return this.symbols.add(s);
-    }
-
-    public long symbol_insert(String s) {
-        return this.symbols.insert(s);
-    }
-
     public void add_fact(com.clevercloud.biscuit.token.builder.Fact f) {
         this.facts.add(f.convert(this.symbols));
     }
@@ -54,15 +47,6 @@ public class Block {
         }
 
         return new com.clevercloud.biscuit.token.Block(this.index, symbols, this.facts, this.caveats);
-    }
-
-    public Boolean add_right(String resource, String right) {
-        if(this.index != 0) {
-            return false;
-        } else {
-            this.add_fact(fact("right", Arrays.asList(s("authority"), string(resource), s(right))));
-            return true;
-        }
     }
 
     public void check_right(String right) {
@@ -103,44 +87,5 @@ public class Block {
                 Arrays.asList(pred("time", Arrays.asList(s("ambient"), var(0)))),
                 Arrays.asList(new Constraint(0, new ConstraintKind.Date(new DateConstraint.Before(d.getTime() / 1000))))
         ));
-    }
-
-    public static com.clevercloud.biscuit.token.builder.Fact fact(String name, List<Atom> ids) {
-        return new com.clevercloud.biscuit.token.builder.Fact(name, ids);
-    }
-
-    public static com.clevercloud.biscuit.token.builder.Predicate pred(String name, List<Atom> ids) {
-        return new com.clevercloud.biscuit.token.builder.Predicate(name, ids);
-    }
-
-    public static com.clevercloud.biscuit.token.builder.Rule rule(String head_name, List<Atom> head_ids,
-                                                                  List<com.clevercloud.biscuit.token.builder.Predicate> predicates) {
-        return new com.clevercloud.biscuit.token.builder.Rule(pred(head_name, head_ids), predicates, new ArrayList<>());
-    }
-
-    public static com.clevercloud.biscuit.token.builder.Rule constrained_rule(String head_name, List<Atom> head_ids,
-                                                                              List<com.clevercloud.biscuit.token.builder.Predicate> predicates,
-                                                                              List<Constraint> constraints) {
-        return new com.clevercloud.biscuit.token.builder.Rule(pred(head_name, head_ids), predicates, constraints);
-    }
-
-    public static Atom integer(long i) {
-        return new Atom.Integer(i);
-    }
-
-    public static Atom string(String s) {
-        return new Atom.Str(s);
-    }
-
-    public static Atom s(String str) {
-        return new Atom.Symbol(str);
-    }
-
-    public static Atom date(Date d) {
-        return new Atom.Date(d.getTime() / 1000);
-    }
-
-    public static Atom var(int i) {
-        return new Atom.Variable(i);
     }
 }

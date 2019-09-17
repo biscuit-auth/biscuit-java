@@ -11,7 +11,7 @@ import io.vavr.control.Either;
 
 import java.util.*;
 
-import static com.clevercloud.biscuit.token.builder.Block.*;
+import static com.clevercloud.biscuit.token.builder.Utils.*;
 
 public class Verifier {
     List<Fact> facts;

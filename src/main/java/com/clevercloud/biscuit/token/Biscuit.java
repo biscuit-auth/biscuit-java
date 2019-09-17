@@ -25,6 +25,15 @@ public class Biscuit {
     public final SymbolTable symbols;
     public final Option<SerializedBiscuit> container;
 
+
+    public static com.clevercloud.biscuit.token.builder.Biscuit builder(final SecureRandom rng, final KeyPair root) {
+        return new com.clevercloud.biscuit.token.builder.Biscuit(rng, root, default_symbol_table());
+    }
+
+    public static com.clevercloud.biscuit.token.builder.Biscuit builder(final SecureRandom rng, final KeyPair root, SymbolTable symbols) {
+        return new com.clevercloud.biscuit.token.builder.Biscuit(rng, root, symbols);
+    }
+
     static public Either<Error, Biscuit> make(final SecureRandom rng, final KeyPair root, final Block authority) {
         SymbolTable symbols = default_symbol_table();
 
