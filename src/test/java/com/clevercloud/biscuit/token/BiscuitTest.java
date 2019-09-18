@@ -58,7 +58,7 @@ public class BiscuitTest extends TestCase {
         System.out.println(hex(data));
 
         System.out.println("deserializing the first token");
-        Biscuit deser = Biscuit.from_bytes(data, root.public_key).get();
+        Biscuit deser = Biscuit.from_bytes(data).get();
 
         System.out.println(deser.print());
 
@@ -91,7 +91,7 @@ public class BiscuitTest extends TestCase {
         System.out.println(hex(data2));
 
         System.out.println("deserializing the second token");
-        Biscuit deser2 = Biscuit.from_bytes(data2, root.public_key).get();
+        Biscuit deser2 = Biscuit.from_bytes(data2).get();
 
         System.out.println(deser2.print());
 
@@ -122,7 +122,7 @@ public class BiscuitTest extends TestCase {
         System.out.println(hex(data3));
 
         System.out.println("deserializing the third token");
-        Biscuit final_token = Biscuit.from_bytes(data3, root.public_key).get();
+        Biscuit final_token = Biscuit.from_bytes(data3).get();
 
         System.out.println(final_token.print());
 
@@ -186,22 +186,22 @@ public class BiscuitTest extends TestCase {
         KeyPair keypair2 = new KeyPair(rng);
         Biscuit b2 = b.append(rng, keypair2, block2.build()).get();
 
-        Verifier v1 = new Verifier();
+        Verifier v1 = b2.verify(root.public_key).get();
         v1.add_resource("/folder1/file1");
         v1.add_operation("read");
-        Either<Error, Void> res = v1.verify(b2);
+        Either<Error, Void> res = v1.verify();
         Assert.assertTrue(res.isRight());
 
-        Verifier v2 = new Verifier();
+        Verifier v2 = b2.verify(root.public_key).get();
         v2.add_resource("/folder2/file3");
         v2.add_operation("read");
-        res = v2.verify(b2);
+        res = v2.verify();
         Assert.assertTrue(res.isLeft());
 
-        Verifier v3 = new Verifier();
+        Verifier v3 = b2.verify(root.public_key).get();
         v3.add_resource("/folder2/file1");
         v3.add_operation("write");
-        res = v3.verify(b2);
+        res = v3.verify();
 
         Error e = res.getLeft();
         Assert.assertTrue(res.isLeft());

@@ -65,8 +65,8 @@ public class Biscuit {
         this.container = container;
     }
 
-    static public Either<Error, Biscuit> from_bytes(byte[] data, RistrettoElement root)  {
-        Either<Error, SerializedBiscuit> res = SerializedBiscuit.from_bytes(data, root);
+    static public Either<Error, Biscuit> from_bytes(byte[] data)  {
+        Either<Error, SerializedBiscuit> res = SerializedBiscuit.from_bytes(data);
         if(res.isLeft()) {
             Error e = res.getLeft();
             return Left(e);
@@ -104,6 +104,9 @@ public class Biscuit {
         return Right(new Biscuit(authority, blocks, symbols, Option.some(ser)));
     }
 
+    public Either<Error, Verifier> verify(RistrettoElement root) {
+        return Verifier.make(this, root);
+    }
 
     public Either<Error.FormatError, byte[]> serialize() {
         if(this.container.isEmpty()) {
@@ -118,7 +121,15 @@ public class Biscuit {
     }*/
     //public Either<Error.FormatError, byte[]> seal(byte[] secret) {}
 
-    public Either<Error, Void> check(SymbolTable symbols, List<Fact> ambient_facts, List<Rule> ambient_rules, List<Rule> ambient_caveats){
+    public Either<Error, Void> check_root_key(RistrettoElement public_key) {
+        if (this.container.isEmpty()) {
+            return Left(new Error().new Sealed());
+        } else {
+            return this.container.get().check_root_key(public_key);
+        }
+    }
+
+    Either<Error, Void> check(SymbolTable symbols, List<Fact> ambient_facts, List<Rule> ambient_rules, List<Rule> ambient_caveats){
         World world = new World();
         long authority_index = symbols.get("authority").get();
         long ambient_index = symbols.get("ambient").get();

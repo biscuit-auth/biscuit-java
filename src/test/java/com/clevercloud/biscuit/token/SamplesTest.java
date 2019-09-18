@@ -41,13 +41,13 @@ public class SamplesTest extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data, root).get();
+        Biscuit token = Biscuit.from_bytes(data).get();
         System.out.println(token.print());
 
-        Verifier v1 = new Verifier();
+        Verifier v1 = token.verify(root).get();
         v1.add_resource("file1");
         v1.add_operation("read");
-        Either<Error, Void> res = v1.verify(token);
+        Either<Error, Void> res = v1.verify();
         if(res.isLeft()) {
             System.out.println("error: "+res.getLeft());
         }
@@ -73,7 +73,8 @@ public class SamplesTest extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Error e = Biscuit.from_bytes(data, root).getLeft();
+        Biscuit token = Biscuit.from_bytes(data).get();
+        Error e = token.check_root_key(root).getLeft();
         System.out.println("got error: "+ e);
         Assert.assertEquals(new Error().new FormatError().new UnknownPublicKey(), e);
     }
@@ -88,7 +89,7 @@ public class SamplesTest extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Error e = Biscuit.from_bytes(data, root).getLeft();
+        Error e = Biscuit.from_bytes(data).getLeft();
         System.out.println("got error: "+ e);
         Assert.assertEquals(new Error().new FormatError().new DeserializationError("java.lang.IllegalArgumentException: Input must by 32 bytes"), e);
     }
@@ -103,7 +104,7 @@ public class SamplesTest extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Error e = Biscuit.from_bytes(data, root).getLeft();
+        Error e = Biscuit.from_bytes(data).getLeft();
         System.out.println("got error: "+ e);
         Assert.assertEquals(new Error().new FormatError().new Signature().new InvalidSignature(), e);
     }
@@ -118,7 +119,7 @@ public class SamplesTest extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Error e = Biscuit.from_bytes(data, root).getLeft();
+        Error e = Biscuit.from_bytes(data).getLeft();
         System.out.println("got error: "+ e);
         Assert.assertEquals(new Error().new FormatError().new Signature().new InvalidSignature(), e);
     }
@@ -133,12 +134,12 @@ public class SamplesTest extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data, root).get();
+        Biscuit token = Biscuit.from_bytes(data).get();
 
-        Verifier v1 = new Verifier();
+        Verifier v1 = token.verify(root).get();
         v1.add_resource("file1");
         v1.add_operation("read");
-        Either<Error, Void> res = v1.verify(token);
+        Either<Error, Void> res = v1.verify();
         System.out.println(token.print());
         System.out.println(res);
         if(res.isLeft()) {
@@ -159,13 +160,13 @@ public class SamplesTest extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data, root).get();
+        Biscuit token = Biscuit.from_bytes(data).get();
         System.out.println(token.print());
 
-        Verifier v1 = new Verifier();
+        Verifier v1 = token.verify(root).get();
         v1.add_resource("file1");
         v1.add_operation("read");
-        Either<Error, Void> res = v1.verify(token);
+        Either<Error, Void> res = v1.verify();
         if(res.isLeft()) {
             System.out.println("error: "+res.getLeft());
         }
@@ -183,13 +184,13 @@ public class SamplesTest extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data, root).get();
+        Biscuit token = Biscuit.from_bytes(data).get();
         System.out.println(token.print());
 
-        Verifier v1 = new Verifier();
+        Verifier v1 = token.verify(root).get();
         v1.add_resource("file1");
         v1.add_operation("read");
-        Either<Error, Void> res = v1.verify(token);
+        Either<Error, Void> res = v1.verify();
         if(res.isLeft()) {
             System.out.println("error: "+res.getLeft());
         }
@@ -207,13 +208,13 @@ public class SamplesTest extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data, root).get();
+        Biscuit token = Biscuit.from_bytes(data).get();
         System.out.println(token.print());
 
-        Verifier v1 = new Verifier();
+        Verifier v1 = token.verify(root).get();
         v1.add_resource("file1");
         v1.add_operation("read");
-        Either<Error, Void> res = v1.verify(token);
+        Either<Error, Void> res = v1.verify();
         if(res.isLeft()) {
             System.out.println("error: "+res.getLeft());
         }
@@ -230,14 +231,14 @@ public class SamplesTest extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data, root).get();
+        Biscuit token = Biscuit.from_bytes(data).get();
         System.out.println(token.print());
 
-        Verifier v1 = new Verifier();
+        Verifier v1 = token.verify(root).get();
         v1.add_resource("file1");
         v1.add_operation("read");
         v1.set_time();
-        Error e = v1.verify(token).getLeft();
+        Error e = v1.verify().getLeft();
 
         Assert.assertEquals(
                 new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
@@ -256,14 +257,14 @@ public class SamplesTest extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data, root).get();
+        Biscuit token = Biscuit.from_bytes(data).get();
         System.out.println(token.print());
 
-        Verifier v1 = new Verifier();
+        Verifier v1 = token.verify(root).get();
         v1.add_resource("file1");
         v1.add_operation("read");
         v1.set_time();
-        Error e = v1.verify(token).getLeft();
+        Error e = v1.verify().getLeft();
         Assert.assertEquals(
                 new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
                         new FailedCaveat().new FailedBlock(0, 1, "expiration(0?) <- time(#ambient, 0?) | 0? <= 1545264000")
@@ -281,14 +282,14 @@ public class SamplesTest extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data, root).get();
+        Biscuit token = Biscuit.from_bytes(data).get();
         System.out.println(token.print());
 
-        Verifier v1 = new Verifier();
+        Verifier v1 = token.verify(root).get();
         v1.add_resource("file1");
         v1.add_operation("read");
         v1.add_fact(fact("owner", Arrays.asList(s("ambient"), s("alice"), string("file1"))));
-        Either<Error, Void> res = v1.verify(token);
+        Either<Error, Void> res = v1.verify();
         System.out.println(res);
         Assert.assertTrue(res.isRight());
     }

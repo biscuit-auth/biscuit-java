@@ -28,7 +28,7 @@ public class SerializedBiscuit {
     public List<RistrettoElement> keys;
     public TokenSignature signature;
 
-    static public Either<Error, SerializedBiscuit> from_bytes(byte[] slice, RistrettoElement public_key) {
+    static public Either<Error, SerializedBiscuit> from_bytes(byte[] slice) {
         try {
             Schema.Biscuit data = Schema.Biscuit.parseFrom(slice);
 
@@ -55,7 +55,7 @@ public class SerializedBiscuit {
 
             SerializedBiscuit b = new SerializedBiscuit(authority, blocks, keys, signature);
 
-            Either<Error, Void> res = b.verify(public_key);
+            Either<Error, Void> res = b.verify();
             if(res.isLeft()) {
                 Error e = res.getLeft();
                 return Left(e);
@@ -142,13 +142,9 @@ public class SerializedBiscuit {
         }
     }
 
-    public Either<Error, Void> verify(RistrettoElement public_key) {
+    public Either<Error, Void> verify() {
         if(this.keys.isEmpty()) {
             return Left(new Error().new FormatError().new EmptyKeys());
-        }
-
-        if(!(this.keys.get(0).ctEquals(public_key) == 1)) {
-            return Left(new Error().new FormatError().new UnknownPublicKey());
         }
 
         ArrayList<byte[]> blocks = new ArrayList<>();
@@ -158,6 +154,18 @@ public class SerializedBiscuit {
         }
 
         return this.signature.verify(this.keys, blocks);
+    }
+
+    public Either<Error, Void> check_root_key(RistrettoElement public_key) {
+        if(this.keys.isEmpty()) {
+            return Left(new Error().new FormatError().new EmptyKeys());
+        }
+
+        if(!(this.keys.get(0).ctEquals(public_key) == 1)) {
+            return Left(new Error().new FormatError().new UnknownPublicKey());
+        }
+
+        return Right(null);
     }
 
 

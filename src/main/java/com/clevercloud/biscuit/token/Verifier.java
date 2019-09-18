@@ -1,5 +1,6 @@
 package com.clevercloud.biscuit.token;
 
+import cafe.cryptography.curve25519.RistrettoElement;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.datalog.constraints.Constraint;
 import com.clevercloud.biscuit.datalog.constraints.ConstraintKind;
@@ -12,16 +13,30 @@ import io.vavr.control.Either;
 import java.util.*;
 
 import static com.clevercloud.biscuit.token.builder.Utils.*;
+import static io.vavr.API.Left;
+import static io.vavr.API.Right;
 
 public class Verifier {
+    Biscuit token;
     List<Fact> facts;
     List<Rule> rules;
     List<Rule> caveats;
 
-    public Verifier() {
+    private Verifier(Biscuit token) {
+        this.token = token;
         this.facts = new ArrayList<>();
         this.rules = new ArrayList<>();
         this.caveats = new ArrayList<>();
+    }
+
+    static public Either<Error, Verifier> make(Biscuit token, RistrettoElement root) {
+        Either<Error, Void> res  = token.check_root_key(root);
+        if(res.isLeft()) {
+            Error e = res.getLeft();
+            return Left(e);
+        }
+
+        return Right(new Verifier(token));
     }
 
     public void add_fact(Fact fact) {
@@ -66,8 +81,8 @@ public class Verifier {
         ));
     }
 
-    public Either<Error, Void> verify(Biscuit token) {
-        SymbolTable symbols = new SymbolTable(token.symbols);
+    public Either<Error, Void> verify() {
+        SymbolTable symbols = new SymbolTable(this.token.symbols);
 
         ArrayList<com.clevercloud.biscuit.datalog.Fact> ambient_facts = new ArrayList<>();
         for(Fact fact: this.facts) {
@@ -84,6 +99,6 @@ public class Verifier {
             ambient_caveats.add(caveat.convert(symbols));
         }
         
-        return token.check(symbols, ambient_facts, ambient_rules, ambient_caveats);
+        return this.token.check(symbols, ambient_facts, ambient_rules, ambient_caveats);
     }
 }
