@@ -43,6 +43,8 @@ public final class World implements Serializable {
       return this.facts;
    }
 
+   public List<Rule> rules() { return this.rules; }
+
    public final Set<Fact> query(final Predicate pred) {
       return this.facts.stream().filter((f) -> {
          if (f.predicate().name() != pred.name()) {
