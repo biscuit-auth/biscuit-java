@@ -18,6 +18,7 @@ import java.util.Arrays;
 
 import static com.clevercloud.biscuit.crypto.TokenSignature.fromHex;
 import static com.clevercloud.biscuit.crypto.TokenSignature.hex;
+import static com.clevercloud.biscuit.token.builder.Utils.*;
 
 public class SamplesTest extends TestCase {
 
@@ -268,5 +269,27 @@ public class SamplesTest extends TestCase {
                         new FailedCaveat().new FailedBlock(0, 1, "expiration(0?) <- time(#ambient, 0?) | 0? <= 1545264000")
                 ))),
                 e);
+    }
+
+    public void test12_AuthorityRules() throws IOException, InvalidEncodingException {
+        byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
+        RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
+
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("test12_authority_rules.bc");
+
+        byte[] data = new byte[inputStream.available()];
+        inputStream.read(data);
+
+        Biscuit token = Biscuit.from_bytes(data, root).get();
+        System.out.println(token.print());
+
+        Verifier v1 = new Verifier();
+        v1.add_resource("file1");
+        v1.add_operation("read");
+        v1.add_fact(fact("owner", Arrays.asList(s("ambient"), s("alice"), string("file1"))));
+        Either<Error, Void> res = v1.verify(token);
+        System.out.println(res);
+        Assert.assertTrue(res.isRight());
     }
 }
