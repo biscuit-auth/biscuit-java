@@ -11,7 +11,9 @@ import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 import com.clevercloud.biscuit.error.Error;
 
-
+/**
+ * @serial exclude
+ */
 public class SignatureTest extends TestCase {
         public SignatureTest(String testName) {
             super(testName);
@@ -21,7 +23,7 @@ public class SignatureTest extends TestCase {
             return new TestSuite(SignatureTest.class);
         }
 
-        public void testThreeMessages() {
+    public void testThreeMessages() {
             byte[] seed = {0, 0, 0, 0};
             SecureRandom rng = new SecureRandom(seed);
 

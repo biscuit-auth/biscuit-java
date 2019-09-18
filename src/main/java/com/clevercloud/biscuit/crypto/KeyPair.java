@@ -6,6 +6,9 @@ import cafe.cryptography.curve25519.Scalar;
 
 import java.security.SecureRandom;
 
+/**
+ * Private and public key
+ */
 public final class KeyPair {
     public final Scalar private_key;
     public final RistrettoElement public_key;

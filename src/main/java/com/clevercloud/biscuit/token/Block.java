@@ -17,12 +17,20 @@ import java.util.Set;
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
+/**
+ * Represents a token's block with its caveats
+ */
 public class Block {
     final long index;
     final SymbolTable symbols;
     final List<Fact> facts;
     final List<Rule> caveats;
 
+    /**
+     * creates a new block
+     * @param index
+     * @param base_symbols
+     */
     public Block(long index, SymbolTable base_symbols) {
         this.index = index;
         this.symbols = base_symbols;
@@ -30,6 +38,13 @@ public class Block {
         this.caveats = new ArrayList<>();
     }
 
+    /**
+     * creates a new block
+     * @param index
+     * @param base_symbols
+     * @param facts
+     * @param caveats
+     */
     public Block(long index, SymbolTable base_symbols, List<Fact> facts, List<Rule> caveats) {
         this.index = index;
         this.symbols = base_symbols;
@@ -37,15 +52,7 @@ public class Block {
         this.caveats = caveats;
     }
 
-    public ID symbol_add(final String symbol) {
-        return this.symbols.add(symbol);
-    }
-
-    public long symbol_insert(final String symbol) {
-        return this.symbols.insert(symbol);
-    }
-
-    public Either<LogicError, Void> check(long i, World w, SymbolTable symbols, List<Rule> verifier_caveats) {
+    Either<LogicError, Void> check(long i, World w, SymbolTable symbols, List<Rule> verifier_caveats) {
         World world = new World(w);
         long authority_index = symbols.get("authority").get().longValue();
         long ambient_index = symbols.get("ambient").get().longValue();
@@ -86,6 +93,11 @@ public class Block {
         }
     }
 
+    /**
+     * pretty printing for a block
+     * @param symbol_table
+     * @return
+     */
     public String print(SymbolTable symbol_table) {
         StringBuilder s = new StringBuilder();
 
@@ -108,6 +120,10 @@ public class Block {
         return s.toString();
     }
 
+    /**
+     * Serializes a Block to its Protobuf representation
+     * @return
+     */
     public Schema.Block serialize() {
         Schema.Block.Builder b = Schema.Block.newBuilder()
                 .setIndex((int) this.index);
@@ -127,6 +143,11 @@ public class Block {
         return b.build();
     }
 
+    /**
+     * Deserializes a block from its Protobuf representation
+     * @param b
+     * @return
+     */
     static public Either<Error.FormatError, Block> deserialize(Schema.Block b) {
         SymbolTable symbols = new SymbolTable();
         for (String s : b.getSymbolsList()) {
@@ -158,6 +179,11 @@ public class Block {
         return Right(new Block(b.getIndex(), symbols, facts, caveats));
     }
 
+    /**
+     * Deserializes a Block from a byte array
+     * @param slice
+     * @return
+     */
     static public Either<Error.FormatError, Block> from_bytes(byte[] slice) {
         try {
             Schema.Block data = Schema.Block.parseFrom(slice);

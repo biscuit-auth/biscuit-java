@@ -11,9 +11,9 @@ import io.vavr.control.Either;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 
-public class Token {
-    public final ArrayList<byte[]> blocks; //= new ArrayList<>();
-    public final ArrayList<RistrettoElement> keys; // keys = new ArrayList<>();
+class Token {
+    public final ArrayList<byte[]> blocks;
+    public final ArrayList<RistrettoElement> keys;
     public final TokenSignature signature;
 
     public Token(final SecureRandom rng, KeyPair keypair, byte[] message) {

@@ -18,22 +18,48 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
+/**
+ * Biscuit auth token
+ */
 public class Biscuit {
-    public final Block authority;
-    public final List<Block> blocks;
-    public final SymbolTable symbols;
-    public final Option<SerializedBiscuit> container;
+    final Block authority;
+    final List<Block> blocks;
+    final SymbolTable symbols;
+    final Option<SerializedBiscuit> container;
 
 
+    /**
+     * Creates a token builder
+     *
+     * this function uses the default symbol table
+     *
+     * @param rng random number generator
+     * @param root root private key
+     * @return
+     */
     public static com.clevercloud.biscuit.token.builder.Biscuit builder(final SecureRandom rng, final KeyPair root) {
         return new com.clevercloud.biscuit.token.builder.Biscuit(rng, root, default_symbol_table());
     }
 
+    /**
+     * Creates a token builder
+     *
+     * @param rng random number generator
+     * @param root root private key
+     * @param symbols symbol table
+     * @return
+     */
     public static com.clevercloud.biscuit.token.builder.Biscuit builder(final SecureRandom rng, final KeyPair root, SymbolTable symbols) {
         return new com.clevercloud.biscuit.token.builder.Biscuit(rng, root, symbols);
     }
 
+    /**
+     * Creates a token
+     * @param rng random number generator
+     * @param root root private key
+     * @param authority authority block
+     * @return
+     */
     static public Either<Error, Biscuit> make(final SecureRandom rng, final KeyPair root, final Block authority) {
         SymbolTable symbols = default_symbol_table();
 
@@ -65,6 +91,16 @@ public class Biscuit {
         this.container = container;
     }
 
+    /**
+     * Deserializes a Biscuit token from a byte array
+     *
+     * This checks the signature, but does not verify that the first key is the root key,
+     * to allow appending blocks without knowing about the root key.
+     *
+     * The root key check is performed in the verify method
+     * @param data
+     * @return
+     */
     static public Either<Error, Biscuit> from_bytes(byte[] data)  {
         Either<Error, SerializedBiscuit> res = SerializedBiscuit.from_bytes(data);
         if(res.isLeft()) {
@@ -104,10 +140,21 @@ public class Biscuit {
         return Right(new Biscuit(authority, blocks, symbols, Option.some(ser)));
     }
 
+    /**
+     * Creates a verifier for this token
+     *
+     * This function checks that the root key is the one we expect
+     * @param root root public key
+     * @return
+     */
     public Either<Error, Verifier> verify(RistrettoElement root) {
         return Verifier.make(this, root);
     }
 
+    /**
+     * Serializes a token to a byte array
+     * @return
+     */
     public Either<Error.FormatError, byte[]> serialize() {
         if(this.container.isEmpty()) {
             return Left(new Error().new FormatError().new SerializationError("no internal container"));
@@ -121,6 +168,11 @@ public class Biscuit {
     }*/
     //public Either<Error.FormatError, byte[]> seal(byte[] secret) {}
 
+    /**
+     * Verifies that a token is valid for a root public key
+     * @param public_key
+     * @return
+     */
     public Either<Error, Void> check_root_key(RistrettoElement public_key) {
         if (this.container.isEmpty()) {
             return Left(new Error().new Sealed());
@@ -167,7 +219,9 @@ public class Biscuit {
             world.add_rule(rule);
         }
 
+        System.out.println("world after adding ambient rules:\n"+symbols.print_world(world));
         world.run();
+        System.out.println("world after running rules:\n"+symbols.print_world(world));
 
         // we only keep the verifier rules
         world.clearRules();
@@ -204,10 +258,21 @@ public class Biscuit {
         }
     }
 
+    /**
+     * Creates a Block builder
+     * @return
+     */
     public com.clevercloud.biscuit.token.builder.Block create_block() {
         return new com.clevercloud.biscuit.token.builder.Block(1+this.blocks.size(), new SymbolTable(this.symbols));
     }
 
+    /**
+     * Generates a new token from an existing one and a new block
+     * @param rng random number generator
+     * @param keypair ephemeral key pair
+     * @param block new block (should be generated from a Block builder)
+     * @return
+     */
     public Either<Error, Biscuit> append(final SecureRandom rng, final KeyPair keypair, Block block) {
         if(this.container.isEmpty()) {
             return Left(new Error().new Sealed());
@@ -247,6 +312,9 @@ public class Biscuit {
     public void adjust_block_symbols(Block block){}
     */
 
+    /**
+     * Prints a token's content
+     */
     public String print() {
         StringBuilder s = new StringBuilder();
         s.append("Biscuit {\n\tsymbols: ");
@@ -264,6 +332,9 @@ public class Biscuit {
         return s.toString();
     }
 
+    /**
+     * Default symbols list
+     */
     static public SymbolTable default_symbol_table() {
         SymbolTable syms = new SymbolTable();
         syms.insert("authority");

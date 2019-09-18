@@ -5,7 +5,6 @@ import cafe.cryptography.curve25519.CompressedRistretto;
 import cafe.cryptography.curve25519.InvalidEncodingException;
 import cafe.cryptography.curve25519.RistrettoElement;
 import com.clevercloud.biscuit.crypto.KeyPair;
-import com.clevercloud.biscuit.crypto.Token;
 import com.clevercloud.biscuit.crypto.TokenSignature;
 import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.token.Block;
@@ -22,12 +21,20 @@ import java.util.List;
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
+/**
+ * Intermediate representation of a token before full serialization
+ */
 public class SerializedBiscuit {
     public byte[] authority;
     public List<byte[]> blocks;
     public List<RistrettoElement> keys;
     public TokenSignature signature;
 
+    /**
+     * Deserializes a SerializedBiscuit from a byte array
+     * @param slice
+     * @return
+     */
     static public Either<Error, SerializedBiscuit> from_bytes(byte[] slice) {
         try {
             Schema.Biscuit data = Schema.Biscuit.parseFrom(slice);
@@ -69,6 +76,10 @@ public class SerializedBiscuit {
         }
     }
 
+    /**
+     * Serializes a SerializedBiscuit to a byte array
+     * @return
+     */
     public Either<Error.FormatError, byte[]> serialize() {
         Schema.Biscuit.Builder b = Schema.Biscuit.newBuilder()
                 .setSignature(this.signature.serialize());

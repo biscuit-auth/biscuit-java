@@ -16,6 +16,9 @@ import static com.clevercloud.biscuit.token.builder.Utils.*;
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
+/**
+ * Token verification class
+ */
 public class Verifier {
     Biscuit token;
     List<Fact> facts;
@@ -29,6 +32,14 @@ public class Verifier {
         this.caveats = new ArrayList<>();
     }
 
+    /**
+     * Creates a verifier for a token
+     *
+     * also checks that the token is valid for this root public key
+     * @param token
+     * @param root
+     * @return
+     */
     static public Either<Error, Verifier> make(Biscuit token, RistrettoElement root) {
         Either<Error, Void> res  = token.check_root_key(root);
         if(res.isLeft()) {
