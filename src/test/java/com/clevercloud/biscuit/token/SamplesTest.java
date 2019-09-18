@@ -3,6 +3,7 @@ package com.clevercloud.biscuit.token;
 import cafe.cryptography.curve25519.CompressedRistretto;
 import cafe.cryptography.curve25519.InvalidEncodingException;
 import cafe.cryptography.curve25519.RistrettoElement;
+import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.error.FailedCaveat;
 import com.clevercloud.biscuit.error.LogicError;
@@ -32,7 +33,7 @@ public class SamplesTest extends TestCase {
 
     public void test1_Basic() throws IOException, InvalidEncodingException {
         byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
-        RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
+        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("test1_basic.bc");
@@ -65,7 +66,7 @@ public class SamplesTest extends TestCase {
 
     public void test2_DifferentRootKey() throws IOException, InvalidEncodingException {
         byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
-        RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
+        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("test2_different_root_key.bc");
@@ -81,7 +82,7 @@ public class SamplesTest extends TestCase {
 
     public void test3_InvalidSignatureFormat() throws IOException, InvalidEncodingException {
         byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
-        RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
+        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("test3_invalid_signature_format.bc");
@@ -96,7 +97,7 @@ public class SamplesTest extends TestCase {
 
     public void test4_random_block() throws IOException, InvalidEncodingException {
         byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
-        RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
+        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("test4_random_block.bc");
@@ -111,7 +112,7 @@ public class SamplesTest extends TestCase {
 
     public void test5_InvalidSignature() throws IOException, InvalidEncodingException {
         byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
-        RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
+        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("test5_invalid_signature.bc");
@@ -126,7 +127,7 @@ public class SamplesTest extends TestCase {
 
     public void test6_reordered_blocks() throws IOException, InvalidEncodingException {
         byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
-        RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
+        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("test6_reordered_blocks.bc");
@@ -151,7 +152,7 @@ public class SamplesTest extends TestCase {
 
     public void test7_missing_authority_tag() throws IOException, InvalidEncodingException {
         byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
-        RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
+        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("test7_missing_authority_tag.bc");
@@ -175,7 +176,7 @@ public class SamplesTest extends TestCase {
 
     public void test8_invalid_block_fact_authority() throws IOException, InvalidEncodingException {
         byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
-        RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
+        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("test8_invalid_block_fact_authority.bc");
@@ -199,7 +200,7 @@ public class SamplesTest extends TestCase {
 
     public void test9_invalid_block_fact_ambient() throws IOException, InvalidEncodingException {
         byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
-        RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
+        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("test9_invalid_block_fact_ambient.bc");
@@ -223,7 +224,7 @@ public class SamplesTest extends TestCase {
 
     public void test10_separate_block_validation() throws IOException, InvalidEncodingException {
         byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
-        RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
+        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("test10_separate_block_validation.bc");
@@ -249,7 +250,7 @@ public class SamplesTest extends TestCase {
 
     public void test11_ExpiredToken() throws IOException, InvalidEncodingException {
         byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
-        RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
+        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("test11_expired_token.bc");
@@ -274,7 +275,7 @@ public class SamplesTest extends TestCase {
 
     public void test12_AuthorityRules() throws IOException, InvalidEncodingException {
         byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
-        RistrettoElement root = (new CompressedRistretto(rootData)).decompress();
+        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("test12_authority_rules.bc");

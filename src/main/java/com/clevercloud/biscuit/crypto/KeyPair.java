@@ -21,5 +21,7 @@ public final class KeyPair {
         this.public_key = Constants.RISTRETTO_GENERATOR.multiply(this.private_key);
     }
 
-
+    public PublicKey public_key() {
+        return new PublicKey(this.public_key);
+    }
 }

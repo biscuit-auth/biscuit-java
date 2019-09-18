@@ -5,6 +5,7 @@ import cafe.cryptography.curve25519.CompressedRistretto;
 import cafe.cryptography.curve25519.InvalidEncodingException;
 import cafe.cryptography.curve25519.RistrettoElement;
 import com.clevercloud.biscuit.crypto.KeyPair;
+import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.crypto.TokenSignature;
 import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.token.Block;
@@ -167,12 +168,12 @@ public class SerializedBiscuit {
         return this.signature.verify(this.keys, blocks);
     }
 
-    public Either<Error, Void> check_root_key(RistrettoElement public_key) {
+    public Either<Error, Void> check_root_key(PublicKey public_key) {
         if(this.keys.isEmpty()) {
             return Left(new Error().new FormatError().new EmptyKeys());
         }
 
-        if(!(this.keys.get(0).ctEquals(public_key) == 1)) {
+        if(!(this.keys.get(0).ctEquals(public_key.key) == 1)) {
             return Left(new Error().new FormatError().new UnknownPublicKey());
         }
 
@@ -180,7 +181,7 @@ public class SerializedBiscuit {
     }
 
 
-    public SerializedBiscuit(byte[] authority, List<byte[]> blocks, List<RistrettoElement> keys, TokenSignature signature) {
+    SerializedBiscuit(byte[] authority, List<byte[]> blocks, List<RistrettoElement> keys, TokenSignature signature) {
         this.authority = authority;
         this.blocks = blocks;
         this.keys = keys;

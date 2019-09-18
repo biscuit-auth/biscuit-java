@@ -1,6 +1,7 @@
 package com.clevercloud.biscuit.token;
 
 import cafe.cryptography.curve25519.RistrettoElement;
+import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.datalog.constraints.Constraint;
 import com.clevercloud.biscuit.datalog.constraints.ConstraintKind;
@@ -40,7 +41,7 @@ public class Verifier {
      * @param root
      * @return
      */
-    static public Either<Error, Verifier> make(Biscuit token, RistrettoElement root) {
+    static public Either<Error, Verifier> make(Biscuit token, PublicKey root) {
         Either<Error, Void> res  = token.check_root_key(root);
         if(res.isLeft()) {
             Error e = res.getLeft();

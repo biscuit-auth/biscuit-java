@@ -1,7 +1,7 @@
 package com.clevercloud.biscuit.token;
 
-import cafe.cryptography.curve25519.RistrettoElement;
 import com.clevercloud.biscuit.crypto.KeyPair;
+import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.datalog.*;
 import com.clevercloud.biscuit.error.FailedCaveat;
 import com.clevercloud.biscuit.error.LogicError;
@@ -147,7 +147,7 @@ public class Biscuit {
      * @param root root public key
      * @return
      */
-    public Either<Error, Verifier> verify(RistrettoElement root) {
+    public Either<Error, Verifier> verify(PublicKey root) {
         return Verifier.make(this, root);
     }
 
@@ -173,7 +173,7 @@ public class Biscuit {
      * @param public_key
      * @return
      */
-    public Either<Error, Void> check_root_key(RistrettoElement public_key) {
+    public Either<Error, Void> check_root_key(PublicKey public_key) {
         if (this.container.isEmpty()) {
             return Left(new Error().new Sealed());
         } else {
