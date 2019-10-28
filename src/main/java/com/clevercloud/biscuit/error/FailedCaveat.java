@@ -35,10 +35,12 @@ public class FailedCaveat {
     }
 
     public class FailedVerifier extends FailedCaveat {
+        final public long block_id;
         final public long caveat_id;
         final public String rule;
 
-        public FailedVerifier(long caveat_id, String rule) {
+        public FailedVerifier(long block_id, long caveat_id, String rule) {
+            this.block_id = block_id;
             this.caveat_id = caveat_id;
             this.rule = rule;
         }
@@ -48,17 +50,17 @@ public class FailedCaveat {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             FailedVerifier b = (FailedVerifier) o;
-            return caveat_id == b.caveat_id && rule.equals(b.rule);
+            return block_id == b.block_id && caveat_id == b.caveat_id && rule.equals(b.rule);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(caveat_id, rule);
+            return Objects.hash(block_id, caveat_id, rule);
         }
 
         @Override
         public String toString() {
-            return "FailedCaveat.FailedVerifier { caveat_id: "+caveat_id+
+            return "FailedCaveat.FailedVerifier { block_id: "+block_id+", caveat_id: "+caveat_id+
                     ", rule: "+rule+" }";
         }
     }

@@ -294,4 +294,39 @@ public class SamplesTest extends TestCase {
         System.out.println(res);
         Assert.assertTrue(res.isRight());
     }
+
+    public void test13_VerifierAuthorityCaveats() throws IOException, InvalidEncodingException {
+        byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
+        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("test13_verifier_authority_caveats.bc");
+
+        byte[] data = new byte[inputStream.available()];
+        inputStream.read(data);
+
+        Biscuit token = Biscuit.from_bytes(data).get();
+        System.out.println(token.print());
+
+        Verifier v1 = token.verify(root).get();
+        v1.add_resource("file2");
+        v1.add_operation("read");
+        v1.add_authority_caveat(rule(
+                "caveat1",
+                Arrays.asList(var(0)),
+                Arrays.asList(
+                        pred("resource", Arrays.asList(s("ambient"), var(0))),
+                        pred("operation", Arrays.asList(s("ambient"), var(1))),
+                        pred("right", Arrays.asList(s("authority"), var(0), var(1)))
+                )
+        ));
+        Either<Error, Void> res = v1.verify();
+        System.out.println(res);
+        Error e = res.getLeft();
+        Assert.assertEquals(
+                new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
+                        new FailedCaveat().new FailedVerifier(0, 0, "caveat1(0?) <- resource(#ambient, 0?) && operation(#ambient, 1?) && right(#authority, 0?, 1?) | ")
+                ))),
+                e);
+    }
 }

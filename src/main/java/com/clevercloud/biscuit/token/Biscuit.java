@@ -17,6 +17,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Biscuit auth token
@@ -181,7 +182,8 @@ public class Biscuit {
         }
     }
 
-    Either<Error, Void> check(SymbolTable symbols, List<Fact> ambient_facts, List<Rule> ambient_rules, List<Rule> ambient_caveats){
+    Either<Error, Void> check(SymbolTable symbols, List<Fact> ambient_facts, List<Rule> ambient_rules,
+                              List<Rule> authority_caveats, List<Rule> block_caveats){
         World world = new World();
         long authority_index = symbols.get("authority").get();
         long ambient_index = symbols.get("ambient").get();
@@ -219,9 +221,9 @@ public class Biscuit {
             world.add_rule(rule);
         }
 
-        System.out.println("world after adding ambient rules:\n"+symbols.print_world(world));
+        //System.out.println("world after adding ambient rules:\n"+symbols.print_world(world));
         world.run();
-        System.out.println("world after running rules:\n"+symbols.print_world(world));
+        //System.out.println("world after running rules:\n"+symbols.print_world(world));
 
         // we only keep the verifier rules
         world.clearRules();
@@ -230,13 +232,21 @@ public class Biscuit {
         }
 
         ArrayList<FailedCaveat> errors = new ArrayList<>();
+        for (int j = 0; j < authority_caveats.size(); j++) {
+            Set<Fact> res = world.query_rule((authority_caveats.get(j)));
+            if (res.isEmpty()) {
+                errors.add(new FailedCaveat().
+                        new FailedVerifier(0, j, symbols.print_rule(authority_caveats.get(j))));
+            }
+        }
+
         for(int i = 0; i < this.blocks.size(); i++) {
             if(this.blocks.get(i).index != i+1) {
                 return Left(new Error().new InvalidBlockIndex(1 + this.blocks.size(), this.blocks.get(i).index));
             }
 
             World w = new World(world);
-            Either<LogicError, Void> res = this.blocks.get(i).check(i, w, symbols, ambient_caveats);
+            Either<LogicError, Void> res = this.blocks.get(i).check(i, w, symbols, block_caveats);
             if(res.isLeft()) {
 
                 LogicError e = res.getLeft();

@@ -135,7 +135,8 @@ public class BiscuitTest extends TestCase {
                 fact("operation", Arrays.asList(s("ambient"), s("read"))).convert(check_symbols)
         );
 
-        Either<Error, Void> res = final_token.check(check_symbols, ambient_facts, new ArrayList<>(), new ArrayList<>());
+        Either<Error, Void> res = final_token.check(check_symbols, ambient_facts, new ArrayList<>(), new ArrayList<>(),
+                new ArrayList<>());
 
         Assert.assertTrue(res.isRight());
 
@@ -147,7 +148,8 @@ public class BiscuitTest extends TestCase {
                 fact("operation", Arrays.asList(s("ambient"), s("write"))).convert(check_symbols2)
         );
 
-        Either<Error, Void> res2 = final_token.check(check_symbols2, ambient_facts2, new ArrayList<>(), new ArrayList<>());
+        Either<Error, Void> res2 = final_token.check(check_symbols2, ambient_facts2, new ArrayList<>(),
+                new ArrayList<>(), new ArrayList<>());
         Assert.assertTrue(res2.isLeft());
         System.out.println(res2.getLeft());
 

@@ -24,13 +24,15 @@ public class Verifier {
     Biscuit token;
     List<Fact> facts;
     List<Rule> rules;
-    List<Rule> caveats;
+    List<Rule> authority_caveats;
+    List<Rule> block_caveats;
 
     private Verifier(Biscuit token) {
         this.token = token;
         this.facts = new ArrayList<>();
         this.rules = new ArrayList<>();
-        this.caveats = new ArrayList<>();
+        this.authority_caveats = new ArrayList<>();
+        this.block_caveats = new ArrayList<>();
     }
 
     /**
@@ -59,8 +61,12 @@ public class Verifier {
         this.rules.add(rule);
     }
 
-    public void add_caveat(Rule caveat) {
-        this.caveats.add(caveat);
+    public void add_authority_caveat(Rule caveat) {
+        this.authority_caveats.add(caveat);
+    }
+
+    public void add_block_caveat(Rule caveat) {
+        this.block_caveats.add(caveat);
     }
 
     public void add_resource(String resource) {
@@ -85,7 +91,7 @@ public class Verifier {
     }
 
     public void revocation_check(List<Long> ids) {
-        this.caveats.add(constrained_rule(
+        this.block_caveats.add(constrained_rule(
                 "revocation_check",
                 Arrays.asList((var(0))),
                 Arrays.asList(pred("revocation_id", Arrays.asList(var(0)))),
@@ -106,11 +112,16 @@ public class Verifier {
             ambient_rules.add(rule.convert(symbols));
         }
 
-        ArrayList<com.clevercloud.biscuit.datalog.Rule> ambient_caveats = new ArrayList<>();
-        for(Rule caveat: this.caveats) {
-            ambient_caveats.add(caveat.convert(symbols));
+        ArrayList<com.clevercloud.biscuit.datalog.Rule> authority_caveats = new ArrayList<>();
+        for(Rule caveat: this.authority_caveats) {
+            authority_caveats.add(caveat.convert(symbols));
+        }
+
+        ArrayList<com.clevercloud.biscuit.datalog.Rule> block_caveats = new ArrayList<>();
+        for(Rule caveat: this.block_caveats) {
+            block_caveats.add(caveat.convert(symbols));
         }
         
-        return this.token.check(symbols, ambient_facts, ambient_rules, ambient_caveats);
+        return this.token.check(symbols, ambient_facts, ambient_rules, authority_caveats, block_caveats);
     }
 }
