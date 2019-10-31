@@ -21,6 +21,7 @@ public class Block {
     int symbol_start;
     SymbolTable symbols;
     List<Fact> facts;
+    List<Rule> rules;
     List<Rule> caveats;
 
     public Block(long index, SymbolTable base_symbols) {
@@ -28,11 +29,16 @@ public class Block {
         this.symbol_start = base_symbols.symbols.size();
         this.symbols = new SymbolTable(base_symbols);
         this.facts = new ArrayList<>();
+        this.rules = new ArrayList<>();
         this.caveats = new ArrayList<>();
     }
 
     public void add_fact(com.clevercloud.biscuit.token.builder.Fact f) {
         this.facts.add(f.convert(this.symbols));
+    }
+
+    public void add_rule(com.clevercloud.biscuit.token.builder.Rule rule) {
+        this.rules.add(rule.convert(this.symbols));
     }
 
     public void add_caveat(com.clevercloud.biscuit.token.builder.Rule caveat) {
@@ -46,7 +52,7 @@ public class Block {
             symbols.add(this.symbols.symbols.get(i));
         }
 
-        return new com.clevercloud.biscuit.token.Block(this.index, symbols, this.facts, this.caveats);
+        return new com.clevercloud.biscuit.token.Block(this.index, symbols, this.facts, this.rules, this.caveats);
     }
 
     public void check_right(String right) {

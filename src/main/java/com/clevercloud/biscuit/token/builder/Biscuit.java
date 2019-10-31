@@ -22,6 +22,7 @@ public class Biscuit {
     SymbolTable symbols;
     List<Fact> facts;
     List<Rule> rules;
+    List<Rule> caveats;
 
     public Biscuit(final SecureRandom rng, final KeyPair root, SymbolTable base_symbols) {
         this.rng = rng;
@@ -30,6 +31,7 @@ public class Biscuit {
         this.symbols = new SymbolTable(base_symbols);
         this.facts = new ArrayList<>();
         this.rules = new ArrayList<>();
+        this.caveats = new ArrayList<>();
     }
 
     public void add_authority_fact(com.clevercloud.biscuit.token.builder.Fact f) {
@@ -55,6 +57,10 @@ public class Biscuit {
         this.rules.add(rule.convert(this.symbols));
     }
 
+    public void add_authority_caveat(com.clevercloud.biscuit.token.builder.Rule rule) {
+        this.caveats.add(rule.convert(this.symbols));
+    }
+
     public Either<Error, com.clevercloud.biscuit.token.Biscuit> build() {
         SymbolTable symbols = new SymbolTable();
 
@@ -62,7 +68,7 @@ public class Biscuit {
             symbols.add(this.symbols.symbols.get(i));
         }
 
-        Block authority_block = new com.clevercloud.biscuit.token.Block(0, symbols, this.facts, this.rules);
+        Block authority_block = new com.clevercloud.biscuit.token.Block(0, symbols, this.facts, this.rules, this.caveats);
         return com.clevercloud.biscuit.token.Biscuit.make(this.rng, this.root, authority_block);
     }
 

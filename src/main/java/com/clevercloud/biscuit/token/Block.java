@@ -24,6 +24,7 @@ public class Block {
     final long index;
     final SymbolTable symbols;
     final List<Fact> facts;
+    final List<Rule> rules;
     final List<Rule> caveats;
 
     /**
@@ -35,6 +36,7 @@ public class Block {
         this.index = index;
         this.symbols = base_symbols;
         this.facts = new ArrayList<>();
+        this.rules = new ArrayList<>();
         this.caveats = new ArrayList<>();
     }
 
@@ -45,10 +47,11 @@ public class Block {
      * @param facts
      * @param caveats
      */
-    public Block(long index, SymbolTable base_symbols, List<Fact> facts, List<Rule> caveats) {
+    public Block(long index, SymbolTable base_symbols, List<Fact> facts, List<Rule> rules, List<Rule> caveats) {
         this.index = index;
         this.symbols = base_symbols;
         this.facts = facts;
+        this.rules = rules;
         this.caveats = caveats;
     }
 
@@ -64,6 +67,10 @@ public class Block {
             }
 
             world.add_fact(fact);
+        }
+
+        for(Rule rule: this.rules) {
+            world.add_rule(rule);
         }
 
         world.run();
@@ -111,6 +118,11 @@ public class Block {
             s.append(symbol_table.print_fact(f));
         }
         s.append("\n\t\t]\n\t\trules: [");
+        for(Rule r: this.rules) {
+            s.append("\n\t\t\t");
+            s.append(symbol_table.print_rule(r));
+        }
+        s.append("\n\t\t]\n\t\tcaveats: [");
         for(Rule r: this.caveats) {
             s.append("\n\t\t\t");
             s.append(symbol_table.print_rule(r));
@@ -134,6 +146,10 @@ public class Block {
 
         for (int i = 0; i < this.facts.size(); i++) {
             b.addFacts(this.facts.get(i).serialize());
+        }
+
+        for (int i = 0; i < this.rules.size(); i++) {
+            b.addRules(this.rules.get(i).serialize());
         }
 
         for (int i = 0; i < this.caveats.size(); i++) {
@@ -165,6 +181,17 @@ public class Block {
             }
         }
 
+        ArrayList<Rule> rules = new ArrayList<>();
+        for (Schema.Rule rule : b.getRulesList()) {
+            Either<Error.FormatError, Rule> res = Rule.deserialize(rule);
+            if (res.isLeft()) {
+                Error.FormatError e = res.getLeft();
+                return Left(e);
+            } else {
+                rules.add(res.get());
+            }
+        }
+
         ArrayList<Rule> caveats = new ArrayList<>();
         for (Schema.Rule caveat : b.getCaveatsList()) {
             Either<Error.FormatError, Rule> res = Rule.deserialize(caveat);
@@ -176,7 +203,7 @@ public class Block {
             }
         }
 
-        return Right(new Block(b.getIndex(), symbols, facts, caveats));
+        return Right(new Block(b.getIndex(), symbols, facts, rules, caveats));
     }
 
     /**

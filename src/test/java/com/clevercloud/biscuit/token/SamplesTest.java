@@ -329,4 +329,68 @@ public class SamplesTest extends TestCase {
                 ))),
                 e);
     }
+
+    public void test14_VerifierAuthorityCaveats() throws IOException, InvalidEncodingException {
+        byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
+        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("test14_authority_caveats.bc");
+
+        byte[] data = new byte[inputStream.available()];
+        inputStream.read(data);
+
+        Biscuit token = Biscuit.from_bytes(data).get();
+        System.out.println(token.print());
+
+        Verifier v1 = token.verify(root).get();
+        v1.add_resource("file1");
+        v1.add_operation("read");
+        Assert.assertTrue(v1.verify().isRight());
+
+        Verifier v2 = token.verify(root).get();
+        v2.add_resource("file2");
+        v2.add_operation("read");
+
+        Either<Error, Void> res = v2.verify();
+        System.out.println(res);
+        Error e = res.getLeft();
+        Assert.assertEquals(
+                new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
+                        new FailedCaveat().new FailedBlock(0, 0, "caveat1(\"file1\") <- resource(#ambient, \"file1\") | ")
+                ))),
+                e);
+    }
+
+    public void test15_BlockRules() throws IOException, InvalidEncodingException {
+        byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
+        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("test15_block_rules.bc");
+
+        byte[] data = new byte[inputStream.available()];
+        inputStream.read(data);
+
+        Biscuit token = Biscuit.from_bytes(data).get();
+        System.out.println(token.print());
+
+        Verifier v1 = token.verify(root).get();
+        v1.add_resource("file1");
+        v1.set_time();
+        Assert.assertTrue(v1.verify().isRight());
+
+        Verifier v2 = token.verify(root).get();
+        v2.add_resource("file2");
+        v2.set_time();
+
+        Either<Error, Void> res = v2.verify();
+        System.out.println(res);
+        Error e = res.getLeft();
+        Assert.assertEquals(
+                new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
+                        new FailedCaveat().new FailedBlock(0, 0, "caveat1(0?) <- valid_date(0?) && resource(#ambient, 0?) | ")
+                ))),
+                e);
+    }
 }

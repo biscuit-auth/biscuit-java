@@ -183,7 +183,7 @@ public class Biscuit {
     }
 
     Either<Error, Void> check(SymbolTable symbols, List<Fact> ambient_facts, List<Rule> ambient_rules,
-                              List<Rule> authority_caveats, List<Rule> block_caveats){
+                              List<Rule> verifier_authority_caveats, List<Rule> verifier_block_caveats){
         World world = new World();
         long authority_index = symbols.get("authority").get();
         long ambient_index = symbols.get("ambient").get();
@@ -196,7 +196,7 @@ public class Biscuit {
             world.add_fact(fact);
         }
 
-        for(Rule rule: this.authority.caveats) {
+        for(Rule rule: this.authority.rules) {
             world.add_rule(rule);
         }
 
@@ -232,11 +232,19 @@ public class Biscuit {
         }
 
         ArrayList<FailedCaveat> errors = new ArrayList<>();
-        for (int j = 0; j < authority_caveats.size(); j++) {
-            Set<Fact> res = world.query_rule((authority_caveats.get(j)));
+        for (int j = 0; j < this.authority.caveats.size(); j++) {
+            Set<Fact> res = world.query_rule(this.authority.caveats.get(j));
             if (res.isEmpty()) {
                 errors.add(new FailedCaveat().
-                        new FailedVerifier(0, j, symbols.print_rule(authority_caveats.get(j))));
+                        new FailedBlock(0, j, symbols.print_rule(this.authority.caveats.get(j))));
+            }
+        }
+
+        for (int j = 0; j < verifier_authority_caveats.size(); j++) {
+            Set<Fact> res = world.query_rule(verifier_authority_caveats.get(j));
+            if (res.isEmpty()) {
+                errors.add(new FailedCaveat().
+                        new FailedVerifier(0, j, symbols.print_rule(verifier_authority_caveats.get(j))));
             }
         }
 
@@ -246,7 +254,7 @@ public class Biscuit {
             }
 
             World w = new World(world);
-            Either<LogicError, Void> res = this.blocks.get(i).check(i, w, symbols, block_caveats);
+            Either<LogicError, Void> res = this.blocks.get(i).check(i, w, symbols, verifier_block_caveats);
             if(res.isLeft()) {
 
                 LogicError e = res.getLeft();
