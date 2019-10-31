@@ -219,6 +219,14 @@ public class Error {
             return true;
         }
     }
+    public class MissingSymbols extends Error {
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            return true;
+        }
+    }
     public class Sealed extends Error {
         @Override
         public boolean equals(Object o) {

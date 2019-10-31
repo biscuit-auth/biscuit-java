@@ -100,6 +100,9 @@ public class Verifier {
     }
 
     public Either<Error, Void> verify() {
+        if(this.token.symbols.get("authority").isEmpty() || this.token.symbols.get("ambient").isEmpty()) {
+            return Left(new Error().new MissingSymbols());
+        }
         SymbolTable symbols = new SymbolTable(this.token.symbols);
 
         ArrayList<com.clevercloud.biscuit.datalog.Fact> ambient_facts = new ArrayList<>();
