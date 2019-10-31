@@ -61,9 +61,7 @@ public class Biscuit {
      * @param authority authority block
      * @return
      */
-    static public Either<Error, Biscuit> make(final SecureRandom rng, final KeyPair root, final Block authority) {
-        SymbolTable symbols = default_symbol_table();
-
+    static public Either<Error, Biscuit> make(final SecureRandom rng, final KeyPair root, final SymbolTable symbols, final Block authority) {
         if(!Collections.disjoint(symbols.symbols, authority.symbols.symbols)) {
             return Left(new Error().new SymbolTableOverlap());
         }
@@ -99,10 +97,26 @@ public class Biscuit {
      * to allow appending blocks without knowing about the root key.
      *
      * The root key check is performed in the verify method
+     *
+     * This method uses the default symbol table
      * @param data
      * @return
      */
     static public Either<Error, Biscuit> from_bytes(byte[] data)  {
+        return Biscuit.from_bytes_with_symbols(data, default_symbol_table());
+    }
+
+    /**
+     * Deserializes a Biscuit token from a byte array
+     *
+     * This checks the signature, but does not verify that the first key is the root key,
+     * to allow appending blocks without knowing about the root key.
+     *
+     * The root key check is performed in the verify method
+     * @param data
+     * @return
+     */
+    static public Either<Error, Biscuit> from_bytes_with_symbols(byte[] data, SymbolTable symbols)  {
         Either<Error, SerializedBiscuit> res = SerializedBiscuit.from_bytes(data);
         if(res.isLeft()) {
             Error e = res.getLeft();
@@ -127,7 +141,6 @@ public class Biscuit {
             blocks.add(blockRes.get());
         }
 
-        SymbolTable symbols = default_symbol_table();
         for(String s: authority.symbols.symbols) {
             symbols.add(s);
         }

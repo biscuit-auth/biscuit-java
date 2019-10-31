@@ -45,7 +45,7 @@ public class BiscuitTest extends TestCase {
         authority_builder.add_fact(fact("right", Arrays.asList(s("authority"), s("file2"), s("read"))));
         authority_builder.add_fact(fact("right", Arrays.asList(s("authority"), s("file1"), s("write"))));
 
-        Biscuit b = Biscuit.make(rng, root, authority_builder.build()).get();
+        Biscuit b = Biscuit.make(rng, root, Biscuit.default_symbol_table(), authority_builder.build()).get();
 
         System.out.println(b.print());
 

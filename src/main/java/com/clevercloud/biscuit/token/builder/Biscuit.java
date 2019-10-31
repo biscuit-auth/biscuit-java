@@ -62,14 +62,19 @@ public class Biscuit {
     }
 
     public Either<Error, com.clevercloud.biscuit.token.Biscuit> build() {
+        SymbolTable base_symbols = new SymbolTable();
         SymbolTable symbols = new SymbolTable();
+
+        for(int i = 0; i < this.symbol_start; i++) {
+            base_symbols.add(this.symbols.symbols.get(i));
+        }
 
         for(int i = this.symbol_start; i < this.symbols.symbols.size(); i++) {
             symbols.add(this.symbols.symbols.get(i));
         }
 
         Block authority_block = new com.clevercloud.biscuit.token.Block(0, symbols, this.facts, this.rules, this.caveats);
-        return com.clevercloud.biscuit.token.Biscuit.make(this.rng, this.root, authority_block);
+        return com.clevercloud.biscuit.token.Biscuit.make(this.rng, this.root, base_symbols, authority_block);
     }
 
     public void add_right(String resource, String right) {
