@@ -177,6 +177,7 @@ public class BiscuitTest extends TestCase {
         builder.add_right("/folder1/file2", "write");
         builder.add_right("/folder2/file3", "read");
 
+        System.out.println(builder.build());
         Biscuit b = builder.build().get();
 
         System.out.println(b.print());
@@ -217,5 +218,80 @@ public class BiscuitTest extends TestCase {
                         new FailedCaveat().new FailedBlock(0, 1, "check_right(#read) <- resource(#ambient, 0?) && operation(#ambient, #read) && right(#authority, 0?, #read) | ")
                 ))),
                 e);
+    }
+
+    public void testSealedTokens() {
+        byte[] seed = {0, 0, 0, 0};
+        SecureRandom rng = new SecureRandom(seed);
+
+        System.out.println("preparing the authority block");
+
+        KeyPair root = new KeyPair(rng);
+
+        SymbolTable symbols = Biscuit.default_symbol_table();
+        Block authority_builder = new Block(0, symbols);
+
+        authority_builder.add_fact(fact("right", Arrays.asList(s("authority"), s("file1"), s("read"))));
+        authority_builder.add_fact(fact("right", Arrays.asList(s("authority"), s("file2"), s("read"))));
+        authority_builder.add_fact(fact("right", Arrays.asList(s("authority"), s("file1"), s("write"))));
+
+        Biscuit b = Biscuit.make(rng, root, Biscuit.default_symbol_table(), authority_builder.build()).get();
+
+        System.out.println(b.print());
+
+        System.out.println("serializing the first token");
+
+        byte[] data = b.serialize().get();
+
+        System.out.print("data len: ");
+        System.out.println(data.length);
+        System.out.println(hex(data));
+
+        System.out.println("deserializing the first token");
+        Biscuit deser = Biscuit.from_bytes(data).get();
+
+        System.out.println(deser.print());
+
+        // SECOND BLOCK
+        System.out.println("preparing the second block");
+
+        KeyPair keypair2 = new KeyPair(rng);
+
+        Block builder = deser.create_block();
+        builder.add_caveat(rule(
+                "caveat1",
+                Arrays.asList(var(0)),
+                Arrays.asList(
+                        pred("resource", Arrays.asList(s("ambient"), var(0))),
+                        pred("operation", Arrays.asList(s("ambient"), s("read"))),
+                        pred("right", Arrays.asList(s("authority"), var(0), s("read")))
+                )
+        ));
+
+        Biscuit b2 = deser.append(rng, keypair2, builder.build()).get();
+
+        System.out.println(b2.print());
+
+        System.out.println("sealing the second token");
+
+        byte[] sealed = b2.seal("testkey".getBytes()).get();
+        System.out.print("sealed data len: ");
+        System.out.println(sealed.length);
+        System.out.println(hex(sealed));
+
+        System.out.println("deserializing the sealed token with an invalid key");
+        Error e = Biscuit.from_sealed(sealed, "not this key".getBytes()).getLeft();
+        System.out.println(e);
+        Assert.assertEquals(
+                new Error().new FormatError().new Signature().new SealedSignature(),
+                e);
+
+        System.out.println("deserializing the sealed token with a valid key");
+        Biscuit deser2 = Biscuit.from_sealed(sealed, "testkey".getBytes()).get();
+        System.out.println(deser2.print());
+
+        System.out.println("trying to append to a sealed token");
+        Block builder2 = deser2.create_block();
+        Error e2 = deser2.append(rng, keypair2, builder.build()).getLeft();
     }
 }

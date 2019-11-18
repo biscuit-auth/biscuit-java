@@ -5,6 +5,7 @@ import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.datalog.*;
 import com.clevercloud.biscuit.error.FailedCaveat;
 import com.clevercloud.biscuit.error.LogicError;
+import com.clevercloud.biscuit.token.format.SealedBiscuit;
 import com.clevercloud.biscuit.token.format.SerializedBiscuit;
 import com.clevercloud.biscuit.error.Error;
 
@@ -177,10 +178,57 @@ public class Biscuit {
     }
 
 
-    /*public Either<Error.FormatError, SerializedBiscuit> from_sealed(byte[] data, byte[] secret)  {
+    public static Either<Error, Biscuit> from_sealed(byte[] data, byte[] secret)  {
+        //FIXME: needs a version of from_sealed with custom symbol table support
+        SymbolTable symbols = default_symbol_table();
 
-    }*/
-    //public Either<Error.FormatError, byte[]> seal(byte[] secret) {}
+        Either<Error, SealedBiscuit> res = SealedBiscuit.from_bytes(data, secret);
+        if(res.isLeft()) {
+            Error e = res.getLeft();
+            return Left(e);
+        }
+
+        SealedBiscuit ser = res.get();
+        Either<Error.FormatError, Block> authRes = Block.from_bytes(ser.authority);
+        if(authRes.isLeft()){
+            Error e = authRes.getLeft();
+            return Left(e);
+        }
+        Block authority = authRes.get();
+
+        ArrayList<Block> blocks = new ArrayList<>();
+        for(byte[] bdata: ser.blocks) {
+            Either<Error.FormatError, Block> blockRes = Block.from_bytes(bdata);
+            if(blockRes.isLeft()) {
+                Error e = blockRes.getLeft();
+                return Left(e);
+            }
+            blocks.add(blockRes.get());
+        }
+
+        for(String s: authority.symbols.symbols) {
+            symbols.add(s);
+        }
+
+        for(Block b: blocks) {
+            for(String s: b.symbols.symbols) {
+                symbols.add(s);
+            }
+        }
+
+        return Right(new Biscuit(authority, blocks, symbols, Option.none()));
+    }
+
+    public Either<Error.FormatError, byte[]> seal(byte[] secret) {
+        Either<Error.FormatError, SealedBiscuit> res = SealedBiscuit.make(authority, blocks, secret);
+        if(res.isLeft()) {
+            Error.FormatError e = res.getLeft();
+            return Left(e);
+        }
+
+        SealedBiscuit b = res.get();
+        return b.serialize();
+    }
 
     /**
      * Verifies that a token is valid for a root public key
