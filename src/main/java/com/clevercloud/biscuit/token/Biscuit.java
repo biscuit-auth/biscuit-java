@@ -163,7 +163,11 @@ public class Biscuit {
      * @return
      */
     public Either<Error, Verifier> verify(PublicKey root) {
-        return Verifier.make(this, root);
+        return Verifier.make(this, Option.some(root));
+    }
+
+    public Either<Error, Verifier> verify_sealed() {
+        return Verifier.make(this, Option.none());
     }
 
     /**
@@ -228,6 +232,10 @@ public class Biscuit {
 
         SealedBiscuit b = res.get();
         return b.serialize();
+    }
+
+    public boolean is_sealed() {
+        return this.container.isEmpty();
     }
 
     /**

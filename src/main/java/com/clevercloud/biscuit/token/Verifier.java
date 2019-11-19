@@ -10,6 +10,7 @@ import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.token.builder.Fact;
 import com.clevercloud.biscuit.token.builder.Rule;
 import io.vavr.control.Either;
+import io.vavr.control.Option;
 
 import java.util.*;
 
@@ -43,11 +44,13 @@ public class Verifier {
      * @param root
      * @return
      */
-    static public Either<Error, Verifier> make(Biscuit token, PublicKey root) {
-        Either<Error, Void> res  = token.check_root_key(root);
-        if(res.isLeft()) {
-            Error e = res.getLeft();
-            return Left(e);
+    static public Either<Error, Verifier> make(Biscuit token, Option<PublicKey> root) {
+        if(!token.is_sealed()) {
+            Either<Error, Void> res = token.check_root_key(root.get());
+            if (res.isLeft()) {
+                Error e = res.getLeft();
+                return Left(e);
+            }
         }
 
         return Right(new Verifier(token));
