@@ -1,6 +1,5 @@
 package com.clevercloud.biscuit.datalog;
 
-import javax.swing.text.html.Option;
 import java.io.Serializable;
 import java.util.*;
 

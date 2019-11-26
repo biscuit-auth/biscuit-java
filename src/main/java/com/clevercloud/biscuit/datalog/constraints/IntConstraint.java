@@ -1,12 +1,10 @@
 package com.clevercloud.biscuit.datalog.constraints;
 
 import biscuit.format.schema.Schema;
-import com.clevercloud.biscuit.datalog.ID;
 import com.clevercloud.biscuit.error.Error;
 import io.vavr.control.Either;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 

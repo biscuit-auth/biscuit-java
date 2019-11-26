@@ -1,6 +1,5 @@
 package com.clevercloud.biscuit.token;
 
-import cafe.cryptography.curve25519.RistrettoElement;
 import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.datalog.constraints.Constraint;

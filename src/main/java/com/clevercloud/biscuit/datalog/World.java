@@ -1,7 +1,6 @@
 package com.clevercloud.biscuit.datalog;
 
 import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

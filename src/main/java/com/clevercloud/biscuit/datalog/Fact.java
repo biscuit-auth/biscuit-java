@@ -5,7 +5,6 @@ import com.clevercloud.biscuit.error.Error;
 import io.vavr.control.Either;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Objects;
 
 import static io.vavr.API.Left;

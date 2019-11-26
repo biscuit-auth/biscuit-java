@@ -1,11 +1,7 @@
 package com.clevercloud.biscuit.crypto;
 
-import biscuit.format.schema.Schema;
-import cafe.cryptography.curve25519.CompressedRistretto;
-import cafe.cryptography.curve25519.InvalidEncodingException;
 import cafe.cryptography.curve25519.RistrettoElement;
 import com.clevercloud.biscuit.error.Error;
-import com.google.protobuf.ByteString;
 import io.vavr.control.Either;
 
 import java.security.SecureRandom;
