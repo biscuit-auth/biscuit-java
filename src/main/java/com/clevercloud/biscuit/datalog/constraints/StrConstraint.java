@@ -7,6 +7,8 @@ import io.vavr.control.Either;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
@@ -22,6 +24,8 @@ public abstract class StrConstraint implements Serializable {
          return Suffix.deserialize(c);
       } else if(c.getKind() == Schema.StringConstraint.Kind.EQUAL) {
          return Equal.deserialize(c);
+      } else if(c.getKind() == Schema.StringConstraint.Kind.REGEX) {
+         return Regex.deserialize(c);
       } else if(c.getKind() == Schema.StringConstraint.Kind.IN) {
          return InSet.deserialize(c);
       } else if(c.getKind() == Schema.StringConstraint.Kind.NOT_IN) {
@@ -120,6 +124,39 @@ public abstract class StrConstraint implements Serializable {
             return Left(new Error().new FormatError().new DeserializationError("invalid String constraint"));
          } else {
             return Right(new Equal(i.getEqual()));
+         }
+      }
+   }
+
+   public static final class Regex extends StrConstraint implements Serializable {
+      private final String pattern;
+
+      public boolean check(final String value) {
+         Pattern p = Pattern.compile(this.pattern);
+         Matcher m = p.matcher(value);
+         return m.matches();
+      }
+
+      public Regex(final String value) {
+         this.pattern = value;
+      }
+
+      @Override
+      public String toString() {
+         return "matches /" + this.pattern + "/";
+      }
+
+      public Schema.StringConstraint serialize() {
+         return Schema.StringConstraint.newBuilder()
+                 .setKind(Schema.StringConstraint.Kind.REGEX)
+                 .setRegex(this.pattern).build();
+      }
+
+      static public Either<Error.FormatError, StrConstraint> deserialize(Schema.StringConstraint i) {
+         if(!i.hasRegex()) {
+            return Left(new Error().new FormatError().new DeserializationError("invalid String constraint"));
+         } else {
+            return Right(new Regex(i.getRegex()));
          }
       }
    }

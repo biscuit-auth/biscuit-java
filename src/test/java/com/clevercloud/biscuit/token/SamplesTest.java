@@ -393,4 +393,37 @@ public class SamplesTest extends TestCase {
                 ))),
                 e);
     }
+
+    public void test16_RegexConstraint() throws IOException, InvalidEncodingException {
+        byte[] rootData = fromHex("da905388864659eb785877a319fbc42c48e2f8a40af0c5baea0ef8ff7c795253");
+        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("test16_regex_constraint.bc");
+
+        byte[] data = new byte[inputStream.available()];
+        inputStream.read(data);
+
+        Biscuit token = Biscuit.from_bytes(data).get();
+        System.out.println(token.print());
+
+        Verifier v1 = token.verify(root).get();
+        v1.add_resource("file1");
+        v1.set_time();
+
+        Either<Error, Void> res = v1.verify();
+        System.out.println(res);
+        Error e = res.getLeft();
+        Assert.assertEquals(
+                new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
+                        new FailedCaveat().new FailedBlock(0, 0, "resource_match(0?) <- resource(#ambient, 0?) | 0? matches /file[0-9]+.txt/")
+                ))),
+                e);
+
+        Verifier v2 = token.verify(root).get();
+        v2.add_resource("file123.txt");
+        v2.set_time();
+        Assert.assertTrue(v2.verify().isRight());
+
+    }
 }
