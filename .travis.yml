@@ -1,6 +1,11 @@
 language: java
 dist: trusty
 
+install:
+  - wget https://github.com/protocolbuffers/protobuf/archive/v3.11.0.tar.gz
+  - tar xvf v3.11.0.tar.gz
+  - pushd v3.11.0 && ./configure --prefix=/usr && make && sudo make install && popd
+
 before_script:
   - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 
