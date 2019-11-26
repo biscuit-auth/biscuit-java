@@ -248,8 +248,9 @@ public class Biscuit {
         }
     }
 
-    Either<Error, Void> check(SymbolTable symbols, List<Fact> ambient_facts, List<Rule> ambient_rules,
-                              List<Rule> verifier_authority_caveats, List<Rule> verifier_block_caveats){
+    Either<Error, HashMap<String, HashMap<Long, Set<Fact>>>> check(SymbolTable symbols, List<Fact> ambient_facts, List<Rule> ambient_rules,
+                              List<Rule> verifier_authority_caveats, List<Rule> verifier_block_caveats,
+                              HashMap<String, Rule> queries){
         World world = new World();
         long authority_index = symbols.get("authority").get();
         long ambient_index = symbols.get("ambient").get();
@@ -314,13 +315,22 @@ public class Biscuit {
             }
         }
 
+        HashMap<String, HashMap<Long, Set<Fact>>> query_results = new HashMap();
+        for(String name: queries.keySet()) {
+            HashMap<Long, Set<Fact>> qres = new HashMap();
+            Set<Fact> res = world.query_rule(queries.get(name));
+            qres.put(new Long(0), res);
+            query_results.put(name, qres);
+        }
+
         for(int i = 0; i < this.blocks.size(); i++) {
             if(this.blocks.get(i).index != i+1) {
                 return Left(new Error().new InvalidBlockIndex(1 + this.blocks.size(), this.blocks.get(i).index));
             }
 
             World w = new World(world);
-            Either<LogicError, Void> res = this.blocks.get(i).check(i, w, symbols, verifier_block_caveats);
+            Either<LogicError, Void> res = this.blocks.get(i).check(i, w, symbols, verifier_block_caveats, queries,
+                    query_results);
             if(res.isLeft()) {
 
                 LogicError e = res.getLeft();
@@ -336,7 +346,7 @@ public class Biscuit {
         }
 
         if(errors.isEmpty()) {
-            return Right(null);
+            return Right(query_results);
         } else {
             return Left(new Error().new FailedLogic(new LogicError().new FailedCaveats(errors)));
         }

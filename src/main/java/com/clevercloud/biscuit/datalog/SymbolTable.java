@@ -80,6 +80,10 @@ public final class SymbolTable implements Serializable {
       return b.toString();
    }
 
+   public String print_symbol(int i) {
+      return this.symbols.get(i);
+   }
+
    public SymbolTable() {
       this.symbols = new ArrayList<>();
    }

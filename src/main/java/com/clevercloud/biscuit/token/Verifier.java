@@ -27,6 +27,7 @@ public class Verifier {
     List<Rule> rules;
     List<Rule> authority_caveats;
     List<Rule> block_caveats;
+    HashMap<String, Rule> queries;
 
     private Verifier(Biscuit token) {
         this.token = token;
@@ -34,6 +35,7 @@ public class Verifier {
         this.rules = new ArrayList<>();
         this.authority_caveats = new ArrayList<>();
         this.block_caveats = new ArrayList<>();
+        this.queries = new HashMap<>();
     }
 
     /**
@@ -72,6 +74,10 @@ public class Verifier {
         this.block_caveats.add(caveat);
     }
 
+    public void add_query(String name, Rule query) {
+        this.queries.put(name, query);
+    }
+
     public void add_resource(String resource) {
         this.facts.add(fact("resource", Arrays.asList(s("ambient"), string(resource))));
     }
@@ -102,7 +108,7 @@ public class Verifier {
         ));
     }
 
-    public Either<Error, Void> verify() {
+    public Either<Error, HashMap<String, HashMap<Long, Set<Fact>>>> verify() {
         if(this.token.symbols.get("authority").isEmpty() || this.token.symbols.get("ambient").isEmpty()) {
             return Left(new Error().new MissingSymbols());
         }
@@ -127,7 +133,37 @@ public class Verifier {
         for(Rule caveat: this.block_caveats) {
             block_caveats.add(caveat.convert(symbols));
         }
-        
-        return this.token.check(symbols, ambient_facts, ambient_rules, authority_caveats, block_caveats);
+
+        HashMap<String, com.clevercloud.biscuit.datalog.Rule> queries = new HashMap<>();
+        for(String name: this.queries.keySet()) {
+            queries.put(name, this.queries.get(name).convert(symbols));
+        }
+
+        Either<Error, HashMap<String, HashMap<Long, Set<com.clevercloud.biscuit.datalog.Fact>>>> res =
+                this.token.check(symbols, ambient_facts, ambient_rules, authority_caveats, block_caveats, queries);
+        if(res.isLeft()) {
+            return Left(res.getLeft());
+        } else {
+            HashMap<String, HashMap<Long, Set<com.clevercloud.biscuit.datalog.Fact>>> query_results = res.get();
+            HashMap<String, HashMap<Long, Set<Fact>>> results = new HashMap();
+
+            for(String key: query_results.keySet()) {
+                HashMap<Long, Set<Fact>> h = new HashMap();
+
+                for(Long block_id: query_results.get(key).keySet()) {
+                    Set<Fact> s = new HashSet();
+
+                    for(com.clevercloud.biscuit.datalog.Fact f: query_results.get(key).get(block_id)) {
+                        s.add(Fact.convert_from(f, symbols));
+                    }
+
+                    h.put(block_id, s);
+                }
+
+                results.put(key, h);
+            }
+
+            return Right(results);
+        }
     }
 }

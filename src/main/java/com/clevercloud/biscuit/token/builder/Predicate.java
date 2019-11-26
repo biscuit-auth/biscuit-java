@@ -26,6 +26,16 @@ public class Predicate {
         return new com.clevercloud.biscuit.datalog.Predicate(name, ids);
     }
 
+    public static Predicate convert_from(com.clevercloud.biscuit.datalog.Predicate p, SymbolTable symbols) {
+        String name = symbols.print_symbol((int) p.name());
+        List<Atom> ids = new ArrayList<>();
+        for(com.clevercloud.biscuit.datalog.ID i: p.ids()) {
+            ids.add(i.toAtom(symbols));
+        }
+
+        return new Predicate(name, ids);
+    }
+
     @Override
     public String toString() {
         return ""+name+"("+ids+")";

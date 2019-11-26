@@ -12,9 +12,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static com.clevercloud.biscuit.crypto.TokenSignature.hex;
 import static com.clevercloud.biscuit.token.builder.Utils.*;
@@ -135,8 +133,8 @@ public class BiscuitTest extends TestCase {
                 fact("operation", Arrays.asList(s("ambient"), s("read"))).convert(check_symbols)
         );
 
-        Either<Error, Void> res = final_token.check(check_symbols, ambient_facts, new ArrayList<>(), new ArrayList<>(),
-                new ArrayList<>());
+        Either<Error, HashMap<String, HashMap<Long, Set<Fact>>>> res = final_token.check(check_symbols, ambient_facts,
+                new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new HashMap<>());
 
         Assert.assertTrue(res.isRight());
 
@@ -148,8 +146,8 @@ public class BiscuitTest extends TestCase {
                 fact("operation", Arrays.asList(s("ambient"), s("write"))).convert(check_symbols2)
         );
 
-        Either<Error, Void> res2 = final_token.check(check_symbols2, ambient_facts2, new ArrayList<>(),
-                new ArrayList<>(), new ArrayList<>());
+        Either<Error, HashMap<String, HashMap<Long, Set<Fact>>>> res2 = final_token.check(check_symbols2, ambient_facts2,
+                new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new HashMap<>());
         Assert.assertTrue(res2.isLeft());
         System.out.println(res2.getLeft());
 
@@ -192,7 +190,7 @@ public class BiscuitTest extends TestCase {
         Verifier v1 = b2.verify(root.public_key()).get();
         v1.add_resource("/folder1/file1");
         v1.add_operation("read");
-        Either<Error, Void> res = v1.verify();
+        Either<Error, HashMap<String, HashMap<Long, Set<com.clevercloud.biscuit.token.builder.Fact>>>> res = v1.verify();
         Assert.assertTrue(res.isRight());
 
         Verifier v2 = b2.verify(root.public_key()).get();

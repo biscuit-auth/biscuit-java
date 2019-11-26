@@ -11,8 +11,16 @@ public class Fact {
         this.predicate = new Predicate(name, ids);
     }
 
+    public Fact(Predicate p) {
+        this.predicate = p;
+    }
+
     public com.clevercloud.biscuit.datalog.Fact convert(SymbolTable symbols) {
         return new com.clevercloud.biscuit.datalog.Fact(this.predicate.convert(symbols));
+    }
+
+    public static Fact convert_from(com.clevercloud.biscuit.datalog.Fact f, SymbolTable symbols) {
+        return new Fact(Predicate.convert_from(f.predicate(), symbols));
     }
 
     @Override

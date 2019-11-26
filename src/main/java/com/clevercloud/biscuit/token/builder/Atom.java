@@ -8,7 +8,7 @@ import java.util.Objects;
 public abstract class Atom {
     abstract public ID convert(SymbolTable symbols);
 
-    public static class Symbol extends Atom {
+        public static class Symbol extends Atom {
         String value;
 
         public Symbol(String value) {
@@ -20,7 +20,7 @@ public abstract class Atom {
             return new ID.Symbol(symbols.insert(this.value));
         }
 
-        @Override
+            @Override
         public String toString() {
             return "#"+value;
         }

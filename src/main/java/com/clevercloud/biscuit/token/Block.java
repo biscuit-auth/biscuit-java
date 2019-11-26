@@ -11,6 +11,7 @@ import io.vavr.control.Either;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -58,7 +59,8 @@ public class Block {
         this.caveats = caveats;
     }
 
-    Either<LogicError, Void> check(long i, World w, SymbolTable symbols, List<Rule> verifier_caveats) {
+    Either<LogicError, Void> check(long i, World w, SymbolTable symbols, List<Rule> verifier_caveats,
+                                   HashMap<String, Rule> queries, HashMap<String, HashMap<Long, Set<Fact>>> query_results) {
         World world = new World(w);
         long authority_index = symbols.get("authority").get().longValue();
         long ambient_index = symbols.get("ambient").get().longValue();
@@ -94,6 +96,11 @@ public class Block {
                 errors.add(new FailedCaveat().
                         new FailedVerifier(i, j, symbols.print_rule(verifier_caveats.get(j))));
             }
+        }
+
+        for(String name: queries.keySet()) {
+            Set<Fact> res = world.query_rule(queries.get(name));
+            query_results.get(name).put(new Long(this.index), res);
         }
 
         if (errors.isEmpty()) {

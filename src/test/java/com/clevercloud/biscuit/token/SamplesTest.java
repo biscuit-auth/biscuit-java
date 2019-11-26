@@ -7,6 +7,7 @@ import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.error.FailedCaveat;
 import com.clevercloud.biscuit.error.LogicError;
+import com.clevercloud.biscuit.token.builder.Fact;
 import io.vavr.control.Either;
 import junit.framework.Assert;
 import junit.framework.Test;
@@ -16,6 +17,8 @@ import junit.framework.TestSuite;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Set;
 
 import static com.clevercloud.biscuit.crypto.TokenSignature.fromHex;
 import static com.clevercloud.biscuit.crypto.TokenSignature.hex;
@@ -48,7 +51,7 @@ public class SamplesTest extends TestCase {
         Verifier v1 = token.verify(root).get();
         v1.add_resource("file1");
         v1.add_operation("read");
-        Either<Error, Void> res = v1.verify();
+        Either<Error, HashMap<String, HashMap<Long, Set<Fact>>>> res = v1.verify();
         if(res.isLeft()) {
             System.out.println("error: "+res.getLeft());
         }
@@ -140,7 +143,7 @@ public class SamplesTest extends TestCase {
         Verifier v1 = token.verify(root).get();
         v1.add_resource("file1");
         v1.add_operation("read");
-        Either<Error, Void> res = v1.verify();
+        Either<Error, HashMap<String, HashMap<Long, Set<Fact>>>> res = v1.verify();
         System.out.println(token.print());
         System.out.println(res);
         if(res.isLeft()) {
@@ -167,7 +170,7 @@ public class SamplesTest extends TestCase {
         Verifier v1 = token.verify(root).get();
         v1.add_resource("file1");
         v1.add_operation("read");
-        Either<Error, Void> res = v1.verify();
+        Either<Error, HashMap<String, HashMap<Long, Set<Fact>>>> res = v1.verify();
         if(res.isLeft()) {
             System.out.println("error: "+res.getLeft());
         }
@@ -191,7 +194,7 @@ public class SamplesTest extends TestCase {
         Verifier v1 = token.verify(root).get();
         v1.add_resource("file1");
         v1.add_operation("read");
-        Either<Error, Void> res = v1.verify();
+        Either<Error, HashMap<String, HashMap<Long, Set<Fact>>>> res = v1.verify();
         if(res.isLeft()) {
             System.out.println("error: "+res.getLeft());
         }
@@ -215,7 +218,7 @@ public class SamplesTest extends TestCase {
         Verifier v1 = token.verify(root).get();
         v1.add_resource("file1");
         v1.add_operation("read");
-        Either<Error, Void> res = v1.verify();
+        Either<Error, HashMap<String, HashMap<Long, Set<Fact>>>> res = v1.verify();
         if(res.isLeft()) {
             System.out.println("error: "+res.getLeft());
         }
@@ -290,7 +293,7 @@ public class SamplesTest extends TestCase {
         v1.add_resource("file1");
         v1.add_operation("read");
         v1.add_fact(fact("owner", Arrays.asList(s("ambient"), s("alice"), string("file1"))));
-        Either<Error, Void> res = v1.verify();
+        Either<Error, HashMap<String, HashMap<Long, Set<Fact>>>> res = v1.verify();
         System.out.println(res);
         Assert.assertTrue(res.isRight());
     }
@@ -320,7 +323,7 @@ public class SamplesTest extends TestCase {
                         pred("right", Arrays.asList(s("authority"), var(0), var(1)))
                 )
         ));
-        Either<Error, Void> res = v1.verify();
+        Either<Error, HashMap<String, HashMap<Long, Set<Fact>>>> res = v1.verify();
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
@@ -352,7 +355,7 @@ public class SamplesTest extends TestCase {
         v2.add_resource("file2");
         v2.add_operation("read");
 
-        Either<Error, Void> res = v2.verify();
+        Either<Error, HashMap<String, HashMap<Long, Set<Fact>>>> res = v2.verify();
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
@@ -384,7 +387,7 @@ public class SamplesTest extends TestCase {
         v2.add_resource("file2");
         v2.set_time();
 
-        Either<Error, Void> res = v2.verify();
+        Either<Error, HashMap<String, HashMap<Long, Set<Fact>>>> res = v2.verify();
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
@@ -411,7 +414,7 @@ public class SamplesTest extends TestCase {
         v1.add_resource("file1");
         v1.set_time();
 
-        Either<Error, Void> res = v1.verify();
+        Either<Error, HashMap<String, HashMap<Long, Set<Fact>>>> res = v1.verify();
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(

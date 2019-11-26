@@ -2,6 +2,7 @@ package com.clevercloud.biscuit.datalog;
 
 import biscuit.format.schema.Schema;
 import com.clevercloud.biscuit.error.Error;
+import com.clevercloud.biscuit.token.builder.Atom;
 import io.vavr.control.Either;
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
@@ -31,6 +32,8 @@ public abstract class ID implements Serializable {
          return Left(new Error().new FormatError().new DeserializationError("invalid ID kind"));
       }
    }
+
+   public abstract Atom toAtom(SymbolTable symbols);
 
    public final static class Date extends ID implements Serializable {
       private final long value;
@@ -80,6 +83,10 @@ public abstract class ID implements Serializable {
          } else {
             return Right(new Date(id.getDate()));
          }
+      }
+
+      public Atom toAtom(SymbolTable symbols) {
+         return new Atom.Date(this.value);
       }
    }
 
@@ -135,6 +142,10 @@ public abstract class ID implements Serializable {
             return Right(new Integer(id.getInteger()));
          }
       }
+
+      public Atom toAtom(SymbolTable symbols) {
+         return new Atom.Integer(this.value);
+      }
    }
 
    public final static class Str extends ID implements Serializable {
@@ -189,6 +200,10 @@ public abstract class ID implements Serializable {
             return Right(new Str(id.getStr()));
          }
       }
+
+      public Atom toAtom(SymbolTable symbols) {
+         return new Atom.Str(this.value);
+      }
    }
 
    public final static class Symbol extends ID implements Serializable {
@@ -242,6 +257,10 @@ public abstract class ID implements Serializable {
          } else {
             return Right(new Symbol(id.getSymbol()));
          }
+      }
+
+      public Atom toAtom(SymbolTable symbols) {
+         return new Atom.Symbol(symbols.print_symbol((int) this.value));
       }
    }
 
@@ -302,6 +321,10 @@ public abstract class ID implements Serializable {
          } else {
             return Right(new Variable(id.getVariable()));
          }
+      }
+
+      public Atom toAtom(SymbolTable symbols) {
+         return new Atom.Variable((int) this.value);
       }
    }
 }
