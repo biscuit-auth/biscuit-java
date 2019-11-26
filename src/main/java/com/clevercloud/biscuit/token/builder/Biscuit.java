@@ -20,6 +20,7 @@ public class Biscuit {
     KeyPair root;
     int symbol_start;
     SymbolTable symbols;
+    String context;
     List<Fact> facts;
     List<Rule> rules;
     List<Rule> caveats;
@@ -29,6 +30,7 @@ public class Biscuit {
         this.root = root;
         this.symbol_start = base_symbols.symbols.size();
         this.symbols = new SymbolTable(base_symbols);
+        this.context = "";
         this.facts = new ArrayList<>();
         this.rules = new ArrayList<>();
         this.caveats = new ArrayList<>();
@@ -61,6 +63,10 @@ public class Biscuit {
         this.caveats.add(rule.convert(this.symbols));
     }
 
+    public  void set_context(String context) {
+        this.context = context;
+    }
+
     public Either<Error, com.clevercloud.biscuit.token.Biscuit> build() {
         SymbolTable base_symbols = new SymbolTable();
         SymbolTable symbols = new SymbolTable();
@@ -73,7 +79,7 @@ public class Biscuit {
             symbols.add(this.symbols.symbols.get(i));
         }
 
-        Block authority_block = new com.clevercloud.biscuit.token.Block(0, symbols, this.facts, this.rules, this.caveats);
+        Block authority_block = new com.clevercloud.biscuit.token.Block(0, symbols, context, this.facts, this.rules, this.caveats);
         return com.clevercloud.biscuit.token.Biscuit.make(this.rng, this.root, base_symbols, authority_block);
     }
 

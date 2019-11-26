@@ -23,6 +23,7 @@ import static io.vavr.API.Right;
 public class Block {
     final long index;
     final SymbolTable symbols;
+    final String context;
     final List<Fact> facts;
     final List<Rule> rules;
     final List<Rule> caveats;
@@ -35,6 +36,7 @@ public class Block {
     public Block(long index, SymbolTable base_symbols) {
         this.index = index;
         this.symbols = base_symbols;
+        this.context = "";
         this.facts = new ArrayList<>();
         this.rules = new ArrayList<>();
         this.caveats = new ArrayList<>();
@@ -47,9 +49,10 @@ public class Block {
      * @param facts
      * @param caveats
      */
-    public Block(long index, SymbolTable base_symbols, List<Fact> facts, List<Rule> rules, List<Rule> caveats) {
+    public Block(long index, SymbolTable base_symbols, String context, List<Fact> facts, List<Rule> rules, List<Rule> caveats) {
         this.index = index;
         this.symbols = base_symbols;
+        this.context=  context;
         this.facts = facts;
         this.rules = rules;
         this.caveats = caveats;
@@ -112,6 +115,8 @@ public class Block {
         s.append(this.index);
         s.append("] {\n\t\tsymbols: ");
         s.append(this.symbols.symbols);
+        s.append("\n\t\tcontext: ");
+        s.append(this.context);
         s.append("\n\t\tfacts: [");
         for(Fact f: this.facts) {
             s.append("\n\t\t\t");
@@ -142,6 +147,10 @@ public class Block {
 
         for (int i = 0; i < this.symbols.symbols.size(); i++) {
             b.addSymbols(this.symbols.symbols.get(i));
+        }
+
+        if(!this.context.isEmpty()) {
+            b.setContext(this.context);
         }
 
         for (int i = 0; i < this.facts.size(); i++) {
@@ -203,7 +212,7 @@ public class Block {
             }
         }
 
-        return Right(new Block(b.getIndex(), symbols, facts, rules, caveats));
+        return Right(new Block(b.getIndex(), symbols, b.getContext(), facts, rules, caveats));
     }
 
     /**

@@ -15,10 +15,7 @@ import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Biscuit auth token
@@ -394,10 +391,24 @@ public class Biscuit {
         return Right(new Biscuit(this.authority, blocks, symbols, Option.some(container)));
     }
 
-    /*
-    public void adjust_authority_symbols(Block block){}
-    public void adjust_block_symbols(Block block){}
-    */
+    public List<Option<String>> context() {
+        ArrayList res = new ArrayList();
+        if(this.authority.context.isEmpty()) {
+            res.add(Option.none());
+        } else {
+            res.add(Option.some(this.authority.context));
+        }
+
+        for(Block b: this.blocks) {
+            if(b.context.isEmpty()) {
+                res.add(Option.none());
+            } else {
+                res.add(Option.some(b.context));
+            }
+        }
+
+        return res;
+    }
 
     /**
      * Prints a token's content
