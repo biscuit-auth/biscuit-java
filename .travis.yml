@@ -1,0 +1,9 @@
+language: java
+dist: trusty
+
+before_script:
+  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+
+script:
+  - mvn test -B
+
