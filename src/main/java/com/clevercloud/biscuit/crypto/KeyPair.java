@@ -21,6 +21,15 @@ public final class KeyPair {
         this.public_key = Constants.RISTRETTO_GENERATOR.multiply(this.private_key);
     }
 
+    public byte[] toBytes() {
+        return this.private_key.toByteArray();
+    }
+
+    public KeyPair(byte[] b) {
+        this.private_key = Scalar.fromBytesModOrderWide(b);
+        this.public_key = Constants.RISTRETTO_GENERATOR.multiply(this.private_key);
+    }
+
     public PublicKey public_key() {
         return new PublicKey(this.public_key);
     }

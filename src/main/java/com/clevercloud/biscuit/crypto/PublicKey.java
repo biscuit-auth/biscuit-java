@@ -16,4 +16,8 @@ public class PublicKey {
         CompressedRistretto c = new CompressedRistretto(data);
         this.key = c.decompress();
     }
+
+    public byte[] toBytes() {
+        return this.key.compress().toByteArray();
+    }
 }
