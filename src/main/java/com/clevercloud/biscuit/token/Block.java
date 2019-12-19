@@ -94,7 +94,7 @@ public class Block {
             Set<Fact> res = world.query_rule((verifier_caveats.get(j)));
             if (res.isEmpty()) {
                 errors.add(new FailedCaveat().
-                        new FailedVerifier(i, j, symbols.print_rule(verifier_caveats.get(j))));
+                        new FailedVerifier(j, symbols.print_rule(verifier_caveats.get(j))));
             }
         }
 

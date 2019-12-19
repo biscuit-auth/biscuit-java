@@ -24,16 +24,14 @@ public class Verifier {
     Biscuit token;
     List<Fact> facts;
     List<Rule> rules;
-    List<Rule> authority_caveats;
-    List<Rule> block_caveats;
+    List<Rule> caveats;
     HashMap<String, Rule> queries;
 
     private Verifier(Biscuit token) {
         this.token = token;
         this.facts = new ArrayList<>();
         this.rules = new ArrayList<>();
-        this.authority_caveats = new ArrayList<>();
-        this.block_caveats = new ArrayList<>();
+        this.caveats = new ArrayList<>();
         this.queries = new HashMap<>();
     }
 
@@ -65,12 +63,8 @@ public class Verifier {
         this.rules.add(rule);
     }
 
-    public void add_authority_caveat(Rule caveat) {
-        this.authority_caveats.add(caveat);
-    }
-
-    public void add_block_caveat(Rule caveat) {
-        this.block_caveats.add(caveat);
+    public void add_caveat(Rule caveat) {
+        this.caveats.add(caveat);
     }
 
     public void add_query(String name, Rule query) {
@@ -99,7 +93,7 @@ public class Verifier {
     }
 
     public void revocation_check(List<Long> ids) {
-        this.block_caveats.add(constrained_rule(
+        this.caveats.add(constrained_rule(
                 "revocation_check",
                 Arrays.asList((var(0))),
                 Arrays.asList(pred("revocation_id", Arrays.asList(var(0)))),
@@ -107,7 +101,7 @@ public class Verifier {
         ));
     }
 
-    public Either<Error, HashMap<String, HashMap<Long, Set<Fact>>>> verify() {
+    public Either<Error, HashMap<String, Set<Fact>>> verify() {
         if(this.token.symbols.get("authority").isEmpty() || this.token.symbols.get("ambient").isEmpty()) {
             return Left(new Error().new MissingSymbols());
         }
@@ -123,14 +117,9 @@ public class Verifier {
             ambient_rules.add(rule.convert(symbols));
         }
 
-        ArrayList<com.clevercloud.biscuit.datalog.Rule> authority_caveats = new ArrayList<>();
-        for(Rule caveat: this.authority_caveats) {
-            authority_caveats.add(caveat.convert(symbols));
-        }
-
-        ArrayList<com.clevercloud.biscuit.datalog.Rule> block_caveats = new ArrayList<>();
-        for(Rule caveat: this.block_caveats) {
-            block_caveats.add(caveat.convert(symbols));
+        ArrayList<com.clevercloud.biscuit.datalog.Rule> caveats = new ArrayList<>();
+        for(Rule caveat: this.caveats) {
+            caveats.add(caveat.convert(symbols));
         }
 
         HashMap<String, com.clevercloud.biscuit.datalog.Rule> queries = new HashMap<>();
@@ -138,28 +127,22 @@ public class Verifier {
             queries.put(name, this.queries.get(name).convert(symbols));
         }
 
-        Either<Error, HashMap<String, HashMap<Long, Set<com.clevercloud.biscuit.datalog.Fact>>>> res =
-                this.token.check(symbols, ambient_facts, ambient_rules, authority_caveats, block_caveats, queries);
+        Either<Error, HashMap<String, Set<com.clevercloud.biscuit.datalog.Fact>>> res =
+                this.token.check(symbols, ambient_facts, ambient_rules, caveats, queries);
         if(res.isLeft()) {
             return Left(res.getLeft());
         } else {
-            HashMap<String, HashMap<Long, Set<com.clevercloud.biscuit.datalog.Fact>>> query_results = res.get();
-            HashMap<String, HashMap<Long, Set<Fact>>> results = new HashMap();
+            HashMap<String, Set<com.clevercloud.biscuit.datalog.Fact>> query_results = res.get();
+            HashMap<String, Set<Fact>> results = new HashMap();
 
             for(String key: query_results.keySet()) {
-                HashMap<Long, Set<Fact>> h = new HashMap();
+                Set<Fact> s = new HashSet();
 
-                for(Long block_id: query_results.get(key).keySet()) {
-                    Set<Fact> s = new HashSet();
-
-                    for(com.clevercloud.biscuit.datalog.Fact f: query_results.get(key).get(block_id)) {
-                        s.add(Fact.convert_from(f, symbols));
-                    }
-
-                    h.put(block_id, s);
+                for(com.clevercloud.biscuit.datalog.Fact f: query_results.get(key)) {
+                    s.add(Fact.convert_from(f, symbols));
                 }
 
-                results.put(key, h);
+                results.put(key, s);
             }
 
             return Right(results);

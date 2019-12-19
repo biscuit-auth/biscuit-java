@@ -133,8 +133,8 @@ public class BiscuitTest extends TestCase {
                 fact("operation", Arrays.asList(s("ambient"), s("read"))).convert(check_symbols)
         );
 
-        Either<Error, HashMap<String, HashMap<Long, Set<Fact>>>> res = final_token.check(check_symbols, ambient_facts,
-                new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new HashMap<>());
+        Either<Error, HashMap<String, Set<Fact>>> res = final_token.check(check_symbols, ambient_facts,
+                new ArrayList<>(), new ArrayList<>(), new HashMap<>());
 
         Assert.assertTrue(res.isRight());
 
@@ -146,15 +146,15 @@ public class BiscuitTest extends TestCase {
                 fact("operation", Arrays.asList(s("ambient"), s("write"))).convert(check_symbols2)
         );
 
-        Either<Error, HashMap<String, HashMap<Long, Set<Fact>>>> res2 = final_token.check(check_symbols2, ambient_facts2,
-                new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new HashMap<>());
+        Either<Error, HashMap<String, Set<Fact>>> res2 = final_token.check(check_symbols2, ambient_facts2,
+                new ArrayList<>(), new ArrayList<>(), new HashMap<>());
         Assert.assertTrue(res2.isLeft());
         System.out.println(res2.getLeft());
 
         Assert.assertEquals(
                 new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
-                        new FailedCaveat().new FailedBlock(0, 0, "caveat1(0?) <- resource(#ambient, 0?) && operation(#ambient, #read) && right(#authority, 0?, #read) | "),
-                        new FailedCaveat().new FailedBlock(1, 0, "caveat2(#file1) <- resource(#ambient, #file1) | ")
+                        new FailedCaveat().new FailedBlock(1, 0, "caveat1(0?) <- resource(#ambient, 0?) && operation(#ambient, #read) && right(#authority, 0?, #read) | "),
+                        new FailedCaveat().new FailedBlock(2, 0, "caveat2(#file1) <- resource(#ambient, #file1) | ")
                 ))),
                 res2.getLeft());
     }
@@ -190,7 +190,7 @@ public class BiscuitTest extends TestCase {
         Verifier v1 = b2.verify(root.public_key()).get();
         v1.add_resource("/folder1/file1");
         v1.add_operation("read");
-        Either<Error, HashMap<String, HashMap<Long, Set<com.clevercloud.biscuit.token.builder.Fact>>>> res = v1.verify();
+        Either<Error, HashMap<String, Set<com.clevercloud.biscuit.token.builder.Fact>>> res = v1.verify();
         Assert.assertTrue(res.isRight());
 
         Verifier v2 = b2.verify(root.public_key()).get();
@@ -212,8 +212,8 @@ public class BiscuitTest extends TestCase {
         }
         Assert.assertEquals(
                 new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
-                        new FailedCaveat().new FailedBlock(0, 0, "prefix(0?) <- resource(#ambient, 0?) | 0? matches /folder1/*"),
-                        new FailedCaveat().new FailedBlock(0, 1, "check_right(#read) <- resource(#ambient, 0?) && operation(#ambient, #read) && right(#authority, 0?, #read) | ")
+                        new FailedCaveat().new FailedBlock(1, 0, "prefix(0?) <- resource(#ambient, 0?) | 0? matches /folder1/*"),
+                        new FailedCaveat().new FailedBlock(1, 1, "check_right(#read) <- resource(#ambient, 0?) && operation(#ambient, #read) && right(#authority, 0?, #read) | ")
                 ))),
                 e);
     }

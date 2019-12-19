@@ -248,18 +248,13 @@ public class Biscuit {
         }
     }
 
-    Either<Error, HashMap<String, HashMap<Long, Set<Fact>>>> check(SymbolTable symbols, List<Fact> ambient_facts, List<Rule> ambient_rules,
-                              List<Rule> verifier_authority_caveats, List<Rule> verifier_block_caveats,
-                              HashMap<String, Rule> queries){
+    Either<Error, HashMap<String, Set<Fact>>> check(SymbolTable symbols, List<Fact> ambient_facts, List<Rule> ambient_rules,
+                              List<Rule> verifier_caveats, HashMap<String, Rule> queries){
         World world = new World();
         long authority_index = symbols.get("authority").get();
         long ambient_index = symbols.get("ambient").get();
 
         for(Fact fact: this.authority.facts) {
-            if(!fact.predicate().ids().get(0).equals(new ID.Symbol(authority_index))) {
-                return Left(new Error().new FailedLogic(new LogicError().new InvalidAuthorityFact(symbols.print_fact(fact))));
-            }
-
             world.add_fact(fact);
         }
 
@@ -267,20 +262,7 @@ public class Biscuit {
             world.add_rule(rule);
         }
 
-        // check that all generated facts have the authority ID
-        for(Fact fact: world.facts()) {
-            if(!fact.predicate().ids().get(0).equals(new ID.Symbol(authority_index))) {
-                return Left(new Error().new FailedLogic(new LogicError().new InvalidAuthorityFact(symbols.print_fact(fact))));
-            }
-
-            world.add_fact(fact);
-        }
-
         for(Fact fact: ambient_facts) {
-            if(!fact.predicate().ids().get(0).equals(new ID.Symbol(ambient_index))) {
-                return Left(new Error().new FailedLogic(new LogicError().new InvalidAmbientFact(symbols.print_fact(fact))));
-            }
-
             world.add_fact(fact);
         }
 
@@ -288,15 +270,28 @@ public class Biscuit {
             world.add_rule(rule);
         }
 
+        for(int i = 0; i < this.blocks.size(); i++) {
+            Block b = this.blocks.get(i);
+            if (b.index != i + 1) {
+                return Left(new Error().new InvalidBlockIndex(1 + this.blocks.size(), this.blocks.get(i).index));
+            }
+
+            for (Fact fact : b.facts) {
+                if (fact.predicate().ids().get(0).equals(new ID.Symbol(authority_index)) ||
+                        fact.predicate().ids().get(0).equals(new ID.Symbol(ambient_index))) {
+                    return Left(new Error().new FailedLogic(new LogicError().new InvalidBlockFact(i, symbols.print_fact(fact))));
+                }
+
+                world.add_fact(fact);
+            }
+
+            for (Rule rule : b.rules) {
+                world.add_rule(rule);
+            }
+        }
         //System.out.println("world after adding ambient rules:\n"+symbols.print_world(world));
         world.run();
         //System.out.println("world after running rules:\n"+symbols.print_world(world));
-
-        // we only keep the verifier rules
-        world.clearRules();
-        for(Rule rule: ambient_rules) {
-            world.add_rule(rule);
-        }
 
         ArrayList<FailedCaveat> errors = new ArrayList<>();
         for (int j = 0; j < this.authority.caveats.size(); j++) {
@@ -307,42 +302,29 @@ public class Biscuit {
             }
         }
 
-        for (int j = 0; j < verifier_authority_caveats.size(); j++) {
-            Set<Fact> res = world.query_rule(verifier_authority_caveats.get(j));
+        for (int j = 0; j < verifier_caveats.size(); j++) {
+            Set<Fact> res = world.query_rule(verifier_caveats.get(j));
             if (res.isEmpty()) {
                 errors.add(new FailedCaveat().
-                        new FailedVerifier(0, j, symbols.print_rule(verifier_authority_caveats.get(j))));
+                        new FailedVerifier(j, symbols.print_rule(verifier_caveats.get(j))));
             }
-        }
-
-        HashMap<String, HashMap<Long, Set<Fact>>> query_results = new HashMap();
-        for(String name: queries.keySet()) {
-            HashMap<Long, Set<Fact>> qres = new HashMap();
-            Set<Fact> res = world.query_rule(queries.get(name));
-            qres.put(new Long(0), res);
-            query_results.put(name, qres);
         }
 
         for(int i = 0; i < this.blocks.size(); i++) {
-            if(this.blocks.get(i).index != i+1) {
-                return Left(new Error().new InvalidBlockIndex(1 + this.blocks.size(), this.blocks.get(i).index));
-            }
-
-            World w = new World(world);
-            Either<LogicError, Void> res = this.blocks.get(i).check(i, w, symbols, verifier_block_caveats, queries,
-                    query_results);
-            if(res.isLeft()) {
-
-                LogicError e = res.getLeft();
-                Option<List<FailedCaveat>> optErr = e.failed_caveats();
-                if(optErr.isEmpty()) {
-                    return Left(new Error().new FailedLogic(e));
-                } else {
-                    for(FailedCaveat f: optErr.get()) {
-                        errors.add(f);
-                    }
+            Block b = this.blocks.get(i);
+            for (int j = 0; j < b.caveats.size(); j++) {
+                Set<Fact> res = world.query_rule((b.caveats.get(j)));
+                if (res.isEmpty()) {
+                    errors.add(new FailedCaveat().
+                            new FailedBlock(b.index, j, symbols.print_rule(b.caveats.get(j))));
                 }
             }
+        }
+
+        HashMap<String, Set<Fact>> query_results = new HashMap();
+        for(String name: queries.keySet()) {
+            Set<Fact> res = world.query_rule(queries.get(name));
+            query_results.put(name, res);
         }
 
         if(errors.isEmpty()) {
