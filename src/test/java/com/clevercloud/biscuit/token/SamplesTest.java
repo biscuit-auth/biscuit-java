@@ -136,10 +136,7 @@ public class SamplesTest extends TestCase {
 
         Biscuit token = Biscuit.from_bytes(data).get();
 
-        Verifier v1 = token.verify(root).get();
-        v1.add_resource("file1");
-        v1.add_operation("read");
-        Either<Error, HashMap<String, Set<Fact>>> res = v1.verify();
+        Either<Error, Verifier> res = token.verify(root);
         System.out.println(token.print());
         System.out.println(res);
         if(res.isLeft()) {
@@ -161,10 +158,7 @@ public class SamplesTest extends TestCase {
         Biscuit token = Biscuit.from_bytes(data).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verify(root).get();
-        v1.add_resource("file1");
-        v1.add_operation("read");
-        Either<Error, HashMap<String, Set<Fact>>> res = v1.verify();
+        Either<Error, Verifier> res = token.verify(root);
         if(res.isLeft()) {
             System.out.println("error: "+res.getLeft());
         }
@@ -183,10 +177,7 @@ public class SamplesTest extends TestCase {
         Biscuit token = Biscuit.from_bytes(data).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verify(root).get();
-        v1.add_resource("file1");
-        v1.add_operation("read");
-        Either<Error, HashMap<String, Set<Fact>>> res = v1.verify();
+        Either<Error, Verifier> res = token.verify(root);
         if(res.isLeft()) {
             System.out.println("error: "+res.getLeft());
         }
