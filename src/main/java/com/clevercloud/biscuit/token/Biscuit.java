@@ -248,8 +248,7 @@ public class Biscuit {
         }
     }
 
-    Either<Error, HashMap<String, Set<Fact>>> check(SymbolTable symbols, List<Fact> ambient_facts, List<Rule> ambient_rules,
-                              List<Rule> verifier_caveats, HashMap<String, Rule> queries){
+    Either<Error, World> generate_world() {
         World world = new World();
         long authority_index = symbols.get("authority").get();
         long ambient_index = symbols.get("ambient").get();
@@ -259,14 +258,6 @@ public class Biscuit {
         }
 
         for(Rule rule: this.authority.rules) {
-            world.add_rule(rule);
-        }
-
-        for(Fact fact: ambient_facts) {
-            world.add_fact(fact);
-        }
-
-        for(Rule rule: ambient_rules) {
             world.add_rule(rule);
         }
 
@@ -289,6 +280,29 @@ public class Biscuit {
                 world.add_rule(rule);
             }
         }
+
+        return Right(world);
+    }
+
+    Either<Error, HashMap<String, Set<Fact>>> check(SymbolTable symbols, List<Fact> ambient_facts, List<Rule> ambient_rules,
+                              List<Rule> verifier_caveats, HashMap<String, Rule> queries){
+        Either<Error, World> wres = this.generate_world();
+
+        if (wres.isLeft()) {
+            Error e = wres.getLeft();
+            return Left(e);
+        }
+
+        World world = wres.get();
+
+        for(Fact fact: ambient_facts) {
+            world.add_fact(fact);
+        }
+
+        for(Rule rule: ambient_rules) {
+            world.add_rule(rule);
+        }
+
         //System.out.println("world after adding ambient rules:\n"+symbols.print_world(world));
         world.run();
         //System.out.println("world after running rules:\n"+symbols.print_world(world));
