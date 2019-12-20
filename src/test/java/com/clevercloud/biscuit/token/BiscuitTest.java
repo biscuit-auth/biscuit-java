@@ -190,7 +190,7 @@ public class BiscuitTest extends TestCase {
         Verifier v1 = b2.verify(root.public_key()).get();
         v1.add_resource("/folder1/file1");
         v1.add_operation("read");
-        Either<Error, HashMap<String, Set<com.clevercloud.biscuit.token.builder.Fact>>> res = v1.verify();
+        Either<Error, Void> res = v1.verify();
         Assert.assertTrue(res.isRight());
 
         Verifier v2 = b2.verify(root.public_key()).get();

@@ -26,7 +26,6 @@ import static io.vavr.API.Right;
 public class Verifier {
     Biscuit token;
     List<Rule> caveats;
-    HashMap<String, Rule> queries;
     World base_world;
     World world;
     SymbolTable symbols;
@@ -37,7 +36,6 @@ public class Verifier {
         this.world = new World(this.base_world);
         this.symbols = new SymbolTable(this.token.symbols);
         this.caveats = new ArrayList<>();
-        this.queries = new HashMap<>();
     }
 
     /**
@@ -71,7 +69,6 @@ public class Verifier {
         this.world = new World(this.base_world);
         this.symbols = new SymbolTable(this.token.symbols);
         this.caveats = new ArrayList<>();
-        this.queries = new HashMap<>();
     }
 
     public void add_fact(Fact fact) {
@@ -84,10 +81,6 @@ public class Verifier {
 
     public void add_caveat(Rule caveat) {
         this.caveats.add(caveat);
-    }
-
-    public void add_query(String name, Rule query) {
-        this.queries.put(name, query);
     }
 
     public void add_resource(String resource) {
@@ -112,7 +105,19 @@ public class Verifier {
         ));
     }
 
-    public Either<Error, HashMap<String, Set<Fact>>> verify() {
+    public Set<Fact> query(Rule query) {
+        world.run();
+        Set<com.clevercloud.biscuit.datalog.Fact> facts = world.query_rule(query.convert(symbols));
+        Set<Fact> s = new HashSet();
+
+        for(com.clevercloud.biscuit.datalog.Fact f: facts) {
+            s.add(Fact.convert_from(f, symbols));
+        }
+
+        return s;
+    }
+
+    public Either<Error, Void> verify() {
         if(this.token.symbols.get("authority").isEmpty() || this.token.symbols.get("ambient").isEmpty()) {
             return Left(new Error().new MissingSymbols());
         }
@@ -123,11 +128,6 @@ public class Verifier {
         ArrayList<com.clevercloud.biscuit.datalog.Rule> caveats = new ArrayList<>();
         for(Rule caveat: this.caveats) {
             caveats.add(caveat.convert(symbols));
-        }
-
-        HashMap<String, com.clevercloud.biscuit.datalog.Rule> queries = new HashMap<>();
-        for(String name: this.queries.keySet()) {
-            queries.put(name, this.queries.get(name).convert(symbols));
         }
 
         ArrayList<FailedCaveat> errors = new ArrayList<>();
@@ -159,26 +159,8 @@ public class Verifier {
             }
         }
 
-        HashMap<String, Set<com.clevercloud.biscuit.datalog.Fact>> query_results = new HashMap();
-        for(String name: queries.keySet()) {
-            Set<com.clevercloud.biscuit.datalog.Fact> res = world.query_rule(queries.get(name));
-            query_results.put(name, res);
-        }
-
         if(errors.isEmpty()) {
-            HashMap<String, Set<Fact>> results = new HashMap();
-
-            for(String key: query_results.keySet()) {
-                Set<Fact> s = new HashSet();
-
-                for(com.clevercloud.biscuit.datalog.Fact f: query_results.get(key)) {
-                    s.add(Fact.convert_from(f, symbols));
-                }
-
-                results.put(key, s);
-            }
-
-            return Right(results);
+            return Right(null);
         } else {
             System.out.println(errors);
             return Left(new Error().new FailedLogic(new LogicError().new FailedCaveats(errors)));
