@@ -36,7 +36,7 @@ public final class KeyPair {
 
     public KeyPair(String hex) {
         byte[] b = hexStringToByteArray(hex);
-        this.private_key = Scalar.fromBytesModOrderWide(b);
+        this.private_key = Scalar.fromBytesModOrder(b);
         this.public_key = Constants.RISTRETTO_GENERATOR.multiply(this.private_key);
     }
 
