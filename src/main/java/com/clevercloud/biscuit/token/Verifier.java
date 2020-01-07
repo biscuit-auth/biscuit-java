@@ -208,4 +208,8 @@ public class Verifier {
             return Left(new Error().new FailedLogic(new LogicError().new FailedCaveats(errors)));
         }
     }
+
+    public String print_world() {
+        return this.symbols.print_world(this.world);
+    }
 }
