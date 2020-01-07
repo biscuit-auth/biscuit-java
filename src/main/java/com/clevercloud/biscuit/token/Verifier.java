@@ -29,12 +29,14 @@ public class Verifier {
     List<Caveat> caveats;
     World base_world;
     World world;
+    SymbolTable base_symbols;
     SymbolTable symbols;
 
     private Verifier(Biscuit token, World w) {
         this.token = token;
         this.base_world = w;
         this.world = new World(this.base_world);
+        this.base_symbols = new SymbolTable(this.token.symbols);
         this.symbols = new SymbolTable(this.token.symbols);
         this.caveats = new ArrayList<>();
     }
@@ -68,8 +70,13 @@ public class Verifier {
 
     public void reset() {
         this.world = new World(this.base_world);
-        this.symbols = new SymbolTable(this.token.symbols);
+        this.symbols = new SymbolTable(this.base_symbols);
         this.caveats = new ArrayList<>();
+    }
+
+    public void snapshot() {
+        this.base_world = new World(this.world);
+        this.base_symbols = new SymbolTable(this.symbols);
     }
 
     public void add_fact(Fact fact) {
