@@ -7,7 +7,9 @@ import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.error.FailedCaveat;
 import com.clevercloud.biscuit.error.LogicError;
+import com.clevercloud.biscuit.token.builder.Caveat;
 import com.clevercloud.biscuit.token.builder.Fact;
+import com.clevercloud.biscuit.token.builder.Rule;
 import io.vavr.control.Either;
 import junit.framework.Assert;
 import junit.framework.Test;
@@ -16,6 +18,7 @@ import junit.framework.TestSuite;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Set;
@@ -244,7 +247,7 @@ public class SamplesTest extends TestCase {
         Verifier v1 = token.verify(root).get();
         v1.add_resource("file2");
         v1.add_operation("read");
-        v1.add_caveat(rule(
+        v1.add_caveat(caveat(rule(
                 "caveat1",
                 Arrays.asList(var(0)),
                 Arrays.asList(
@@ -252,7 +255,7 @@ public class SamplesTest extends TestCase {
                         pred("operation", Arrays.asList(s("ambient"), var(1))),
                         pred("right", Arrays.asList(s("authority"), var(0), var(1)))
                 )
-        ));
+        )));
         Either<Error, Void> res = v1.verify();
         System.out.println(res);
         Error e = res.getLeft();
@@ -355,5 +358,38 @@ public class SamplesTest extends TestCase {
         v2.set_time();
         Assert.assertTrue(v2.verify().isRight());
 
+    }
+
+    public void test15_MultiQueriesCaveats() throws IOException, InvalidEncodingException {
+        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("test15_multi_queries_caveats.bc");
+
+        byte[] data = new byte[inputStream.available()];
+        inputStream.read(data);
+
+        Biscuit token = Biscuit.from_bytes(data).get();
+        System.out.println(token.print());
+
+        Verifier v1 = token.verify(root).get();
+        ArrayList<Rule> queries = new ArrayList<>();
+        queries.add(rule(
+                "test_must_be_present_authority",
+                Arrays.asList(var(0)),
+                Arrays.asList(
+                        pred("must_be_present", Arrays.asList(s("authority"), var(0)))
+                )
+                ));
+        queries.add(rule(
+                "test_must_be_present",
+                Arrays.asList(var(0)),
+                Arrays.asList(
+                        pred("mst_be_present", Arrays.asList(var(0)))
+                )
+        ));
+        v1.add_caveat(new Caveat(queries));
+
+        Assert.assertTrue(v1.verify().isRight());
     }
 }

@@ -4,6 +4,7 @@ import com.clevercloud.biscuit.crypto.KeyPair;
 import com.clevercloud.biscuit.datalog.Fact;
 import com.clevercloud.biscuit.datalog.Rule;
 import com.clevercloud.biscuit.datalog.SymbolTable;
+import com.clevercloud.biscuit.datalog.Caveat;
 import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.token.Block;
 import io.vavr.control.Either;
@@ -23,7 +24,7 @@ public class Biscuit {
     String context;
     List<Fact> facts;
     List<Rule> rules;
-    List<Rule> caveats;
+    List<Caveat> caveats;
 
     public Biscuit(final SecureRandom rng, final KeyPair root, SymbolTable base_symbols) {
         this.rng = rng;
@@ -59,8 +60,8 @@ public class Biscuit {
         this.rules.add(rule.convert(this.symbols));
     }
 
-    public void add_authority_caveat(com.clevercloud.biscuit.token.builder.Rule rule) {
-        this.caveats.add(rule.convert(this.symbols));
+    public void add_authority_caveat(com.clevercloud.biscuit.token.builder.Caveat c) {
+        this.caveats.add(c.convert(this.symbols));
     }
 
     public  void set_context(String context) {

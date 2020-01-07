@@ -11,6 +11,7 @@ import com.clevercloud.biscuit.error.FailedCaveat;
 import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.builder.Fact;
 import com.clevercloud.biscuit.token.builder.Rule;
+import com.clevercloud.biscuit.token.builder.Caveat;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 
@@ -25,7 +26,7 @@ import static io.vavr.API.Right;
  */
 public class Verifier {
     Biscuit token;
-    List<Rule> caveats;
+    List<Caveat> caveats;
     World base_world;
     World world;
     SymbolTable symbols;
@@ -79,7 +80,7 @@ public class Verifier {
         world.add_rule(rule.convert(symbols));
     }
 
-    public void add_caveat(Rule caveat) {
+    public void add_caveat(Caveat caveat) {
         this.caveats.add(caveat);
     }
 
@@ -97,12 +98,16 @@ public class Verifier {
     }
 
     public void revocation_check(List<Long> ids) {
-        this.caveats.add(constrained_rule(
+        ArrayList<Rule> q = new ArrayList<>();
+
+        q.add(constrained_rule(
                 "revocation_check",
                 Arrays.asList((var(0))),
                 Arrays.asList(pred("revocation_id", Arrays.asList(var(0)))),
                 Arrays.asList(new Constraint(0, new ConstraintKind.Int(new IntConstraint.NotInSet(new HashSet(ids)))))
         ));
+
+        this.caveats.add(new Caveat(q));
     }
 
     public Set<Fact> query(Rule query) {
@@ -125,36 +130,66 @@ public class Verifier {
         world.run();
         SymbolTable symbols = new SymbolTable(this.token.symbols);
 
-        ArrayList<com.clevercloud.biscuit.datalog.Rule> caveats = new ArrayList<>();
-        for(Rule caveat: this.caveats) {
+        ArrayList<com.clevercloud.biscuit.datalog.Caveat> caveats = new ArrayList<>();
+        for(Caveat caveat: this.caveats) {
             caveats.add(caveat.convert(symbols));
         }
 
         ArrayList<FailedCaveat> errors = new ArrayList<>();
         for (int j = 0; j < this.token.authority.caveats.size(); j++) {
-            Set<com.clevercloud.biscuit.datalog.Fact> res = world.query_rule(this.token.authority.caveats.get(j));
-            if (res.isEmpty()) {
+            boolean successful = false;
+            com.clevercloud.biscuit.datalog.Caveat c = this.token.authority.caveats.get(j);
+
+            for(int k = 0; k < c.queries().size(); k++) {
+                Set<com.clevercloud.biscuit.datalog.Fact> res = world.query_rule(c.queries().get(k));
+                if (!res.isEmpty()) {
+                    successful = true;
+                    break;
+                }
+            }
+
+            if (!successful) {
                 errors.add(new FailedCaveat().
-                        new FailedBlock(0, j, symbols.print_rule(this.token.authority.caveats.get(j))));
+                        new FailedBlock(0, j, symbols.print_caveat(this.token.authority.caveats.get(j))));
             }
         }
 
         for (int j = 0; j < this.caveats.size(); j++) {
-            com.clevercloud.biscuit.datalog.Rule caveat = this.caveats.get(j).convert(symbols);
-            Set<com.clevercloud.biscuit.datalog.Fact> res = world.query_rule(caveat);
-            if (res.isEmpty()) {
+            com.clevercloud.biscuit.datalog.Caveat c = this.caveats.get(j).convert(symbols);
+            boolean successful = false;
+
+            for(int k = 0; k < c.queries().size(); k++) {
+                Set<com.clevercloud.biscuit.datalog.Fact> res = world.query_rule(c.queries().get(k));
+                if (!res.isEmpty()) {
+                    successful = true;
+                    break;
+                }
+            }
+
+            if (!successful) {
                 errors.add(new FailedCaveat().
-                        new FailedVerifier(j, symbols.print_rule(caveat)));
+                        new FailedVerifier(j, symbols.print_caveat(c)));
             }
         }
 
         for(int i = 0; i < this.token.blocks.size(); i++) {
             Block b = this.token.blocks.get(i);
+
             for (int j = 0; j < b.caveats.size(); j++) {
-                Set<com.clevercloud.biscuit.datalog.Fact> res = world.query_rule((b.caveats.get(j)));
-                if (res.isEmpty()) {
+                boolean successful = false;
+                com.clevercloud.biscuit.datalog.Caveat c = b.caveats.get(j);
+
+                for(int k = 0; k < c.queries().size(); k++) {
+                    Set<com.clevercloud.biscuit.datalog.Fact> res = world.query_rule(c.queries().get(k));
+                    if (!res.isEmpty()) {
+                        successful = true;
+                        break;
+                    }
+                }
+
+                if (!successful) {
                     errors.add(new FailedCaveat().
-                            new FailedBlock(b.index, j, symbols.print_rule(b.caveats.get(j))));
+                            new FailedBlock(b.index, j, symbols.print_caveat(b.caveats.get(j))));
                 }
             }
         }

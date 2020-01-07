@@ -285,7 +285,7 @@ public class Biscuit {
     }
 
     Either<Error, HashMap<String, Set<Fact>>> check(SymbolTable symbols, List<Fact> ambient_facts, List<Rule> ambient_rules,
-                              List<Rule> verifier_caveats, HashMap<String, Rule> queries){
+                              List<Caveat> verifier_caveats, HashMap<String, Rule> queries){
         Either<Error, World> wres = this.generate_world();
 
         if (wres.isLeft()) {
@@ -309,28 +309,59 @@ public class Biscuit {
 
         ArrayList<FailedCaveat> errors = new ArrayList<>();
         for (int j = 0; j < this.authority.caveats.size(); j++) {
-            Set<Fact> res = world.query_rule(this.authority.caveats.get(j));
-            if (res.isEmpty()) {
+            boolean successful = false;
+            Caveat c = this.authority.caveats.get(j);
+
+            for(int k = 0; k < c.queries().size(); k++) {
+                Set<Fact> res = world.query_rule(c.queries().get(k));
+                if (!res.isEmpty()) {
+                    successful = true;
+                    break;
+                }
+            }
+
+            if (!successful) {
                 errors.add(new FailedCaveat().
-                        new FailedBlock(0, j, symbols.print_rule(this.authority.caveats.get(j))));
+                        new FailedBlock(0, j, symbols.print_caveat(this.authority.caveats.get(j))));
             }
         }
 
         for (int j = 0; j < verifier_caveats.size(); j++) {
-            Set<Fact> res = world.query_rule(verifier_caveats.get(j));
-            if (res.isEmpty()) {
+            boolean successful = false;
+            Caveat c = verifier_caveats.get(j);
+
+            for(int k = 0; k < c.queries().size(); k++) {
+                Set<Fact> res = world.query_rule(c.queries().get(k));
+                if (!res.isEmpty()) {
+                    successful = true;
+                    break;
+                }
+            }
+
+            if (!successful) {
                 errors.add(new FailedCaveat().
-                        new FailedVerifier(j, symbols.print_rule(verifier_caveats.get(j))));
+                        new FailedVerifier(j, symbols.print_caveat(verifier_caveats.get(j))));
             }
         }
 
         for(int i = 0; i < this.blocks.size(); i++) {
             Block b = this.blocks.get(i);
+
             for (int j = 0; j < b.caveats.size(); j++) {
-                Set<Fact> res = world.query_rule((b.caveats.get(j)));
-                if (res.isEmpty()) {
+                boolean successful = false;
+                Caveat c = b.caveats.get(j);
+
+                for(int k = 0; k < c.queries().size(); k++) {
+                    Set<Fact> res = world.query_rule(c.queries().get(k));
+                    if (!res.isEmpty()) {
+                        successful = true;
+                        break;
+                    }
+                }
+
+                if (!successful) {
                     errors.add(new FailedCaveat().
-                            new FailedBlock(b.index, j, symbols.print_rule(b.caveats.get(j))));
+                            new FailedBlock(b.index, j, symbols.print_caveat(b.caveats.get(j))));
                 }
             }
         }

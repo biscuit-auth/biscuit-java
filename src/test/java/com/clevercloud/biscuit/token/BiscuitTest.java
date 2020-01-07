@@ -66,7 +66,7 @@ public class BiscuitTest extends TestCase {
         KeyPair keypair2 = new KeyPair(rng);
 
         Block builder = deser.create_block();
-        builder.add_caveat(rule(
+        builder.add_caveat(caveat(rule(
                 "caveat1",
                 Arrays.asList(var(0)),
                 Arrays.asList(
@@ -74,7 +74,7 @@ public class BiscuitTest extends TestCase {
                         pred("operation", Arrays.asList(s("ambient"), s("read"))),
                         pred("right", Arrays.asList(s("authority"), var(0), s("read")))
                 )
-        ));
+        )));
 
         Biscuit b2 = deser.append(rng, keypair2, builder.build()).get();
 
@@ -99,13 +99,13 @@ public class BiscuitTest extends TestCase {
         KeyPair keypair3 = new KeyPair(rng);
 
         Block builder3 = deser2.create_block();
-        builder3.add_caveat(rule(
+        builder3.add_caveat(caveat(rule(
                 "caveat2",
                 Arrays.asList(s("file1")),
                 Arrays.asList(
                         pred("resource", Arrays.asList(s("ambient"), s("file1")))
                 )
-        ));
+        )));
 
         Biscuit b3 = deser2.append(rng, keypair3, builder3.build()).get();
 
@@ -256,7 +256,7 @@ public class BiscuitTest extends TestCase {
         KeyPair keypair2 = new KeyPair(rng);
 
         Block builder = deser.create_block();
-        builder.add_caveat(rule(
+        builder.add_caveat(caveat(rule(
                 "caveat1",
                 Arrays.asList(var(0)),
                 Arrays.asList(
@@ -264,7 +264,7 @@ public class BiscuitTest extends TestCase {
                         pred("operation", Arrays.asList(s("ambient"), s("read"))),
                         pred("right", Arrays.asList(s("authority"), var(0), s("read")))
                 )
-        ));
+        )));
 
         Biscuit b2 = deser.append(rng, keypair2, builder.build()).get();
 

@@ -26,6 +26,10 @@ public class Utils {
         return new com.clevercloud.biscuit.token.builder.Rule(pred(head_name, head_ids), predicates, constraints);
     }
 
+    public static com.clevercloud.biscuit.token.builder.Caveat caveat(com.clevercloud.biscuit.token.builder.Rule rule) {
+        return new com.clevercloud.biscuit.token.builder.Caveat(rule);
+    }
+
     public static Atom integer(long i) {
         return new Atom.Integer(i);
     }

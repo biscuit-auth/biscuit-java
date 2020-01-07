@@ -66,6 +66,11 @@ public final class SymbolTable implements Serializable {
       return this.print_predicate(f.predicate());
    }
 
+   public String print_caveat(final Caveat c) {
+      final List<String> queries = c.queries().stream().map((q) -> this.print_rule(q)).collect(Collectors.toList());
+      return String.join(" || ", queries);
+   }
+
    public String print_world(final World w) {
       final List<String> facts = w.facts().stream().map((f) -> this.print_fact(f)).collect(Collectors.toList());
       final List<String> rules = w.rules().stream().map((r) -> this.print_rule(r)).collect(Collectors.toList());

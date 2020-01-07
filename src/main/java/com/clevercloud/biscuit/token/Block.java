@@ -27,7 +27,7 @@ public class Block {
     final String context;
     final List<Fact> facts;
     final List<Rule> rules;
-    final List<Rule> caveats;
+    final List<Caveat> caveats;
 
     /**
      * creates a new block
@@ -50,7 +50,7 @@ public class Block {
      * @param facts
      * @param caveats
      */
-    public Block(long index, SymbolTable base_symbols, String context, List<Fact> facts, List<Rule> rules, List<Rule> caveats) {
+    public Block(long index, SymbolTable base_symbols, String context, List<Fact> facts, List<Rule> rules, List<Caveat> caveats) {
         this.index = index;
         this.symbols = base_symbols;
         this.context=  context;
@@ -59,7 +59,7 @@ public class Block {
         this.caveats = caveats;
     }
 
-    Either<LogicError, Void> check(long i, World w, SymbolTable symbols, List<Rule> verifier_caveats,
+    Either<LogicError, Void> check(long i, World w, SymbolTable symbols, List<Caveat> verifier_caveats,
                                    HashMap<String, Rule> queries, HashMap<String, HashMap<Long, Set<Fact>>> query_results) {
         World world = new World(w);
         long authority_index = symbols.get("authority").get().longValue();
@@ -83,18 +83,38 @@ public class Block {
         ArrayList<FailedCaveat> errors = new ArrayList<>();
 
         for (int j = 0; j < this.caveats.size(); j++) {
-            Set<Fact> res = world.query_rule((this.caveats.get(j)));
-            if (res.isEmpty()) {
+            boolean successful = false;
+            Caveat c = this.caveats.get(j);
+
+            for(int k = 0; k < c.queries().size(); k++) {
+                Set<Fact> res = world.query_rule(c.queries().get(k));
+                if (!res.isEmpty()) {
+                    successful = true;
+                    break;
+                }
+            }
+
+            if (!successful) {
                 errors.add(new FailedCaveat().
-                        new FailedBlock(i, j, symbols.print_rule(this.caveats.get(j))));
+                        new FailedBlock(i, j, symbols.print_caveat(this.caveats.get(j))));
             }
         }
 
         for (int j = 0; j < verifier_caveats.size(); j++) {
-            Set<Fact> res = world.query_rule((verifier_caveats.get(j)));
-            if (res.isEmpty()) {
+            boolean successful = false;
+            Caveat c = verifier_caveats.get(j);
+
+            for(int k = 0; k < c.queries().size(); k++) {
+                Set<Fact> res = world.query_rule(c.queries().get(k));
+                if (!res.isEmpty()) {
+                    successful = true;
+                    break;
+                }
+            }
+
+            if (!successful) {
                 errors.add(new FailedCaveat().
-                        new FailedVerifier(j, symbols.print_rule(verifier_caveats.get(j))));
+                        new FailedVerifier(j, symbols.print_caveat(verifier_caveats.get(j))));
             }
         }
 
@@ -135,9 +155,9 @@ public class Block {
             s.append(symbol_table.print_rule(r));
         }
         s.append("\n\t\t]\n\t\tcaveats: [");
-        for(Rule r: this.caveats) {
+        for(Caveat c: this.caveats) {
             s.append("\n\t\t\t");
-            s.append(symbol_table.print_rule(r));
+            s.append(symbol_table.print_caveat(c));
         }
         s.append("\n\t\t]\n\t}");
 
@@ -208,9 +228,9 @@ public class Block {
             }
         }
 
-        ArrayList<Rule> caveats = new ArrayList<>();
-        for (Schema.Rule caveat : b.getCaveatsList()) {
-            Either<Error.FormatError, Rule> res = Rule.deserialize(caveat);
+        ArrayList<Caveat> caveats = new ArrayList<>();
+        for (Schema.Caveat caveat : b.getCaveatsList()) {
+            Either<Error.FormatError, Caveat> res = Caveat.deserialize(caveat);
             if (res.isLeft()) {
                 Error.FormatError e = res.getLeft();
                 return Left(e);
