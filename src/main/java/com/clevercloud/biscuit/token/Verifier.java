@@ -130,17 +130,12 @@ public class Verifier {
     }
 
     public Either<Error, Void> verify() {
-        if(this.token.symbols.get("authority").isEmpty() || this.token.symbols.get("ambient").isEmpty()) {
+        if(this.symbols.get("authority").isEmpty() || this.symbols.get("ambient").isEmpty()) {
             return Left(new Error().new MissingSymbols());
         }
 
         world.run();
-        SymbolTable symbols = new SymbolTable(this.token.symbols);
-
-        ArrayList<com.clevercloud.biscuit.datalog.Caveat> caveats = new ArrayList<>();
-        for(Caveat caveat: this.caveats) {
-            caveats.add(caveat.convert(symbols));
-        }
+        SymbolTable symbols = new SymbolTable(this.symbols);
 
         ArrayList<FailedCaveat> errors = new ArrayList<>();
         for (int j = 0; j < this.token.authority.caveats.size(); j++) {
