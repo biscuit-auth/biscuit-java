@@ -105,6 +105,10 @@
                                 <goals>
                                     <goal>sign</goal>
                                 </goals>
+                                <configuration>
+                                    <keyname>mavencentral@clever-cloud.com</keyname>
+                                    <passphraseServerId>mavencentral@clever-cloud.com</passphraseServerId>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
