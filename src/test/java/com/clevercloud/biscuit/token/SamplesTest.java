@@ -392,4 +392,28 @@ public class SamplesTest extends TestCase {
 
         Assert.assertTrue(v1.verify().isRight());
     }
+
+    public void test16_CaveatHeadName() throws IOException, InvalidEncodingException {
+        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("test16_caveat_head_name.bc");
+
+        byte[] data = new byte[inputStream.available()];
+        inputStream.read(data);
+
+        Biscuit token = Biscuit.from_bytes(data).get();
+        System.out.println(token.print());
+
+        Verifier v1 = token.verify(root).get();
+
+        Either<Error, Void> res = v1.verify();
+        System.out.println(res);
+        Error e = res.getLeft();
+        Assert.assertEquals(
+                new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
+                        new FailedCaveat().new FailedBlock(0, 0, "caveat1(#test) <- resource(#ambient, #hello) | ")
+                ))),
+                e);
+    }
 }
