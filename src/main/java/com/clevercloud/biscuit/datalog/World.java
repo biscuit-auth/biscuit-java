@@ -53,7 +53,8 @@ public final class World implements Serializable {
          for (int i = 0; i < min_size; ++i) {
             final ID fid = f.predicate().ids().get(i);
             final ID pid = pred.ids().get(i);
-            if ((fid instanceof ID.Symbol || fid instanceof ID.Integer || fid instanceof ID.Str) && fid.getClass() == pid.getClass()) {
+            if ((fid instanceof ID.Symbol || fid instanceof ID.Integer || fid instanceof ID.Str || fid instanceof ID.Date)
+                    && fid.getClass() == pid.getClass()) {
                if (!fid.equals(pid)) {
                   return false;
                }
