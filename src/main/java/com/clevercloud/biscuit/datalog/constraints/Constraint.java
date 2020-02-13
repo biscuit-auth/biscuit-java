@@ -42,7 +42,7 @@ public final class Constraint implements Serializable {
 
    @Override
    public String toString() {
-      return this.id + "? " + this.kind.toString();
+      return "$" + this.id + " " + this.kind.toString();
    }
 
    public Schema.Constraint serialize() {

@@ -165,7 +165,7 @@ public class SamplesTest extends TestCase {
         if(res.isLeft()) {
             System.out.println("error: "+res.getLeft());
         }
-        Assert.assertEquals(new Error().new FailedLogic(new LogicError().new InvalidBlockFact(0, "right(#authority, \"file1\", #write)")), res.getLeft());
+        Assert.assertEquals(new Error().new FailedLogic(new LogicError().new InvalidBlockFact(0, "!right(#authority, \"file1\", #write)")), res.getLeft());
     }
 
     public void test8_invalid_block_fact_ambient() throws IOException, InvalidEncodingException {
@@ -184,7 +184,7 @@ public class SamplesTest extends TestCase {
         if(res.isLeft()) {
             System.out.println("error: "+res.getLeft());
         }
-        Assert.assertEquals(new Error().new FailedLogic(new LogicError().new InvalidBlockFact(0, "right(#ambient, \"file1\", #write)")), res.getLeft());
+        Assert.assertEquals(new Error().new FailedLogic(new LogicError().new InvalidBlockFact(0, "!right(#ambient, \"file1\", #write)")), res.getLeft());
     }
 
     public void test9_ExpiredToken() throws IOException, InvalidEncodingException {
@@ -206,7 +206,7 @@ public class SamplesTest extends TestCase {
         Error e = v1.verify().getLeft();
         Assert.assertEquals(
                 new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
-                        new FailedCaveat().new FailedBlock(1, 1, "expiration(0?) <- time(#ambient, 0?) | 0? <= 1545264000")
+                        new FailedCaveat().new FailedBlock(1, 1, "*expiration($0) <- !time(#ambient, $0) @ $0 <= 1545264000")
                 ))),
                 e);
     }
@@ -261,7 +261,7 @@ public class SamplesTest extends TestCase {
         Error e = res.getLeft();
         Assert.assertEquals(
                 new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
-                        new FailedCaveat().new FailedVerifier(0, "caveat1(0?) <- resource(#ambient, 0?) && operation(#ambient, 1?) && right(#authority, 0?, 1?) | ")
+                        new FailedCaveat().new FailedVerifier(0, "*caveat1($0) <- !resource(#ambient, $0), !operation(#ambient, $1), !right(#authority, $0, $1)")
                 ))),
                 e);
     }
@@ -292,7 +292,7 @@ public class SamplesTest extends TestCase {
         Error e = res.getLeft();
         Assert.assertEquals(
                 new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
-                        new FailedCaveat().new FailedBlock(0, 0, "caveat1(\"file1\") <- resource(#ambient, \"file1\") | ")
+                        new FailedCaveat().new FailedBlock(0, 0, "*caveat1(\"file1\") <- !resource(#ambient, \"file1\")")
                 ))),
                 e);
     }
@@ -323,7 +323,7 @@ public class SamplesTest extends TestCase {
         Error e = res.getLeft();
         Assert.assertEquals(
                 new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
-                        new FailedCaveat().new FailedBlock(1, 0, "caveat1(0?) <- valid_date(0?) && resource(#ambient, 0?) | ")
+                        new FailedCaveat().new FailedBlock(1, 0, "*caveat1($0) <- !valid_date($0), !resource(#ambient, $0)")
                 ))),
                 e);
     }
@@ -349,7 +349,7 @@ public class SamplesTest extends TestCase {
         Error e = res.getLeft();
         Assert.assertEquals(
                 new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
-                        new FailedCaveat().new FailedBlock(0, 0, "resource_match(0?) <- resource(#ambient, 0?) | 0? matches /file[0-9]+.txt/")
+                        new FailedCaveat().new FailedBlock(0, 0, "*resource_match($0) <- !resource(#ambient, $0) @ $0 matches /file[0-9]+.txt/")
                 ))),
                 e);
 
@@ -412,7 +412,7 @@ public class SamplesTest extends TestCase {
         Error e = res.getLeft();
         Assert.assertEquals(
                 new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
-                        new FailedCaveat().new FailedBlock(0, 0, "caveat1(#test) <- resource(#ambient, #hello) | ")
+                        new FailedCaveat().new FailedBlock(0, 0, "*caveat1(#test) <- !resource(#ambient, #hello)")
                 ))),
                 e);
     }

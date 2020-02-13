@@ -36,17 +36,21 @@ public final class SymbolTable implements Serializable {
    }
 
    public String print_rule(final Rule r) {
-      final String res = this.print_predicate(r.head());
-      final List<String> preds = r.body().stream().map((p) -> this.print_predicate(p)).collect(Collectors.toList());
+      String res = "*"+this.print_predicate(r.head());
+      final List<String> preds = r.body().stream().map((p) -> "!"+this.print_predicate(p)).collect(Collectors.toList());
       final List<String> constraints = r.constraints().stream().map((c) -> c.toString()).collect(Collectors.toList());
 
-      return res + " <- " + String.join(" && ", preds) + " | " + String.join(" && ", constraints);
+      res += " <- " + String.join(", ", preds);
+      if(!constraints.isEmpty()) {
+         res += " @ " + String.join(", ", constraints);
+      }
+      return res;
    }
 
    public String print_predicate(final Predicate p) {
       List<String> ids = p.ids().stream().map((i) -> {
          if (i instanceof ID.Variable) {
-            return ((ID.Variable) i).value() + "?";
+            return "$" + ((ID.Variable) i).value();
          } else if (i instanceof ID.Symbol) {
             return "#" + this.symbols.get((int) ((ID.Symbol) i).value());
          } else if (i instanceof ID.Date) {
@@ -63,7 +67,7 @@ public final class SymbolTable implements Serializable {
    }
 
    public String print_fact(final Fact f) {
-      return this.print_predicate(f.predicate());
+      return "!" + this.print_predicate(f.predicate());
    }
 
    public String print_caveat(final Caveat c) {
