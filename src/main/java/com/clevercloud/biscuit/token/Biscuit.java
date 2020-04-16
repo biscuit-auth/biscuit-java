@@ -89,6 +89,22 @@ public class Biscuit {
     }
 
     /**
+     * Deserializes a Biscuit token from a hex string
+     *
+     * This checks the signature, but does not verify that the first key is the root key,
+     * to allow appending blocks without knowing about the root key.
+     *
+     * The root key check is performed in the verify method
+     *
+     * This method uses the default symbol table
+     * @param data
+     * @return
+     */
+    static public Either<Error, Biscuit> from_b64(String data)  {
+        return Biscuit.from_bytes(Base64.getDecoder().decode(data));
+    }
+
+    /**
      * Deserializes a Biscuit token from a byte array
      *
      * This checks the signature, but does not verify that the first key is the root key,
@@ -178,6 +194,13 @@ public class Biscuit {
         return this.container.get().serialize();
     }
 
+    /**
+     * Serializes a token to a base 64 String
+     * @return
+     */
+    public Either<Error.FormatError, String> serialize_b64() {
+        return serialize().map(Base64.getEncoder()::encodeToString);
+    }
 
     public static Either<Error, Biscuit> from_sealed(byte[] data, byte[] secret)  {
         //FIXME: needs a version of from_sealed with custom symbol table support
