@@ -88,6 +88,19 @@ public class Biscuit {
         this.container = container;
     }
 
+    public Biscuit(Biscuit that) {
+        this.authority = new Block(that.authority);
+        List<Block> blocks = new ArrayList<>();
+        blocks.addAll(that.blocks);
+        this.blocks = blocks;
+        this.symbols = new SymbolTable(that.symbols);
+        if (that.container.isDefined()) {
+            this.container = Option.some(that.container.map(SerializedBiscuit::new).get());
+        } else {
+            this.container = Option.none();
+        }
+    }
+
     /**
      * Deserializes a Biscuit token from a hex string
      *

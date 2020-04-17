@@ -17,6 +17,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static io.vavr.API.Left;
@@ -186,5 +187,16 @@ public class SerializedBiscuit {
         this.blocks = blocks;
         this.keys = keys;
         this.signature = signature;
+    }
+
+    public SerializedBiscuit(SerializedBiscuit that) {
+        this.authority = Arrays.copyOf(that.authority, that.authority.length);
+        List<byte[]> blocks = new ArrayList<>();
+        blocks.addAll(that.blocks);
+        this.blocks = blocks;
+        List<RistrettoElement> keys = new ArrayList<>();
+        keys.addAll(that.keys);
+        this.keys = keys;
+        this.signature = new TokenSignature(that.signature);
     }
 }

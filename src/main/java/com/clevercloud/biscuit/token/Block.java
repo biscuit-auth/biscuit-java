@@ -59,6 +59,21 @@ public class Block {
         this.caveats = caveats;
     }
 
+    public Block(Block that) {
+        this.index = that.index;
+        this.symbols = new SymbolTable(that.symbols);
+        this.context = that.context;
+        List<Fact> facts = new ArrayList<>();
+        facts.addAll(that.facts);
+        this.facts = facts;
+        List<Rule> rules = new ArrayList<>();
+        rules.addAll(that.rules);
+        this.rules = rules;
+        List<Caveat> caveats = new ArrayList<>();
+        caveats.addAll(that.caveats);
+        this.caveats = caveats;
+    }
+
     Either<LogicError, Void> check(long i, World w, SymbolTable symbols, List<Caveat> verifier_caveats,
                                    HashMap<String, Rule> queries, HashMap<String, HashMap<Long, Set<Fact>>> query_results) {
         World world = new World(w);

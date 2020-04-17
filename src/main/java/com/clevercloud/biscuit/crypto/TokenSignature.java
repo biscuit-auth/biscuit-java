@@ -49,6 +49,13 @@ public class TokenSignature {
         this.z = z;
     }
 
+    public TokenSignature(TokenSignature that) {
+        ArrayList<RistrettoElement> parameters = new ArrayList<>();
+        parameters.addAll(that.parameters);
+        this.parameters = parameters;
+        this.z = Scalar.fromBytesModOrder(that.z.toByteArray());
+    }
+
     /**
      * Generates a new valid signature from an existing one, a private key and a message
      * @param rng
