@@ -2,6 +2,7 @@ package com.clevercloud.biscuit.token;
 
 import com.clevercloud.biscuit.crypto.KeyPair;
 import com.clevercloud.biscuit.datalog.*;
+import com.clevercloud.biscuit.datalog.constraints.Constraint;
 import com.clevercloud.biscuit.error.FailedCaveat;
 import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.error.Error;
@@ -291,5 +292,133 @@ public class BiscuitTest extends TestCase {
         System.out.println("trying to append to a sealed token");
         Block builder2 = deser2.create_block();
         Error e2 = deser2.append(rng, keypair2, builder.build()).getLeft();
+    }
+
+    public void testBiscuitCopy() {
+        byte[] seed = {0, 0, 0, 0};
+        SecureRandom rng = new SecureRandom(seed);
+
+        System.out.println("preparing the authority block");
+
+        KeyPair root = new KeyPair(rng);
+
+        SymbolTable symbols = Biscuit.default_symbol_table();
+        Block authority_builder = new Block(0, symbols);
+
+        authority_builder.add_fact(fact("right", Arrays.asList(s("authority"), s("file1"), s("read"))));
+        authority_builder.add_fact(fact("right", Arrays.asList(s("authority"), s("file2"), s("read"))));
+        authority_builder.add_fact(fact("right", Arrays.asList(s("authority"), s("file1"), s("write"))));
+
+        Biscuit b = Biscuit.make(rng, root, Biscuit.default_symbol_table(), authority_builder.build()).get();
+        Biscuit b2 = new Biscuit(b);
+
+        System.out.println(b.toString());
+        System.out.println(b2.toString());
+
+        assertEquals(b, b2);
+        assertFalse(b == b2);
+
+        assertEquals(b.authority, b2.authority);
+        assertFalse(b.authority == b2.authority);
+
+        assertEquals(b.blocks, b2.blocks);
+        assertFalse(b.blocks == b2.blocks);
+        for (int i = 0; i < b.blocks.size(); i++) {
+            com.clevercloud.biscuit.token.Block bBlock = b.blocks.get(i);
+            com.clevercloud.biscuit.token.Block b2Block = b.blocks.get(i);
+
+            assertEquals(bBlock, b2Block);
+            assertFalse(bBlock == b2Block);
+
+            assertEquals(bBlock.index, b2Block.index);
+            assertEquals(bBlock.context, b2Block.context);
+            assertFalse(bBlock.context == b2Block.context);
+
+            assertEquals(bBlock.caveats, b2Block.caveats);
+            assertFalse(bBlock.caveats == b2Block.caveats);
+            for (int j = 0; j < bBlock.caveats.size(); j++) {
+                Caveat c = bBlock.caveats.get(j);
+                Caveat c2 = b2Block.caveats.get(j);
+
+                assertEquals(c, c2);
+                assertFalse(c == c2);
+
+                for (int k = 0; k < c.queries().size(); k ++) {
+                    Rule r = c.queries().get(k);
+                    Rule r2 = c2.queries().get(k);
+
+                    assertEquals(r, r2);
+                    assertFalse(r == r2);
+
+                    for (int l = 0; l < r.body().size(); l++) {
+                        Predicate p = r.body().get(l);
+                        Predicate p2 = r2.body().get(l);
+
+                        assertEquals(p, p2);
+                        assertFalse(p == p2);
+                    }
+
+                    for (int l = 0; l < r.constraints().size(); l++) {
+                        Constraint ct = r.constraints().get(l);
+                        Constraint ct2 = r2.constraints().get(l);
+
+                        assertEquals(ct, ct2);
+                        assertFalse(ct == ct2);
+                    }
+                }
+            }
+
+            assertEquals(bBlock.rules, b2Block.rules);
+            assertFalse(bBlock.rules == b2Block.rules);
+            for (int j = 0; j < bBlock.rules.size(); j++) {
+                Rule r = bBlock.rules.get(j);
+                Rule r2 = b2Block.rules.get(j);
+
+                assertEquals(r, r2);
+                assertFalse(r == r2);
+
+                for (int l = 0; l < r.body().size(); l++) {
+                    Predicate p = r.body().get(l);
+                    Predicate p2 = r2.body().get(l);
+
+                    assertEquals(p, p2);
+                    assertFalse(p == p2);
+                }
+
+                for (int l = 0; l < r.constraints().size(); l++) {
+                    Constraint ct = r.constraints().get(l);
+                    Constraint ct2 = r2.constraints().get(l);
+
+                    assertEquals(ct, ct2);
+                    assertFalse(ct == ct2);
+                }
+            }
+
+            assertEquals(bBlock.facts, b2Block.facts);
+            assertFalse(bBlock.facts == b2Block.facts);
+            for (int j = 0; j < bBlock.facts.size(); j++) {
+                Fact f = bBlock.facts.get(j);
+                Fact f2 = b2Block.facts.get(j);
+
+                assertEquals(f, f2);
+                assertFalse(f == f2);
+
+                Predicate p = f.predicate();
+                Predicate p2 = f2.predicate();
+
+                assertEquals(p, p2);
+                assertFalse(p == p2);
+            }
+        }
+
+        assertEquals(b.symbols.symbols, b2.symbols.symbols);
+        assertFalse(b.symbols.symbols == b2.symbols.symbols);
+        for (int i = 0; i < b.symbols.symbols.size(); i++) {
+            assertEquals(b.symbols.symbols.get(i), b2.symbols.symbols.get(i));
+            assertFalse(b.symbols.symbols.get(i) == b2.symbols.symbols.get(i));
+        }
+
+        // token signature will never change so the deep copy is not required
+        assertTrue(b.container.get().signature == b2.container.get().signature);
     }
 }
