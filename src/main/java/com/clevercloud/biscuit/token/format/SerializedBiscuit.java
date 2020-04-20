@@ -226,6 +226,6 @@ public class SerializedBiscuit {
         List<RistrettoElement> keys = new ArrayList<>();
         keys.addAll(that.keys);
         this.keys = keys;
-        this.signature = new TokenSignature(that.signature);
+        this.signature = that.signature;
     }
 }
