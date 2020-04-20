@@ -417,7 +417,7 @@ public class Biscuit {
      * @param block new block (should be generated from a Block builder)
      * @return
      */
-    public Either<Error, Biscuit> append(final SecureRandom rng, final KeyPair keypair, Block block) {
+    public Either<Error, Biscuit> attenuate(final SecureRandom rng, final KeyPair keypair, Block block) {
         if(this.container.isEmpty()) {
             return Left(new Error().new Sealed());
         }
