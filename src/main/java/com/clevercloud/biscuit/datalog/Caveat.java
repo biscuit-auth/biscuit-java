@@ -19,6 +19,14 @@ public class Caveat {
         this.queries = queries;
     }
 
+    public Caveat(Caveat that) {
+        List<Rule> queries = new ArrayList<>();
+        for (Rule r: that.queries) {
+            queries.add(new Rule(r));
+        }
+        this.queries = queries;
+    }
+
     public List<Rule> queries() {
         return queries;
     }

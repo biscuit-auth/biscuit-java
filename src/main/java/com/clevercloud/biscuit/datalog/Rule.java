@@ -17,6 +17,20 @@ public final class Rule implements Serializable {
    private final List<Predicate> body;
    private final List<Constraint> constraints;
 
+   public Rule(Rule that) {
+      this.head = that.head.clone();
+      List<Predicate> body = new ArrayList<>();
+      for (Predicate p: that.body) {
+         body.add(p.clone());
+      }
+      this.body = body;
+      List<Constraint> constraints = new ArrayList<>();
+      for (Constraint c: that.constraints) {
+         constraints.add(new Constraint(c.id, c.kind));
+      }
+      this.constraints = constraints;
+   }
+
    public final Predicate head() {
       return this.head;
    }

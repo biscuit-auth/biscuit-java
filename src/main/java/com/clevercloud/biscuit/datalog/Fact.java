@@ -25,6 +25,10 @@ public final class Fact implements Serializable {
       this.predicate = predicate;
    }
 
+   public Fact(Fact fact) {
+      this(fact.predicate.clone());
+   }
+
    @Override
    public boolean equals(Object o) {
       if (this == o) return true;
