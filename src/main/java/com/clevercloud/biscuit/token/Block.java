@@ -95,13 +95,19 @@ public class Block {
         this.symbols = new SymbolTable(that.symbols);
         this.context = that.context;
         List<Fact> facts = new ArrayList<>();
-        facts.addAll(that.facts);
+        for (Fact f: that.facts) {
+            facts.add(new Fact(f));
+        }
         this.facts = facts;
         List<Rule> rules = new ArrayList<>();
-        rules.addAll(that.rules);
+        for (Rule r: that.rules) {
+            rules.add(new Rule(r));
+        }
         this.rules = rules;
         List<Caveat> caveats = new ArrayList<>();
-        caveats.addAll(that.caveats);
+        for (Caveat c: that.caveats) {
+            caveats.add(new Caveat(c));
+        }
         this.caveats = caveats;
     }
 

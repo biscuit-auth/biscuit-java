@@ -91,7 +91,9 @@ public class Biscuit {
     public Biscuit(Biscuit that) {
         this.authority = new Block(that.authority);
         List<Block> blocks = new ArrayList<>();
-        blocks.addAll(that.blocks);
+        for (Block b: that.blocks) {
+            blocks.add(new Block(b));
+        }
         this.blocks = blocks;
         this.symbols = new SymbolTable(that.symbols);
         if (that.container.isDefined()) {
