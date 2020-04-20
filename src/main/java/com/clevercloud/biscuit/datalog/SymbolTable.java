@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import io.vavr.control.Option;
@@ -101,5 +102,25 @@ public final class SymbolTable implements Serializable {
       for(String symbol: s.symbols) {
          this.symbols.add(symbol);
       }
+   }
+
+   @Override
+   public String toString() {
+      return "SymbolTable{" +
+              "symbols=" + symbols +
+              '}';
+   }
+
+   @Override
+   public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof SymbolTable)) return false;
+      SymbolTable that = (SymbolTable) o;
+      return Objects.equals(symbols, that.symbols);
+   }
+
+   @Override
+   public int hashCode() {
+      return Objects.hash(symbols);
    }
 }

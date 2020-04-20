@@ -10,6 +10,7 @@ import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
@@ -49,11 +50,26 @@ public class TokenSignature {
         this.z = z;
     }
 
-    public TokenSignature(TokenSignature that) {
-        ArrayList<RistrettoElement> parameters = new ArrayList<>();
-        parameters.addAll(that.parameters);
-        this.parameters = parameters;
-        this.z = Scalar.fromBytesModOrder(that.z.toByteArray());
+    @Override
+    public String toString() {
+        return "TokenSignature{" +
+                "parameters=" + parameters +
+                ", z=" + z +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TokenSignature)) return false;
+        TokenSignature that = (TokenSignature) o;
+        return Objects.equals(parameters, that.parameters) &&
+                Objects.equals(z, that.z);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(parameters, z);
     }
 
     /**

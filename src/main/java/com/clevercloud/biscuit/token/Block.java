@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static io.vavr.API.Left;
@@ -57,6 +58,36 @@ public class Block {
         this.facts = facts;
         this.rules = rules;
         this.caveats = caveats;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Block)) return false;
+        Block block = (Block) o;
+        return index == block.index &&
+                Objects.equals(symbols, block.symbols) &&
+                Objects.equals(context, block.context) &&
+                Objects.equals(facts, block.facts) &&
+                Objects.equals(rules, block.rules) &&
+                Objects.equals(caveats, block.caveats);
+    }
+
+    @Override
+    public String toString() {
+        return "Block{" +
+                "index=" + index +
+                ", symbols=" + symbols +
+                ", context='" + context + '\'' +
+                ", facts=" + facts +
+                ", rules=" + rules +
+                ", caveats=" + caveats +
+                '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(index, symbols, context, facts, rules, caveats);
     }
 
     public Block(Block that) {

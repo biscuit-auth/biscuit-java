@@ -483,6 +483,32 @@ public class Biscuit {
         return res;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Biscuit biscuit = (Biscuit) o;
+        return Objects.equals(authority, biscuit.authority) &&
+                Objects.equals(blocks, biscuit.blocks) &&
+                Objects.equals(symbols, biscuit.symbols) &&
+                Objects.equals(container, biscuit.container);
+    }
+
+    @Override
+    public String toString() {
+        return "Biscuit{" +
+                "\n\tauthority=" + authority +
+                ", \n\tblocks=" + blocks +
+                ", \n\tsymbols=" + symbols +
+                ", \n\tcontainer=" + container +
+                '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(authority, blocks, symbols, container);
+    }
+
     /**
      * Prints a token's content
      */

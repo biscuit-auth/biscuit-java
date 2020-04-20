@@ -19,6 +19,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
@@ -187,6 +188,34 @@ public class SerializedBiscuit {
         this.blocks = blocks;
         this.keys = keys;
         this.signature = signature;
+    }
+
+    @Override
+    public String toString() {
+        return "SerializedBiscuit{" +
+                "authority=" + Arrays.toString(authority) +
+                ", blocks=" + blocks +
+                ", keys=" + keys +
+                ", signature=" + signature +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SerializedBiscuit)) return false;
+        SerializedBiscuit that = (SerializedBiscuit) o;
+        return Arrays.equals(authority, that.authority) &&
+                Objects.equals(blocks, that.blocks) &&
+                Objects.equals(keys, that.keys) &&
+                Objects.equals(signature, that.signature);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(blocks, keys, signature);
+        result = 31 * result + Arrays.hashCode(authority);
+        return result;
     }
 
     public SerializedBiscuit(SerializedBiscuit that) {
