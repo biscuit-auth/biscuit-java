@@ -76,7 +76,7 @@ public class BiscuitTest extends TestCase {
                 )
         )));
 
-        Biscuit b2 = deser.append(rng, keypair2, builder.build()).get();
+        Biscuit b2 = deser.attenuate(rng, keypair2, builder.build()).get();
 
         System.out.println(b2.print());
 
@@ -107,7 +107,7 @@ public class BiscuitTest extends TestCase {
                 )
         )));
 
-        Biscuit b3 = deser2.append(rng, keypair3, builder3.build()).get();
+        Biscuit b3 = deser2.attenuate(rng, keypair3, builder3.build()).get();
 
         System.out.println(b3.print());
 
@@ -185,7 +185,7 @@ public class BiscuitTest extends TestCase {
         block2.check_right("read");
 
         KeyPair keypair2 = new KeyPair(rng);
-        Biscuit b2 = b.append(rng, keypair2, block2.build()).get();
+        Biscuit b2 = b.attenuate(rng, keypair2, block2.build()).get();
 
         Verifier v1 = b2.verify(root.public_key()).get();
         v1.add_resource("/folder1/file1");
@@ -266,7 +266,7 @@ public class BiscuitTest extends TestCase {
                 )
         )));
 
-        Biscuit b2 = deser.append(rng, keypair2, builder.build()).get();
+        Biscuit b2 = deser.attenuate(rng, keypair2, builder.build()).get();
 
         System.out.println(b2.print());
 
@@ -288,8 +288,8 @@ public class BiscuitTest extends TestCase {
         Biscuit deser2 = Biscuit.from_sealed(sealed, "testkey".getBytes()).get();
         System.out.println(deser2.print());
 
-        System.out.println("trying to append to a sealed token");
+        System.out.println("trying to attenuate to a sealed token");
         Block builder2 = deser2.create_block();
-        Error e2 = deser2.append(rng, keypair2, builder.build()).getLeft();
+        Error e2 = deser2.attenuate(rng, keypair2, builder.build()).getLeft();
     }
 }
