@@ -315,6 +315,7 @@ public class BiscuitTest extends TestCase {
         System.out.println(b.toString());
         System.out.println(b2.toString());
 
+        // equals use equals methods and == check references for objects and values for primitives
         assertEquals(b, b2);
         assertFalse(b == b2);
 
