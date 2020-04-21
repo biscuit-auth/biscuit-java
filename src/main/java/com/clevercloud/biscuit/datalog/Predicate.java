@@ -56,6 +56,15 @@ public final class Predicate implements Serializable {
       this.ids = ids;
    }
 
+   public Predicate(Predicate that) {
+      List<ID> ids = new ArrayList<>();
+      for (ID id: that.ids) {
+         ids.add(id);
+      }
+      this.ids = ids;
+      this.name = that.name;
+   }
+
    @Override
    public boolean equals(Object o) {
       if (this == o) return true;

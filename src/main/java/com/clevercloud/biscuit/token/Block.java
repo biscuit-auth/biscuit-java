@@ -93,7 +93,7 @@ public class Block {
     public Block(Block that) {
         this.index = that.index;
         this.symbols = new SymbolTable(that.symbols);
-        this.context = that.context;
+        this.context = new String(that.context);
         List<Fact> facts = new ArrayList<>();
         for (Fact f: that.facts) {
             facts.add(new Fact(f));

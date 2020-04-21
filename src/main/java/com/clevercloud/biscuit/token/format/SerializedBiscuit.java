@@ -218,13 +218,20 @@ public class SerializedBiscuit {
         return result;
     }
 
-    public SerializedBiscuit(SerializedBiscuit that) {
+    public SerializedBiscuit(SerializedBiscuit that) throws InvalidEncodingException {
         this.authority = Arrays.copyOf(that.authority, that.authority.length);
         List<byte[]> blocks = new ArrayList<>();
-        blocks.addAll(that.blocks);
+        for (byte[] block: that.blocks) {
+            blocks.add(Arrays.copyOf(block, block.length));
+        }
         this.blocks = blocks;
         List<RistrettoElement> keys = new ArrayList<>();
-        keys.addAll(that.keys);
+        for (RistrettoElement ristrettoElement: that.keys) {
+            // can't find a better way to copy it
+            byte[] compressedRistretto = ristrettoElement.compress().toByteArray();
+            CompressedRistretto c = new CompressedRistretto(Arrays.copyOf(compressedRistretto, compressedRistretto.length));
+            keys.add(c.decompress());
+        }
         this.keys = keys;
         this.signature = that.signature;
     }

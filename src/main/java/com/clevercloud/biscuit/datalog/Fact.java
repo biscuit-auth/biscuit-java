@@ -26,7 +26,7 @@ public final class Fact implements Serializable {
    }
 
    public Fact(Fact fact) {
-      this(fact.predicate.clone());
+      this(new Predicate(fact.predicate));
    }
 
    @Override

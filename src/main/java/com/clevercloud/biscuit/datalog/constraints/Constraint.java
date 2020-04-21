@@ -11,12 +11,17 @@ import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
 public final class Constraint implements Serializable {
-   public final long id;
-   public final ConstraintKind kind;
+   private final long id;
+   private final ConstraintKind kind;
 
    public Constraint(long id, ConstraintKind kind) {
       this.id = id;
       this.kind = kind;
+   }
+
+   public Constraint(Constraint that) {
+      this.id = that.id;
+      this.kind = that.kind;
    }
 
    public boolean check(final long name, final ID id) {
