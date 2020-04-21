@@ -1,5 +1,6 @@
 package com.clevercloud.biscuit.token;
 
+import cafe.cryptography.curve25519.InvalidEncodingException;
 import com.clevercloud.biscuit.crypto.KeyPair;
 import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.datalog.*;
@@ -96,11 +97,14 @@ public class Biscuit {
         }
         this.blocks = blocks;
         this.symbols = new SymbolTable(that.symbols);
-        if (that.container.isDefined()) {
-            this.container = Option.some(that.container.map(SerializedBiscuit::new).get());
-        } else {
-            this.container = Option.none();
-        }
+        this.container = that.container.map(serializedBiscuit -> {
+            try {
+                return new SerializedBiscuit(serializedBiscuit);
+            } catch (InvalidEncodingException invalidEncodingException) {
+                invalidEncodingException.printStackTrace();
+            }
+            return null;
+        });
     }
 
     /**
