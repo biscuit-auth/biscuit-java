@@ -166,7 +166,7 @@ public abstract class ID implements Serializable {
       }
 
       public Str(final String value) {
-         this.value = value;
+         this.value = new String(value);
       }
 
       @Override
