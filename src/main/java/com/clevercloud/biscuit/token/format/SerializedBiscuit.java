@@ -81,7 +81,7 @@ public class SerializedBiscuit {
      * Serializes a SerializedBiscuit to a byte array
      * @return
      */
-    public Either<Error.FormatError, byte[]> serialize() {
+    public Either<Error, byte[]> serialize() {
         Schema.Biscuit.Builder b = Schema.Biscuit.newBuilder()
                 .setSignature(this.signature.serialize());
 

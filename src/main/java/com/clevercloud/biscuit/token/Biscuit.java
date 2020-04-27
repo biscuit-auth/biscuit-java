@@ -187,7 +187,7 @@ public class Biscuit {
      * Serializes a token to a byte array
      * @return
      */
-    public Either<Error.FormatError, byte[]> serialize() {
+    public Either<Error, byte[]> serialize() {
         if(this.container.isEmpty()) {
             return Left(new Error().new FormatError().new SerializationError("no internal container"));
         }
@@ -198,7 +198,7 @@ public class Biscuit {
      * Serializes a token to a base 64 String
      * @return
      */
-    public Either<Error.FormatError, String> serialize_b64() {
+    public Either<Error, String> serialize_b64() {
         return serialize().map(Base64.getEncoder()::encodeToString);
     }
 
@@ -418,37 +418,41 @@ public class Biscuit {
      * @return
      */
     public Either<Error, Biscuit> attenuate(final SecureRandom rng, final KeyPair keypair, Block block) {
-        if(this.container.isEmpty()) {
-            return Left(new Error().new Sealed());
+        Either<Error, Biscuit> e = this.copy();
+
+        if (e.isLeft()) {
+            return Left(e.getLeft());
         }
 
-        if(!Collections.disjoint(this.symbols.symbols, block.symbols.symbols)) {
+        Biscuit copiedBiscuit = e.get();
+
+        if(!Collections.disjoint(copiedBiscuit.symbols.symbols, block.symbols.symbols)) {
             return Left(new Error().new SymbolTableOverlap());
         }
 
         if(block.index != 1 + this.blocks.size()) {
-            return Left(new Error().new InvalidBlockIndex(1 + this.blocks.size(), block.index));
+            return Left(new Error().new InvalidBlockIndex(1 + copiedBiscuit.blocks.size(), block.index));
         }
 
-        Either<Error.FormatError, SerializedBiscuit> containerRes = this.container.get().append(rng, keypair, block);
+        Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.container.get().append(rng, keypair, block);
         if(containerRes.isLeft()) {
-            Error.FormatError e = containerRes.getLeft();
-            return Left(e);
+            Error.FormatError error = containerRes.getLeft();
+            return Left(error);
         }
         SerializedBiscuit container = containerRes.get();
 
-        SymbolTable symbols = new SymbolTable(this.symbols);
+        SymbolTable symbols = new SymbolTable(copiedBiscuit.symbols);
         for(String s: block.symbols.symbols) {
             symbols.add(s);
         }
 
         ArrayList<Block> blocks = new ArrayList<>();
-        for(Block b: this.blocks) {
+        for(Block b: copiedBiscuit.blocks) {
             blocks.add(b);
         }
         blocks.add(block);
 
-        return Right(new Biscuit(this.authority, blocks, symbols, Option.some(container)));
+        return Right(new Biscuit(copiedBiscuit.authority, blocks, symbols, Option.some(container)));
     }
 
     public List<Option<String>> context() {
@@ -504,5 +508,15 @@ public class Biscuit {
         syms.insert("revocation_id");
 
         return syms;
+    }
+
+    public Either<Error, Biscuit> copy() {
+        return this
+                .serialize()
+                .map(Biscuit::from_bytes)
+                .flatMap(e -> {
+                    Either<Error, Biscuit> y = Either.narrow(e);
+                    return y;
+                });
     }
 }
