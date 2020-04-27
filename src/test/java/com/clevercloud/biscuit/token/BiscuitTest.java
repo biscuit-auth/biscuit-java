@@ -1,10 +1,12 @@
 package com.clevercloud.biscuit.token;
 
 import com.clevercloud.biscuit.crypto.KeyPair;
-import com.clevercloud.biscuit.datalog.*;
+import com.clevercloud.biscuit.datalog.Fact;
+import com.clevercloud.biscuit.datalog.SymbolTable;
+import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.error.FailedCaveat;
 import com.clevercloud.biscuit.error.LogicError;
-import com.clevercloud.biscuit.error.Error;
+import com.clevercloud.biscuit.token.builder.Block;
 import io.vavr.control.Either;
 import junit.framework.Assert;
 import junit.framework.Test;
@@ -12,12 +14,17 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import java.security.SecureRandom;
-import java.util.*;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 import static com.clevercloud.biscuit.crypto.TokenSignature.hex;
 import static com.clevercloud.biscuit.token.builder.Utils.*;
-
-import com.clevercloud.biscuit.token.builder.Block;
 
 public class BiscuitTest extends TestCase {
     public BiscuitTest(String testName) {
@@ -207,7 +214,7 @@ public class BiscuitTest extends TestCase {
         Error e = res.getLeft();
         Assert.assertTrue(res.isLeft());
 
-        for(FailedCaveat f: e.failed_caveats().get()) {
+        for (FailedCaveat f : e.failed_caveats().get()) {
             System.out.println(f.toString());
         }
         Assert.assertEquals(
