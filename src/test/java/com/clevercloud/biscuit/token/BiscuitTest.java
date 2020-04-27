@@ -299,4 +299,32 @@ public class BiscuitTest extends TestCase {
         Block builder2 = deser2.create_block();
         Error e2 = deser2.attenuate(rng, keypair2, builder.build()).getLeft();
     }
+
+    public void testMultipleAttenuation() {
+        SecureRandom rng = new SecureRandom();
+        KeyPair root = new KeyPair(rng);
+
+        SymbolTable symbols = Biscuit.default_symbol_table();
+        Block authority_builder = new Block(0, symbols);
+        Date date = Date.from(Instant.now());
+        authority_builder.add_fact(fact("revocation_id", Arrays.asList(date(date))));
+
+        Biscuit biscuit = Biscuit.make(rng, root, Biscuit.default_symbol_table(), authority_builder.build()).get();
+
+        Block builder = biscuit.create_block();
+        builder.add_fact(fact(
+                "right",
+                Arrays.asList(s("topic"), s("tenant"), s("namespace"), s("topic"), s("produce"))
+        ));
+
+        String attenuatedB64 = biscuit.attenuate(rng, new KeyPair(rng), builder.build()).get().serialize_b64().get();
+
+        System.out.println("attenuated: " + attenuatedB64);
+
+        Biscuit.from_b64(attenuatedB64).get();
+        String attenuated2B64 = biscuit.attenuate(rng, new KeyPair(rng), builder.build()).get().serialize_b64().get();
+
+        System.out.println("attenuated2: " + attenuated2B64);
+        Biscuit.from_b64(attenuated2B64).get();
+    }
 }
