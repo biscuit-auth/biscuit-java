@@ -202,25 +202,6 @@ public class Biscuit {
         return serialize().map(Base64.getEncoder()::encodeToString);
     }
 
-    /**
-     * Serializes a token to a byte array
-     * @return
-     */
-    static public Either<Error, byte[]> serialize(Biscuit biscuit) {
-        if(biscuit.container.isEmpty()) {
-            return Left(new Error().new FormatError().new SerializationError("no internal container"));
-        }
-        return biscuit.container.get().serialize();
-    }
-
-    /**
-     * Serializes a token to a base 64 String
-     * @return
-     */
-    static public Either<Error, String> serialize_b64(Biscuit biscuit) {
-        return serialize(biscuit).map(Base64.getEncoder()::encodeToString);
-    }
-
     public static Either<Error, Biscuit> from_sealed(byte[] data, byte[] secret)  {
         //FIXME: needs a version of from_sealed with custom symbol table support
         SymbolTable symbols = default_symbol_table();
