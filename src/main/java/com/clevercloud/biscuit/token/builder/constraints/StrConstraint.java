@@ -1,11 +1,12 @@
 package com.clevercloud.biscuit.token.builder.constraints;
 
 import com.clevercloud.biscuit.datalog.SymbolTable;
+import com.clevercloud.biscuit.datalog.constraints.Constraint;
 import com.clevercloud.biscuit.datalog.constraints.ConstraintKind;
 
 import java.util.Set;
 
-public abstract class StrConstraint {
+public abstract class StrConstraint implements ConstraintBuilder {
     abstract public Constraint convert(SymbolTable symbols);
 
     public static class Prefix extends StrConstraint {

@@ -111,7 +111,7 @@ public class Verifier {
                 "revocation_check",
                 Arrays.asList((var(0))),
                 Arrays.asList(pred("revocation_id", Arrays.asList(var(0)))),
-                Arrays.asList(new Constraint(0, new ConstraintKind.Int(new IntConstraint.NotInSet(new HashSet(ids)))))
+                Arrays.asList(new com.clevercloud.biscuit.token.builder.constraints.IntConstraint.NotInSet(0, new HashSet(ids)))
         ));
 
         this.caveats.add(new Caveat(q));
