@@ -48,7 +48,7 @@ public abstract class StrConstraint implements Serializable {
 
       @Override
       public String toString() {
-         return "matches " + this.value + "*";
+         return " matches " + this.value + "*";
       }
 
       public Schema.StringConstraint serialize() {

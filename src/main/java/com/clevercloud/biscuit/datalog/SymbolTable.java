@@ -52,7 +52,7 @@ public final class SymbolTable implements Serializable {
    }
 
    public String print_constraint(final Constraint c) {
-      String res = "$" + c.id;
+      String res = "$" + c.id + " ";
       if (c.kind instanceof ConstraintKind.Int) {
          res += c.kind.toString();
       } else if (c.kind instanceof ConstraintKind.Str) {
@@ -64,26 +64,13 @@ public final class SymbolTable implements Serializable {
 
          if (s instanceof SymbolConstraint.InSet) {
             List<String> set = ((SymbolConstraint.InSet) s).value.stream().map((sym) ->  this.symbols.get(sym.intValue())).collect(Collectors.toList());
-            res += " in " + set.toString();
+            res += "in " + set.toString();
          } else if (s instanceof SymbolConstraint.NotInSet) {
             List<String> set = ((SymbolConstraint.NotInSet) s).value.stream().map((sym) -> this.symbols.get(sym.intValue())).collect(Collectors.toList());
-            res += " not in " + set.toString();
+            res += "not in " + set.toString();
          }
       }
-      /*if (c.id instanceof ID.Variable) {
-         assert "should not check constraint on a variable" == null;
-         return false;
-      } else if (id instanceof ID.Integer && this.kind instanceof ConstraintKind.Int) {
-         return ((ConstraintKind.Int) this.kind).check(((ID.Integer) id).value());
-      } else if (id instanceof ID.Str && this.kind instanceof ConstraintKind.Str) {
-         return ((ConstraintKind.Str) this.kind).check(((ID.Str) id).value());
-      } else if (id instanceof ID.Date && this.kind instanceof ConstraintKind.Date) {
-         return ((ConstraintKind.Date) this.kind).check(((ID.Date) id).value());
-      } else if (id instanceof ID.Symbol && this.kind instanceof ConstraintKind.Symbol) {
-         return ((ConstraintKind.Symbol) this.kind).check(((ID.Symbol) id).value());
-      } else {
-         return false;
-      }*/
+
       return res;
    }
 
