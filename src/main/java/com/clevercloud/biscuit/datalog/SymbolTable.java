@@ -7,6 +7,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import com.clevercloud.biscuit.datalog.constraints.Constraint;
+import com.clevercloud.biscuit.datalog.constraints.ConstraintKind;
+import com.clevercloud.biscuit.datalog.constraints.SymbolConstraint;
 import io.vavr.control.Option;
 
 public final class SymbolTable implements Serializable {
@@ -38,7 +42,7 @@ public final class SymbolTable implements Serializable {
    public String print_rule(final Rule r) {
       String res = "*"+this.print_predicate(r.head());
       final List<String> preds = r.body().stream().map((p) -> "!"+this.print_predicate(p)).collect(Collectors.toList());
-      final List<String> constraints = r.constraints().stream().map((c) -> c.toString()).collect(Collectors.toList());
+      final List<String> constraints = r.constraints().stream().map((c) -> this.print_constraint(c)).collect(Collectors.toList());
 
       res += " <- " + String.join(", ", preds);
       if(!constraints.isEmpty()) {
@@ -46,6 +50,30 @@ public final class SymbolTable implements Serializable {
       }
       return res;
    }
+
+   public String print_constraint(final Constraint c) {
+      String res = "$" + c.id + " ";
+      if (c.kind instanceof ConstraintKind.Int) {
+         res += c.kind.toString();
+      } else if (c.kind instanceof ConstraintKind.Str) {
+         res += c.kind.toString();
+      } else if (c.kind instanceof ConstraintKind.Date) {
+         res += c.kind.toString();
+      } else if (c.kind instanceof  ConstraintKind.Symbol) {
+         SymbolConstraint s = ((ConstraintKind.Symbol) c.kind).constraint;
+
+         if (s instanceof SymbolConstraint.InSet) {
+            List<String> set = ((SymbolConstraint.InSet) s).value.stream().map((sym) ->  this.symbols.get(sym.intValue())).collect(Collectors.toList());
+            res += "in " + set.toString();
+         } else if (s instanceof SymbolConstraint.NotInSet) {
+            List<String> set = ((SymbolConstraint.NotInSet) s).value.stream().map((sym) -> this.symbols.get(sym.intValue())).collect(Collectors.toList());
+            res += "not in " + set.toString();
+         }
+      }
+
+      return res;
+   }
+
 
    public String print_predicate(final Predicate p) {
       List<String> ids = p.ids().stream().map((i) -> {

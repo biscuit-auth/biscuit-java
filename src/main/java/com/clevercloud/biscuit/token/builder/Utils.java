@@ -1,6 +1,7 @@
 package com.clevercloud.biscuit.token.builder;
 
 import com.clevercloud.biscuit.datalog.constraints.Constraint;
+import com.clevercloud.biscuit.token.builder.constraints.ConstraintBuilder;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -22,7 +23,7 @@ public class Utils {
 
     public static com.clevercloud.biscuit.token.builder.Rule constrained_rule(String head_name, List<Atom> head_ids,
                                                                               List<com.clevercloud.biscuit.token.builder.Predicate> predicates,
-                                                                              List<Constraint> constraints) {
+                                                                              List<ConstraintBuilder> constraints) {
         return new com.clevercloud.biscuit.token.builder.Rule(pred(head_name, head_ids), predicates, constraints);
     }
 

@@ -214,6 +214,7 @@ public class BiscuitTest extends TestCase {
         Error e = res.getLeft();
         Assert.assertTrue(res.isLeft());
 
+        System.out.println(v3.print_world());
         for (FailedCaveat f : e.failed_caveats().get()) {
             System.out.println(f.toString());
         }

@@ -83,8 +83,7 @@ public class Block {
                 "prefix",
                 Arrays.asList(var(0)),
                 Arrays.asList(pred("resource", Arrays.asList(s("ambient"), var(0)))),
-                Arrays.asList(
-                        new Constraint(0, new ConstraintKind.Str(new StrConstraint.Prefix(prefix))))
+                Arrays.asList(new com.clevercloud.biscuit.token.builder.constraints.StrConstraint.Prefix(0, prefix))
         ));
         this.add_caveat(new com.clevercloud.biscuit.token.builder.Caveat(queries));
     }
@@ -96,7 +95,7 @@ public class Block {
                 "suffix",
                 Arrays.asList(var(0)),
                 Arrays.asList(pred("resource", Arrays.asList(s("ambient"), var(0)))),
-                Arrays.asList(new Constraint(0, new ConstraintKind.Str(new StrConstraint.Suffix(suffix))))
+                Arrays.asList(new com.clevercloud.biscuit.token.builder.constraints.StrConstraint.Suffix(0, suffix))
         ));
         this.add_caveat(new com.clevercloud.biscuit.token.builder.Caveat(queries));
     }
@@ -108,7 +107,7 @@ public class Block {
                 "expiration",
                 Arrays.asList(var(0)),
                 Arrays.asList(pred("time", Arrays.asList(s("ambient"), var(0)))),
-                Arrays.asList(new Constraint(0, new ConstraintKind.Date(new DateConstraint.Before(d.getTime() / 1000))))
+                Arrays.asList(new com.clevercloud.biscuit.token.builder.constraints.DateConstraint.Before(0, d.getTime() / 1000))
         ));
         this.add_caveat(new com.clevercloud.biscuit.token.builder.Caveat(queries));
     }

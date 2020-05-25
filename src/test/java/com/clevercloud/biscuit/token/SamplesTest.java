@@ -203,6 +203,8 @@ public class SamplesTest extends TestCase {
         v1.add_resource("file1");
         v1.add_operation("read");
         v1.set_time();
+        System.out.println(v1.print_world());
+
         Error e = v1.verify().getLeft();
         Assert.assertEquals(
                 new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
