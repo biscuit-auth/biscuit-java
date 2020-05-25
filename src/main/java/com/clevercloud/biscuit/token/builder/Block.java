@@ -95,7 +95,7 @@ public class Block {
                 "suffix",
                 Arrays.asList(var(0)),
                 Arrays.asList(pred("resource", Arrays.asList(s("ambient"), var(0)))),
-                Arrays.asList(new com.clevercloud.biscuit.token.builder.constraints.StrConstraint.Prefix(0, suffix))
+                Arrays.asList(new com.clevercloud.biscuit.token.builder.constraints.StrConstraint.Suffix(0, suffix))
         ));
         this.add_caveat(new com.clevercloud.biscuit.token.builder.Caveat(queries));
     }
