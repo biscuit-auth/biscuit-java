@@ -150,7 +150,7 @@ public abstract class ConstraintKind implements Serializable {
    }
 
    public static final class Symbol extends ConstraintKind implements Serializable {
-      private final SymbolConstraint constraint;
+      public final SymbolConstraint constraint;
 
       public boolean check(final long value) {
          return this.constraint.check(value);

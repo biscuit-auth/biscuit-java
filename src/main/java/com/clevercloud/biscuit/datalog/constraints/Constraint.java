@@ -11,8 +11,8 @@ import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
 public final class Constraint implements Serializable {
-   private final long id;
-   private final ConstraintKind kind;
+   public final long id;
+   public final ConstraintKind kind;
 
    public Constraint(long id, ConstraintKind kind) {
       this.id = id;

@@ -26,7 +26,7 @@ public abstract class SymbolConstraint implements Serializable {
    }
 
    public static final class InSet extends SymbolConstraint implements Serializable {
-      private final Set<Long> value;
+      public final Set<Long> value;
 
       public boolean check(final long value) {
          return this.value.contains(value);
@@ -64,7 +64,7 @@ public abstract class SymbolConstraint implements Serializable {
    }
 
    public static final class NotInSet extends SymbolConstraint implements Serializable {
-      private final Set<Long> value;
+      public final Set<Long> value;
 
       public boolean check(final long value) {
          return !this.value.contains(value);
