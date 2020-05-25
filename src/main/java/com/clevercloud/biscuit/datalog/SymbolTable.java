@@ -63,10 +63,10 @@ public final class SymbolTable implements Serializable {
          SymbolConstraint s = ((ConstraintKind.Symbol) c.kind).constraint;
 
          if (s instanceof SymbolConstraint.InSet) {
-            List<String> set = ((SymbolConstraint.InSet) s).value.stream().map((sym) ->  this.symbols.get(sym.intValue())).collect(Collectors.toList());
+            List<String> set = ((SymbolConstraint.InSet) s).value.stream().map((sym) -> "#" + this.symbols.get(sym.intValue())).collect(Collectors.toList());
             res += "in " + set.toString();
          } else if (s instanceof SymbolConstraint.NotInSet) {
-            List<String> set = ((SymbolConstraint.NotInSet) s).value.stream().map((sym) -> this.symbols.get(sym.intValue())).collect(Collectors.toList());
+            List<String> set = ((SymbolConstraint.NotInSet) s).value.stream().map((sym) -> "#" + this.symbols.get(sym.intValue())).collect(Collectors.toList());
             res += "not in " + set.toString();
          }
       }
