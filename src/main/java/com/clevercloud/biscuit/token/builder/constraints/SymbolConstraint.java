@@ -7,19 +7,21 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class SymbolConstraint {
-    abstract public ConstraintKind.Symbol convert(SymbolTable symbols);
+    abstract public Constraint convert(SymbolTable symbols);
 
     public static class InSet extends SymbolConstraint {
+        long id;
         Set<String> value;
 
-        public InSet(Set<String> value) {
+        public InSet(long id, Set<String> value) {
+            this.id = id;
             this.value = value;
         }
 
         @Override
-        public ConstraintKind.Symbol convert(SymbolTable symbols) {
+        public Constraint convert(SymbolTable symbols) {
             Set<Long> ids = this.value.stream().map(string -> symbols.insert(string)).collect(Collectors.toSet());
-            return new ConstraintKind.Symbol(new com.clevercloud.biscuit.datalog.constraints.SymbolConstraint.InSet(ids));
+            return new Constraint(this.id, new ConstraintKind.Symbol(new com.clevercloud.biscuit.datalog.constraints.SymbolConstraint.InSet(ids)));
         }
 
         @Override
@@ -29,16 +31,18 @@ public abstract class SymbolConstraint {
     }
 
     public static class NotInSet extends SymbolConstraint {
+        long id;
         Set<String> value;
 
-        public NotInSet(Set<String> value) {
+        public NotInSet(long id, Set<String> value) {
+            this.id = id;
             this.value = value;
         }
 
         @Override
-        public ConstraintKind.Symbol convert(SymbolTable symbols) {
+        public Constraint convert(SymbolTable symbols) {
             Set<Long> ids = this.value.stream().map(string -> symbols.insert(string)).collect(Collectors.toSet());
-            return new ConstraintKind.Symbol(new com.clevercloud.biscuit.datalog.constraints.SymbolConstraint.NotInSet(ids));
+            return new Constraint(this.id, new ConstraintKind.Symbol(new com.clevercloud.biscuit.datalog.constraints.SymbolConstraint.NotInSet(ids)));
         }
 
         @Override

@@ -4,18 +4,20 @@ import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.datalog.constraints.ConstraintKind;
 
 public abstract class DateConstraint {
-    abstract public ConstraintKind.Date convert(SymbolTable symbols);
+    abstract public Constraint convert(SymbolTable symbols);
 
     public static class Before extends DateConstraint {
+        long id;
         String value;
 
-        public Before(String value) {
+        public Before(long id, String value) {
+            this.id = id;
             this.value = value;
         }
 
         @Override
-        public ConstraintKind.Date convert(SymbolTable symbols) {
-            return new ConstraintKind.Date(new com.clevercloud.biscuit.datalog.constraints.DateConstraint.Before(symbols.insert(this.value)));
+        public Constraint convert(SymbolTable symbols) {
+            return new Constraint(this.id, new ConstraintKind.Date(new com.clevercloud.biscuit.datalog.constraints.DateConstraint.Before(symbols.insert(this.value))));
         }
 
         @Override
@@ -25,15 +27,17 @@ public abstract class DateConstraint {
     }
 
     public static class After extends DateConstraint {
+        long id;
         String value;
 
-        public After(String value) {
+        public After(long id, String value) {
+            this.id = id;
             this.value = value;
         }
 
         @Override
-        public ConstraintKind.Date convert(SymbolTable symbols) {
-            return new ConstraintKind.Date(new com.clevercloud.biscuit.datalog.constraints.DateConstraint.After(symbols.insert(this.value)));
+        public Constraint convert(SymbolTable symbols) {
+            return new Constraint(this.id, new ConstraintKind.Date(new com.clevercloud.biscuit.datalog.constraints.DateConstraint.After(symbols.insert(this.value))));
         }
 
         @Override
