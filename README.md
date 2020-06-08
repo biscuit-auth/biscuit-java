@@ -8,7 +8,24 @@ Java library for Biscuit usage.
 
 ## Publish
 
+## Publish
+
+You need to define this in `~/.m2/settings.xml` using your bintray APIKEY on the Clever Cloud organisation:
+
+```xml
+<server>
+  <id>bintray-repo-maven-biscuit-java</id>
+  <username>@@BINTRAY_USERNAME@</username>
+  <password>@@YOUR_BINTRAY_API_KEY@@</password>
+</server>
+```
+
+Then run
+
 ```bash
-# Using mavencentral@clever-cloud.com PGP key from Clever Cloud vault do:
 mvn deploy
 ```
+
+It will prompt for GPG passphrase stored on Clever Cloud vault (search for `maven@clever-cloud.com`).
+
+Then on bintray package homepage run Sync to Central to push to Maven Central.
