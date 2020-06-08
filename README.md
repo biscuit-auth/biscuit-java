@@ -8,8 +8,6 @@ Java library for Biscuit usage.
 
 ## Publish
 
-## Publish
-
 You need to define this in `~/.m2/settings.xml` using your bintray APIKEY on the Clever Cloud organisation:
 
 ```xml
