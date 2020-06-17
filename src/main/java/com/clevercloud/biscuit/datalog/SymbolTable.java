@@ -95,7 +95,7 @@ public final class SymbolTable implements Serializable {
    }
 
    public String print_fact(final Fact f) {
-      return "!" + this.print_predicate(f.predicate());
+      return this.print_predicate(f.predicate());
    }
 
    public String print_caveat(final Caveat c) {
