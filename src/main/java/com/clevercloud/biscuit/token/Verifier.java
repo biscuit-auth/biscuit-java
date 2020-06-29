@@ -89,6 +89,7 @@ public class Verifier {
 
     public void add_caveat(Caveat caveat) {
         this.caveats.add(caveat);
+        world.add_caveat(caveat.convert(symbols));
     }
 
     public void add_resource(String resource) {
