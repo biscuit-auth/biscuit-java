@@ -160,8 +160,8 @@ public class BiscuitTest extends TestCase {
 
         Assert.assertEquals(
                 new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
-                        new FailedCaveat().new FailedBlock(1, 0, "*caveat1($0) <- !resource(#ambient, $0), !operation(#ambient, #read), !right(#authority, $0, #read)"),
-                        new FailedCaveat().new FailedBlock(2, 0, "*caveat2(#file1) <- !resource(#ambient, #file1)")
+                        new FailedCaveat().new FailedBlock(1, 0, "*caveat1($0) <- resource(#ambient, $0), operation(#ambient, #read), right(#authority, $0, #read)"),
+                        new FailedCaveat().new FailedBlock(2, 0, "*caveat2(#file1) <- resource(#ambient, #file1)")
                 ))),
                 res2.getLeft());
     }
@@ -220,8 +220,8 @@ public class BiscuitTest extends TestCase {
         }
         Assert.assertEquals(
                 new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
-                        new FailedCaveat().new FailedBlock(1, 0, "*prefix($0) <- !resource(#ambient, $0) @ $0 matches /folder1/*"),
-                        new FailedCaveat().new FailedBlock(1, 1, "*check_right(#read) <- !resource(#ambient, $0), !operation(#ambient, #read), !right(#authority, $0, #read)")
+                        new FailedCaveat().new FailedBlock(1, 0, "*prefix($0) <- resource(#ambient, $0) @ $0 matches /folder1/*"),
+                        new FailedCaveat().new FailedBlock(1, 1, "*check_right(#read) <- resource(#ambient, $0), operation(#ambient, #read), right(#authority, $0, #read)")
                 ))),
                 e);
     }
