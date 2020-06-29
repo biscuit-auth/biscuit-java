@@ -110,11 +110,11 @@ public final class SymbolTable implements Serializable {
       final List<String> caveatsStr = w.caveats().stream().map((c) -> this.print_caveat(c)).collect(Collectors.toList());
 
       StringBuilder b = new StringBuilder();
-      b.append("World {\n\tfacts: [");
+      b.append("World {\n\tfacts: [\n\t\t");
       b.append(String.join(",\n\t\t", facts));
-      b.append("\n\t],\n\trules: [");
+      b.append("\n\t],\n\trules: [\n\t\t");
       b.append(String.join(",\n\t\t", rules));
-      b.append("\n\t],\n\tcaveats: [");
+      b.append("\n\t],\n\tcaveats: [\n\t\t");
       b.append(String.join(",\n\t\t", caveatsStr));
       b.append("\n\t]\n}");
 
