@@ -101,7 +101,7 @@ public class Biscuit {
      * @return
      */
     static public Either<Error, Biscuit> from_b64(String data)  {
-        return Biscuit.from_bytes(Base64.getDecoder().decode(data));
+        return Biscuit.from_bytes(Base64.getUrlDecoder().decode(data));
     }
 
     /**
@@ -199,7 +199,7 @@ public class Biscuit {
      * @return
      */
     public Either<Error, String> serialize_b64() {
-        return serialize().map(Base64.getEncoder()::encodeToString);
+        return serialize().map(Base64.getUrlEncoder()::encodeToString);
     }
 
     public static Either<Error, Biscuit> from_sealed(byte[] data, byte[] secret)  {
