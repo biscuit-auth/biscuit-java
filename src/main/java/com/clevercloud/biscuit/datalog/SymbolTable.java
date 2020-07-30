@@ -3,6 +3,7 @@ package com.clevercloud.biscuit.datalog;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -106,12 +107,15 @@ public final class SymbolTable implements Serializable {
    public String print_world(final World w) {
       final List<String> facts = w.facts().stream().map((f) -> this.print_fact(f)).collect(Collectors.toList());
       final List<String> rules = w.rules().stream().map((r) -> this.print_rule(r)).collect(Collectors.toList());
+      final List<String> caveatsStr = w.caveats().stream().map((c) -> this.print_caveat(c)).collect(Collectors.toList());
 
       StringBuilder b = new StringBuilder();
-      b.append("World {\n\tfacts: [");
+      b.append("World {\n\tfacts: [\n\t\t");
       b.append(String.join(",\n\t\t", facts));
-      b.append("\n\t],\n\trules: [");
+      b.append("\n\t],\n\trules: [\n\t\t");
       b.append(String.join(",\n\t\t", rules));
+      b.append("\n\t],\n\tcaveats: [\n\t\t");
+      b.append(String.join(",\n\t\t", caveatsStr));
       b.append("\n\t]\n}");
 
       return b.toString();
