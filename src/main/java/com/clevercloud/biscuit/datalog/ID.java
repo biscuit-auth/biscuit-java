@@ -3,6 +3,7 @@ package com.clevercloud.biscuit.datalog;
 import biscuit.format.schema.Schema;
 import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.token.builder.Atom;
+import com.google.protobuf.ByteString;
 import io.vavr.control.Either;
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
@@ -24,6 +25,8 @@ public abstract class ID implements Serializable {
          return Integer.deserialize(id);
       } else if(id.getKind() == Schema.ID.Kind.STR) {
          return Str.deserialize(id);
+      } else if(id.getKind() == Schema.ID.Kind.BYTES) {
+         return Bytes.deserialize(id);
       } else if(id.getKind() == Schema.ID.Kind.SYMBOL) {
          return Symbol.deserialize(id);
       } else if(id.getKind() == Schema.ID.Kind.VARIABLE) {
@@ -203,6 +206,64 @@ public abstract class ID implements Serializable {
 
       public Atom toAtom(SymbolTable symbols) {
          return new Atom.Str(this.value);
+      }
+   }
+
+   public final static class Bytes extends ID implements Serializable {
+      private final byte[] value;
+
+      public byte[] value() {
+         return this.value;
+      }
+
+      public boolean match(final ID other) {
+         if (other instanceof Variable) {
+            return true;
+         }
+         if (other instanceof Str) {
+            return this.value.equals(((Bytes) other).value);
+         }
+         return false;
+      }
+
+      public Bytes(final byte[] value) {
+         this.value = value;
+      }
+
+      @Override
+      public boolean equals(Object o) {
+         if (this == o) return true;
+         if (o == null || getClass() != o.getClass()) return false;
+         Bytes str = (Bytes) o;
+         return Objects.equals(value, str.value);
+      }
+
+      @Override
+      public int hashCode() {
+         return Objects.hash(value);
+      }
+
+      @Override
+      public String toString() {
+         return this.value.toString();
+      }
+
+      public Schema.ID serialize() {
+         return Schema.ID.newBuilder()
+                 .setKind(Schema.ID.Kind.BYTES)
+                 .setBytes(ByteString.EMPTY.copyFrom(this.value)).build();
+      }
+
+      static public Either<Error.FormatError, ID> deserialize(Schema.ID id) {
+         if(id.getKind() != Schema.ID.Kind.STR) {
+            return Left(new Error().new FormatError().new DeserializationError("invalid ID kind"));
+         } else {
+            return Right(new Str(id.getStr()));
+         }
+      }
+
+      public Atom toAtom(SymbolTable symbols) {
+         return new Atom.Bytes(this.value);
       }
    }
 
