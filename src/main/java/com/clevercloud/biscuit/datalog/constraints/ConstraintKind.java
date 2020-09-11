@@ -108,6 +108,47 @@ public abstract class ConstraintKind implements Serializable {
       }
    }
 
+   public static final class Bytes extends ConstraintKind implements Serializable {
+      private final BytesConstraint constraint;
+
+      public boolean check(final byte[] value) {
+         return this.constraint.check(value);
+      }
+
+      public Bytes(final BytesConstraint constraint) {
+         this.constraint = constraint;
+      }
+
+      @Override
+      public String toString() {
+         return this.constraint.toString();
+      }
+
+      public Schema.Constraint serialize(long id) {
+         return Schema.Constraint.newBuilder()
+                 .setId((int) id)
+                 .setKind(Schema.Constraint.Kind.BYTES)
+                 .setBytes(this.constraint.serialize())
+                 .build();
+      }
+
+      static public Either<Error.FormatError, ConstraintKind> deserialize(Schema.Constraint c) {
+         long id = c.getId();
+
+         if (!c.hasStr()) {
+            return Left(new Error().new FormatError().new DeserializationError("invalid Bytes constraint"));
+         } else {
+            Either<Error.FormatError, BytesConstraint> res = BytesConstraint.deserialize_enum(c.getBytes());
+            if (res.isLeft()) {
+               Error.FormatError e = res.getLeft();
+               return Left(e);
+            } else {
+               return Right(new Bytes(res.get()));
+            }
+         }
+      }
+   }
+
    public static final class Date extends ConstraintKind implements Serializable {
       private final DateConstraint constraint;
 

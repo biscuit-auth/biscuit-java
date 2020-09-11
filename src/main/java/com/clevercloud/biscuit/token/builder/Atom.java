@@ -93,6 +93,24 @@ public abstract class Atom {
         }
     }
 
+    public static class Bytes extends Atom {
+        byte[] value;
+
+        public Bytes(byte[] value) {
+            this.value = value;
+        }
+
+        @Override
+        public ID convert(SymbolTable symbols) {
+            return new ID.Bytes(this.value);
+        }
+
+        @Override
+        public String toString() {
+            return "\""+value+"\"";
+        }
+    }
+
     public static class Date extends Atom {
         long value;
 
