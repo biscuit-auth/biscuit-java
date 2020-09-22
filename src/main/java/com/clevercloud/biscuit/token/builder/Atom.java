@@ -91,6 +91,8 @@ public abstract class Atom {
         public String toString() {
             return "\""+value+"\"";
         }
+
+        public String value() { return value; }
     }
 
     public static class Bytes extends Atom {

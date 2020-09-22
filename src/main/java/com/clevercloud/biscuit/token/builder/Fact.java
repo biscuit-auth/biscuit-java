@@ -31,4 +31,6 @@ public class Fact {
     public String name() {
         return this.predicate.name;
     }
+
+    public List<Atom> ids() { return this.predicate.ids; }
 }
