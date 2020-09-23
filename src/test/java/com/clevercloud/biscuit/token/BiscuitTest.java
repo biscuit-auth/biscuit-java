@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static com.clevercloud.biscuit.crypto.TokenSignature.hex;
 import static com.clevercloud.biscuit.token.builder.Utils.*;
@@ -327,5 +328,34 @@ public class BiscuitTest extends TestCase {
 
         System.out.println("attenuated2: " + attenuated2B64);
         Biscuit.from_b64(attenuated2B64).get();
+    }
+
+    public void testGetRevocationIds() {
+        SecureRandom rng = new SecureRandom();
+        KeyPair root = new KeyPair(rng);
+
+        SymbolTable symbols = Biscuit.default_symbol_table();
+        Block authority_builder = new Block(0, symbols);
+
+        UUID uuid1 = UUID.fromString("0b6d033d-83da-437f-a078-1a44890018bc");
+        authority_builder.add_fact(fact("revocation_id", Arrays.asList(string(uuid1.toString()))));
+
+        Biscuit biscuit = Biscuit.make(rng, root, Biscuit.default_symbol_table(), authority_builder.build()).get();
+
+        Block builder = biscuit.create_block();
+        builder.add_fact(fact(
+                "right",
+                Arrays.asList(s("topic"), s("tenant"), s("namespace"), s("topic"), s("produce"))
+        ));
+        UUID uuid2 = UUID.fromString("46a103de-ee65-4d04-936b-9111eac7dd3b");
+        builder.add_fact(fact("revocation_id", Arrays.asList(string(uuid2.toString()))));
+
+        String attenuatedB64 = biscuit.attenuate(rng, new KeyPair(rng), builder.build()).get().serialize_b64().get();
+        Biscuit b = Biscuit.from_b64(attenuatedB64).get();
+
+        Verifier v1 = b.verify(root.public_key()).get();
+        List<UUID> revokedIds = v1.get_revocation_ids();
+        org.junit.Assert.assertTrue(revokedIds.contains(uuid1));
+        org.junit.Assert.assertTrue(revokedIds.contains(uuid2));
     }
 }
