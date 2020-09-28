@@ -130,8 +130,8 @@ public class Verifier {
                 Arrays.asList(pred("revocation_id", Arrays.asList(var(0))))
         );
 
-        this.query(getRevocationIds).parallelStream().forEach(fact -> {
-            fact.ids().parallelStream().forEach(id -> {
+        this.query(getRevocationIds).stream().forEach(fact -> {
+            fact.ids().stream().forEach(id -> {
                 if (id instanceof Atom.Str) {
                     ids.add((((Atom.Str) id).value()));
                 }
