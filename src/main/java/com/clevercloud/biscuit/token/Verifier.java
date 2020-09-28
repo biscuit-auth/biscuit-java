@@ -121,8 +121,8 @@ public class Verifier {
         this.caveats.add(new Caveat(q));
     }
 
-    public List<UUID> get_revocation_ids() {
-        ArrayList<UUID> ids = new ArrayList<>();
+    public List<String> get_revocation_ids() {
+        ArrayList<String> ids = new ArrayList<>();
 
         final Rule getRevocationIds = rule(
                 "revocation_id",
@@ -133,7 +133,7 @@ public class Verifier {
         this.query(getRevocationIds).parallelStream().forEach(fact -> {
             fact.ids().parallelStream().forEach(id -> {
                 if (id instanceof Atom.Str) {
-                    ids.add(UUID.fromString((((Atom.Str) id).value())));
+                    ids.add((((Atom.Str) id).value()));
                 }
             });
         });
