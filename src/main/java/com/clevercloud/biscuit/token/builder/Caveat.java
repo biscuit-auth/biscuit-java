@@ -40,4 +40,19 @@ public class Caveat {
     public String toString() {
         return "caveat("+queries+")";
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Caveat caveat = (Caveat) o;
+
+        return queries != null ? queries.equals(caveat.queries) : caveat.queries == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return queries != null ? queries.hashCode() : 0;
+    }
 }

@@ -33,4 +33,19 @@ public class Fact {
     }
 
     public List<Atom> ids() { return this.predicate.ids; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Fact fact = (Fact) o;
+
+        return predicate != null ? predicate.equals(fact.predicate) : fact.predicate == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return predicate != null ? predicate.hashCode() : 0;
+    }
 }

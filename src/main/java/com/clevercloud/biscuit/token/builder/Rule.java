@@ -33,4 +33,24 @@ public class Rule {
 
         return new com.clevercloud.biscuit.datalog.Rule(head, body, constraints);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Rule rule = (Rule) o;
+
+        if (head != null ? !head.equals(rule.head) : rule.head != null) return false;
+        if (body != null ? !body.equals(rule.body) : rule.body != null) return false;
+        return constraintsBuilders != null ? constraintsBuilders.equals(rule.constraintsBuilders) : rule.constraintsBuilders == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = head != null ? head.hashCode() : 0;
+        result = 31 * result + (body != null ? body.hashCode() : 0);
+        result = 31 * result + (constraintsBuilders != null ? constraintsBuilders.hashCode() : 0);
+        return result;
+    }
 }
