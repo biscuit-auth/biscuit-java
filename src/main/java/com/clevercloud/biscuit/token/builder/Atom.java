@@ -54,7 +54,7 @@ public abstract class Atom {
 
         @Override
         public String toString() {
-            return ""+value+"?";
+            return "$"+value;
         }
 
         @Override
