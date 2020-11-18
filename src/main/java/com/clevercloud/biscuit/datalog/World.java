@@ -27,7 +27,7 @@ public final class World implements Serializable {
    }
 
    public void run() {
-      for (int i = 0; i < 100; ++i) {
+      while(true) {
          final Set<Fact> new_facts = new HashSet<>();
          for (final Rule rule : this.rules) {
             rule.apply(this.facts, new_facts);
@@ -38,7 +38,6 @@ public final class World implements Serializable {
             return;
          }
       }
-      assert "world ran more than 100 iterations" == null;
    }
 
    public final Set<Fact> facts() {
