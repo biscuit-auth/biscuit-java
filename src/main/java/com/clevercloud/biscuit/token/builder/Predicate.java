@@ -15,6 +15,14 @@ public class Predicate {
         this.ids = ids;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public List<Atom> getIds() {
+        return ids;
+    }
+
     public com.clevercloud.biscuit.datalog.Predicate convert(SymbolTable symbols) {
         long name = symbols.insert(this.name);
         ArrayList<ID> ids = new ArrayList<ID>();

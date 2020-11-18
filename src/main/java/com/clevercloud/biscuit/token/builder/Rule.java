@@ -53,4 +53,9 @@ public class Rule {
         result = 31 * result + (constraintsBuilders != null ? constraintsBuilders.hashCode() : 0);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return head.toString() + " <- " + body + " @ "+ constraintsBuilders;
+    }
 }
