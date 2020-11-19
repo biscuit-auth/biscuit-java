@@ -53,7 +53,7 @@ public final class SymbolTable implements Serializable {
    }
 
    public String print_constraint(final Constraint c) {
-      String res = "$" + this.symbols.get((int) c.id) + " ";
+      String res = "$" + this.print_symbol((int) c.id) + " ";
       if (c.kind instanceof ConstraintKind.Int) {
          res += c.kind.toString();
       } else if (c.kind instanceof ConstraintKind.Str) {
@@ -64,10 +64,10 @@ public final class SymbolTable implements Serializable {
          SymbolConstraint s = ((ConstraintKind.Symbol) c.kind).constraint;
 
          if (s instanceof SymbolConstraint.InSet) {
-            List<String> set = ((SymbolConstraint.InSet) s).value.stream().map((sym) -> "#" + this.symbols.get(sym.intValue())).collect(Collectors.toList());
+            List<String> set = ((SymbolConstraint.InSet) s).value.stream().map((sym) -> "#" + this.print_symbol(sym.intValue())).collect(Collectors.toList());
             res += "in " + set.toString();
          } else if (s instanceof SymbolConstraint.NotInSet) {
-            List<String> set = ((SymbolConstraint.NotInSet) s).value.stream().map((sym) -> "#" + this.symbols.get(sym.intValue())).collect(Collectors.toList());
+            List<String> set = ((SymbolConstraint.NotInSet) s).value.stream().map((sym) -> "#" + this.print_symbol(sym.intValue())).collect(Collectors.toList());
             res += "not in " + set.toString();
          }
       }
@@ -79,9 +79,9 @@ public final class SymbolTable implements Serializable {
    public String print_predicate(final Predicate p) {
       List<String> ids = p.ids().stream().map((i) -> {
          if (i instanceof ID.Variable) {
-            return "$" + this.symbols.get((int) ((ID.Variable) i).value());
+            return "$" + this.print_symbol((int) ((ID.Variable) i).value());
          } else if (i instanceof ID.Symbol) {
-            return "#" + this.symbols.get((int) ((ID.Symbol) i).value());
+            return "#" + this.print_symbol((int) ((ID.Symbol) i).value());
          } else if (i instanceof ID.Date) {
             return Date.from(Instant.ofEpochSecond(((ID.Date) i).value())).toString();
          } else if (i instanceof ID.Integer) {
@@ -92,7 +92,7 @@ public final class SymbolTable implements Serializable {
             return "???";
          }
       }).collect(Collectors.toList());
-      return Optional.ofNullable(this.symbols.get((int) p.name())).orElse("<?>") + "(" + String.join(", ", ids) + ")";
+      return Optional.ofNullable(this.print_symbol((int) p.name())).orElse("<?>") + "(" + String.join(", ", ids) + ")";
    }
 
    public String print_fact(final Fact f) {
@@ -122,7 +122,11 @@ public final class SymbolTable implements Serializable {
    }
 
    public String print_symbol(int i) {
-      return this.symbols.get(i);
+      if (i >=0 && i < this.symbols.size()) {
+         return this.symbols.get(i);
+      } else {
+         return "<"+i+"?>";
+      }
    }
 
    public SymbolTable() {
