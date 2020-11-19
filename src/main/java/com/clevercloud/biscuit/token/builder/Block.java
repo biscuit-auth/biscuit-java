@@ -68,9 +68,9 @@ public class Block {
                 "check_right",
                 Arrays.asList(s(right)),
                 Arrays.asList(
-                        pred("resource", Arrays.asList(s("ambient"), var(0))),
+                        pred("resource", Arrays.asList(s("ambient"), var("resource"))),
                         pred("operation", Arrays.asList(s("ambient"), s(right))),
-                        pred("right", Arrays.asList(s("authority"), var(0), s(right)))
+                        pred("right", Arrays.asList(s("authority"), var("resource"), s(right)))
                 )
         ));
         this.add_caveat(new com.clevercloud.biscuit.token.builder.Caveat(queries));
@@ -81,9 +81,9 @@ public class Block {
 
         queries.add(constrained_rule(
                 "prefix",
-                Arrays.asList(var(0)),
-                Arrays.asList(pred("resource", Arrays.asList(s("ambient"), var(0)))),
-                Arrays.asList(new com.clevercloud.biscuit.token.builder.constraints.StrConstraint.Prefix(0, prefix))
+                Arrays.asList(var("resource")),
+                Arrays.asList(pred("resource", Arrays.asList(s("ambient"), var("resource")))),
+                Arrays.asList(new com.clevercloud.biscuit.token.builder.constraints.StrConstraint.Prefix("resource", prefix))
         ));
         this.add_caveat(new com.clevercloud.biscuit.token.builder.Caveat(queries));
     }
@@ -93,9 +93,9 @@ public class Block {
 
         queries.add(constrained_rule(
                 "suffix",
-                Arrays.asList(var(0)),
-                Arrays.asList(pred("resource", Arrays.asList(s("ambient"), var(0)))),
-                Arrays.asList(new com.clevercloud.biscuit.token.builder.constraints.StrConstraint.Suffix(0, suffix))
+                Arrays.asList(var("resource")),
+                Arrays.asList(pred("resource", Arrays.asList(s("ambient"), var("resource")))),
+                Arrays.asList(new com.clevercloud.biscuit.token.builder.constraints.StrConstraint.Suffix("resource", suffix))
         ));
         this.add_caveat(new com.clevercloud.biscuit.token.builder.Caveat(queries));
     }
@@ -105,9 +105,9 @@ public class Block {
 
         queries.add(constrained_rule(
                 "expiration",
-                Arrays.asList(var(0)),
-                Arrays.asList(pred("time", Arrays.asList(s("ambient"), var(0)))),
-                Arrays.asList(new com.clevercloud.biscuit.token.builder.constraints.DateConstraint.Before(0, d.getTime() / 1000))
+                Arrays.asList(var("date")),
+                Arrays.asList(pred("time", Arrays.asList(s("ambient"), var("date")))),
+                Arrays.asList(new com.clevercloud.biscuit.token.builder.constraints.DateConstraint.Before("date", d.getTime() / 1000))
         ));
         this.add_caveat(new com.clevercloud.biscuit.token.builder.Caveat(queries));
     }

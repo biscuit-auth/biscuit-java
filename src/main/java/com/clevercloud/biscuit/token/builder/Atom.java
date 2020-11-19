@@ -41,15 +41,15 @@ public abstract class Atom {
     }
 
     public static class Variable extends Atom {
-        int value;
+        String value;
 
-        public Variable(int value) {
+        public Variable(String value) {
             this.value = value;
         }
 
         @Override
         public ID convert(SymbolTable symbols) {
-            return new ID.Variable(this.value);
+            return new ID.Variable(symbols.insert(this.value));
         }
 
         @Override
@@ -64,12 +64,12 @@ public abstract class Atom {
 
             Variable variable = (Variable) o;
 
-            return value == variable.value;
+            return value.equals(variable.value);
         }
 
         @Override
         public int hashCode() {
-            return value;
+            return value.hashCode();
         }
     }
 

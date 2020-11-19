@@ -340,18 +340,6 @@ public abstract class ID implements Serializable {
          this.value = value;
       }
 
-      public Variable(final String name) {
-         long value = 0;
-         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] res = digest.digest(name.getBytes(StandardCharsets.UTF_8));
-            value = Byte.toUnsignedLong(res[0]) + (Byte.toUnsignedLong(res[1]) << 8) + (Byte.toUnsignedLong(res[2]) << 16) + (Byte.toUnsignedLong(res[3]) << 24);
-         } catch (NoSuchAlgorithmException e) {
-            assert e == null;
-         }
-         this.value = value;
-      }
-
       @Override
       public boolean equals(Object o) {
          if (this == o) return true;
@@ -385,7 +373,7 @@ public abstract class ID implements Serializable {
       }
 
       public Atom toAtom(SymbolTable symbols) {
-         return new Atom.Variable((int) this.value);
+         return new Atom.Variable(symbols.print_symbol((int) this.value));
       }
    }
 }

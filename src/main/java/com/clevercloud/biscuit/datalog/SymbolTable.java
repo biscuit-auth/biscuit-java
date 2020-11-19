@@ -53,7 +53,7 @@ public final class SymbolTable implements Serializable {
    }
 
    public String print_constraint(final Constraint c) {
-      String res = "$" + c.id + " ";
+      String res = "$" + this.symbols.get((int) c.id) + " ";
       if (c.kind instanceof ConstraintKind.Int) {
          res += c.kind.toString();
       } else if (c.kind instanceof ConstraintKind.Str) {
@@ -79,7 +79,7 @@ public final class SymbolTable implements Serializable {
    public String print_predicate(final Predicate p) {
       List<String> ids = p.ids().stream().map((i) -> {
          if (i instanceof ID.Variable) {
-            return "$" + ((ID.Variable) i).value();
+            return "$" + this.symbols.get((int) ((ID.Variable) i).value());
          } else if (i instanceof ID.Symbol) {
             return "#" + this.symbols.get((int) ((ID.Symbol) i).value());
          } else if (i instanceof ID.Date) {

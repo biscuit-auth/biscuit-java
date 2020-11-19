@@ -208,7 +208,7 @@ public class SamplesTest extends TestCase {
         Error e = v1.verify().getLeft();
         Assert.assertEquals(
                 new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
-                        new FailedCaveat().new FailedBlock(1, 1, "*expiration($0) <- time(#ambient, $0) @ $0 <= 1545264000")
+                        new FailedCaveat().new FailedBlock(1, 1, "*expiration($date) <- time(#ambient, $date) @ $date <= 1545264000")
                 ))),
                 e);
     }
@@ -251,11 +251,11 @@ public class SamplesTest extends TestCase {
         v1.add_operation("read");
         v1.add_caveat(caveat(rule(
                 "caveat1",
-                Arrays.asList(var(0)),
+                Arrays.asList(var("0")),
                 Arrays.asList(
-                        pred("resource", Arrays.asList(s("ambient"), var(0))),
-                        pred("operation", Arrays.asList(s("ambient"), var(1))),
-                        pred("right", Arrays.asList(s("authority"), var(0), var(1)))
+                        pred("resource", Arrays.asList(s("ambient"), var("0"))),
+                        pred("operation", Arrays.asList(s("ambient"), var("1"))),
+                        pred("right", Arrays.asList(s("authority"), var("0"), var("1")))
                 )
         )));
         Either<Error, Void> res = v1.verify();
@@ -378,16 +378,16 @@ public class SamplesTest extends TestCase {
         ArrayList<Rule> queries = new ArrayList<>();
         queries.add(rule(
                 "test_must_be_present_authority",
-                Arrays.asList(var(0)),
+                Arrays.asList(var("0")),
                 Arrays.asList(
-                        pred("must_be_present", Arrays.asList(s("authority"), var(0)))
+                        pred("must_be_present", Arrays.asList(s("authority"), var("0")))
                 )
                 ));
         queries.add(rule(
                 "test_must_be_present",
-                Arrays.asList(var(0)),
+                Arrays.asList(var("0")),
                 Arrays.asList(
-                        pred("mst_be_present", Arrays.asList(var(0)))
+                        pred("mst_be_present", Arrays.asList(var("0")))
                 )
         ));
         v1.add_caveat(new Caveat(queries));

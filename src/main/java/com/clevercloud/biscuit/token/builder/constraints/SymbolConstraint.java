@@ -11,10 +11,10 @@ public abstract class SymbolConstraint implements ConstraintBuilder {
     abstract public Constraint convert(SymbolTable symbols);
 
     public static class InSet extends SymbolConstraint {
-        long id;
+        String id;
         Set<String> value;
 
-        public InSet(long id, Set<String> value) {
+        public InSet(String id, Set<String> value) {
             this.id = id;
             this.value = value;
         }
@@ -22,7 +22,7 @@ public abstract class SymbolConstraint implements ConstraintBuilder {
         @Override
         public Constraint convert(SymbolTable symbols) {
             Set<Long> ids = this.value.stream().map(string -> symbols.insert(string)).collect(Collectors.toSet());
-            return new Constraint(this.id, new ConstraintKind.Symbol(new com.clevercloud.biscuit.datalog.constraints.SymbolConstraint.InSet(ids)));
+            return new Constraint(symbols.insert(this.id), new ConstraintKind.Symbol(new com.clevercloud.biscuit.datalog.constraints.SymbolConstraint.InSet(ids)));
         }
 
         @Override
@@ -32,10 +32,10 @@ public abstract class SymbolConstraint implements ConstraintBuilder {
     }
 
     public static class NotInSet extends SymbolConstraint {
-        long id;
+        String id;
         Set<String> value;
 
-        public NotInSet(long id, Set<String> value) {
+        public NotInSet(String id, Set<String> value) {
             this.id = id;
             this.value = value;
         }
@@ -43,7 +43,7 @@ public abstract class SymbolConstraint implements ConstraintBuilder {
         @Override
         public Constraint convert(SymbolTable symbols) {
             Set<Long> ids = this.value.stream().map(string -> symbols.insert(string)).collect(Collectors.toSet());
-            return new Constraint(this.id, new ConstraintKind.Symbol(new com.clevercloud.biscuit.datalog.constraints.SymbolConstraint.NotInSet(ids)));
+            return new Constraint(symbols.insert(this.id), new ConstraintKind.Symbol(new com.clevercloud.biscuit.datalog.constraints.SymbolConstraint.NotInSet(ids)));
         }
 
         @Override

@@ -8,17 +8,17 @@ public abstract class DateConstraint implements ConstraintBuilder {
     abstract public Constraint convert(SymbolTable symbols);
 
     public static class Before extends DateConstraint {
-        long id;
+        String id;
         long value;
 
-        public Before(long id, long value) {
+        public Before(String id, long value) {
             this.id = id;
             this.value = value;
         }
 
         @Override
         public Constraint convert(SymbolTable symbols) {
-            return new Constraint(this.id, new ConstraintKind.Date(new com.clevercloud.biscuit.datalog.constraints.DateConstraint.Before(this.value)));
+            return new Constraint(symbols.insert(this.id), new ConstraintKind.Date(new com.clevercloud.biscuit.datalog.constraints.DateConstraint.Before(this.value)));
         }
 
         @Override
@@ -28,17 +28,17 @@ public abstract class DateConstraint implements ConstraintBuilder {
     }
 
     public static class After extends DateConstraint {
-        long id;
+        String id;
         long value;
 
-        public After(long id, long value) {
+        public After(String id, long value) {
             this.id = id;
             this.value = value;
         }
 
         @Override
         public Constraint convert(SymbolTable symbols) {
-            return new Constraint(this.id, new ConstraintKind.Date(new com.clevercloud.biscuit.datalog.constraints.DateConstraint.After(this.value)));
+            return new Constraint(symbols.insert(this.id), new ConstraintKind.Date(new com.clevercloud.biscuit.datalog.constraints.DateConstraint.After(this.value)));
         }
 
         @Override

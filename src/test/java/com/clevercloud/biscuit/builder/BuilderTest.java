@@ -34,18 +34,18 @@ public class BuilderTest extends TestCase {
         authority_builder.add_fact(fact("revocation_id", Arrays.asList(date(Date.from(Instant.now())))));
         authority_builder.add_fact(fact("right", Arrays.asList(s("authority"), s("admin"))));
         authority_builder.add_rule(constrained_rule("right",
-                Arrays.asList(s("authority"), s("namespace"), var(0), var(1), var(2)),
-                Arrays.asList(pred("ns_operation", Arrays.asList(s("authority"), s("namespace"), var(0), var(1), var(2)))),
-                Arrays.asList(new com.clevercloud.biscuit.token.builder.constraints.SymbolConstraint.InSet(2, new HashSet<>(Arrays.asList(
+                Arrays.asList(s("authority"), s("namespace"), var("tenant"), var("namespace"), var("operation")),
+                Arrays.asList(pred("ns_operation", Arrays.asList(s("authority"), s("namespace"), var("tenant"), var("namespace"), var("operation")))),
+                Arrays.asList(new com.clevercloud.biscuit.token.builder.constraints.SymbolConstraint.InSet("operation", new HashSet<>(Arrays.asList(
                         "create_topic",
                         "get_topic",
                         "get_topics"
                 ))))
         ));
         authority_builder.add_rule(constrained_rule("right",
-                Arrays.asList(s("authority"), s("topic"), var(0), var(1), var(2), var(3)),
-                Arrays.asList(pred("topic_operation", Arrays.asList(s("authority"), s("topic"), var(0), var(1), var(2), var(3)))),
-                Arrays.asList(new com.clevercloud.biscuit.token.builder.constraints.SymbolConstraint.InSet(3, new HashSet<>(Arrays.asList(
+                Arrays.asList(s("authority"), s("topic"), var("tenant"), var("namespace"), var("topic"), var("operation")),
+                Arrays.asList(pred("topic_operation", Arrays.asList(s("authority"), s("topic"), var("tenant"), var("namespace"), var("topic"), var("operation")))),
+                Arrays.asList(new com.clevercloud.biscuit.token.builder.constraints.SymbolConstraint.InSet("operation", new HashSet<>(Arrays.asList(
                         "lookup"
                 ))))
         ));

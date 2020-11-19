@@ -47,7 +47,7 @@ public class Utils {
         return new Atom.Date(d.getTime() / 1000);
     }
 
-    public static Atom var(int i) {
-        return new Atom.Variable(i);
+    public static Atom var(String name) {
+        return new Atom.Variable(name);
     }
 }

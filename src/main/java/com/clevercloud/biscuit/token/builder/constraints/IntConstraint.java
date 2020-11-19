@@ -10,17 +10,17 @@ public abstract class IntConstraint implements ConstraintBuilder {
     abstract public Constraint convert(SymbolTable symbols);
 
     public static class Equal extends IntConstraint {
-        long id;
+        String id;
         long value;
 
-        public Equal(long id, long value) {
+        public Equal(String id, long value) {
             this.id = id;
             this.value = value;
         }
 
         @Override
         public Constraint convert(SymbolTable symbols) {
-            return new Constraint(this.id, new ConstraintKind.Int(new com.clevercloud.biscuit.datalog.constraints.IntConstraint.Equal(this.value)));
+            return new Constraint(symbols.insert(this.id), new ConstraintKind.Int(new com.clevercloud.biscuit.datalog.constraints.IntConstraint.Equal(this.value)));
         }
 
         @Override
@@ -30,17 +30,17 @@ public abstract class IntConstraint implements ConstraintBuilder {
     }
 
     public static class Greater extends IntConstraint {
-        long id;
+        String id;
         long value;
 
-        public Greater(long id, long value) {
+        public Greater(String id, long value) {
             this.id = id;
             this.value = value;
         }
 
         @Override
         public Constraint convert(SymbolTable symbols) {
-            return new Constraint(this.id, new ConstraintKind.Int(new com.clevercloud.biscuit.datalog.constraints.IntConstraint.Greater(this.value)));
+            return new Constraint(symbols.insert(this.id), new ConstraintKind.Int(new com.clevercloud.biscuit.datalog.constraints.IntConstraint.Greater(this.value)));
         }
 
         @Override
@@ -50,17 +50,17 @@ public abstract class IntConstraint implements ConstraintBuilder {
     }
 
     public static class GreaterOrEqual extends IntConstraint {
-        long id;
+        String id;
         long value;
 
-        public GreaterOrEqual(long id, long value) {
+        public GreaterOrEqual(String id, long value) {
             this.id = id;
             this.value = value;
         }
 
         @Override
         public Constraint convert(SymbolTable symbols) {
-            return new Constraint(this.id, new ConstraintKind.Int(new com.clevercloud.biscuit.datalog.constraints.IntConstraint.GreaterOrEqual(this.value)));
+            return new Constraint(symbols.insert(this.id), new ConstraintKind.Int(new com.clevercloud.biscuit.datalog.constraints.IntConstraint.GreaterOrEqual(this.value)));
         }
 
         @Override
@@ -70,17 +70,17 @@ public abstract class IntConstraint implements ConstraintBuilder {
     }
 
     public static class Lower extends IntConstraint {
-        long id;
+        String id;
         long value;
 
-        public Lower(long id, long value) {
+        public Lower(String id, long value) {
             this.id = id;
             this.value = value;
         }
 
         @Override
         public Constraint convert(SymbolTable symbols) {
-            return new Constraint(this.id, new ConstraintKind.Int(new com.clevercloud.biscuit.datalog.constraints.IntConstraint.Lower(this.value)));
+            return new Constraint(symbols.insert(this.id), new ConstraintKind.Int(new com.clevercloud.biscuit.datalog.constraints.IntConstraint.Lower(this.value)));
         }
 
         @Override
@@ -90,17 +90,17 @@ public abstract class IntConstraint implements ConstraintBuilder {
     }
 
     public static class LowerOrEqual extends IntConstraint {
-        long id;
+        String id;
         long value;
 
-        public LowerOrEqual(long id, long value) {
+        public LowerOrEqual(String id, long value) {
             this.id = id;
             this.value = value;
         }
 
         @Override
         public Constraint convert(SymbolTable symbols) {
-            return new Constraint(this.id, new ConstraintKind.Int(new com.clevercloud.biscuit.datalog.constraints.IntConstraint.LowerOrEqual(this.value)));
+            return new Constraint(symbols.insert(this.id), new ConstraintKind.Int(new com.clevercloud.biscuit.datalog.constraints.IntConstraint.LowerOrEqual(this.value)));
         }
 
         @Override
@@ -110,17 +110,17 @@ public abstract class IntConstraint implements ConstraintBuilder {
     }
 
     public static class InSet extends IntConstraint {
-        long id;
+        String id;
         Set<Long> value;
 
-        public InSet(long id, Set<Long> value) {
+        public InSet(String id, Set<Long> value) {
             this.id = id;
             this.value = value;
         }
 
         @Override
         public Constraint convert(SymbolTable symbols) {
-            return new Constraint(this.id, new ConstraintKind.Int(new com.clevercloud.biscuit.datalog.constraints.IntConstraint.InSet(this.value)));
+            return new Constraint(symbols.insert(this.id), new ConstraintKind.Int(new com.clevercloud.biscuit.datalog.constraints.IntConstraint.InSet(this.value)));
         }
 
         @Override
@@ -130,17 +130,17 @@ public abstract class IntConstraint implements ConstraintBuilder {
     }
 
     public static class NotInSet extends IntConstraint {
-        long id;
+        String id;
         Set<Long> value;
 
-        public NotInSet(long id, Set<Long> value) {
+        public NotInSet(String id, Set<Long> value) {
             this.id = id;
             this.value = value;
         }
 
         @Override
         public Constraint convert(SymbolTable symbols) {
-            return new Constraint(this.id, new ConstraintKind.Int(new com.clevercloud.biscuit.datalog.constraints.IntConstraint.NotInSet(this.value)));
+            return new Constraint(symbols.insert(this.id), new ConstraintKind.Int(new com.clevercloud.biscuit.datalog.constraints.IntConstraint.NotInSet(this.value)));
         }
 
         @Override

@@ -348,15 +348,15 @@ public class Parser {
         for (int i = 1; i < s.length(); i++) {
             char c = s.charAt(i);
 
-            if(!Character.isDigit(c)) {
+            if(!Character.isAlphabetic(c) && !Character.isDigit(c) && c != '_') {
                 index = i;
                 break;
             }
         }
 
-        Integer i = Integer.parseInt(s.substring(1, index));
+        String name = s.substring(1, index);
         String remaining = s.substring(index);
-        return Either.right(new Tuple2<String, Atom.Variable>(remaining, (Atom.Variable) var(i.intValue())));
+        return Either.right(new Tuple2<String, Atom.Variable>(remaining, (Atom.Variable) var(name)));
     }
 
     public static Either<Error, Tuple2<String, ConstraintBuilder>> constraint(String s) {

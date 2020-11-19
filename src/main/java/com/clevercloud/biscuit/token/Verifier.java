@@ -113,9 +113,9 @@ public class Verifier {
 
         q.add(constrained_rule(
                 "revocation_check",
-                Arrays.asList((var(0))),
-                Arrays.asList(pred("revocation_id", Arrays.asList(var(0)))),
-                Arrays.asList(new com.clevercloud.biscuit.token.builder.constraints.IntConstraint.NotInSet(0, new HashSet(ids)))
+                Arrays.asList((var("id"))),
+                Arrays.asList(pred("revocation_id", Arrays.asList(var("id")))),
+                Arrays.asList(new com.clevercloud.biscuit.token.builder.constraints.IntConstraint.NotInSet("id", new HashSet(ids)))
         ));
 
         this.caveats.add(new Caveat(q));
@@ -126,8 +126,8 @@ public class Verifier {
 
         final Rule getRevocationIds = rule(
                 "revocation_id",
-                Arrays.asList(var(0)),
-                Arrays.asList(pred("revocation_id", Arrays.asList(var(0))))
+                Arrays.asList(var("id")),
+                Arrays.asList(pred("revocation_id", Arrays.asList(var("id"))))
         );
 
         this.query(getRevocationIds).stream().forEach(fact -> {

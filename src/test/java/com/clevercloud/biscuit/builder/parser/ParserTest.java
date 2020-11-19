@@ -54,8 +54,8 @@ public class ParserTest extends TestCase {
     }
 
     public void testVariable() {
-        Either<Error, Tuple2<String, Atom.Variable>> res = Parser.variable("$1");
-        assertEquals(Either.right(new Tuple2<String, Atom.Variable>("", (Atom.Variable) var(1))), res);
+        Either<Error, Tuple2<String, Atom.Variable>> res = Parser.variable("$name");
+        assertEquals(Either.right(new Tuple2<String, Atom.Variable>("", (Atom.Variable) var("name"))), res);
     }
 
     public void testConstraint() {
@@ -69,12 +69,12 @@ public class ParserTest extends TestCase {
     }
 
     public void testRule() {
-        Either<Error, Tuple2<String, Rule>> res = Parser.rule("*right(#authority, $0, #read) <- resource( #ambient, $0), operation(#ambient, #read)");
+        Either<Error, Tuple2<String, Rule>> res = Parser.rule("*right(#authority, $resource, #read) <- resource( #ambient, $resource), operation(#ambient, #read)");
         assertEquals(Either.right(new Tuple2<String, Rule>("",
                 rule("right",
-                        Arrays.asList(s("authority"), var(0), s("read")),
+                        Arrays.asList(s("authority"), var("resource"), s("read")),
                         Arrays.asList(
-                                pred("resource", Arrays.asList(s("ambient"),  var(0))),
+                                pred("resource", Arrays.asList(s("ambient"),  var("resource"))),
                                 pred("operation", Arrays.asList(s("ambient"), s("read"))))
                 ))),
                 res);

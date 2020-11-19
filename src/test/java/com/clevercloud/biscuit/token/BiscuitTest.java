@@ -77,11 +77,11 @@ public class BiscuitTest extends TestCase {
         Block builder = deser.create_block();
         builder.add_caveat(caveat(rule(
                 "caveat1",
-                Arrays.asList(var(0)),
+                Arrays.asList(var("resource")),
                 Arrays.asList(
-                        pred("resource", Arrays.asList(s("ambient"), var(0))),
+                        pred("resource", Arrays.asList(s("ambient"), var("resource"))),
                         pred("operation", Arrays.asList(s("ambient"), s("read"))),
-                        pred("right", Arrays.asList(s("authority"), var(0), s("read")))
+                        pred("right", Arrays.asList(s("authority"), var("resource"), s("read")))
                 )
         )));
 
@@ -162,7 +162,7 @@ public class BiscuitTest extends TestCase {
 
         Assert.assertEquals(
                 new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
-                        new FailedCaveat().new FailedBlock(1, 0, "*caveat1($0) <- resource(#ambient, $0), operation(#ambient, #read), right(#authority, $0, #read)"),
+                        new FailedCaveat().new FailedBlock(1, 0, "*caveat1($resource) <- resource(#ambient, $resource), operation(#ambient, #read), right(#authority, $resource, #read)"),
                         new FailedCaveat().new FailedBlock(2, 0, "*caveat2(#file1) <- resource(#ambient, #file1)")
                 ))),
                 res2.getLeft());
@@ -222,8 +222,8 @@ public class BiscuitTest extends TestCase {
         }
         Assert.assertEquals(
                 new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
-                        new FailedCaveat().new FailedBlock(1, 0, "*prefix($0) <- resource(#ambient, $0) @ $0 matches /folder1/*"),
-                        new FailedCaveat().new FailedBlock(1, 1, "*check_right(#read) <- resource(#ambient, $0), operation(#ambient, #read), right(#authority, $0, #read)")
+                        new FailedCaveat().new FailedBlock(1, 0, "*prefix($resource) <- resource(#ambient, $resource) @ $resource matches /folder1/*"),
+                        new FailedCaveat().new FailedBlock(1, 1, "*check_right(#read) <- resource(#ambient, $resource), operation(#ambient, #read), right(#authority, $resource, #read)")
                 ))),
                 e);
     }
@@ -268,11 +268,11 @@ public class BiscuitTest extends TestCase {
         Block builder = deser.create_block();
         builder.add_caveat(caveat(rule(
                 "caveat1",
-                Arrays.asList(var(0)),
+                Arrays.asList(var("resource")),
                 Arrays.asList(
-                        pred("resource", Arrays.asList(s("ambient"), var(0))),
+                        pred("resource", Arrays.asList(s("ambient"), var("resource"))),
                         pred("operation", Arrays.asList(s("ambient"), s("read"))),
-                        pred("right", Arrays.asList(s("authority"), var(0), s("read")))
+                        pred("right", Arrays.asList(s("authority"), var("resource"), s("read")))
                 )
         )));
 

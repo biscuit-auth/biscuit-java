@@ -10,17 +10,17 @@ public abstract class BytesConstraint implements ConstraintBuilder {
     abstract public Constraint convert(SymbolTable symbols);
 
     public static class Equal extends BytesConstraint {
-        long id;
+        String id;
         byte[] value;
 
-        public Equal(long id, byte[] value) {
+        public Equal(String id, byte[] value) {
             this.id = id;
             this.value = value;
         }
 
         @Override
         public Constraint convert(SymbolTable symbols) {
-            return new Constraint(this.id, new ConstraintKind.Bytes(new com.clevercloud.biscuit.datalog.constraints.BytesConstraint.Equal(this.value)));
+            return new Constraint(symbols.insert(this.id), new ConstraintKind.Bytes(new com.clevercloud.biscuit.datalog.constraints.BytesConstraint.Equal(this.value)));
         }
 
         @Override
@@ -30,17 +30,17 @@ public abstract class BytesConstraint implements ConstraintBuilder {
     }
 
     public static class InSet extends BytesConstraint {
-        long id;
+        String id;
         Set<byte[]> value;
 
-        public InSet(long id, Set<byte[]> value) {
+        public InSet(String id, Set<byte[]> value) {
             this.id = id;
             this.value = value;
         }
 
         @Override
         public Constraint convert(SymbolTable symbols) {
-            return new Constraint(this.id, new ConstraintKind.Bytes(new com.clevercloud.biscuit.datalog.constraints.BytesConstraint.InSet(this.value)));
+            return new Constraint(symbols.insert(this.id), new ConstraintKind.Bytes(new com.clevercloud.biscuit.datalog.constraints.BytesConstraint.InSet(this.value)));
         }
 
         @Override
@@ -50,17 +50,17 @@ public abstract class BytesConstraint implements ConstraintBuilder {
     }
 
     public static class NotInSet extends BytesConstraint {
-        long id;
+        String id;
         Set<byte[]> value;
 
-        public NotInSet(long id, Set<byte[]> value) {
+        public NotInSet(String id, Set<byte[]> value) {
             this.id = id;
             this.value = value;
         }
 
         @Override
         public Constraint convert(SymbolTable symbols) {
-            return new Constraint(this.id, new ConstraintKind.Bytes(new com.clevercloud.biscuit.datalog.constraints.BytesConstraint.NotInSet(this.value)));
+            return new Constraint(symbols.insert(this.id), new ConstraintKind.Bytes(new com.clevercloud.biscuit.datalog.constraints.BytesConstraint.NotInSet(this.value)));
         }
 
         @Override
