@@ -247,7 +247,7 @@ public class Parser {
         for (int i = 1; i < s.length(); i++) {
             char c = s.charAt(i);
 
-            if (!(Character.isAlphabetic(c) || c == '_')) {
+            if (!(Character.isAlphabetic(c) && c != '_')) {
                 index = i;
                 break;
             }
