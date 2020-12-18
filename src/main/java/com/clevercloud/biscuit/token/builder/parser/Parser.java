@@ -40,7 +40,7 @@ public class Parser {
         int index2 = s.length();
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
-            if (c != ' ') {
+            if (c != ' ' && c != '\t' && c != '\r' && c != '\n') {
                 index2 = i;
                 break;
             }
@@ -55,7 +55,7 @@ public class Parser {
             int index_loop = s.length();
             for (int i = 0; i < s.length(); i++) {
                 char c = s.charAt(i);
-                if (c != ' ') {
+                if (c != ' ' && c != '\t' && c != '\r' && c != '\n') {
                     index_loop = i;
                     break;
                 }
@@ -74,7 +74,7 @@ public class Parser {
             index_loop = s.length();
             for (int i = 0; i < s.length(); i++) {
                 char c = s.charAt(i);
-                if (c != ' ') {
+                if (c != ' ' && c != '\t' && c != '\r' && c != '\n') {
                     index_loop = i;
                     break;
                 }
@@ -121,7 +121,7 @@ public class Parser {
         int index2 = s.length();
         for (int i = index; i < s.length(); i++) {
             char c = s.charAt(i);
-            if (c != ' ') {
+            if (c != ' ' && c != '\t' && c != '\r' && c != '\n') {
                 index2 = i;
                 break;
             }
@@ -136,7 +136,7 @@ public class Parser {
             int index_loop = s.length();
             for (int i = 0; i < s.length(); i++) {
                 char c = s.charAt(i);
-                if (c != ' ') {
+                if (c != ' ' && c != '\t' && c != '\r' && c != '\n') {
                     index_loop = i;
                     break;
                 }
@@ -155,7 +155,7 @@ public class Parser {
             index_loop = s.length();
             for (int i = 0; i < s.length(); i++) {
                 char c = s.charAt(i);
-                if (c != ' ') {
+                if (c != ' ' && c != '\t' && c != '\r' && c != '\n') {
                     index_loop = i;
                     break;
                 }
@@ -171,7 +171,7 @@ public class Parser {
         index = s.length();
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
-            if (c != ' ') {
+            if (c != ' ' && c != '\t' && c != '\r' && c != '\n') {
                 index = i;
                 break;
             }
