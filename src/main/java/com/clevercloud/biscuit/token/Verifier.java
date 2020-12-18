@@ -19,6 +19,7 @@ import io.vavr.control.Either;
 import io.vavr.control.Option;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.clevercloud.biscuit.token.builder.Utils.*;
 import static io.vavr.API.Left;
@@ -229,6 +230,36 @@ public class Verifier {
     }
 
     public String print_world() {
-        return this.symbols.print_world(this.world);
+        final List<String> facts = this.world.facts().stream().map((f) -> this.symbols.print_fact(f)).collect(Collectors.toList());
+        final List<String> rules = this.world.rules().stream().map((r) -> this.symbols.print_rule(r)).collect(Collectors.toList());
+
+        List<String> caveats = new ArrayList<>();
+
+        for (int j = 0; j < this.caveats.size(); j++) {
+            caveats.add("Verifier["+j+"]: "+this.caveats.get(j).toString());
+        }
+
+        for (int j = 0; j < this.token.authority.caveats.size(); j++) {
+            caveats.add("Block[0]["+j+"]: "+this.symbols.print_caveat(this.token.authority.caveats.get(j)));
+        }
+
+        for(int i = 0; i < this.token.blocks.size(); i++) {
+            Block b = this.token.blocks.get(i);
+
+            for (int j = 0; j < b.caveats.size(); j++) {
+                caveats.add("Block["+i+"]["+j+"]: "+this.symbols.print_caveat(this.token.authority.caveats.get(j)));
+            }
+        }
+
+        StringBuilder b = new StringBuilder();
+        b.append("World {\n\tfacts: [\n\t\t");
+        b.append(String.join(",\n\t\t", facts));
+        b.append("\n\t],\n\trules: [\n\t\t");
+        b.append(String.join(",\n\t\t", rules));
+        b.append("\n\t],\n\tcaveats: [\n\t\t");
+        b.append(String.join(",\n\t\t", caveats));
+        b.append("\n\t]\n}");
+
+        return b.toString();
     }
 }
