@@ -2,16 +2,13 @@ package com.clevercloud.biscuit.datalog;
 
 import biscuit.format.schema.Schema;
 import com.clevercloud.biscuit.error.Error;
-import com.clevercloud.biscuit.token.builder.Atom;
+import com.clevercloud.biscuit.token.builder.Term;
 import com.google.protobuf.ByteString;
 import io.vavr.control.Either;
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
 
@@ -36,7 +33,7 @@ public abstract class ID implements Serializable {
       }
    }
 
-   public abstract Atom toAtom(SymbolTable symbols);
+   public abstract Term toTerm(SymbolTable symbols);
 
    public final static class Date extends ID implements Serializable {
       private final long value;
@@ -88,8 +85,8 @@ public abstract class ID implements Serializable {
          }
       }
 
-      public Atom toAtom(SymbolTable symbols) {
-         return new Atom.Date(this.value);
+      public Term toTerm(SymbolTable symbols) {
+         return new Term.Date(this.value);
       }
    }
 
@@ -146,8 +143,8 @@ public abstract class ID implements Serializable {
          }
       }
 
-      public Atom toAtom(SymbolTable symbols) {
-         return new Atom.Integer(this.value);
+      public Term toTerm(SymbolTable symbols) {
+         return new Term.Integer(this.value);
       }
    }
 
@@ -204,8 +201,8 @@ public abstract class ID implements Serializable {
          }
       }
 
-      public Atom toAtom(SymbolTable symbols) {
-         return new Atom.Str(this.value);
+      public Term toTerm(SymbolTable symbols) {
+         return new Term.Str(this.value);
       }
    }
 
@@ -262,8 +259,8 @@ public abstract class ID implements Serializable {
          }
       }
 
-      public Atom toAtom(SymbolTable symbols) {
-         return new Atom.Bytes(this.value);
+      public Term toTerm(SymbolTable symbols) {
+         return new Term.Bytes(this.value);
       }
    }
 
@@ -320,8 +317,8 @@ public abstract class ID implements Serializable {
          }
       }
 
-      public Atom toAtom(SymbolTable symbols) {
-         return new Atom.Symbol(symbols.print_symbol((int) this.value));
+      public Term toTerm(SymbolTable symbols) {
+         return new Term.Symbol(symbols.print_symbol((int) this.value));
       }
    }
 
@@ -372,8 +369,8 @@ public abstract class ID implements Serializable {
          }
       }
 
-      public Atom toAtom(SymbolTable symbols) {
-         return new Atom.Variable(symbols.print_symbol((int) this.value));
+      public Term toTerm(SymbolTable symbols) {
+         return new Term.Variable(symbols.print_symbol((int) this.value));
       }
    }
 }

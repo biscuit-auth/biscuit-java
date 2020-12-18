@@ -8,9 +8,9 @@ import java.util.List;
 
 public class Predicate {
     String name;
-    List<Atom> ids;
+    List<Term> ids;
 
-    public Predicate(String name, List<Atom> ids) {
+    public Predicate(String name, List<Term> ids) {
         this.name = name;
         this.ids = ids;
     }
@@ -19,7 +19,7 @@ public class Predicate {
         return name;
     }
 
-    public List<Atom> getIds() {
+    public List<Term> getIds() {
         return ids;
     }
 
@@ -27,7 +27,7 @@ public class Predicate {
         long name = symbols.insert(this.name);
         ArrayList<ID> ids = new ArrayList<ID>();
 
-        for(Atom a: this.ids) {
+        for(Term a: this.ids) {
             ids.add(a.convert(symbols));
         }
 
@@ -36,9 +36,9 @@ public class Predicate {
 
     public static Predicate convert_from(com.clevercloud.biscuit.datalog.Predicate p, SymbolTable symbols) {
         String name = symbols.print_symbol((int) p.name());
-        List<Atom> ids = new ArrayList<>();
+        List<Term> ids = new ArrayList<>();
         for(com.clevercloud.biscuit.datalog.ID i: p.ids()) {
-            ids.add(i.toAtom(symbols));
+            ids.add(i.toTerm(symbols));
         }
 
         return new Predicate(name, ids);

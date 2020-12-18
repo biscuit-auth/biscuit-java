@@ -130,7 +130,7 @@ public class Parser {
             return Either.left(new Error(s, "opening parens not found"));
         }
 
-        List<Atom> atoms = new ArrayList<Atom>();
+        List<Term> terms = new ArrayList<Term>();
         s = s.substring(index2+1);
         while(true) {
             int index_loop = s.length();
@@ -143,14 +143,14 @@ public class Parser {
             }
             s = s.substring(index_loop);
 
-            Either<Error, Tuple2<String, Atom>> res = atom(s);
+            Either<Error, Tuple2<String, Term>> res = atom(s);
             if (res.isLeft()) {
                 break;
             }
 
-            Tuple2<String, Atom> t = res.get();
+            Tuple2<String, Term> t = res.get();
             s = t._1;
-            atoms.add(t._2);
+            terms.add(t._2);
 
             index_loop = s.length();
             for (int i = 0; i < s.length(); i++) {
@@ -182,7 +182,7 @@ public class Parser {
         }
 
         String remaining = s.substring(index+1);
-        return Either.right(new Tuple2<String, Predicate>(remaining, new Predicate(name, atoms)));
+        return Either.right(new Tuple2<String, Predicate>(remaining, new Predicate(name, terms)));
     }
 
     public static Either<Error, Tuple2<String, String>> name(String s) {
@@ -204,41 +204,41 @@ public class Parser {
         return Either.right(new Tuple2<String, String>(remaining, name));
     }
 
-    public static Either<Error, Tuple2<String, Atom>> atom(String s) {
-        Either<Error, Tuple2<String, Atom.Symbol>> res1 = symbol(s);
+    public static Either<Error, Tuple2<String, Term>> atom(String s) {
+        Either<Error, Tuple2<String, Term.Symbol>> res1 = symbol(s);
         if(res1.isRight()) {
-            Tuple2<String, Atom.Symbol> t = res1.get();
-            return Either.right(new Tuple2<String, Atom>(t._1, t._2));
+            Tuple2<String, Term.Symbol> t = res1.get();
+            return Either.right(new Tuple2<String, Term>(t._1, t._2));
         }
 
-        Either<Error, Tuple2<String, Atom.Str>> res2 = string(s);
+        Either<Error, Tuple2<String, Term.Str>> res2 = string(s);
         if(res2.isRight()) {
-            Tuple2<String, Atom.Str> t = res2.get();
-            return Either.right(new Tuple2<String, Atom>(t._1, t._2));
+            Tuple2<String, Term.Str> t = res2.get();
+            return Either.right(new Tuple2<String, Term>(t._1, t._2));
         }
 
-        Either<Error, Tuple2<String, Atom.Integer>> res3 = integer(s);
+        Either<Error, Tuple2<String, Term.Integer>> res3 = integer(s);
         if(res3.isRight()) {
-            Tuple2<String, Atom.Integer> t = res3.get();
-            return Either.right(new Tuple2<String, Atom>(t._1, t._2));
+            Tuple2<String, Term.Integer> t = res3.get();
+            return Either.right(new Tuple2<String, Term>(t._1, t._2));
         }
 
-        Either<Error, Tuple2<String, Atom.Date>> res4 = date(s);
+        Either<Error, Tuple2<String, Term.Date>> res4 = date(s);
         if(res4.isRight()) {
-            Tuple2<String, Atom.Date> t = res4.get();
-            return Either.right(new Tuple2<String, Atom>(t._1, t._2));
+            Tuple2<String, Term.Date> t = res4.get();
+            return Either.right(new Tuple2<String, Term>(t._1, t._2));
         }
 
-        Either<Error, Tuple2<String, Atom.Variable>> res5 = variable(s);
+        Either<Error, Tuple2<String, Term.Variable>> res5 = variable(s);
         if(res5.isRight()) {
-            Tuple2<String, Atom.Variable> t = res5.get();
-            return Either.right(new Tuple2<String, Atom>(t._1, t._2));
+            Tuple2<String, Term.Variable> t = res5.get();
+            return Either.right(new Tuple2<String, Term>(t._1, t._2));
         }
 
         return Either.left(new Error(s, "unrecognized value"));
     }
 
-    public static Either<Error, Tuple2<String, Atom.Symbol>> symbol(String s) {
+    public static Either<Error, Tuple2<String, Term.Symbol>> symbol(String s) {
         if(s.charAt(0) !='#') {
             return Either.left(new Error(s, "not a symbol"));
         }
@@ -258,10 +258,10 @@ public class Parser {
         }
         String name = s.substring(1, index);
         String remaining = s.substring(index);
-        return Either.right(new Tuple2<String, Atom.Symbol>(remaining, (Atom.Symbol) s(name)));
+        return Either.right(new Tuple2<String, Term.Symbol>(remaining, (Term.Symbol) s(name)));
     }
 
-    public static Either<Error, Tuple2<String, Atom.Str>> string(String s) {
+    public static Either<Error, Tuple2<String, Term.Str>> string(String s) {
         if(s.charAt(0) !='"') {
             return Either.left(new Error(s, "not a string"));
         }
@@ -291,10 +291,10 @@ public class Parser {
 
         String string = s.substring(1, index+1);
         String remaining = s.substring(index+2);
-        return Either.right(new Tuple2<String, Atom.Str>(remaining, (Atom.Str) Utils.string(string)));
+        return Either.right(new Tuple2<String, Term.Str>(remaining, (Term.Str) Utils.string(string)));
     }
 
-    public static Either<Error, Tuple2<String, Atom.Integer>> integer(String s) {
+    public static Either<Error, Tuple2<String, Term.Integer>> integer(String s) {
         int index = 0;
         if(s.charAt(0) == '-') {
             index += 1;
@@ -316,10 +316,10 @@ public class Parser {
 
         Integer i = Integer.parseInt(s.substring(0, index2));
         String remaining = s.substring(index2);
-        return Either.right(new Tuple2<String, Atom.Integer>(remaining, (Atom.Integer) Utils.integer(i.intValue())));
+        return Either.right(new Tuple2<String, Term.Integer>(remaining, (Term.Integer) Utils.integer(i.intValue())));
     }
 
-    public static Either<Error, Tuple2<String, Atom.Date>> date(String s) {
+    public static Either<Error, Tuple2<String, Term.Date>> date(String s) {
         int index = s.length();
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
@@ -332,14 +332,14 @@ public class Parser {
         try {
             Instant i = Instant.parse(s.substring(0, index));
             String remaining = s.substring(index);
-            return Either.right(new Tuple2<String, Atom.Date>(remaining, new Atom.Date(i.getEpochSecond())));
+            return Either.right(new Tuple2<String, Term.Date>(remaining, new Term.Date(i.getEpochSecond())));
         } catch (DateTimeParseException e) {
             return Either.left(new Error(s, "not a date"));
 
         }
     }
 
-    public static Either<Error, Tuple2<String, Atom.Variable>> variable(String s) {
+    public static Either<Error, Tuple2<String, Term.Variable>> variable(String s) {
         if(s.charAt(0) !='$') {
             return Either.left(new Error(s, "not a variable"));
         }
@@ -356,7 +356,7 @@ public class Parser {
 
         String name = s.substring(1, index);
         String remaining = s.substring(index);
-        return Either.right(new Tuple2<String, Atom.Variable>(remaining, (Atom.Variable) var(name)));
+        return Either.right(new Tuple2<String, Term.Variable>(remaining, (Term.Variable) var(name)));
     }
 
     public static Either<Error, Tuple2<String, ConstraintBuilder>> constraint(String s) {

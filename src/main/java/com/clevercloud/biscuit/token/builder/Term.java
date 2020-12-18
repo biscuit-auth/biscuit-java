@@ -6,10 +6,10 @@ import com.clevercloud.biscuit.datalog.SymbolTable;
 import java.util.Arrays;
 import java.util.Objects;
 
-public abstract class Atom {
+public abstract class Term {
     abstract public ID convert(SymbolTable symbols);
 
-    public static class Symbol extends Atom {
+    public static class Symbol extends Term {
         String value;
 
         public Symbol(String value) {
@@ -40,7 +40,7 @@ public abstract class Atom {
         }
     }
 
-    public static class Variable extends Atom {
+    public static class Variable extends Term {
         String value;
 
         public Variable(String value) {
@@ -73,7 +73,7 @@ public abstract class Atom {
         }
     }
 
-    public static class Integer extends Atom {
+    public static class Integer extends Term {
         long value;
 
         public Integer(long value) {
@@ -106,7 +106,7 @@ public abstract class Atom {
         }
     }
 
-    public static class Str extends Atom {
+    public static class Str extends Term {
         String value;
 
         public Str(String value) {
@@ -141,7 +141,7 @@ public abstract class Atom {
         }
     }
 
-    public static class Bytes extends Atom {
+    public static class Bytes extends Term {
         byte[] value;
 
         public Bytes(byte[] value) {
@@ -174,7 +174,7 @@ public abstract class Atom {
         }
     }
 
-    public static class Date extends Atom {
+    public static class Date extends Term {
         long value;
 
         public Date(long value) {

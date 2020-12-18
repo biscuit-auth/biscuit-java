@@ -1,7 +1,6 @@
 package com.clevercloud.biscuit.builder.parser;
 
-import com.clevercloud.biscuit.datalog.Predicate;
-import com.clevercloud.biscuit.token.builder.Atom;
+import com.clevercloud.biscuit.token.builder.Term;
 import com.clevercloud.biscuit.token.builder.Fact;
 import com.clevercloud.biscuit.token.builder.Rule;
 import com.clevercloud.biscuit.token.builder.parser.Error;
@@ -12,9 +11,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 
 import static com.clevercloud.biscuit.token.builder.Utils.*;
 
@@ -31,31 +28,31 @@ public class ParserTest extends TestCase {
     }
 
     public void testSymbol() {
-        Either<Error, Tuple2<String, Atom.Symbol>> res = Parser.symbol("#ambient");
-        assertEquals(Either.right(new Tuple2<String, Atom.Symbol>("", (Atom.Symbol) s("ambient"))), res);
+        Either<Error, Tuple2<String, Term.Symbol>> res = Parser.symbol("#ambient");
+        assertEquals(Either.right(new Tuple2<String, Term.Symbol>("", (Term.Symbol) s("ambient"))), res);
     }
 
     public void testString() {
-        Either<Error, Tuple2<String, Atom.Str>> res = Parser.string("\"file1 a hello - 123_\"");
-        assertEquals(Either.right(new Tuple2<String, Atom.Str>("", (Atom.Str) string("file1 a hello - 123_"))), res);
+        Either<Error, Tuple2<String, Term.Str>> res = Parser.string("\"file1 a hello - 123_\"");
+        assertEquals(Either.right(new Tuple2<String, Term.Str>("", (Term.Str) string("file1 a hello - 123_"))), res);
     }
 
     public void testInteger() {
-        Either<Error, Tuple2<String, Atom.Integer>> res = Parser.integer("123");
-        assertEquals(Either.right(new Tuple2<String, Atom.Integer>("", (Atom.Integer) integer(123))), res);
+        Either<Error, Tuple2<String, Term.Integer>> res = Parser.integer("123");
+        assertEquals(Either.right(new Tuple2<String, Term.Integer>("", (Term.Integer) integer(123))), res);
 
-        Either<Error, Tuple2<String, Atom.Integer>> res2 = Parser.integer("-42");
-        assertEquals(Either.right(new Tuple2<String, Atom.Integer>("", (Atom.Integer) integer(-42))), res2);
+        Either<Error, Tuple2<String, Term.Integer>> res2 = Parser.integer("-42");
+        assertEquals(Either.right(new Tuple2<String, Term.Integer>("", (Term.Integer) integer(-42))), res2);
     }
 
     public void testDate() {
-        Either<Error, Tuple2<String, Atom.Date>> res = Parser.date("2019-12-02T13:49:53Z,");
-        assertEquals(Either.right(new Tuple2<String, Atom.Date>(",", new Atom.Date(1575294593))), res);
+        Either<Error, Tuple2<String, Term.Date>> res = Parser.date("2019-12-02T13:49:53Z,");
+        assertEquals(Either.right(new Tuple2<String, Term.Date>(",", new Term.Date(1575294593))), res);
     }
 
     public void testVariable() {
-        Either<Error, Tuple2<String, Atom.Variable>> res = Parser.variable("$name");
-        assertEquals(Either.right(new Tuple2<String, Atom.Variable>("", (Atom.Variable) var("name"))), res);
+        Either<Error, Tuple2<String, Term.Variable>> res = Parser.variable("$name");
+        assertEquals(Either.right(new Tuple2<String, Term.Variable>("", (Term.Variable) var("name"))), res);
     }
 
     public void testConstraint() {

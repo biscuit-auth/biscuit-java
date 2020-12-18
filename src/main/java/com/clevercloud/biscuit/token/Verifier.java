@@ -1,17 +1,12 @@
 package com.clevercloud.biscuit.token;
 
-import biscuit.format.schema.Schema;
 import com.clevercloud.biscuit.crypto.PublicKey;
-import com.clevercloud.biscuit.datalog.ID;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.datalog.World;
-import com.clevercloud.biscuit.datalog.constraints.Constraint;
-import com.clevercloud.biscuit.datalog.constraints.ConstraintKind;
-import com.clevercloud.biscuit.datalog.constraints.IntConstraint;
 import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.error.FailedCaveat;
 import com.clevercloud.biscuit.error.LogicError;
-import com.clevercloud.biscuit.token.builder.Atom;
+import com.clevercloud.biscuit.token.builder.Term;
 import com.clevercloud.biscuit.token.builder.Fact;
 import com.clevercloud.biscuit.token.builder.Rule;
 import com.clevercloud.biscuit.token.builder.Caveat;
@@ -133,8 +128,8 @@ public class Verifier {
 
         this.query(getRevocationIds).stream().forEach(fact -> {
             fact.ids().stream().forEach(id -> {
-                if (id instanceof Atom.Str) {
-                    ids.add((((Atom.Str) id).value()));
+                if (id instanceof Term.Str) {
+                    ids.add((((Term.Str) id).value()));
                 }
             });
         });
