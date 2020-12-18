@@ -242,7 +242,7 @@ public class Verifier {
             Block b = this.token.blocks.get(i);
 
             for (int j = 0; j < b.caveats.size(); j++) {
-                caveats.add("Block["+i+"]["+j+"]: "+this.symbols.print_caveat(this.token.authority.caveats.get(j)));
+                caveats.add("Block["+i+"]["+j+"]: "+this.symbols.print_caveat(b.caveats.get(j)));
             }
         }
 
