@@ -355,7 +355,7 @@ public class BiscuitTest extends TestCase {
         Biscuit b = Biscuit.from_b64(attenuatedB64).get();
 
         Verifier v1 = b.verify(root.public_key()).get();
-        List<UUID> revokedIds = v1.get_revocation_ids().stream().map(s -> UUID.fromString(s)).collect(Collectors.toList());
+        List<UUID> revokedIds = v1.get_revocation_ids().get().stream().map(s -> UUID.fromString(s)).collect(Collectors.toList());
         org.junit.Assert.assertTrue(revokedIds.contains(uuid1));
         org.junit.Assert.assertTrue(revokedIds.contains(uuid2));
     }

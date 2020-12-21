@@ -266,4 +266,31 @@ public class Error {
         }
 
     }
+
+    public class TooManyFacts extends Error {
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            return true;
+        }
+    }
+
+    public class TooManyIterations extends Error {
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            return true;
+        }
+    }
+
+    public class Timeout extends Error {
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            return true;
+        }
+    }
 }

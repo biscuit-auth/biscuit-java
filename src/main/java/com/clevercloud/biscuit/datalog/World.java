@@ -1,11 +1,20 @@
 package com.clevercloud.biscuit.datalog;
 
+import com.clevercloud.biscuit.error.Error;
+import com.clevercloud.biscuit.error.LogicError;
+import io.vavr.control.Either;
+
 import java.io.Serializable;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static io.vavr.API.Left;
+import static io.vavr.API.Right;
 
 public final class World implements Serializable {
    private final Set<Fact> facts;
@@ -26,16 +35,37 @@ public final class World implements Serializable {
       this.rules.clear();
    }
 
-   public void run() {
+   public Either<Error, Void> run() {
+      return this.run(new RunLimits());
+   }
+
+   public Either<Error, Void> run(RunLimits limits) {
+      int iterations = 0;
+      Instant limit = Instant.now().plus(limits.maxTime);
+
       while(true) {
          final Set<Fact> new_facts = new HashSet<>();
          for (final Rule rule : this.rules) {
             rule.apply(this.facts, new_facts);
+
+            if(Instant.now().compareTo(limit) >= 0) {
+               return Left(new Error().new Timeout());
+            }
          }
+
          final int len = this.facts.size();
          this.facts.addAll(new_facts);
          if (this.facts.size() == len) {
-            return;
+            return Right(null);
+         }
+
+         if (this.facts.size() >= limits.maxFacts) {
+            return Left(new Error().new TooManyFacts());
+         }
+
+         iterations += 1;
+         if(iterations >= limits.maxIterations) {
+            return Left(new Error().new TooManyIterations());
          }
       }
    }
