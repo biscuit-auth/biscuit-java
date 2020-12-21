@@ -161,9 +161,9 @@ public class BiscuitTest extends TestCase {
         System.out.println(res2.getLeft());
 
         Assert.assertEquals(
-                new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
-                        new FailedCaveat().new FailedBlock(1, 0, "*caveat1($resource) <- resource(#ambient, $resource), operation(#ambient, #read), right(#authority, $resource, #read)"),
-                        new FailedCaveat().new FailedBlock(2, 0, "*caveat2(#file1) <- resource(#ambient, #file1)")
+                new Error.FailedLogic(new LogicError.FailedCaveats(Arrays.asList(
+                        new FailedCaveat.FailedBlock(1, 0, "*caveat1($resource) <- resource(#ambient, $resource), operation(#ambient, #read), right(#authority, $resource, #read)"),
+                        new FailedCaveat.FailedBlock(2, 0, "*caveat2(#file1) <- resource(#ambient, #file1)")
                 ))),
                 res2.getLeft());
     }
@@ -221,9 +221,9 @@ public class BiscuitTest extends TestCase {
             System.out.println(f.toString());
         }
         Assert.assertEquals(
-                new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
-                        new FailedCaveat().new FailedBlock(1, 0, "*prefix($resource) <- resource(#ambient, $resource) @ $resource matches /folder1/*"),
-                        new FailedCaveat().new FailedBlock(1, 1, "*check_right(#read) <- resource(#ambient, $resource), operation(#ambient, #read), right(#authority, $resource, #read)")
+                new Error.FailedLogic(new LogicError.FailedCaveats(Arrays.asList(
+                        new FailedCaveat.FailedBlock(1, 0, "*prefix($resource) <- resource(#ambient, $resource) @ $resource matches /folder1/*"),
+                        new FailedCaveat.FailedBlock(1, 1, "*check_right(#read) <- resource(#ambient, $resource), operation(#ambient, #read), right(#authority, $resource, #read)")
                 ))),
                 e);
     }
@@ -291,7 +291,7 @@ public class BiscuitTest extends TestCase {
         Error e = Biscuit.from_sealed(sealed, "not this key".getBytes()).getLeft();
         System.out.println(e);
         Assert.assertEquals(
-                new Error().new FormatError().new Signature().new SealedSignature(),
+                new Error.FormatError.Signature.SealedSignature(),
                 e);
 
         System.out.println("deserializing the sealed token with a valid key");

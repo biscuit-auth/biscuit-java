@@ -84,7 +84,7 @@ public class TokenSignature {
     public Either<Error, Void> verify(List<RistrettoElement> public_keys, List<byte[]> messages) {
         if (!(public_keys.size() == messages.size() && public_keys.size() == this.parameters.size())) {
             System.out.println(("lists are not the same size"));
-            return Left(new Error().new FormatError().new Signature().new InvalidFormat());
+            return Left(new Error.FormatError.Signature.InvalidFormat());
         }
 
         //System.out.println("z, zp");
@@ -129,7 +129,7 @@ public class TokenSignature {
         if (res.ctEquals(RistrettoElement.IDENTITY) == 1) {
             return Right(null);
         } else {
-            return Left(new Error().new FormatError().new Signature().new InvalidSignature());
+            return Left(new Error.FormatError.Signature.InvalidSignature());
         }
     }
 
@@ -169,9 +169,9 @@ public class TokenSignature {
 
             return Right(new TokenSignature(parameters, z));
         } catch (InvalidEncodingException e) {
-            return Left(new Error().new FormatError().new Signature().new InvalidFormat());
+            return Left(new Error.FormatError.Signature.InvalidFormat());
         } catch(IllegalArgumentException e) {
-            return Left(new Error().new FormatError().new DeserializationError(e.toString()));
+            return Left(new Error.FormatError.DeserializationError(e.toString()));
         }
     }
 

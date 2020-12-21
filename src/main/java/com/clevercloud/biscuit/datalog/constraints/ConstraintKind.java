@@ -21,7 +21,7 @@ public abstract class ConstraintKind implements Serializable {
       } else if(c.getKind() == Schema.Constraint.Kind.SYMBOL) {
          return Symbol.deserialize(c);
       } else {
-         return Left(new Error().new FormatError().new DeserializationError("invalid constraint kind"));
+         return Left(new Error.FormatError.DeserializationError("invalid constraint kind"));
       }
    }
 
@@ -54,7 +54,7 @@ public abstract class ConstraintKind implements Serializable {
          long id = c.getId();
 
          if(!c.hasInt()) {
-            return Left(new Error().new FormatError().new DeserializationError("invalid Int constraint"));
+            return Left(new Error.FormatError.DeserializationError("invalid Int constraint"));
          } else {
             Either<Error.FormatError, IntConstraint> res = IntConstraint.deserialize_enum(c.getInt());
             if (res.isLeft()) {
@@ -95,7 +95,7 @@ public abstract class ConstraintKind implements Serializable {
          long id = c.getId();
 
          if (!c.hasStr()) {
-            return Left(new Error().new FormatError().new DeserializationError("invalid Str constraint"));
+            return Left(new Error.FormatError.DeserializationError("invalid Str constraint"));
          } else {
             Either<Error.FormatError, StrConstraint> res = StrConstraint.deserialize_enum(c.getStr());
             if (res.isLeft()) {
@@ -136,7 +136,7 @@ public abstract class ConstraintKind implements Serializable {
          long id = c.getId();
 
          if (!c.hasStr()) {
-            return Left(new Error().new FormatError().new DeserializationError("invalid Bytes constraint"));
+            return Left(new Error.FormatError.DeserializationError("invalid Bytes constraint"));
          } else {
             Either<Error.FormatError, BytesConstraint> res = BytesConstraint.deserialize_enum(c.getBytes());
             if (res.isLeft()) {
@@ -177,7 +177,7 @@ public abstract class ConstraintKind implements Serializable {
          long id = c.getId();
 
          if (!c.hasDate()) {
-            return Left(new Error().new FormatError().new DeserializationError("invalid Date constraint"));
+            return Left(new Error.FormatError.DeserializationError("invalid Date constraint"));
          } else {
             Either<Error.FormatError, DateConstraint> res = DateConstraint.deserialize_enum(c.getDate());
             if (res.isLeft()) {
@@ -218,7 +218,7 @@ public abstract class ConstraintKind implements Serializable {
          long id = c.getId();
 
          if (!c.hasSymbol()) {
-            return Left(new Error().new FormatError().new DeserializationError("invalid Symbol constraint"));
+            return Left(new Error.FormatError.DeserializationError("invalid Symbol constraint"));
          } else {
             Either<Error.FormatError, SymbolConstraint> res = SymbolConstraint.deserialize_enum(c.getSymbol());
             if (res.isLeft()) {

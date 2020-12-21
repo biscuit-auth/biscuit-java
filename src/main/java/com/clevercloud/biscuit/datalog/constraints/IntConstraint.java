@@ -31,7 +31,7 @@ public abstract class IntConstraint implements Serializable {
       } else if(c.getKind() == Schema.IntConstraint.Kind.NOT_IN) {
          return NotInSet.deserialize(c);
       } else {
-         return Left(new Error().new FormatError().new DeserializationError("invalid int constraint kind"));
+         return Left(new Error.FormatError.DeserializationError("invalid int constraint kind"));
       }
    }
 
@@ -59,7 +59,7 @@ public abstract class IntConstraint implements Serializable {
 
       static public Either<Error.FormatError, IntConstraint> deserialize(Schema.IntConstraint i) {
          if(!i.hasEqual()) {
-            return Left(new Error().new FormatError().new DeserializationError("invalid Int constraint"));
+            return Left(new Error.FormatError.DeserializationError("invalid Int constraint"));
          } else {
             return Right(new Equal(i.getEqual()));
          }
@@ -90,7 +90,7 @@ public abstract class IntConstraint implements Serializable {
 
       static public Either<Error.FormatError, IntConstraint> deserialize(Schema.IntConstraint i) {
          if(!i.hasLarger()) {
-            return Left(new Error().new FormatError().new DeserializationError("invalid Int constraint"));
+            return Left(new Error.FormatError.DeserializationError("invalid Int constraint"));
          } else {
             return Right(new Greater(i.getLarger()));
          }
@@ -121,7 +121,7 @@ public abstract class IntConstraint implements Serializable {
 
       static public Either<Error.FormatError, IntConstraint> deserialize(Schema.IntConstraint i) {
          if(!i.hasLargerOrEqual()) {
-            return Left(new Error().new FormatError().new DeserializationError("invalid Int constraint"));
+            return Left(new Error.FormatError.DeserializationError("invalid Int constraint"));
          } else {
             return Right(new GreaterOrEqual(i.getLargerOrEqual()));
          }
@@ -152,7 +152,7 @@ public abstract class IntConstraint implements Serializable {
 
       static public Either<Error.FormatError, IntConstraint> deserialize(Schema.IntConstraint i) {
          if(!i.hasLower()) {
-            return Left(new Error().new FormatError().new DeserializationError("invalid Int constraint"));
+            return Left(new Error.FormatError.DeserializationError("invalid Int constraint"));
          } else {
             return Right(new Lower(i.getLower()));
          }
@@ -183,7 +183,7 @@ public abstract class IntConstraint implements Serializable {
 
       static public Either<Error.FormatError, IntConstraint> deserialize(Schema.IntConstraint i) {
          if(!i.hasLowerOrEqual()) {
-            return Left(new Error().new FormatError().new DeserializationError("invalid Int constraint"));
+            return Left(new Error.FormatError.DeserializationError("invalid Int constraint"));
          } else {
             return Right(new LowerOrEqual(i.getLowerOrEqual()));
          }
@@ -221,7 +221,7 @@ public abstract class IntConstraint implements Serializable {
             values.add(l);
          }
          if(values.isEmpty()) {
-            return Left(new Error().new FormatError().new DeserializationError("invalid Int constraint"));
+            return Left(new Error.FormatError.DeserializationError("invalid Int constraint"));
          } else {
             return Right(new InSet(values));
          }
@@ -259,7 +259,7 @@ public abstract class IntConstraint implements Serializable {
             values.add(l);
          }
          if(values.isEmpty()) {
-            return Left(new Error().new FormatError().new DeserializationError("invalid Int constraint"));
+            return Left(new Error.FormatError.DeserializationError("invalid Int constraint"));
          } else {
             return Right(new NotInSet(values));
          }

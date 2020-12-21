@@ -61,11 +61,11 @@ public class Biscuit {
      */
     static public Either<Error, Biscuit> make(final SecureRandom rng, final KeyPair root, final SymbolTable symbols, final Block authority) {
         if(!Collections.disjoint(symbols.symbols, authority.symbols.symbols)) {
-            return Left(new Error().new SymbolTableOverlap());
+            return Left(new Error.SymbolTableOverlap());
         }
 
         if(authority.index != 0) {
-            return Left(new Error().new InvalidAuthorityIndex(authority.index));
+            return Left(new Error.InvalidAuthorityIndex(authority.index));
         }
 
         symbols.symbols.addAll(authority.symbols.symbols);
@@ -189,7 +189,7 @@ public class Biscuit {
      */
     public Either<Error, byte[]> serialize() {
         if(this.container.isEmpty()) {
-            return Left(new Error().new FormatError().new SerializationError("no internal container"));
+            return Left(new Error.FormatError.SerializationError("no internal container"));
         }
         return this.container.get().serialize();
     }
@@ -265,7 +265,7 @@ public class Biscuit {
      */
     public Either<Error, Void> check_root_key(PublicKey public_key) {
         if (this.container.isEmpty()) {
-            return Left(new Error().new Sealed());
+            return Left(new Error.Sealed());
         } else {
             return this.container.get().check_root_key(public_key);
         }
@@ -287,13 +287,13 @@ public class Biscuit {
         for(int i = 0; i < this.blocks.size(); i++) {
             Block b = this.blocks.get(i);
             if (b.index != i + 1) {
-                return Left(new Error().new InvalidBlockIndex(1 + this.blocks.size(), this.blocks.get(i).index));
+                return Left(new Error.InvalidBlockIndex(1 + this.blocks.size(), this.blocks.get(i).index));
             }
 
             for (Fact fact : b.facts) {
                 if (fact.predicate().ids().get(0).equals(new ID.Symbol(authority_index)) ||
                         fact.predicate().ids().get(0).equals(new ID.Symbol(ambient_index))) {
-                    return Left(new Error().new FailedLogic(new LogicError().new InvalidBlockFact(i, symbols.print_fact(fact))));
+                    return Left(new Error.FailedLogic(new LogicError.InvalidBlockFact(i, symbols.print_fact(fact))));
                 }
 
                 world.add_fact(fact);
@@ -344,8 +344,7 @@ public class Biscuit {
             }
 
             if (!successful) {
-                errors.add(new FailedCaveat().
-                        new FailedBlock(0, j, symbols.print_caveat(this.authority.caveats.get(j))));
+                errors.add(new FailedCaveat.FailedBlock(0, j, symbols.print_caveat(this.authority.caveats.get(j))));
             }
         }
 
@@ -362,8 +361,7 @@ public class Biscuit {
             }
 
             if (!successful) {
-                errors.add(new FailedCaveat().
-                        new FailedVerifier(j, symbols.print_caveat(verifier_caveats.get(j))));
+                errors.add(new FailedCaveat.FailedVerifier(j, symbols.print_caveat(verifier_caveats.get(j))));
             }
         }
 
@@ -383,8 +381,7 @@ public class Biscuit {
                 }
 
                 if (!successful) {
-                    errors.add(new FailedCaveat().
-                            new FailedBlock(b.index, j, symbols.print_caveat(b.caveats.get(j))));
+                    errors.add(new FailedCaveat.FailedBlock(b.index, j, symbols.print_caveat(b.caveats.get(j))));
                 }
             }
         }
@@ -398,7 +395,7 @@ public class Biscuit {
         if(errors.isEmpty()) {
             return Right(query_results);
         } else {
-            return Left(new Error().new FailedLogic(new LogicError().new FailedCaveats(errors)));
+            return Left(new Error.FailedLogic(new LogicError.FailedCaveats(errors)));
         }
     }
 
@@ -427,11 +424,11 @@ public class Biscuit {
         Biscuit copiedBiscuit = e.get();
 
         if(!Collections.disjoint(copiedBiscuit.symbols.symbols, block.symbols.symbols)) {
-            return Left(new Error().new SymbolTableOverlap());
+            return Left(new Error.SymbolTableOverlap());
         }
 
         if(block.index != 1 + this.blocks.size()) {
-            return Left(new Error().new InvalidBlockIndex(1 + copiedBiscuit.blocks.size(), block.index));
+            return Left(new Error.InvalidBlockIndex(1 + copiedBiscuit.blocks.size(), block.index));
         }
 
         Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.container.get().append(rng, keypair, block);

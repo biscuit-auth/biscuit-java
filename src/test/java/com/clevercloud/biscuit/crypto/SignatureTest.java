@@ -56,13 +56,13 @@ public class SignatureTest extends TestCase {
         KeyPair keypair2 = new KeyPair(rng);
         Token token2 = token1.append(rng, keypair2, message2.getBytes());
         token2.blocks.set(1, "you".getBytes());
-        Assert.assertEquals(Left(new Error().new FormatError().new Signature().new InvalidSignature()),
+        Assert.assertEquals(Left(new Error.FormatError.Signature.InvalidSignature()),
                 token2.verify());
 
         String message3 = "!!";
         KeyPair keypair3 = new KeyPair(rng);
         Token token3 = token2.append(rng, keypair3, message3.getBytes());
-        Assert.assertEquals(Left(new Error().new FormatError().new Signature().new InvalidSignature()),
+        Assert.assertEquals(Left(new Error.FormatError.Signature.InvalidSignature()),
                 token3.verify());
     }
 }

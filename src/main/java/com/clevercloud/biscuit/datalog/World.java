@@ -49,7 +49,7 @@ public final class World implements Serializable {
             rule.apply(this.facts, new_facts);
 
             if(Instant.now().compareTo(limit) >= 0) {
-               return Left(new Error().new Timeout());
+               return Left(new Error.Timeout());
             }
          }
 
@@ -60,12 +60,12 @@ public final class World implements Serializable {
          }
 
          if (this.facts.size() >= limits.maxFacts) {
-            return Left(new Error().new TooManyFacts());
+            return Left(new Error.TooManyFacts());
          }
 
          iterations += 1;
          if(iterations >= limits.maxIterations) {
-            return Left(new Error().new TooManyIterations());
+            return Left(new Error.TooManyIterations());
          }
       }
    }

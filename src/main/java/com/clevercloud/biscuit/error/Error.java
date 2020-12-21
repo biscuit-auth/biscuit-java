@@ -11,11 +11,11 @@ public class Error {
     }
 
 
-    public class InternalError extends Error {}
+    public static class InternalError extends Error {}
 
-    public class FormatError extends Error {
-        public class Signature extends FormatError {
-            public class InvalidFormat extends Signature {
+    public static class FormatError extends Error {
+        public static class Signature extends FormatError {
+            public static class InvalidFormat extends Signature {
                 public InvalidFormat() {}
                 @Override
                 public boolean equals(Object o) {
@@ -24,7 +24,7 @@ public class Error {
                     return true;
                 }
             }
-            public class InvalidSignature extends Signature {
+            public static class InvalidSignature extends Signature {
                 @Override
                 public boolean equals(Object o) {
                     if (this == o) return true;
@@ -34,7 +34,7 @@ public class Error {
             }
         }
 
-        public class SealedSignature extends FormatError {
+        public static class SealedSignature extends FormatError {
             @Override
             public boolean equals(Object o) {
                 if (this == o) return true;
@@ -42,7 +42,7 @@ public class Error {
                 return true;
             }
         }
-        public class EmptyKeys extends FormatError {
+        public static class EmptyKeys extends FormatError {
             @Override
             public boolean equals(Object o) {
                 if (this == o) return true;
@@ -50,7 +50,7 @@ public class Error {
                 return true;
             }
         }
-        public class UnknownPublicKey extends FormatError {
+        public static class UnknownPublicKey extends FormatError {
             @Override
             public boolean equals(Object o) {
                 if (this == o) return true;
@@ -58,7 +58,7 @@ public class Error {
                 return true;
             }
         }
-        public class DeserializationError extends FormatError {
+        public static class DeserializationError extends FormatError {
             final public String e;
 
             public DeserializationError(String e) {
@@ -83,7 +83,7 @@ public class Error {
                 return "Error.FormatError.DeserializationError{ error: "+  e + " }";
             }
         }
-        public class SerializationError extends FormatError {
+        public static class SerializationError extends FormatError {
             final public String e;
 
             public SerializationError(String e) {
@@ -108,7 +108,7 @@ public class Error {
                 return "Error.FormatError.SerializationError{ error: "+  e + " }";
             }
         }
-        public class BlockDeserializationError extends FormatError {
+        public static class BlockDeserializationError extends FormatError {
             final public String e;
 
             public BlockDeserializationError(String e) {
@@ -133,7 +133,7 @@ public class Error {
                 return "Error.FormatError.BlockDeserializationError{ error: "+  e + " }";
             }
         }
-        public class BlockSerializationError extends FormatError {
+        public static class BlockSerializationError extends FormatError {
             final public String e;
 
             public BlockSerializationError(String e) {
@@ -159,7 +159,7 @@ public class Error {
             }
         }
     }
-    public class InvalidAuthorityIndex extends Error {
+    public static class InvalidAuthorityIndex extends Error {
         final public long index;
 
         public InvalidAuthorityIndex(long index) {
@@ -184,7 +184,7 @@ public class Error {
             return "Error.InvalidAuthorityIndex{ index: "+ index + " }";
         }
     }
-    public class InvalidBlockIndex extends Error {
+    public static class InvalidBlockIndex extends Error {
         final public long expected;
         final public long found;
 
@@ -211,7 +211,7 @@ public class Error {
             return "Error.InvalidBlockIndex{ expected: " + expected + ", found: " + found + " }";
         }
     }
-    public class SymbolTableOverlap extends Error {
+    public static class SymbolTableOverlap extends Error {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -219,7 +219,7 @@ public class Error {
             return true;
         }
     }
-    public class MissingSymbols extends Error {
+    public static class MissingSymbols extends Error {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -227,7 +227,7 @@ public class Error {
             return true;
         }
     }
-    public class Sealed extends Error {
+    public static class Sealed extends Error {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -235,7 +235,7 @@ public class Error {
             return true;
         }
     }
-    public class FailedLogic extends Error {
+    public static class FailedLogic extends Error {
         final public LogicError error;
 
         public FailedLogic(LogicError error) {
@@ -267,7 +267,7 @@ public class Error {
 
     }
 
-    public class TooManyFacts extends Error {
+    public static class TooManyFacts extends Error {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -276,7 +276,7 @@ public class Error {
         }
     }
 
-    public class TooManyIterations extends Error {
+    public static class TooManyIterations extends Error {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -285,7 +285,7 @@ public class Error {
         }
     }
 
-    public class Timeout extends Error {
+    public static class Timeout extends Error {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;

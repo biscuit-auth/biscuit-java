@@ -21,7 +21,7 @@ public abstract class SymbolConstraint implements Serializable {
       } else if (c.getKind() == Schema.SymbolConstraint.Kind.IN) {
          return NotInSet.deserialize(c);
       } else {
-         return Left(new Error().new FormatError().new DeserializationError("invalid Symbol constraint kind"));
+         return Left(new Error.FormatError.DeserializationError("invalid Symbol constraint kind"));
       }
    }
 
@@ -56,7 +56,7 @@ public abstract class SymbolConstraint implements Serializable {
             values.add(l);
          }
          if(values.isEmpty()) {
-            return Left(new Error().new FormatError().new DeserializationError("invalid Symbol constraint"));
+            return Left(new Error.FormatError.DeserializationError("invalid Symbol constraint"));
          } else {
             return Right(new InSet(values));
          }
@@ -94,7 +94,7 @@ public abstract class SymbolConstraint implements Serializable {
             values.add(l);
          }
          if(values.isEmpty()) {
-            return Left(new Error().new FormatError().new DeserializationError("invalid Symbol constraint"));
+            return Left(new Error.FormatError.DeserializationError("invalid Symbol constraint"));
          } else {
             return Right(new NotInSet(values));
          }

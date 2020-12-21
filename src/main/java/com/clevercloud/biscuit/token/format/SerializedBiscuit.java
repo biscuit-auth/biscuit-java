@@ -71,9 +71,9 @@ public class SerializedBiscuit {
                 return Right(b);
             }
         } catch(InvalidProtocolBufferException e) {
-            return Left(new Error().new FormatError().new DeserializationError(e.toString()));
+            return Left(new Error.FormatError.DeserializationError(e.toString()));
         } catch(InvalidEncodingException e) {
-            return Left(new Error().new FormatError().new DeserializationError(e.toString()));
+            return Left(new Error.FormatError.DeserializationError(e.toString()));
         }
     }
 
@@ -103,7 +103,7 @@ public class SerializedBiscuit {
             byte[] data = stream.toByteArray();
             return Right(data);
         } catch(IOException e) {
-            return Left(new Error().new FormatError().new SerializationError(e.toString()));
+            return Left(new Error.FormatError.SerializationError(e.toString()));
         }
 
     }
@@ -122,7 +122,7 @@ public class SerializedBiscuit {
 
             return Right(new SerializedBiscuit(data, new ArrayList<>(), keys, signature));
         } catch(IOException e) {
-            return Left(new Error().new FormatError().new SerializationError(e.toString()));
+            return Left(new Error.FormatError.SerializationError(e.toString()));
         }
     }
 
@@ -150,13 +150,13 @@ public class SerializedBiscuit {
 
             return Right(new SerializedBiscuit(this.authority, blocks, keys, signature));
         } catch(IOException e) {
-            return Left(new Error().new FormatError().new SerializationError(e.toString()));
+            return Left(new Error.FormatError.SerializationError(e.toString()));
         }
     }
 
     public Either<Error, Void> verify() {
         if(this.keys.isEmpty()) {
-            return Left(new Error().new FormatError().new EmptyKeys());
+            return Left(new Error.FormatError.EmptyKeys());
         }
 
         ArrayList<byte[]> blocks = new ArrayList<>();
@@ -170,11 +170,11 @@ public class SerializedBiscuit {
 
     public Either<Error, Void> check_root_key(PublicKey public_key) {
         if(this.keys.isEmpty()) {
-            return Left(new Error().new FormatError().new EmptyKeys());
+            return Left(new Error.FormatError.EmptyKeys());
         }
 
         if(!(this.keys.get(0).ctEquals(public_key.key) == 1)) {
-            return Left(new Error().new FormatError().new UnknownPublicKey());
+            return Left(new Error.FormatError.UnknownPublicKey());
         }
 
         return Right(null);

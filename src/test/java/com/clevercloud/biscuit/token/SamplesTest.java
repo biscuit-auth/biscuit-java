@@ -83,7 +83,7 @@ public class SamplesTest extends TestCase {
         Biscuit token = Biscuit.from_bytes(data).get();
         Error e = token.check_root_key(root).getLeft();
         System.out.println("got error: "+ e);
-        Assert.assertEquals(new Error().new FormatError().new UnknownPublicKey(), e);
+        Assert.assertEquals(new Error.FormatError.UnknownPublicKey(), e);
     }
 
     public void test3_InvalidSignatureFormat() throws IOException, InvalidEncodingException {
@@ -97,7 +97,7 @@ public class SamplesTest extends TestCase {
 
         Error e = Biscuit.from_bytes(data).getLeft();
         System.out.println("got error: "+ e);
-        Assert.assertEquals(new Error().new FormatError().new DeserializationError("java.lang.IllegalArgumentException: Input must by 32 bytes"), e);
+        Assert.assertEquals(new Error.FormatError.DeserializationError("java.lang.IllegalArgumentException: Input must by 32 bytes"), e);
     }
 
     public void test4_random_block() throws IOException, InvalidEncodingException {
@@ -111,7 +111,7 @@ public class SamplesTest extends TestCase {
 
         Error e = Biscuit.from_bytes(data).getLeft();
         System.out.println("got error: "+ e);
-        Assert.assertEquals(new Error().new FormatError().new Signature().new InvalidSignature(), e);
+        Assert.assertEquals(new Error.FormatError.Signature.InvalidSignature(), e);
     }
 
     public void test5_InvalidSignature() throws IOException, InvalidEncodingException {
@@ -125,7 +125,7 @@ public class SamplesTest extends TestCase {
 
         Error e = Biscuit.from_bytes(data).getLeft();
         System.out.println("got error: "+ e);
-        Assert.assertEquals(new Error().new FormatError().new Signature().new InvalidSignature(), e);
+        Assert.assertEquals(new Error.FormatError.Signature.InvalidSignature(), e);
     }
 
     public void test6_reordered_blocks() throws IOException, InvalidEncodingException {
@@ -145,7 +145,7 @@ public class SamplesTest extends TestCase {
         if(res.isLeft()) {
             System.out.println("error: "+res.getLeft());
         }
-        Assert.assertEquals(new Error().new InvalidBlockIndex(3, 2), res.getLeft());
+        Assert.assertEquals(new Error.InvalidBlockIndex(3, 2), res.getLeft());
 
     }
 
@@ -165,7 +165,7 @@ public class SamplesTest extends TestCase {
         if(res.isLeft()) {
             System.out.println("error: "+res.getLeft());
         }
-        Assert.assertEquals(new Error().new FailedLogic(new LogicError().new InvalidBlockFact(0, "right(#authority, \"file1\", #write)")), res.getLeft());
+        Assert.assertEquals(new Error.FailedLogic(new LogicError.InvalidBlockFact(0, "right(#authority, \"file1\", #write)")), res.getLeft());
     }
 
     public void test8_invalid_block_fact_ambient() throws IOException, InvalidEncodingException {
@@ -184,7 +184,7 @@ public class SamplesTest extends TestCase {
         if(res.isLeft()) {
             System.out.println("error: "+res.getLeft());
         }
-        Assert.assertEquals(new Error().new FailedLogic(new LogicError().new InvalidBlockFact(0, "right(#ambient, \"file1\", #write)")), res.getLeft());
+        Assert.assertEquals(new Error.FailedLogic(new LogicError.InvalidBlockFact(0, "right(#ambient, \"file1\", #write)")), res.getLeft());
     }
 
     public void test9_ExpiredToken() throws IOException, InvalidEncodingException {
@@ -207,8 +207,8 @@ public class SamplesTest extends TestCase {
 
         Error e = v1.verify().getLeft();
         Assert.assertEquals(
-                new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
-                        new FailedCaveat().new FailedBlock(1, 1, "*expiration($date) <- time(#ambient, $date) @ $date <= 1545264000")
+                new Error.FailedLogic(new LogicError.FailedCaveats(Arrays.asList(
+                        new FailedCaveat.FailedBlock(1, 1, "*expiration($date) <- time(#ambient, $date) @ $date <= 1545264000")
                 ))),
                 e);
     }
@@ -262,8 +262,8 @@ public class SamplesTest extends TestCase {
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
-                new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
-                        new FailedCaveat().new FailedVerifier(0, "*caveat1($0) <- resource(#ambient, $0), operation(#ambient, $1), right(#authority, $0, $1)")
+                new Error.FailedLogic(new LogicError.FailedCaveats(Arrays.asList(
+                        new FailedCaveat.FailedVerifier(0, "*caveat1($0) <- resource(#ambient, $0), operation(#ambient, $1), right(#authority, $0, $1)")
                 ))),
                 e);
     }
@@ -293,8 +293,8 @@ public class SamplesTest extends TestCase {
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
-                new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
-                        new FailedCaveat().new FailedBlock(0, 0, "*caveat1(\"file1\") <- resource(#ambient, \"file1\")")
+                new Error.FailedLogic(new LogicError.FailedCaveats(Arrays.asList(
+                        new FailedCaveat.FailedBlock(0, 0, "*caveat1(\"file1\") <- resource(#ambient, \"file1\")")
                 ))),
                 e);
     }
@@ -324,8 +324,8 @@ public class SamplesTest extends TestCase {
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
-                new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
-                        new FailedCaveat().new FailedBlock(1, 0, "*caveat1($0) <- valid_date($0), resource(#ambient, $0)")
+                new Error.FailedLogic(new LogicError.FailedCaveats(Arrays.asList(
+                        new FailedCaveat.FailedBlock(1, 0, "*caveat1($0) <- valid_date($0), resource(#ambient, $0)")
                 ))),
                 e);
     }
@@ -350,8 +350,8 @@ public class SamplesTest extends TestCase {
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
-                new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
-                        new FailedCaveat().new FailedBlock(0, 0, "*resource_match($0) <- resource(#ambient, $0) @ $0 matches /file[0-9]+.txt/")
+                new Error.FailedLogic(new LogicError.FailedCaveats(Arrays.asList(
+                        new FailedCaveat.FailedBlock(0, 0, "*resource_match($0) <- resource(#ambient, $0) @ $0 matches /file[0-9]+.txt/")
                 ))),
                 e);
 
@@ -413,8 +413,8 @@ public class SamplesTest extends TestCase {
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
-                new Error().new FailedLogic(new LogicError().new FailedCaveats(Arrays.asList(
-                        new FailedCaveat().new FailedBlock(0, 0, "*caveat1(#test) <- resource(#ambient, #hello)")
+                new Error.FailedLogic(new LogicError.FailedCaveats(Arrays.asList(
+                        new FailedCaveat.FailedBlock(0, 0, "*caveat1(#test) <- resource(#ambient, #hello)")
                 ))),
                 e);
     }

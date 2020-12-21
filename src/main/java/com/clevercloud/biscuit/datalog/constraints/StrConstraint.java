@@ -31,7 +31,7 @@ public abstract class StrConstraint implements Serializable {
       } else if(c.getKind() == Schema.StringConstraint.Kind.NOT_IN) {
          return NotInSet.deserialize(c);
       } else {
-         return Left(new Error().new FormatError().new DeserializationError("invalid String constraint kind"));
+         return Left(new Error.FormatError.DeserializationError("invalid String constraint kind"));
       }
    }
 
@@ -59,7 +59,7 @@ public abstract class StrConstraint implements Serializable {
 
       static public Either<Error.FormatError, StrConstraint> deserialize(Schema.StringConstraint i) {
          if(!i.hasPrefix()) {
-            return Left(new Error().new FormatError().new DeserializationError("invalid String constraint"));
+            return Left(new Error.FormatError.DeserializationError("invalid String constraint"));
          } else {
             return Right(new Prefix(i.getPrefix()));
          }
@@ -90,7 +90,7 @@ public abstract class StrConstraint implements Serializable {
 
       static public Either<Error.FormatError, StrConstraint> deserialize(Schema.StringConstraint i) {
          if(!i.hasSuffix()) {
-            return Left(new Error().new FormatError().new DeserializationError("invalid String constraint"));
+            return Left(new Error.FormatError.DeserializationError("invalid String constraint"));
          } else {
             return Right(new Suffix(i.getSuffix()));
          }
@@ -121,7 +121,7 @@ public abstract class StrConstraint implements Serializable {
 
       static public Either<Error.FormatError, StrConstraint> deserialize(Schema.StringConstraint i) {
          if(!i.hasEqual()) {
-            return Left(new Error().new FormatError().new DeserializationError("invalid String constraint"));
+            return Left(new Error.FormatError.DeserializationError("invalid String constraint"));
          } else {
             return Right(new Equal(i.getEqual()));
          }
@@ -154,7 +154,7 @@ public abstract class StrConstraint implements Serializable {
 
       static public Either<Error.FormatError, StrConstraint> deserialize(Schema.StringConstraint i) {
          if(!i.hasRegex()) {
-            return Left(new Error().new FormatError().new DeserializationError("invalid String constraint"));
+            return Left(new Error.FormatError.DeserializationError("invalid String constraint"));
          } else {
             return Right(new Regex(i.getRegex()));
          }
@@ -192,7 +192,7 @@ public abstract class StrConstraint implements Serializable {
             values.add(l);
          }
          if(values.isEmpty()) {
-            return Left(new Error().new FormatError().new DeserializationError("invalid String constraint"));
+            return Left(new Error.FormatError.DeserializationError("invalid String constraint"));
          } else {
             return Right(new InSet(values));
          }
@@ -230,7 +230,7 @@ public abstract class StrConstraint implements Serializable {
             values.add(l);
          }
          if(values.isEmpty()) {
-            return Left(new Error().new FormatError().new DeserializationError("invalid String constraint"));
+            return Left(new Error.FormatError.DeserializationError("invalid String constraint"));
          } else {
             return Right(new NotInSet(values));
          }

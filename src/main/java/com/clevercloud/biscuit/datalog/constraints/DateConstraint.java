@@ -19,7 +19,7 @@ public abstract class DateConstraint implements Serializable {
       } else if (c.getKind() == Schema.DateConstraint.Kind.AFTER) {
          return After.deserialize(c);
       } else {
-         return Left(new Error().new FormatError().new DeserializationError("invalid date constraint kind"));
+         return Left(new Error.FormatError.DeserializationError("invalid date constraint kind"));
       }
    }
 
@@ -47,7 +47,7 @@ public abstract class DateConstraint implements Serializable {
 
       static public Either<Error.FormatError, DateConstraint> deserialize(Schema.DateConstraint i) {
          if(!i.hasBefore()) {
-            return Left(new Error().new FormatError().new DeserializationError("invalid Date constraint"));
+            return Left(new Error.FormatError.DeserializationError("invalid Date constraint"));
          } else {
             return Right(new Before(i.getBefore()));
          }
@@ -78,7 +78,7 @@ public abstract class DateConstraint implements Serializable {
 
       static public Either<Error.FormatError, DateConstraint> deserialize(Schema.DateConstraint i) {
          if(!i.hasAfter()) {
-            return Left(new Error().new FormatError().new DeserializationError("invalid Date constraint"));
+            return Left(new Error.FormatError.DeserializationError("invalid Date constraint"));
          } else {
             return Right(new After(i.getAfter()));
          }

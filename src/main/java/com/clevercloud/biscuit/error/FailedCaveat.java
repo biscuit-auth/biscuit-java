@@ -3,7 +3,7 @@ package com.clevercloud.biscuit.error;
 import java.util.Objects;
 
 public class FailedCaveat {
-    public class FailedBlock extends FailedCaveat {
+    public static class FailedBlock extends FailedCaveat {
         final public long block_id;
         final public long caveat_id;
         final public String rule;
@@ -34,7 +34,7 @@ public class FailedCaveat {
         }
     }
 
-    public class FailedVerifier extends FailedCaveat {
+    public static class FailedVerifier extends FailedCaveat {
         final public long caveat_id;
         final public String rule;
 

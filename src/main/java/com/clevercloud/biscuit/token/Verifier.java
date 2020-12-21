@@ -176,7 +176,7 @@ public class Verifier {
         Instant timeLimit = Instant.now().plus(limits.maxTime);
 
         if(this.symbols.get("authority").isEmpty() || this.symbols.get("ambient").isEmpty()) {
-            return Left(new Error().new MissingSymbols());
+            return Left(new Error.MissingSymbols());
         }
 
         Either<Error, Void> runRes = world.run(limits);
@@ -197,7 +197,7 @@ public class Verifier {
                 Set<com.clevercloud.biscuit.datalog.Fact> res = world.query_rule(c.queries().get(k));
 
                 if(Instant.now().compareTo(timeLimit) >= 0) {
-                    return Left(new Error().new Timeout());
+                    return Left(new Error.Timeout());
                 }
 
                 if (!res.isEmpty()) {
@@ -207,8 +207,7 @@ public class Verifier {
             }
 
             if (!successful) {
-                errors.add(new FailedCaveat().
-                        new FailedBlock(0, j, symbols.print_caveat(this.token.authority.caveats.get(j))));
+                errors.add(new FailedCaveat.FailedBlock(0, j, symbols.print_caveat(this.token.authority.caveats.get(j))));
             }
         }
 
@@ -220,7 +219,7 @@ public class Verifier {
                 Set<com.clevercloud.biscuit.datalog.Fact> res = world.query_rule(c.queries().get(k));
 
                 if(Instant.now().compareTo(timeLimit) >= 0) {
-                    return Left(new Error().new Timeout());
+                    return Left(new Error.Timeout());
                 }
 
                 if (!res.isEmpty()) {
@@ -230,8 +229,7 @@ public class Verifier {
             }
 
             if (!successful) {
-                errors.add(new FailedCaveat().
-                        new FailedVerifier(j, symbols.print_caveat(c)));
+                errors.add(new FailedCaveat.FailedVerifier(j, symbols.print_caveat(c)));
             }
         }
 
@@ -246,7 +244,7 @@ public class Verifier {
                     Set<com.clevercloud.biscuit.datalog.Fact> res = world.query_rule(c.queries().get(k));
 
                     if(Instant.now().compareTo(timeLimit) >= 0) {
-                        return Left(new Error().new Timeout());
+                        return Left(new Error.Timeout());
                     }
 
                     if (!res.isEmpty()) {
@@ -256,8 +254,7 @@ public class Verifier {
                 }
 
                 if (!successful) {
-                    errors.add(new FailedCaveat().
-                            new FailedBlock(b.index, j, symbols.print_caveat(b.caveats.get(j))));
+                    errors.add(new FailedCaveat.FailedBlock(b.index, j, symbols.print_caveat(b.caveats.get(j))));
                 }
             }
         }
@@ -266,7 +263,7 @@ public class Verifier {
             return Right(null);
         } else {
             System.out.println(errors);
-            return Left(new Error().new FailedLogic(new LogicError().new FailedCaveats(errors)));
+            return Left(new Error.FailedLogic(new LogicError.FailedCaveats(errors)));
         }
     }
 

@@ -10,7 +10,7 @@ public class LogicError {
         return Option.none();
     }
 
-    public class InvalidAuthorityFact extends LogicError {
+    public static class InvalidAuthorityFact extends LogicError {
         final public String e;
 
         public InvalidAuthorityFact(String e) {
@@ -36,7 +36,7 @@ public class LogicError {
         }
     }
 
-    public class InvalidAmbientFact extends LogicError {
+    public static class InvalidAmbientFact extends LogicError {
         final public String e;
 
         public InvalidAmbientFact(String e) {
@@ -62,7 +62,7 @@ public class LogicError {
         }
     }
 
-    public class InvalidBlockFact extends LogicError {
+    public static class InvalidBlockFact extends LogicError {
         final public long id;
         final public String e;
 
@@ -89,7 +89,7 @@ public class LogicError {
             return "LogicError.InvalidBlockFact{ id: "+id+", error: "+  e + " }";
         }
     }
-    public class FailedCaveats extends LogicError {
+    public static class FailedCaveats extends LogicError {
         final public List<FailedCaveat> errors;
 
         public FailedCaveats(List<FailedCaveat> errors) {

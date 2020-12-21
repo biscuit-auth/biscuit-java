@@ -51,7 +51,7 @@ public class SealedBiscuit {
             byte[] signature = data.getSignature().toByteArray();
 
             if (calculated.length != signature.length) {
-                return Left(new Error().new FormatError().new Signature().new InvalidFormat());
+                return Left(new Error.FormatError.Signature.InvalidFormat());
             }
 
             int result = 0;
@@ -60,13 +60,13 @@ public class SealedBiscuit {
             }
 
             if (result != 0) {
-                return Left(new Error().new FormatError().new SealedSignature());
+                return Left(new Error.FormatError.SealedSignature());
             }
 
             SealedBiscuit b = new SealedBiscuit(authority, blocks, signature);
             return Right(b);
         } catch(InvalidProtocolBufferException | NoSuchAlgorithmException | InvalidKeyException e) {
-            return Left(new Error().new FormatError().new DeserializationError(e.toString()));
+            return Left(new Error.FormatError.DeserializationError(e.toString()));
         }
     }
 
@@ -92,7 +92,7 @@ public class SealedBiscuit {
             byte[] data = stream.toByteArray();
             return Right(data);
         } catch(IOException e) {
-            return Left(new Error().new FormatError().new SerializationError(e.toString()));
+            return Left(new Error.FormatError.SerializationError(e.toString()));
         }
 
     }
@@ -129,7 +129,7 @@ public class SealedBiscuit {
             byte[] signature = sha256_HMAC.doFinal();
             return Right(new SealedBiscuit(authorityData, blocksData, signature));
         } catch(IOException | NoSuchAlgorithmException | InvalidKeyException e) {
-            return Left(new Error().new FormatError().new SerializationError(e.toString()));
+            return Left(new Error.FormatError.SerializationError(e.toString()));
         }
     }
 }

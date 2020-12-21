@@ -68,7 +68,7 @@ public class Block {
         for (Fact fact : this.facts) {
             if (fact.predicate().ids().get(0).equals(new ID.Symbol(authority_index)) ||
                     fact.predicate().ids().get(0).equals(new ID.Symbol(ambient_index))) {
-                return Left(new LogicError().new InvalidBlockFact(i, symbols.print_fact(fact)));
+                return Left(new LogicError.InvalidBlockFact(i, symbols.print_fact(fact)));
             }
 
             world.add_fact(fact);
@@ -95,8 +95,7 @@ public class Block {
             }
 
             if (!successful) {
-                errors.add(new FailedCaveat().
-                        new FailedBlock(i, j, symbols.print_caveat(this.caveats.get(j))));
+                errors.add(new FailedCaveat.FailedBlock(i, j, symbols.print_caveat(this.caveats.get(j))));
             }
         }
 
@@ -113,8 +112,7 @@ public class Block {
             }
 
             if (!successful) {
-                errors.add(new FailedCaveat().
-                        new FailedVerifier(j, symbols.print_caveat(verifier_caveats.get(j))));
+                errors.add(new FailedCaveat.FailedVerifier(j, symbols.print_caveat(verifier_caveats.get(j))));
             }
         }
 
@@ -126,7 +124,7 @@ public class Block {
         if (errors.isEmpty()) {
             return Right(null);
         } else {
-            return Left(new LogicError().new FailedCaveats(errors));
+            return Left(new LogicError.FailedCaveats(errors));
         }
     }
 
@@ -252,7 +250,7 @@ public class Block {
             Schema.Block data = Schema.Block.parseFrom(slice);
             return Block.deserialize(data);
         } catch (InvalidProtocolBufferException e) {
-            return Left(new Error().new FormatError().new DeserializationError(e.toString()));
+            return Left(new Error.FormatError.DeserializationError(e.toString()));
         }
     }
 
@@ -264,7 +262,7 @@ public class Block {
             byte[] data = stream.toByteArray();
             return Right(data);
         } catch(IOException e) {
-            return Left(new Error().new FormatError().new SerializationError(e.toString()));
+            return Left(new Error.FormatError.SerializationError(e.toString()));
         }
     }
 }

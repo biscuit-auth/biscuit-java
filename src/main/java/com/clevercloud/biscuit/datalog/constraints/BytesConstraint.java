@@ -27,7 +27,7 @@ public abstract class BytesConstraint implements Serializable {
         } else if(c.getKind() == Schema.BytesConstraint.Kind.NOT_IN) {
             return com.clevercloud.biscuit.datalog.constraints.BytesConstraint.NotInSet.deserialize(c);
         } else {
-            return Left(new Error().new FormatError().new DeserializationError("invalid Bytes constraint kind"));
+            return Left(new Error.FormatError.DeserializationError("invalid Bytes constraint kind"));
         }
     }
 
@@ -55,7 +55,7 @@ public abstract class BytesConstraint implements Serializable {
 
         static public Either<Error.FormatError, com.clevercloud.biscuit.datalog.constraints.BytesConstraint> deserialize(Schema.BytesConstraint i) {
             if(!i.hasEqual()) {
-                return Left(new Error().new FormatError().new DeserializationError("invalid Bytes constraint"));
+                return Left(new Error.FormatError.DeserializationError("invalid Bytes constraint"));
             } else {
                 return Right(new Equal(i.getEqual().toByteArray()));
             }
@@ -93,7 +93,7 @@ public abstract class BytesConstraint implements Serializable {
                 values.add(l.toByteArray());
             }
             if(values.isEmpty()) {
-                return Left(new Error().new FormatError().new DeserializationError("invalid Bytes constraint"));
+                return Left(new Error.FormatError.DeserializationError("invalid Bytes constraint"));
             } else {
                 return Right(new InSet(values));
             }
@@ -131,7 +131,7 @@ public abstract class BytesConstraint implements Serializable {
                 values.add(l.toByteArray());
             }
             if(values.isEmpty()) {
-                return Left(new Error().new FormatError().new DeserializationError("invalid Bytes constraint"));
+                return Left(new Error.FormatError.DeserializationError("invalid Bytes constraint"));
             } else {
                 return Right(new NotInSet(values));
             }
