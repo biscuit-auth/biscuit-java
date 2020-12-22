@@ -208,7 +208,7 @@ public class SamplesTest extends TestCase {
         Error e = v1.verify().getLeft();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedCaveats(Arrays.asList(
-                        new FailedCaveat.FailedBlock(1, 1, "*expiration($date) <- time(#ambient, $date) @ $date <= 1545264000")
+                        new FailedCaveat.FailedBlock(1, 1, "expiration($date) <- time(#ambient, $date) @ $date <= 1545264000")
                 ))),
                 e);
     }
@@ -263,7 +263,7 @@ public class SamplesTest extends TestCase {
         Error e = res.getLeft();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedCaveats(Arrays.asList(
-                        new FailedCaveat.FailedVerifier(0, "*caveat1($0) <- resource(#ambient, $0), operation(#ambient, $1), right(#authority, $0, $1)")
+                        new FailedCaveat.FailedVerifier(0, "caveat1($0) <- resource(#ambient, $0), operation(#ambient, $1), right(#authority, $0, $1)")
                 ))),
                 e);
     }
@@ -294,7 +294,7 @@ public class SamplesTest extends TestCase {
         Error e = res.getLeft();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedCaveats(Arrays.asList(
-                        new FailedCaveat.FailedBlock(0, 0, "*caveat1(\"file1\") <- resource(#ambient, \"file1\")")
+                        new FailedCaveat.FailedBlock(0, 0, "caveat1(\"file1\") <- resource(#ambient, \"file1\")")
                 ))),
                 e);
     }
@@ -325,7 +325,7 @@ public class SamplesTest extends TestCase {
         Error e = res.getLeft();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedCaveats(Arrays.asList(
-                        new FailedCaveat.FailedBlock(1, 0, "*caveat1($0) <- valid_date($0), resource(#ambient, $0)")
+                        new FailedCaveat.FailedBlock(1, 0, "caveat1($0) <- valid_date($0), resource(#ambient, $0)")
                 ))),
                 e);
     }
@@ -351,7 +351,7 @@ public class SamplesTest extends TestCase {
         Error e = res.getLeft();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedCaveats(Arrays.asList(
-                        new FailedCaveat.FailedBlock(0, 0, "*resource_match($0) <- resource(#ambient, $0) @ $0 matches /file[0-9]+.txt/")
+                        new FailedCaveat.FailedBlock(0, 0, "resource_match($0) <- resource(#ambient, $0) @ $0 matches /file[0-9]+.txt/")
                 ))),
                 e);
 
@@ -414,7 +414,7 @@ public class SamplesTest extends TestCase {
         Error e = res.getLeft();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedCaveats(Arrays.asList(
-                        new FailedCaveat.FailedBlock(0, 0, "*caveat1(#test) <- resource(#ambient, #hello)")
+                        new FailedCaveat.FailedBlock(0, 0, "caveat1(#test) <- resource(#ambient, #hello)")
                 ))),
                 e);
     }

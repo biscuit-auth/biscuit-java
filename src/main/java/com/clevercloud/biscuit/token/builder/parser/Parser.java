@@ -25,9 +25,6 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<String, Rule>> rule(String s) {
-        if(s.charAt(0) != '*') {
-            return Either.left(new Error(s, "rule * prefix not found"));
-        }
         Either<Error, Tuple2<String, Predicate>> res0 = predicate(s.substring(1));
         if (res0.isLeft()) {
             return Either.left(res0.getLeft());

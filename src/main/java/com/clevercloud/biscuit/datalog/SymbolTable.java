@@ -41,7 +41,7 @@ public final class SymbolTable implements Serializable {
    }
 
    public String print_rule(final Rule r) {
-      String res = "*"+this.print_predicate(r.head());
+      String res = this.print_predicate(r.head());
       final List<String> preds = r.body().stream().map((p) -> this.print_predicate(p)).collect(Collectors.toList());
       final List<String> constraints = r.constraints().stream().map((c) -> this.print_constraint(c)).collect(Collectors.toList());
 
