@@ -45,13 +45,24 @@ public final class Constraint implements Serializable {
       return "$" + this.id + " " + this.kind.toString();
    }
 
-   public Schema.Constraint serialize() {
+   public Schema.ConstraintV1 serialize() {
       return this.kind.serialize(this.id);
    }
 
-   static public Either<Error.FormatError, Constraint> deserialize(Schema.Constraint c) {
+   static public Either<Error.FormatError, Constraint> deserializeV0(Schema.ConstraintV0 c) {
       long id = c.getId();
-      Either<Error.FormatError, ConstraintKind> res = ConstraintKind.deserialize_enum(c);
+      Either<Error.FormatError, ConstraintKind> res = ConstraintKind.deserialize_enumV0(c);
+      if(res.isLeft()) {
+         Error.FormatError e = res.getLeft();
+         return Left(e);
+      } else {
+         return Right(new Constraint(id, res.get()));
+      }
+   }
+
+   static public Either<Error.FormatError, Constraint> deserializeV1(Schema.ConstraintV1 c) {
+      long id = c.getId();
+      Either<Error.FormatError, ConstraintKind> res = ConstraintKind.deserialize_enumV1(c);
       if(res.isLeft()) {
          Error.FormatError e = res.getLeft();
          return Left(e);

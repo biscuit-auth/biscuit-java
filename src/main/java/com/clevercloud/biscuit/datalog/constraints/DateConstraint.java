@@ -11,13 +11,23 @@ import static io.vavr.API.Right;
 
 public abstract class DateConstraint implements Serializable {
    public abstract boolean check(final long value);
-   public abstract Schema.DateConstraint serialize();
+   public abstract Schema.DateConstraintV1 serialize();
 
-   static public Either<Error.FormatError, DateConstraint> deserialize_enum(Schema.DateConstraint c) {
-      if (c.getKind() == Schema.DateConstraint.Kind.BEFORE) {
-         return Before.deserialize(c);
-      } else if (c.getKind() == Schema.DateConstraint.Kind.AFTER) {
-         return After.deserialize(c);
+   static public Either<Error.FormatError, DateConstraint> deserialize_enumV0(Schema.DateConstraintV0 c) {
+      if (c.getKind() == Schema.DateConstraintV0.Kind.BEFORE) {
+         return Before.deserializeV0(c);
+      } else if (c.getKind() == Schema.DateConstraintV0.Kind.AFTER) {
+         return After.deserializeV0(c);
+      } else {
+         return Left(new Error.FormatError.DeserializationError("invalid date constraint kind"));
+      }
+   }
+
+   static public Either<Error.FormatError, DateConstraint> deserialize_enumV1(Schema.DateConstraintV1 c) {
+      if (c.getKind() == Schema.DateConstraintV1.Kind.BEFORE) {
+         return Before.deserializeV1(c);
+      } else if (c.getKind() == Schema.DateConstraintV1.Kind.AFTER) {
+         return After.deserializeV1(c);
       } else {
          return Left(new Error.FormatError.DeserializationError("invalid date constraint kind"));
       }
@@ -39,13 +49,21 @@ public abstract class DateConstraint implements Serializable {
          return "<= " + this.value;
       }
 
-      public Schema.DateConstraint serialize() {
-         return Schema.DateConstraint.newBuilder()
-                 .setKind(Schema.DateConstraint.Kind.BEFORE)
+      public Schema.DateConstraintV1 serialize() {
+         return Schema.DateConstraintV1.newBuilder()
+                 .setKind(Schema.DateConstraintV1.Kind.BEFORE)
                  .setBefore(this.value).build();
       }
 
-      static public Either<Error.FormatError, DateConstraint> deserialize(Schema.DateConstraint i) {
+      static public Either<Error.FormatError, DateConstraint> deserializeV0(Schema.DateConstraintV0 i) {
+         if(!i.hasBefore()) {
+            return Left(new Error.FormatError.DeserializationError("invalid Date constraint"));
+         } else {
+            return Right(new Before(i.getBefore()));
+         }
+      }
+
+      static public Either<Error.FormatError, DateConstraint> deserializeV1(Schema.DateConstraintV1 i) {
          if(!i.hasBefore()) {
             return Left(new Error.FormatError.DeserializationError("invalid Date constraint"));
          } else {
@@ -70,13 +88,21 @@ public abstract class DateConstraint implements Serializable {
          return ">= " + this.value;
       }
 
-      public Schema.DateConstraint serialize() {
-         return Schema.DateConstraint.newBuilder()
-                 .setKind(Schema.DateConstraint.Kind.AFTER)
+      public Schema.DateConstraintV1 serialize() {
+         return Schema.DateConstraintV1.newBuilder()
+                 .setKind(Schema.DateConstraintV1.Kind.AFTER)
                  .setAfter(this.value).build();
       }
 
-      static public Either<Error.FormatError, DateConstraint> deserialize(Schema.DateConstraint i) {
+      static public Either<Error.FormatError, DateConstraint> deserializeV0(Schema.DateConstraintV0 i) {
+         if(!i.hasAfter()) {
+            return Left(new Error.FormatError.DeserializationError("invalid Date constraint"));
+         } else {
+            return Right(new After(i.getAfter()));
+         }
+      }
+
+      static public Either<Error.FormatError, DateConstraint> deserializeV1(Schema.DateConstraintV1 i) {
          if(!i.hasAfter()) {
             return Left(new Error.FormatError.DeserializationError("invalid Date constraint"));
          } else {

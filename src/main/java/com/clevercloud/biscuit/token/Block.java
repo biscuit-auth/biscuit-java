@@ -183,15 +183,15 @@ public class Block {
         }
 
         for (int i = 0; i < this.facts.size(); i++) {
-            b.addFacts(this.facts.get(i).serialize());
+            b.addFactsV1(this.facts.get(i).serialize());
         }
 
         for (int i = 0; i < this.rules.size(); i++) {
-            b.addRules(this.rules.get(i).serialize());
+            b.addRulesV1(this.rules.get(i).serialize());
         }
 
         for (int i = 0; i < this.caveats.size(); i++) {
-            b.addCaveats(this.caveats.get(i).serialize());
+            b.addCaveatsV1(this.caveats.get(i).serialize());
         }
 
         b.setVersion(SerializedBiscuit.MAX_SCHEMA_VERSION);
@@ -215,35 +215,72 @@ public class Block {
         }
 
         ArrayList<Fact> facts = new ArrayList<>();
-        for (Schema.Fact fact : b.getFactsList()) {
-            Either<Error.FormatError, Fact> res = Fact.deserialize(fact);
-            if (res.isLeft()) {
-                Error.FormatError e = res.getLeft();
-                return Left(e);
-            } else {
-                facts.add(res.get());
-            }
-        }
-
         ArrayList<Rule> rules = new ArrayList<>();
-        for (Schema.Rule rule : b.getRulesList()) {
-            Either<Error.FormatError, Rule> res = Rule.deserialize(rule);
-            if (res.isLeft()) {
-                Error.FormatError e = res.getLeft();
-                return Left(e);
-            } else {
-                rules.add(res.get());
-            }
-        }
-
         ArrayList<Caveat> caveats = new ArrayList<>();
-        for (Schema.Caveat caveat : b.getCaveatsList()) {
-            Either<Error.FormatError, Caveat> res = Caveat.deserialize(caveat);
-            if (res.isLeft()) {
-                Error.FormatError e = res.getLeft();
-                return Left(e);
-            } else {
-                caveats.add(res.get());
+
+        if(version == 0) {
+            for (Schema.FactV0 fact : b.getFactsV0List()) {
+                Either<Error.FormatError, Fact> res = Fact.deserializeV0(fact);
+                if (res.isLeft()) {
+                    Error.FormatError e = res.getLeft();
+                    return Left(e);
+                } else {
+                    facts.add(res.get());
+                }
+            }
+
+
+            for (Schema.RuleV0 rule : b.getRulesV0List()) {
+                Either<Error.FormatError, Rule> res = Rule.deserializeV0(rule);
+                if (res.isLeft()) {
+                    Error.FormatError e = res.getLeft();
+                    return Left(e);
+                } else {
+                    rules.add(res.get());
+                }
+            }
+
+
+            for (Schema.CaveatV0 caveat : b.getCaveatsV0List()) {
+                Either<Error.FormatError, Caveat> res = Caveat.deserializeV0(caveat);
+                if (res.isLeft()) {
+                    Error.FormatError e = res.getLeft();
+                    return Left(e);
+                } else {
+                    caveats.add(res.get());
+                }
+            }
+        } else {
+            for (Schema.FactV1 fact : b.getFactsV1List()) {
+                Either<Error.FormatError, Fact> res = Fact.deserializeV1(fact);
+                if (res.isLeft()) {
+                    Error.FormatError e = res.getLeft();
+                    return Left(e);
+                } else {
+                    facts.add(res.get());
+                }
+            }
+
+
+            for (Schema.RuleV1 rule : b.getRulesV1List()) {
+                Either<Error.FormatError, Rule> res = Rule.deserializeV1(rule);
+                if (res.isLeft()) {
+                    Error.FormatError e = res.getLeft();
+                    return Left(e);
+                } else {
+                    rules.add(res.get());
+                }
+            }
+
+
+            for (Schema.CaveatV1 caveat : b.getCaveatsV1List()) {
+                Either<Error.FormatError, Caveat> res = Caveat.deserializeV1(caveat);
+                if (res.isLeft()) {
+                    Error.FormatError e = res.getLeft();
+                    return Left(e);
+                } else {
+                    caveats.add(res.get());
+                }
             }
         }
 

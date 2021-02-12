@@ -38,8 +38,8 @@ public class Caveat {
         return super.toString();
     }
 
-    public Schema.Caveat serialize() {
-        Schema.Caveat.Builder b = Schema.Caveat.newBuilder();
+    public Schema.CaveatV1 serialize() {
+        Schema.CaveatV1.Builder b = Schema.CaveatV1.newBuilder();
 
         for(int i = 0; i < this.queries.size(); i++) {
             b.addQueries(this.queries.get(i).serialize());
@@ -48,11 +48,27 @@ public class Caveat {
         return b.build();
     }
 
-    static public Either<Error.FormatError, Caveat> deserialize(Schema.Caveat caveat) {
+    static public Either<Error.FormatError, Caveat> deserializeV0(Schema.CaveatV0 caveat) {
         ArrayList<Rule> queries = new ArrayList<>();
 
-        for (Schema.Rule query: caveat.getQueriesList()) {
-            Either<Error.FormatError, Rule> res = Rule.deserialize(query);
+        for (Schema.RuleV0 query: caveat.getQueriesList()) {
+            Either<Error.FormatError, Rule> res = Rule.deserializeV0(query);
+            if(res.isLeft()) {
+                Error.FormatError e = res.getLeft();
+                return Left(e);
+            } else {
+                queries.add(res.get());
+            }
+        }
+
+        return Right(new Caveat(queries));
+    }
+
+    static public Either<Error.FormatError, Caveat> deserializeV1(Schema.CaveatV1 caveat) {
+        ArrayList<Rule> queries = new ArrayList<>();
+
+        for (Schema.RuleV1 query: caveat.getQueriesList()) {
+            Either<Error.FormatError, Rule> res = Rule.deserializeV1(query);
             if(res.isLeft()) {
                 Error.FormatError e = res.getLeft();
                 return Left(e);

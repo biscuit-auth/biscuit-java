@@ -13,13 +13,23 @@ import static io.vavr.API.Right;
 
 public abstract class SymbolConstraint implements Serializable {
    public abstract boolean check(final long value);
-   public abstract Schema.SymbolConstraint serialize();
+   public abstract Schema.SymbolConstraintV1 serialize();
 
-   static public Either<Error.FormatError, SymbolConstraint> deserialize_enum(Schema.SymbolConstraint c) {
-      if (c.getKind() == Schema.SymbolConstraint.Kind.IN) {
-         return InSet.deserialize(c);
-      } else if (c.getKind() == Schema.SymbolConstraint.Kind.IN) {
-         return NotInSet.deserialize(c);
+   static public Either<Error.FormatError, SymbolConstraint> deserialize_enumV0(Schema.SymbolConstraintV0 c) {
+      if (c.getKind() == Schema.SymbolConstraintV0.Kind.IN) {
+         return InSet.deserializeV0(c);
+      } else if (c.getKind() == Schema.SymbolConstraintV0.Kind.IN) {
+         return NotInSet.deserializeV0(c);
+      } else {
+         return Left(new Error.FormatError.DeserializationError("invalid Symbol constraint kind"));
+      }
+   }
+
+   static public Either<Error.FormatError, SymbolConstraint> deserialize_enumV1(Schema.SymbolConstraintV1 c) {
+      if (c.getKind() == Schema.SymbolConstraintV1.Kind.IN) {
+         return InSet.deserializeV1(c);
+      } else if (c.getKind() == Schema.SymbolConstraintV1.Kind.IN) {
+         return NotInSet.deserializeV1(c);
       } else {
          return Left(new Error.FormatError.DeserializationError("invalid Symbol constraint kind"));
       }
@@ -41,16 +51,28 @@ public abstract class SymbolConstraint implements Serializable {
          return "in " + this.value;
       }
 
-      public Schema.SymbolConstraint serialize() {
-         Schema.SymbolConstraint.Builder b = Schema.SymbolConstraint.newBuilder()
-                 .setKind(Schema.SymbolConstraint.Kind.IN);
+      public Schema.SymbolConstraintV1 serialize() {
+         Schema.SymbolConstraintV1.Builder b = Schema.SymbolConstraintV1.newBuilder()
+                 .setKind(Schema.SymbolConstraintV1.Kind.IN);
          for (Long l: this.value) {
             b.addInSet(l);
          }
          return b.build();
       }
 
-      static public Either<Error.FormatError, SymbolConstraint> deserialize(Schema.SymbolConstraint i) {
+      static public Either<Error.FormatError, SymbolConstraint> deserializeV0(Schema.SymbolConstraintV0 i) {
+         Set<Long> values = new HashSet<>();
+         for (long l: i.getInSetList()) {
+            values.add(l);
+         }
+         if(values.isEmpty()) {
+            return Left(new Error.FormatError.DeserializationError("invalid Symbol constraint"));
+         } else {
+            return Right(new InSet(values));
+         }
+      }
+
+      static public Either<Error.FormatError, SymbolConstraint> deserializeV1(Schema.SymbolConstraintV1 i) {
          Set<Long> values = new HashSet<>();
          for (long l: i.getInSetList()) {
             values.add(l);
@@ -79,16 +101,28 @@ public abstract class SymbolConstraint implements Serializable {
          return "not in " + this.value;
       }
 
-      public Schema.SymbolConstraint serialize() {
-         Schema.SymbolConstraint.Builder b = Schema.SymbolConstraint.newBuilder()
-                 .setKind(Schema.SymbolConstraint.Kind.NOT_IN);
+      public Schema.SymbolConstraintV1 serialize() {
+         Schema.SymbolConstraintV1.Builder b = Schema.SymbolConstraintV1.newBuilder()
+                 .setKind(Schema.SymbolConstraintV1.Kind.NOT_IN);
          for (Long l: this.value) {
             b.addNotInSet(l);
          }
          return b.build();
       }
 
-      static public Either<Error.FormatError, SymbolConstraint> deserialize(Schema.SymbolConstraint i) {
+      static public Either<Error.FormatError, SymbolConstraint> deserializeV0(Schema.SymbolConstraintV0 i) {
+         Set<Long> values = new HashSet<>();
+         for (long l: i.getNotInSetList()) {
+            values.add(l);
+         }
+         if(values.isEmpty()) {
+            return Left(new Error.FormatError.DeserializationError("invalid Symbol constraint"));
+         } else {
+            return Right(new NotInSet(values));
+         }
+      }
+
+      static public Either<Error.FormatError, SymbolConstraint> deserializeV1(Schema.SymbolConstraintV1 i) {
          Set<Long> values = new HashSet<>();
          for (long l: i.getNotInSetList()) {
             values.add(l);

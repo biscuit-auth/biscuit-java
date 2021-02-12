@@ -15,21 +15,39 @@ import static io.vavr.API.Right;
 
 public abstract class StrConstraint implements Serializable {
    public abstract boolean check(final String value);
-   public abstract Schema.StringConstraint serialize();
+   public abstract Schema.StringConstraintV1 serialize();
 
-   static public Either<Error.FormatError, StrConstraint> deserialize_enum(Schema.StringConstraint c) {
-      if(c.getKind() == Schema.StringConstraint.Kind.PREFIX) {
-         return Prefix.deserialize(c);
-      } else if(c.getKind() == Schema.StringConstraint.Kind.SUFFIX) {
-         return Suffix.deserialize(c);
-      } else if(c.getKind() == Schema.StringConstraint.Kind.EQUAL) {
-         return Equal.deserialize(c);
-      } else if(c.getKind() == Schema.StringConstraint.Kind.REGEX) {
-         return Regex.deserialize(c);
-      } else if(c.getKind() == Schema.StringConstraint.Kind.IN) {
-         return InSet.deserialize(c);
-      } else if(c.getKind() == Schema.StringConstraint.Kind.NOT_IN) {
-         return NotInSet.deserialize(c);
+   static public Either<Error.FormatError, StrConstraint> deserialize_enumV0(Schema.StringConstraintV0 c) {
+      if(c.getKind() == Schema.StringConstraintV0.Kind.PREFIX) {
+         return Prefix.deserializeV0(c);
+      } else if(c.getKind() == Schema.StringConstraintV0.Kind.SUFFIX) {
+         return Suffix.deserializeV0(c);
+      } else if(c.getKind() == Schema.StringConstraintV0.Kind.EQUAL) {
+         return Equal.deserializeV0(c);
+      } else if(c.getKind() == Schema.StringConstraintV0.Kind.REGEX) {
+         return Regex.deserializeV0(c);
+      } else if(c.getKind() == Schema.StringConstraintV0.Kind.IN) {
+         return InSet.deserializeV0(c);
+      } else if(c.getKind() == Schema.StringConstraintV0.Kind.NOT_IN) {
+         return NotInSet.deserializeV0(c);
+      } else {
+         return Left(new Error.FormatError.DeserializationError("invalid String constraint kind"));
+      }
+   }
+
+   static public Either<Error.FormatError, StrConstraint> deserialize_enumV1(Schema.StringConstraintV1 c) {
+      if(c.getKind() == Schema.StringConstraintV1.Kind.PREFIX) {
+         return Prefix.deserializeV1(c);
+      } else if(c.getKind() == Schema.StringConstraintV1.Kind.SUFFIX) {
+         return Suffix.deserializeV1(c);
+      } else if(c.getKind() == Schema.StringConstraintV1.Kind.EQUAL) {
+         return Equal.deserializeV1(c);
+      } else if(c.getKind() == Schema.StringConstraintV1.Kind.REGEX) {
+         return Regex.deserializeV1(c);
+      } else if(c.getKind() == Schema.StringConstraintV1.Kind.IN) {
+         return InSet.deserializeV1(c);
+      } else if(c.getKind() == Schema.StringConstraintV1.Kind.NOT_IN) {
+         return NotInSet.deserializeV1(c);
       } else {
          return Left(new Error.FormatError.DeserializationError("invalid String constraint kind"));
       }
@@ -51,13 +69,21 @@ public abstract class StrConstraint implements Serializable {
          return "matches " + this.value + "*";
       }
 
-      public Schema.StringConstraint serialize() {
-         return Schema.StringConstraint.newBuilder()
-                 .setKind(Schema.StringConstraint.Kind.PREFIX)
+      public Schema.StringConstraintV1 serialize() {
+         return Schema.StringConstraintV1.newBuilder()
+                 .setKind(Schema.StringConstraintV1.Kind.PREFIX)
                  .setPrefix(this.value).build();
       }
 
-      static public Either<Error.FormatError, StrConstraint> deserialize(Schema.StringConstraint i) {
+      static public Either<Error.FormatError, StrConstraint> deserializeV0(Schema.StringConstraintV0 i) {
+         if(!i.hasPrefix()) {
+            return Left(new Error.FormatError.DeserializationError("invalid String constraint"));
+         } else {
+            return Right(new Prefix(i.getPrefix()));
+         }
+      }
+
+      static public Either<Error.FormatError, StrConstraint> deserializeV1(Schema.StringConstraintV1 i) {
          if(!i.hasPrefix()) {
             return Left(new Error.FormatError.DeserializationError("invalid String constraint"));
          } else {
@@ -82,13 +108,21 @@ public abstract class StrConstraint implements Serializable {
          return "matches *" + this.value;
       }
 
-      public Schema.StringConstraint serialize() {
-         return Schema.StringConstraint.newBuilder()
-                 .setKind(Schema.StringConstraint.Kind.SUFFIX)
+      public Schema.StringConstraintV1 serialize() {
+         return Schema.StringConstraintV1.newBuilder()
+                 .setKind(Schema.StringConstraintV1.Kind.SUFFIX)
                  .setSuffix(this.value).build();
       }
 
-      static public Either<Error.FormatError, StrConstraint> deserialize(Schema.StringConstraint i) {
+      static public Either<Error.FormatError, StrConstraint> deserializeV0(Schema.StringConstraintV0 i) {
+         if(!i.hasSuffix()) {
+            return Left(new Error.FormatError.DeserializationError("invalid String constraint"));
+         } else {
+            return Right(new Suffix(i.getSuffix()));
+         }
+      }
+
+      static public Either<Error.FormatError, StrConstraint> deserializeV1(Schema.StringConstraintV1 i) {
          if(!i.hasSuffix()) {
             return Left(new Error.FormatError.DeserializationError("invalid String constraint"));
          } else {
@@ -113,13 +147,21 @@ public abstract class StrConstraint implements Serializable {
          return "== " + this.value;
       }
 
-      public Schema.StringConstraint serialize() {
-         return Schema.StringConstraint.newBuilder()
-                 .setKind(Schema.StringConstraint.Kind.EQUAL)
+      public Schema.StringConstraintV1 serialize() {
+         return Schema.StringConstraintV1.newBuilder()
+                 .setKind(Schema.StringConstraintV1.Kind.EQUAL)
                  .setEqual(this.value).build();
       }
 
-      static public Either<Error.FormatError, StrConstraint> deserialize(Schema.StringConstraint i) {
+      static public Either<Error.FormatError, StrConstraint> deserializeV0(Schema.StringConstraintV0 i) {
+         if(!i.hasEqual()) {
+            return Left(new Error.FormatError.DeserializationError("invalid String constraint"));
+         } else {
+            return Right(new Equal(i.getEqual()));
+         }
+      }
+
+      static public Either<Error.FormatError, StrConstraint> deserializeV1(Schema.StringConstraintV1 i) {
          if(!i.hasEqual()) {
             return Left(new Error.FormatError.DeserializationError("invalid String constraint"));
          } else {
@@ -146,13 +188,21 @@ public abstract class StrConstraint implements Serializable {
          return "matches /" + this.pattern + "/";
       }
 
-      public Schema.StringConstraint serialize() {
-         return Schema.StringConstraint.newBuilder()
-                 .setKind(Schema.StringConstraint.Kind.REGEX)
+      public Schema.StringConstraintV1 serialize() {
+         return Schema.StringConstraintV1.newBuilder()
+                 .setKind(Schema.StringConstraintV1.Kind.REGEX)
                  .setRegex(this.pattern).build();
       }
 
-      static public Either<Error.FormatError, StrConstraint> deserialize(Schema.StringConstraint i) {
+      static public Either<Error.FormatError, StrConstraint> deserializeV0(Schema.StringConstraintV0 i) {
+         if(!i.hasRegex()) {
+            return Left(new Error.FormatError.DeserializationError("invalid String constraint"));
+         } else {
+            return Right(new Regex(i.getRegex()));
+         }
+      }
+
+      static public Either<Error.FormatError, StrConstraint> deserializeV1(Schema.StringConstraintV1 i) {
          if(!i.hasRegex()) {
             return Left(new Error.FormatError.DeserializationError("invalid String constraint"));
          } else {
@@ -177,16 +227,28 @@ public abstract class StrConstraint implements Serializable {
          return "in " + this.value;
       }
 
-      public Schema.StringConstraint serialize() {
-         Schema.StringConstraint.Builder b = Schema.StringConstraint.newBuilder()
-                 .setKind(Schema.StringConstraint.Kind.IN);
+      public Schema.StringConstraintV1 serialize() {
+         Schema.StringConstraintV1.Builder b = Schema.StringConstraintV1.newBuilder()
+                 .setKind(Schema.StringConstraintV1.Kind.IN);
          for (String s: this.value) {
             b.addInSet(s);
          }
          return b.build();
       }
 
-      static public Either<Error.FormatError, StrConstraint> deserialize(Schema.StringConstraint i) {
+      static public Either<Error.FormatError, StrConstraint> deserializeV0(Schema.StringConstraintV0 i) {
+         Set<String> values = new HashSet<>();
+         for (String l: i.getInSetList()) {
+            values.add(l);
+         }
+         if(values.isEmpty()) {
+            return Left(new Error.FormatError.DeserializationError("invalid String constraint"));
+         } else {
+            return Right(new InSet(values));
+         }
+      }
+
+      static public Either<Error.FormatError, StrConstraint> deserializeV1(Schema.StringConstraintV1 i) {
          Set<String> values = new HashSet<>();
          for (String l: i.getInSetList()) {
             values.add(l);
@@ -215,16 +277,28 @@ public abstract class StrConstraint implements Serializable {
          return "not in " + this.value;
       }
 
-      public Schema.StringConstraint serialize() {
-         Schema.StringConstraint.Builder b = Schema.StringConstraint.newBuilder()
-                 .setKind(Schema.StringConstraint.Kind.NOT_IN);
+      public Schema.StringConstraintV1 serialize() {
+         Schema.StringConstraintV1.Builder b = Schema.StringConstraintV1.newBuilder()
+                 .setKind(Schema.StringConstraintV1.Kind.NOT_IN);
          for (String s: this.value) {
             b.addNotInSet(s);
          }
          return b.build();
       }
 
-      static public Either<Error.FormatError, StrConstraint> deserialize(Schema.StringConstraint i) {
+      static public Either<Error.FormatError, StrConstraint> deserializeV0(Schema.StringConstraintV0 i) {
+         Set<String> values = new HashSet<>();
+         for (String l: i.getNotInSetList()) {
+            values.add(l);
+         }
+         if(values.isEmpty()) {
+            return Left(new Error.FormatError.DeserializationError("invalid String constraint"));
+         } else {
+            return Right(new NotInSet(values));
+         }
+      }
+
+      static public Either<Error.FormatError, StrConstraint> deserializeV1(Schema.StringConstraintV1 i) {
          Set<String> values = new HashSet<>();
          for (String l: i.getNotInSetList()) {
             values.add(l);

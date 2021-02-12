@@ -14,20 +14,38 @@ import java.util.Objects;
 
 public abstract class ID implements Serializable {
    public abstract boolean match(final ID other);
-   public abstract Schema.ID serialize();
-   static public Either<Error.FormatError, ID> deserialize_enum(Schema.ID id) {
-      if(id.getKind() == Schema.ID.Kind.DATE) {
-         return Date.deserialize(id);
-      } else if(id.getKind() == Schema.ID.Kind.INTEGER) {
-         return Integer.deserialize(id);
-      } else if(id.getKind() == Schema.ID.Kind.STR) {
-         return Str.deserialize(id);
-      } else if(id.getKind() == Schema.ID.Kind.BYTES) {
-         return Bytes.deserialize(id);
-      } else if(id.getKind() == Schema.ID.Kind.SYMBOL) {
-         return Symbol.deserialize(id);
-      } else if(id.getKind() == Schema.ID.Kind.VARIABLE) {
-         return Variable.deserialize(id);
+   public abstract Schema.IDV1 serialize();
+   static public Either<Error.FormatError, ID> deserialize_enumV0(Schema.IDV0 id) {
+      if(id.getKind() == Schema.IDV0.Kind.DATE) {
+         return Date.deserializeV0(id);
+      } else if(id.getKind() == Schema.IDV0.Kind.INTEGER) {
+         return Integer.deserializeV0(id);
+      } else if(id.getKind() == Schema.IDV0.Kind.STR) {
+         return Str.deserializeV0(id);
+      } else if(id.getKind() == Schema.IDV0.Kind.BYTES) {
+         return Bytes.deserializeV0(id);
+      } else if(id.getKind() == Schema.IDV0.Kind.SYMBOL) {
+         return Symbol.deserializeV0(id);
+      } else if(id.getKind() == Schema.IDV0.Kind.VARIABLE) {
+         return Variable.deserializeV0(id);
+      } else {
+         return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+      }
+   }
+
+   static public Either<Error.FormatError, ID> deserialize_enumV1(Schema.IDV1 id) {
+      if(id.getKind() == Schema.IDV1.Kind.DATE) {
+         return Date.deserializeV1(id);
+      } else if(id.getKind() == Schema.IDV1.Kind.INTEGER) {
+         return Integer.deserializeV1(id);
+      } else if(id.getKind() == Schema. IDV1.Kind.STR) {
+         return Str.deserializeV1(id);
+      } else if(id.getKind() == Schema.IDV1.Kind.BYTES) {
+         return Bytes.deserializeV1(id);
+      } else if(id.getKind() == Schema.IDV1.Kind.SYMBOL) {
+         return Symbol.deserializeV1(id);
+      } else if(id.getKind() == Schema.IDV1.Kind.VARIABLE) {
+         return Variable.deserializeV1(id);
       } else {
          return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
       }
@@ -71,14 +89,22 @@ public abstract class ID implements Serializable {
          return "@" + this.value;
       }
 
-      public Schema.ID serialize() {
-         return Schema.ID.newBuilder()
-                 .setKind(Schema.ID.Kind.DATE)
+      public Schema.IDV1 serialize() {
+         return Schema.IDV1.newBuilder()
+                 .setKind(Schema.IDV1.Kind.DATE)
                  .setDate(this.value).build();
       }
 
-      static public Either<Error.FormatError, ID> deserialize(Schema.ID id) {
-         if(id.getKind() != Schema.ID.Kind.DATE) {
+      static public Either<Error.FormatError, ID> deserializeV0(Schema.IDV0 id) {
+         if(id.getKind() != Schema.IDV0.Kind.DATE) {
+            return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+         } else {
+            return Right(new Date(id.getDate()));
+         }
+      }
+
+      static public Either<Error.FormatError, ID> deserializeV1(Schema.IDV1 id) {
+         if(id.getKind() != Schema.IDV1.Kind.DATE) {
             return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
          } else {
             return Right(new Date(id.getDate()));
@@ -129,14 +155,22 @@ public abstract class ID implements Serializable {
          return "" + this.value;
       }
 
-      public Schema.ID serialize() {
-         return Schema.ID.newBuilder()
-                 .setKind(Schema.ID.Kind.INTEGER)
+      public Schema.IDV1 serialize() {
+         return Schema.IDV1.newBuilder()
+                 .setKind(Schema.IDV1.Kind.INTEGER)
                  .setInteger(this.value).build();
       }
 
-      static public Either<Error.FormatError, ID> deserialize(Schema.ID id) {
-         if(id.getKind() != Schema.ID.Kind.INTEGER) {
+      static public Either<Error.FormatError, ID> deserializeV0(Schema.IDV0 id) {
+         if(id.getKind() != Schema.IDV0.Kind.INTEGER) {
+            return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+         } else {
+            return Right(new Integer(id.getInteger()));
+         }
+      }
+
+      static public Either<Error.FormatError, ID> deserializeV1(Schema.IDV1 id) {
+         if(id.getKind() != Schema.IDV1.Kind.INTEGER) {
             return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
          } else {
             return Right(new Integer(id.getInteger()));
@@ -187,14 +221,22 @@ public abstract class ID implements Serializable {
          return this.value;
       }
 
-      public Schema.ID serialize() {
-         return Schema.ID.newBuilder()
-                 .setKind(Schema.ID.Kind.STR)
+      public Schema.IDV1 serialize() {
+         return Schema.IDV1.newBuilder()
+                 .setKind(Schema.IDV1.Kind.STR)
                  .setStr(this.value).build();
       }
 
-      static public Either<Error.FormatError, ID> deserialize(Schema.ID id) {
-         if(id.getKind() != Schema.ID.Kind.STR) {
+      static public Either<Error.FormatError, ID> deserializeV0(Schema.IDV0 id) {
+         if(id.getKind() != Schema.IDV0.Kind.STR) {
+            return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+         } else {
+            return Right(new Str(id.getStr()));
+         }
+      }
+
+      static public Either<Error.FormatError, ID> deserializeV1(Schema.IDV1 id) {
+         if(id.getKind() != Schema.IDV1.Kind.STR) {
             return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
          } else {
             return Right(new Str(id.getStr()));
@@ -245,14 +287,22 @@ public abstract class ID implements Serializable {
          return this.value.toString();
       }
 
-      public Schema.ID serialize() {
-         return Schema.ID.newBuilder()
-                 .setKind(Schema.ID.Kind.BYTES)
+      public Schema.IDV1 serialize() {
+         return Schema.IDV1.newBuilder()
+                 .setKind(Schema.IDV1.Kind.BYTES)
                  .setBytes(ByteString.EMPTY.copyFrom(this.value)).build();
       }
 
-      static public Either<Error.FormatError, ID> deserialize(Schema.ID id) {
-         if(id.getKind() != Schema.ID.Kind.STR) {
+      static public Either<Error.FormatError, ID> deserializeV0(Schema.IDV0 id) {
+         if(id.getKind() != Schema.IDV0.Kind.STR) {
+            return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+         } else {
+            return Right(new Str(id.getStr()));
+         }
+      }
+
+      static public Either<Error.FormatError, ID> deserializeV1(Schema.IDV1 id) {
+         if(id.getKind() != Schema.IDV1.Kind.STR) {
             return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
          } else {
             return Right(new Str(id.getStr()));
@@ -303,14 +353,22 @@ public abstract class ID implements Serializable {
          return "#" + this.value;
       }
 
-      public Schema.ID serialize() {
-         return Schema.ID.newBuilder()
-                 .setKind(Schema.ID.Kind.SYMBOL)
+      public Schema.IDV1 serialize() {
+         return Schema.IDV1.newBuilder()
+                 .setKind(Schema.IDV1.Kind.SYMBOL)
                  .setSymbol(this.value).build();
       }
 
-      static public Either<Error.FormatError, ID> deserialize(Schema.ID id) {
-         if(id.getKind() != Schema.ID.Kind.SYMBOL) {
+      static public Either<Error.FormatError, ID> deserializeV0(Schema.IDV0 id) {
+         if(id.getKind() != Schema.IDV0.Kind.SYMBOL) {
+            return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+         } else {
+            return Right(new Symbol(id.getSymbol()));
+         }
+      }
+
+      static public Either<Error.FormatError, ID> deserializeV1(Schema.IDV1 id) {
+         if(id.getKind() != Schema.IDV1.Kind.SYMBOL) {
             return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
          } else {
             return Right(new Symbol(id.getSymbol()));
@@ -355,14 +413,22 @@ public abstract class ID implements Serializable {
          return this.value + "?";
       }
 
-      public Schema.ID serialize() {
-         return Schema.ID.newBuilder()
-                 .setKind(Schema.ID.Kind.VARIABLE)
+      public Schema.IDV1 serialize() {
+         return Schema.IDV1.newBuilder()
+                 .setKind(Schema.IDV1.Kind.VARIABLE)
                  .setVariable((int) this.value).build();
       }
 
-      static public Either<Error.FormatError, ID> deserialize(Schema.ID id) {
-         if(id.getKind() != Schema.ID.Kind.VARIABLE) {
+      static public Either<Error.FormatError, ID> deserializeV0(Schema.IDV0 id) {
+         if(id.getKind() != Schema.IDV0.Kind.VARIABLE) {
+            return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+         } else {
+            return Right(new Variable(id.getVariable()));
+         }
+      }
+
+      static public Either<Error.FormatError, ID> deserializeV1(Schema.IDV1 id) {
+         if(id.getKind() != Schema.IDV1.Kind.VARIABLE) {
             return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
          } else {
             return Right(new Variable(id.getVariable()));

@@ -56,8 +56,8 @@ public final class Rule implements Serializable {
       this.constraints = constraints;
    }
 
-   public Schema.Rule serialize() {
-      Schema.Rule.Builder b = Schema.Rule.newBuilder()
+   public Schema.RuleV1 serialize() {
+      Schema.RuleV1.Builder b = Schema.RuleV1.newBuilder()
               .setHead(this.head.serialize());
 
       for (int i = 0; i < this.body.size(); i++) {
@@ -71,10 +71,10 @@ public final class Rule implements Serializable {
       return b.build();
    }
 
-   static public Either<Error.FormatError, Rule> deserialize(Schema.Rule rule) {
+   static public Either<Error.FormatError, Rule> deserializeV0(Schema.RuleV0 rule) {
       ArrayList<Predicate> body = new ArrayList<>();
-      for (Schema.Predicate predicate: rule.getBodyList()) {
-         Either<Error.FormatError, Predicate> res = Predicate.deserialize(predicate);
+      for (Schema.PredicateV0 predicate: rule.getBodyList()) {
+         Either<Error.FormatError, Predicate> res = Predicate.deserializeV0(predicate);
          if(res.isLeft()) {
             Error.FormatError e = res.getLeft();
             return Left(e);
@@ -84,8 +84,8 @@ public final class Rule implements Serializable {
       }
 
       ArrayList<Constraint> constraints = new ArrayList<>();
-      for (Schema.Constraint constraint: rule.getConstraintsList()) {
-         Either<Error.FormatError, Constraint> res = Constraint.deserialize(constraint);
+      for (Schema.ConstraintV0 constraint: rule.getConstraintsList()) {
+         Either<Error.FormatError, Constraint> res = Constraint.deserializeV0(constraint);
          if(res.isLeft()) {
             Error.FormatError e = res.getLeft();
             return Left(e);
@@ -94,7 +94,39 @@ public final class Rule implements Serializable {
          }
       }
 
-      Either<Error.FormatError, Predicate> res = Predicate.deserialize(rule.getHead());
+      Either<Error.FormatError, Predicate> res = Predicate.deserializeV0(rule.getHead());
+      if(res.isLeft()) {
+         Error.FormatError e = res.getLeft();
+         return Left(e);
+      } else {
+         return Right(new Rule(res.get(), body, constraints));
+      }
+   }
+
+   static public Either<Error.FormatError, Rule> deserializeV1(Schema.RuleV1 rule) {
+      ArrayList<Predicate> body = new ArrayList<>();
+      for (Schema.PredicateV1 predicate: rule.getBodyList()) {
+         Either<Error.FormatError, Predicate> res = Predicate.deserializeV1(predicate);
+         if(res.isLeft()) {
+            Error.FormatError e = res.getLeft();
+            return Left(e);
+         } else {
+            body.add(res.get());
+         }
+      }
+
+      ArrayList<Constraint> constraints = new ArrayList<>();
+      for (Schema.ConstraintV1 constraint: rule.getConstraintsList()) {
+         Either<Error.FormatError, Constraint> res = Constraint.deserializeV1(constraint);
+         if(res.isLeft()) {
+            Error.FormatError e = res.getLeft();
+            return Left(e);
+         } else {
+            constraints.add(res.get());
+         }
+      }
+
+      Either<Error.FormatError, Predicate> res = Predicate.deserializeV1(rule.getHead());
       if(res.isLeft()) {
          Error.FormatError e = res.getLeft();
          return Left(e);

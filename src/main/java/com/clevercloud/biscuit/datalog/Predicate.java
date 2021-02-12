@@ -75,8 +75,8 @@ public final class Predicate implements Serializable {
       return this.name + "(" + String.join(", ", this.ids.stream().map((i) -> (i == null) ? "(null)" : i.toString()).collect(Collectors.toList())) + ")";
    }
 
-   public Schema.Predicate serialize() {
-      Schema.Predicate.Builder builder = Schema.Predicate.newBuilder()
+   public Schema.PredicateV1 serialize() {
+      Schema.PredicateV1.Builder builder = Schema.PredicateV1.newBuilder()
               .setName(this.name);
 
       for (int i = 0; i < this.ids.size(); i++) {
@@ -86,10 +86,25 @@ public final class Predicate implements Serializable {
       return builder.build();
    }
 
-   static public Either<Error.FormatError, Predicate> deserialize(Schema.Predicate predicate) {
+   static public Either<Error.FormatError, Predicate> deserializeV0(Schema.PredicateV0 predicate) {
       ArrayList<ID> ids = new ArrayList<>();
-      for (Schema.ID id: predicate.getIdsList()) {
-         Either<Error.FormatError, ID> res = ID.deserialize_enum(id);
+      for (Schema.IDV0 id: predicate.getIdsList()) {
+         Either<Error.FormatError, ID> res = ID.deserialize_enumV0(id);
+         if(res.isLeft()) {
+            Error.FormatError e = res.getLeft();
+            return Left(e);
+         } else {
+            ids.add(res.get());
+         }
+      }
+
+      return Right(new Predicate(predicate.getName(), ids));
+   }
+
+   static public Either<Error.FormatError, Predicate> deserializeV1(Schema.PredicateV1 predicate) {
+      ArrayList<ID> ids = new ArrayList<>();
+      for (Schema.IDV1 id: predicate.getIdsList()) {
+         Either<Error.FormatError, ID> res = ID.deserialize_enumV1(id);
          if(res.isLeft()) {
             Error.FormatError e = res.getLeft();
             return Left(e);
