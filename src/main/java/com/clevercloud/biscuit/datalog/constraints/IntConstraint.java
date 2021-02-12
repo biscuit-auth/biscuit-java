@@ -17,11 +17,11 @@ public abstract class IntConstraint implements Serializable {
 
    static public Either<Error.FormatError, IntConstraint> deserialize_enumV0(Schema.IntConstraintV0 c) {
       if(c.getKind() == Schema.IntConstraintV0.Kind.LOWER) {
-         return Lower.deserializeV0(c);
+         return LessThan.deserializeV0(c);
       } else if(c.getKind() == Schema.IntConstraintV0.Kind.LARGER) {
-         return Greater.deserializeV0(c);
+         return GreaterThan.deserializeV0(c);
       } else if(c.getKind() == Schema.IntConstraintV0.Kind.LOWER_OR_EQUAL) {
-         return LowerOrEqual.deserializeV0(c);
+         return LessOrEqual.deserializeV0(c);
       } else if(c.getKind() == Schema.IntConstraintV0.Kind.LARGER_OR_EQUAL) {
          return GreaterOrEqual.deserializeV0(c);
       } else if(c.getKind() == Schema.IntConstraintV0.Kind.EQUAL) {
@@ -36,13 +36,13 @@ public abstract class IntConstraint implements Serializable {
    }
 
    static public Either<Error.FormatError, IntConstraint> deserialize_enumV1(Schema.IntConstraintV1 c) {
-      if(c.getKind() == Schema.IntConstraintV1.Kind.LOWER) {
-         return Lower.deserializeV1(c);
-      } else if(c.getKind() == Schema.IntConstraintV1.Kind.LARGER) {
-         return Greater.deserializeV1(c);
-      } else if(c.getKind() == Schema.IntConstraintV1.Kind.LOWER_OR_EQUAL) {
-         return LowerOrEqual.deserializeV1(c);
-      } else if(c.getKind() == Schema.IntConstraintV1.Kind.LARGER_OR_EQUAL) {
+      if(c.getKind() == Schema.IntConstraintV1.Kind.LESS_THAN) {
+         return LessThan.deserializeV1(c);
+      } else if(c.getKind() == Schema.IntConstraintV1.Kind.GREATER_THAN) {
+         return GreaterThan.deserializeV1(c);
+      } else if(c.getKind() == Schema.IntConstraintV1.Kind.LESS_OR_EQUAL) {
+         return LessOrEqual.deserializeV1(c);
+      } else if(c.getKind() == Schema.IntConstraintV1.Kind.GREATER_OR_EQUAL) {
          return GreaterOrEqual.deserializeV1(c);
       } else if(c.getKind() == Schema.IntConstraintV1.Kind.EQUAL) {
          return Equal.deserializeV1(c);
@@ -94,14 +94,14 @@ public abstract class IntConstraint implements Serializable {
       }
    }
 
-   public static final class Greater extends IntConstraint implements Serializable {
+   public static final class GreaterThan extends IntConstraint implements Serializable {
       private final long value;
 
       public boolean check(final long value) {
          return this.value < value;
       }
 
-      public Greater(final long value) {
+      public GreaterThan(final long value) {
          this.value = value;
       }
 
@@ -112,23 +112,23 @@ public abstract class IntConstraint implements Serializable {
 
       public Schema.IntConstraintV1 serialize() {
          return Schema.IntConstraintV1.newBuilder()
-                 .setKind(Schema.IntConstraintV1.Kind.LARGER)
-                 .setLarger(this.value).build();
+                 .setKind(Schema.IntConstraintV1.Kind.GREATER_THAN)
+                 .setGreaterThan(this.value).build();
       }
 
       static public Either<Error.FormatError, IntConstraint> deserializeV0(Schema.IntConstraintV0 i) {
          if(!i.hasLarger()) {
             return Left(new Error.FormatError.DeserializationError("invalid Int constraint"));
          } else {
-            return Right(new Greater(i.getLarger()));
+            return Right(new GreaterThan(i.getLarger()));
          }
       }
 
       static public Either<Error.FormatError, IntConstraint> deserializeV1(Schema.IntConstraintV1 i) {
-         if(!i.hasLarger()) {
+         if(!i.hasGreaterThan()) {
             return Left(new Error.FormatError.DeserializationError("invalid Int constraint"));
          } else {
-            return Right(new Greater(i.getLarger()));
+            return Right(new GreaterThan(i.getGreaterThan()));
          }
       }
    }
@@ -151,8 +151,8 @@ public abstract class IntConstraint implements Serializable {
 
       public Schema.IntConstraintV1 serialize() {
          return Schema.IntConstraintV1.newBuilder()
-                 .setKind(Schema.IntConstraintV1.Kind.LARGER_OR_EQUAL)
-                 .setLargerOrEqual(this.value).build();
+                 .setKind(Schema.IntConstraintV1.Kind.GREATER_OR_EQUAL)
+                 .setGreaterOrEqual(this.value).build();
       }
 
       static public Either<Error.FormatError, IntConstraint> deserializeV0(Schema.IntConstraintV0 i) {
@@ -164,22 +164,22 @@ public abstract class IntConstraint implements Serializable {
       }
 
       static public Either<Error.FormatError, IntConstraint> deserializeV1(Schema.IntConstraintV1 i) {
-         if(!i.hasLargerOrEqual()) {
+         if(!i.hasGreaterOrEqual()) {
             return Left(new Error.FormatError.DeserializationError("invalid Int constraint"));
          } else {
-            return Right(new GreaterOrEqual(i.getLargerOrEqual()));
+            return Right(new GreaterOrEqual(i.getGreaterOrEqual()));
          }
       }
    }
 
-   public static final class Lower extends IntConstraint implements Serializable {
+   public static final class LessThan extends IntConstraint implements Serializable {
       private final long value;
 
       public boolean check(final long value) {
          return this.value > value;
       }
 
-      public Lower(final long value) {
+      public LessThan(final long value) {
          this.value = value;
       }
 
@@ -190,35 +190,35 @@ public abstract class IntConstraint implements Serializable {
 
       public Schema.IntConstraintV1 serialize() {
          return Schema.IntConstraintV1.newBuilder()
-                 .setKind(Schema.IntConstraintV1.Kind.LOWER)
-                 .setLower(this.value).build();
+                 .setKind(Schema.IntConstraintV1.Kind.LESS_THAN)
+                 .setLessOrEqual(this.value).build();
       }
 
       static public Either<Error.FormatError, IntConstraint> deserializeV0(Schema.IntConstraintV0 i) {
          if(!i.hasLower()) {
             return Left(new Error.FormatError.DeserializationError("invalid Int constraint"));
          } else {
-            return Right(new Lower(i.getLower()));
+            return Right(new LessThan(i.getLower()));
          }
       }
 
       static public Either<Error.FormatError, IntConstraint> deserializeV1(Schema.IntConstraintV1 i) {
-         if(!i.hasLower()) {
+         if(!i.hasLessThan()) {
             return Left(new Error.FormatError.DeserializationError("invalid Int constraint"));
          } else {
-            return Right(new Lower(i.getLower()));
+            return Right(new LessThan(i.getLessThan()));
          }
       }
    }
 
-   public static final class LowerOrEqual extends IntConstraint implements Serializable {
+   public static final class LessOrEqual extends IntConstraint implements Serializable {
       private final long value;
 
       public boolean check(final long value) {
          return this.value >= value;
       }
 
-      public LowerOrEqual(final long value) {
+      public LessOrEqual(final long value) {
          this.value = value;
       }
 
@@ -229,23 +229,23 @@ public abstract class IntConstraint implements Serializable {
 
       public Schema.IntConstraintV1 serialize() {
          return Schema.IntConstraintV1.newBuilder()
-                 .setKind(Schema.IntConstraintV1.Kind.LOWER_OR_EQUAL)
-                 .setLowerOrEqual(this.value).build();
+                 .setKind(Schema.IntConstraintV1.Kind.LESS_OR_EQUAL)
+                 .setLessOrEqual(this.value).build();
       }
 
       static public Either<Error.FormatError, IntConstraint> deserializeV0(Schema.IntConstraintV0 i) {
          if(!i.hasLowerOrEqual()) {
             return Left(new Error.FormatError.DeserializationError("invalid Int constraint"));
          } else {
-            return Right(new LowerOrEqual(i.getLowerOrEqual()));
+            return Right(new LessOrEqual(i.getLowerOrEqual()));
          }
       }
 
       static public Either<Error.FormatError, IntConstraint> deserializeV1(Schema.IntConstraintV1 i) {
-         if(!i.hasLowerOrEqual()) {
+         if(!i.hasLessOrEqual()) {
             return Left(new Error.FormatError.DeserializationError("invalid Int constraint"));
          } else {
-            return Right(new LowerOrEqual(i.getLowerOrEqual()));
+            return Right(new LessOrEqual(i.getLessOrEqual()));
          }
       }
    }

@@ -146,7 +146,7 @@ public class WorldTest extends TestCase {
                                       new ID.Variable(syms.insert("t2_id")),
                                       new ID.Variable(syms.insert("right")),
                                       new ID.Variable(syms.insert("id"))))),
-              Arrays.asList(new Constraint(syms.insert("id"), new ConstraintKind.Int(new IntConstraint.Lower(1))))));
+              Arrays.asList(new Constraint(syms.insert("id"), new ConstraintKind.Int(new IntConstraint.LessThan(1))))));
       for (final Fact f : res) {
          System.out.println("\t" + syms.print_fact(f));
       }

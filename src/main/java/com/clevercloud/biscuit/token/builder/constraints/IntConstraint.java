@@ -40,7 +40,7 @@ public abstract class IntConstraint implements ConstraintBuilder {
 
         @Override
         public Constraint convert(SymbolTable symbols) {
-            return new Constraint(symbols.insert(this.id), new ConstraintKind.Int(new com.clevercloud.biscuit.datalog.constraints.IntConstraint.Greater(this.value)));
+            return new Constraint(symbols.insert(this.id), new ConstraintKind.Int(new com.clevercloud.biscuit.datalog.constraints.IntConstraint.GreaterThan(this.value)));
         }
 
         @Override
@@ -80,7 +80,7 @@ public abstract class IntConstraint implements ConstraintBuilder {
 
         @Override
         public Constraint convert(SymbolTable symbols) {
-            return new Constraint(symbols.insert(this.id), new ConstraintKind.Int(new com.clevercloud.biscuit.datalog.constraints.IntConstraint.Lower(this.value)));
+            return new Constraint(symbols.insert(this.id), new ConstraintKind.Int(new com.clevercloud.biscuit.datalog.constraints.IntConstraint.LessThan(this.value)));
         }
 
         @Override
@@ -100,7 +100,7 @@ public abstract class IntConstraint implements ConstraintBuilder {
 
         @Override
         public Constraint convert(SymbolTable symbols) {
-            return new Constraint(symbols.insert(this.id), new ConstraintKind.Int(new com.clevercloud.biscuit.datalog.constraints.IntConstraint.LowerOrEqual(this.value)));
+            return new Constraint(symbols.insert(this.id), new ConstraintKind.Int(new com.clevercloud.biscuit.datalog.constraints.IntConstraint.LessOrEqual(this.value)));
         }
 
         @Override
