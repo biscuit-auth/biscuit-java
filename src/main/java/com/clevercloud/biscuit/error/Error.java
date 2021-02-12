@@ -83,6 +83,7 @@ public class Error {
                 return "Error.FormatError.DeserializationError{ error: "+  e + " }";
             }
         }
+
         public static class SerializationError extends FormatError {
             final public String e;
 
@@ -156,6 +157,42 @@ public class Error {
             @Override
             public String toString() {
                 return "Error.FormatError.BlockSerializationError{ error: "+  e + " }";
+            }
+        }
+
+        public static class Version extends FormatError {
+            final public int maximum;
+            final public int actual;
+
+            public Version(int maximum, int actual) {
+                this.maximum = maximum;
+                this.actual = actual;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+
+                Version version = (Version) o;
+
+                if (maximum != version.maximum) return false;
+                return actual == version.actual;
+            }
+
+            @Override
+            public int hashCode() {
+                int result = maximum;
+                result = 31 * result + actual;
+                return result;
+            }
+
+            @Override
+            public String toString() {
+                return "Version{" +
+                        "maximum=" + maximum +
+                        ", actual=" + actual +
+                        '}';
             }
         }
     }

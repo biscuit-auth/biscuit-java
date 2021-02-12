@@ -5,6 +5,7 @@ import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.datalog.*;
 import com.clevercloud.biscuit.error.FailedCaveat;
 import com.clevercloud.biscuit.error.LogicError;
+import com.clevercloud.biscuit.token.format.SerializedBiscuit;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.vavr.control.Either;
 
@@ -28,6 +29,7 @@ public class Block {
     final List<Fact> facts;
     final List<Rule> rules;
     final List<Caveat> caveats;
+    final long version;
 
     /**
      * creates a new block
@@ -41,6 +43,7 @@ public class Block {
         this.facts = new ArrayList<>();
         this.rules = new ArrayList<>();
         this.caveats = new ArrayList<>();
+        this.version = SerializedBiscuit.MAX_SCHEMA_VERSION;
     }
 
     /**
@@ -57,6 +60,7 @@ public class Block {
         this.facts = facts;
         this.rules = rules;
         this.caveats = caveats;
+        this.version = SerializedBiscuit.MAX_SCHEMA_VERSION;
     }
 
     Either<LogicError, Void> check(long i, World w, SymbolTable symbols, List<Caveat> verifier_caveats,
@@ -190,6 +194,7 @@ public class Block {
             b.addCaveats(this.caveats.get(i).serialize());
         }
 
+        b.setVersion(SerializedBiscuit.MAX_SCHEMA_VERSION);
         return b.build();
     }
 
@@ -199,6 +204,11 @@ public class Block {
      * @return
      */
     static public Either<Error.FormatError, Block> deserialize(Schema.Block b) {
+        int version = b.getVersion();
+        if(version > SerializedBiscuit.MAX_SCHEMA_VERSION) {
+            return Left(new Error.FormatError.Version(SerializedBiscuit.MAX_SCHEMA_VERSION, version));
+        }
+
         SymbolTable symbols = new SymbolTable();
         for (String s : b.getSymbolsList()) {
             symbols.add(s);

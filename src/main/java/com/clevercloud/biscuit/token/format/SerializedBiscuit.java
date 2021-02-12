@@ -31,6 +31,8 @@ public class SerializedBiscuit {
     public List<RistrettoElement> keys;
     public TokenSignature signature;
 
+    public static int MAX_SCHEMA_VERSION = 0;
+
     /**
      * Deserializes a SerializedBiscuit from a byte array
      * @param slice
