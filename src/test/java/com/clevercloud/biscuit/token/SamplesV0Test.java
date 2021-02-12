@@ -2,13 +2,11 @@ package com.clevercloud.biscuit.token;
 
 import cafe.cryptography.curve25519.CompressedRistretto;
 import cafe.cryptography.curve25519.InvalidEncodingException;
-import cafe.cryptography.curve25519.RistrettoElement;
 import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.error.FailedCaveat;
 import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.builder.Caveat;
-import com.clevercloud.biscuit.token.builder.Fact;
 import com.clevercloud.biscuit.token.builder.Rule;
 import io.vavr.control.Either;
 import junit.framework.Assert;
@@ -20,21 +18,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Set;
 
 import static com.clevercloud.biscuit.crypto.TokenSignature.fromHex;
 import static com.clevercloud.biscuit.crypto.TokenSignature.hex;
 import static com.clevercloud.biscuit.token.builder.Utils.*;
 
-public class SamplesTest extends TestCase {
+public class SamplesV0Test extends TestCase {
 
-    public SamplesTest(String testName) {
+    public SamplesV0Test(String testName) {
         super(testName);
     }
 
     public static Test suite() {
-        return new TestSuite(SamplesTest.class);
+        return new TestSuite(SamplesV0Test.class);
     }
 
     static byte[] rootData = fromHex("529e780f28d9181c968b0eab9977ed8494a27a4544c3adc1910f41bb3dc36958");
@@ -43,7 +39,7 @@ public class SamplesTest extends TestCase {
         PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("test1_basic.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v0/test1_basic.bc");
 
         System.out.println("a");
         byte[] data = new byte[inputStream.available()];
@@ -75,7 +71,7 @@ public class SamplesTest extends TestCase {
         PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("test2_different_root_key.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v0/test2_different_root_key.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
@@ -90,7 +86,7 @@ public class SamplesTest extends TestCase {
         PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("test3_invalid_signature_format.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v0/test3_invalid_signature_format.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
@@ -104,7 +100,7 @@ public class SamplesTest extends TestCase {
         PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("test4_random_block.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v0/test4_random_block.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
@@ -118,7 +114,7 @@ public class SamplesTest extends TestCase {
         PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("test5_invalid_signature.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v0/test5_invalid_signature.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
@@ -132,7 +128,7 @@ public class SamplesTest extends TestCase {
         PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("test6_reordered_blocks.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v0/test6_reordered_blocks.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
@@ -153,7 +149,7 @@ public class SamplesTest extends TestCase {
         PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("test7_invalid_block_fact_authority.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v0/test7_invalid_block_fact_authority.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
@@ -172,7 +168,7 @@ public class SamplesTest extends TestCase {
         PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("test8_invalid_block_fact_ambient.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v0/test8_invalid_block_fact_ambient.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
@@ -191,7 +187,7 @@ public class SamplesTest extends TestCase {
         PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("test9_expired_token.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v0/test9_expired_token.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
@@ -217,7 +213,7 @@ public class SamplesTest extends TestCase {
         PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("test10_authority_rules.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v0/test10_authority_rules.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
@@ -238,7 +234,7 @@ public class SamplesTest extends TestCase {
         PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("test11_verifier_authority_caveats.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v0/test11_verifier_authority_caveats.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
@@ -272,7 +268,7 @@ public class SamplesTest extends TestCase {
         PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("test12_authority_caveats.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v0/test12_authority_caveats.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
@@ -303,7 +299,7 @@ public class SamplesTest extends TestCase {
         PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("test13_block_rules.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v0/test13_block_rules.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
@@ -334,7 +330,7 @@ public class SamplesTest extends TestCase {
         PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("test14_regex_constraint.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v0/test14_regex_constraint.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
@@ -366,7 +362,7 @@ public class SamplesTest extends TestCase {
         PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("test15_multi_queries_caveats.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v0/test15_multi_queries_caveats.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
@@ -399,7 +395,7 @@ public class SamplesTest extends TestCase {
         PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("test16_caveat_head_name.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v0/test16_caveat_head_name.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
