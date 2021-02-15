@@ -26,9 +26,9 @@ public abstract class SymbolConstraint implements Serializable {
    }
 
    static public Either<Error.FormatError, SymbolConstraint> deserialize_enumV1(Schema.SymbolConstraintV1 c) {
-      if (c.getKind() == Schema.SymbolConstraintV1.Kind.IN) {
+      if (c.hasInSet()) {
          return InSet.deserializeV1(c);
-      } else if (c.getKind() == Schema.SymbolConstraintV1.Kind.IN) {
+      } else if (c.hasNotInSet()) {
          return NotInSet.deserializeV1(c);
       } else {
          return Left(new Error.FormatError.DeserializationError("invalid Symbol constraint kind"));
@@ -52,11 +52,14 @@ public abstract class SymbolConstraint implements Serializable {
       }
 
       public Schema.SymbolConstraintV1 serialize() {
-         Schema.SymbolConstraintV1.Builder b = Schema.SymbolConstraintV1.newBuilder()
-                 .setKind(Schema.SymbolConstraintV1.Kind.IN);
+         Schema.SymbolConstraintV1.Builder b = Schema.SymbolConstraintV1.newBuilder();
+         Schema.SymbolSet.Builder s = Schema.SymbolSet.newBuilder();
+
          for (Long l: this.value) {
-            b.addInSet(l);
+            s.addSet(l);
          }
+         b.setInSet(s);
+
          return b.build();
       }
 
@@ -74,13 +77,14 @@ public abstract class SymbolConstraint implements Serializable {
 
       static public Either<Error.FormatError, SymbolConstraint> deserializeV1(Schema.SymbolConstraintV1 i) {
          Set<Long> values = new HashSet<>();
-         for (long l: i.getInSetList()) {
+         Schema.SymbolSet s = i.getInSet();
+         for (Long l: s.getSetList()) {
             values.add(l);
          }
          if(values.isEmpty()) {
             return Left(new Error.FormatError.DeserializationError("invalid Symbol constraint"));
          } else {
-            return Right(new InSet(values));
+            return Right(new SymbolConstraint.InSet(values));
          }
       }
    }
@@ -102,11 +106,14 @@ public abstract class SymbolConstraint implements Serializable {
       }
 
       public Schema.SymbolConstraintV1 serialize() {
-         Schema.SymbolConstraintV1.Builder b = Schema.SymbolConstraintV1.newBuilder()
-                 .setKind(Schema.SymbolConstraintV1.Kind.NOT_IN);
+         Schema.SymbolConstraintV1.Builder b = Schema.SymbolConstraintV1.newBuilder();
+         Schema.SymbolSet.Builder s = Schema.SymbolSet.newBuilder();
+
          for (Long l: this.value) {
-            b.addNotInSet(l);
+            s.addSet(l);
          }
+         b.setNotInSet(s);
+
          return b.build();
       }
 
@@ -124,13 +131,14 @@ public abstract class SymbolConstraint implements Serializable {
 
       static public Either<Error.FormatError, SymbolConstraint> deserializeV1(Schema.SymbolConstraintV1 i) {
          Set<Long> values = new HashSet<>();
-         for (long l: i.getNotInSetList()) {
+         Schema.SymbolSet s = i.getNotInSet();
+         for (Long l: s.getSetList()) {
             values.add(l);
          }
          if(values.isEmpty()) {
             return Left(new Error.FormatError.DeserializationError("invalid Symbol constraint"));
          } else {
-            return Right(new NotInSet(values));
+            return Right(new SymbolConstraint.NotInSet(values));
          }
       }
    }

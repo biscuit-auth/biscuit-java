@@ -26,13 +26,13 @@ public abstract class ConstraintKind implements Serializable {
    }
 
    static public Either<Error.FormatError, ConstraintKind> deserialize_enumV1(Schema.ConstraintV1 c) {
-      if(c.getKind() == Schema.ConstraintV1.Kind.INT) {
+      if(c.hasInt()) {
          return Int.deserializeV1(c);
-      } else if(c.getKind() == Schema.ConstraintV1.Kind.STRING) {
+      } else if(c.hasString()) {
          return Str.deserializeV1(c);
-      } else if(c.getKind() == Schema.ConstraintV1.Kind.DATE) {
+      } else if(c.hasDate()) {
          return Date.deserializeV1(c);
-      } else if(c.getKind() == Schema.ConstraintV1.Kind.SYMBOL) {
+      } else if(c.hasSymbol()) {
          return Symbol.deserializeV1(c);
       } else {
          return Left(new Error.FormatError.DeserializationError("invalid constraint kind"));
@@ -59,7 +59,6 @@ public abstract class ConstraintKind implements Serializable {
       public Schema.ConstraintV1 serialize(long id) {
          return Schema.ConstraintV1.newBuilder()
                  .setId((int) id)
-                 .setKind(Schema.ConstraintV1.Kind.INT)
                  .setInt(this.constraint.serialize())
                  .build();
       }
@@ -116,14 +115,11 @@ public abstract class ConstraintKind implements Serializable {
       public Schema.ConstraintV1 serialize(long id) {
          return Schema.ConstraintV1.newBuilder()
                  .setId((int) id)
-                 .setKind(Schema.ConstraintV1.Kind.STRING)
-                 .setStr(this.constraint.serialize())
+                 .setString(this.constraint.serialize())
                  .build();
       }
 
       static public Either<Error.FormatError, ConstraintKind> deserializeV0(Schema.ConstraintV0 c) {
-         long id = c.getId();
-
          if (!c.hasStr()) {
             return Left(new Error.FormatError.DeserializationError("invalid Str constraint"));
          } else {
@@ -138,12 +134,10 @@ public abstract class ConstraintKind implements Serializable {
       }
 
       static public Either<Error.FormatError, ConstraintKind> deserializeV1(Schema.ConstraintV1 c) {
-         long id = c.getId();
-
-         if (!c.hasStr()) {
+         if (!c.hasString()) {
             return Left(new Error.FormatError.DeserializationError("invalid Str constraint"));
          } else {
-            Either<Error.FormatError, StrConstraint> res = StrConstraint.deserialize_enumV1(c.getStr());
+            Either<Error.FormatError, StrConstraint> res = StrConstraint.deserialize_enumV1(c.getString());
             if (res.isLeft()) {
                Error.FormatError e = res.getLeft();
                return Left(e);
@@ -173,15 +167,12 @@ public abstract class ConstraintKind implements Serializable {
       public Schema.ConstraintV1 serialize(long id) {
          return Schema.ConstraintV1.newBuilder()
                  .setId((int) id)
-                 .setKind(Schema.ConstraintV1.Kind.BYTES)
                  .setBytes(this.constraint.serialize())
                  .build();
       }
 
       static public Either<Error.FormatError, ConstraintKind> deserializeV0(Schema.ConstraintV0 c) {
-         long id = c.getId();
-
-         if (!c.hasStr()) {
+         if (!c.hasBytes()) {
             return Left(new Error.FormatError.DeserializationError("invalid Bytes constraint"));
          } else {
             Either<Error.FormatError, BytesConstraint> res = BytesConstraint.deserialize_enumV0(c.getBytes());
@@ -195,9 +186,7 @@ public abstract class ConstraintKind implements Serializable {
       }
 
       static public Either<Error.FormatError, ConstraintKind> deserializeV1(Schema.ConstraintV1 c) {
-         long id = c.getId();
-
-         if (!c.hasStr()) {
+         if (!c.hasBytes()) {
             return Left(new Error.FormatError.DeserializationError("invalid Bytes constraint"));
          } else {
             Either<Error.FormatError, BytesConstraint> res = BytesConstraint.deserialize_enumV1(c.getBytes());
@@ -230,14 +219,11 @@ public abstract class ConstraintKind implements Serializable {
       public Schema.ConstraintV1 serialize(long id) {
          return Schema.ConstraintV1.newBuilder()
                  .setId((int) id)
-                 .setKind(Schema.ConstraintV1.Kind.DATE)
                  .setDate(this.constraint.serialize())
                  .build();
       }
 
       static public Either<Error.FormatError, ConstraintKind> deserializeV0(Schema.ConstraintV0 c) {
-         long id = c.getId();
-
          if (!c.hasDate()) {
             return Left(new Error.FormatError.DeserializationError("invalid Date constraint"));
          } else {
@@ -252,8 +238,6 @@ public abstract class ConstraintKind implements Serializable {
       }
 
       static public Either<Error.FormatError, ConstraintKind> deserializeV1(Schema.ConstraintV1 c) {
-         long id = c.getId();
-
          if (!c.hasDate()) {
             return Left(new Error.FormatError.DeserializationError("invalid Date constraint"));
          } else {
@@ -287,14 +271,11 @@ public abstract class ConstraintKind implements Serializable {
       public Schema.ConstraintV1 serialize(long id) {
          return Schema.ConstraintV1.newBuilder()
                  .setId((int) id)
-                 .setKind(Schema.ConstraintV1.Kind.SYMBOL)
                  .setSymbol(this.constraint.serialize())
                  .build();
       }
 
       static public Either<Error.FormatError, ConstraintKind> deserializeV0(Schema.ConstraintV0 c) {
-         long id = c.getId();
-
          if (!c.hasSymbol()) {
             return Left(new Error.FormatError.DeserializationError("invalid Symbol constraint"));
          } else {
@@ -309,8 +290,6 @@ public abstract class ConstraintKind implements Serializable {
       }
 
       static public Either<Error.FormatError, ConstraintKind> deserializeV1(Schema.ConstraintV1 c) {
-         long id = c.getId();
-
          if (!c.hasSymbol()) {
             return Left(new Error.FormatError.DeserializationError("invalid Symbol constraint"));
          } else {

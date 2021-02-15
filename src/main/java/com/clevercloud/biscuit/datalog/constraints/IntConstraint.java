@@ -36,19 +36,19 @@ public abstract class IntConstraint implements Serializable {
    }
 
    static public Either<Error.FormatError, IntConstraint> deserialize_enumV1(Schema.IntConstraintV1 c) {
-      if(c.getKind() == Schema.IntConstraintV1.Kind.LESS_THAN) {
+      if(c.hasLessThan()) {
          return LessThan.deserializeV1(c);
-      } else if(c.getKind() == Schema.IntConstraintV1.Kind.GREATER_THAN) {
+      } else if(c.hasGreaterThan()) {
          return GreaterThan.deserializeV1(c);
-      } else if(c.getKind() == Schema.IntConstraintV1.Kind.LESS_OR_EQUAL) {
+      } else if(c.hasLessOrEqual()) {
          return LessOrEqual.deserializeV1(c);
-      } else if(c.getKind() == Schema.IntConstraintV1.Kind.GREATER_OR_EQUAL) {
+      } else if(c.hasGreaterOrEqual()) {
          return GreaterOrEqual.deserializeV1(c);
-      } else if(c.getKind() == Schema.IntConstraintV1.Kind.EQUAL) {
+      } else if(c.hasEqual()) {
          return Equal.deserializeV1(c);
-      } else if(c.getKind() == Schema.IntConstraintV1.Kind.IN) {
+      } else if(c.hasInSet()) {
          return InSet.deserializeV1(c);
-      } else if(c.getKind() == Schema.IntConstraintV1.Kind.NOT_IN) {
+      } else if(c.hasNotInSet()) {
          return NotInSet.deserializeV1(c);
       } else {
          return Left(new Error.FormatError.DeserializationError("invalid int constraint kind"));
@@ -73,7 +73,6 @@ public abstract class IntConstraint implements Serializable {
 
       public Schema.IntConstraintV1 serialize() {
          return Schema.IntConstraintV1.newBuilder()
-                 .setKind(Schema.IntConstraintV1.Kind.EQUAL)
                  .setEqual(this.value).build();
       }
 
@@ -112,7 +111,6 @@ public abstract class IntConstraint implements Serializable {
 
       public Schema.IntConstraintV1 serialize() {
          return Schema.IntConstraintV1.newBuilder()
-                 .setKind(Schema.IntConstraintV1.Kind.GREATER_THAN)
                  .setGreaterThan(this.value).build();
       }
 
@@ -151,7 +149,6 @@ public abstract class IntConstraint implements Serializable {
 
       public Schema.IntConstraintV1 serialize() {
          return Schema.IntConstraintV1.newBuilder()
-                 .setKind(Schema.IntConstraintV1.Kind.GREATER_OR_EQUAL)
                  .setGreaterOrEqual(this.value).build();
       }
 
@@ -190,7 +187,6 @@ public abstract class IntConstraint implements Serializable {
 
       public Schema.IntConstraintV1 serialize() {
          return Schema.IntConstraintV1.newBuilder()
-                 .setKind(Schema.IntConstraintV1.Kind.LESS_THAN)
                  .setLessOrEqual(this.value).build();
       }
 
@@ -229,7 +225,6 @@ public abstract class IntConstraint implements Serializable {
 
       public Schema.IntConstraintV1 serialize() {
          return Schema.IntConstraintV1.newBuilder()
-                 .setKind(Schema.IntConstraintV1.Kind.LESS_OR_EQUAL)
                  .setLessOrEqual(this.value).build();
       }
 
@@ -267,11 +262,14 @@ public abstract class IntConstraint implements Serializable {
       }
 
       public Schema.IntConstraintV1 serialize() {
-         Schema.IntConstraintV1.Builder b = Schema.IntConstraintV1.newBuilder()
-                 .setKind(Schema.IntConstraintV1.Kind.IN);
+         Schema.IntConstraintV1.Builder b = Schema.IntConstraintV1.newBuilder();
+         Schema.IntSet.Builder s = Schema.IntSet.newBuilder();
+
          for (Long l: this.value) {
-            b.addInSet(l);
+            s.addSet(l);
          }
+         b.setInSet(s);
+
          return b.build();
       }
 
@@ -289,7 +287,8 @@ public abstract class IntConstraint implements Serializable {
 
       static public Either<Error.FormatError, IntConstraint> deserializeV1(Schema.IntConstraintV1 i) {
          Set<Long> values = new HashSet<>();
-         for (long l: i.getInSetList()) {
+         Schema.IntSet s = i.getInSet();
+         for (long l: s.getSetList()) {
             values.add(l);
          }
          if(values.isEmpty()) {
@@ -317,11 +316,14 @@ public abstract class IntConstraint implements Serializable {
       }
 
       public Schema.IntConstraintV1 serialize() {
-         Schema.IntConstraintV1.Builder b = Schema.IntConstraintV1.newBuilder()
-                 .setKind(Schema.IntConstraintV1.Kind.NOT_IN);
+         Schema.IntConstraintV1.Builder b = Schema.IntConstraintV1.newBuilder();
+         Schema.IntSet.Builder s = Schema.IntSet.newBuilder();
+
          for (Long l: this.value) {
-            b.addNotInSet(l);
+            s.addSet(l);
          }
+         b.setNotInSet(s);
+
          return b.build();
       }
 
@@ -339,7 +341,8 @@ public abstract class IntConstraint implements Serializable {
 
       static public Either<Error.FormatError, IntConstraint> deserializeV1(Schema.IntConstraintV1 i) {
          Set<Long> values = new HashSet<>();
-         for (long l: i.getNotInSetList()) {
+         Schema.IntSet s = i.getNotInSet();
+         for (long l: s.getSetList()) {
             values.add(l);
          }
          if(values.isEmpty()) {

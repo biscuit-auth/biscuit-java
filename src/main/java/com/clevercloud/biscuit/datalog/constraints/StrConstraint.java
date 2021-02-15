@@ -36,17 +36,17 @@ public abstract class StrConstraint implements Serializable {
    }
 
    static public Either<Error.FormatError, StrConstraint> deserialize_enumV1(Schema.StringConstraintV1 c) {
-      if(c.getKind() == Schema.StringConstraintV1.Kind.PREFIX) {
+      if(c.hasPrefix()) {
          return Prefix.deserializeV1(c);
-      } else if(c.getKind() == Schema.StringConstraintV1.Kind.SUFFIX) {
+      } else if(c.hasSuffix()) {
          return Suffix.deserializeV1(c);
-      } else if(c.getKind() == Schema.StringConstraintV1.Kind.EQUAL) {
+      } else if(c.hasEqual()) {
          return Equal.deserializeV1(c);
-      } else if(c.getKind() == Schema.StringConstraintV1.Kind.REGEX) {
+      } else if(c.hasRegex()) {
          return Regex.deserializeV1(c);
-      } else if(c.getKind() == Schema.StringConstraintV1.Kind.IN) {
+      } else if(c.hasInSet()) {
          return InSet.deserializeV1(c);
-      } else if(c.getKind() == Schema.StringConstraintV1.Kind.NOT_IN) {
+      } else if(c.hasNotInSet()) {
          return NotInSet.deserializeV1(c);
       } else {
          return Left(new Error.FormatError.DeserializationError("invalid String constraint kind"));
@@ -71,7 +71,6 @@ public abstract class StrConstraint implements Serializable {
 
       public Schema.StringConstraintV1 serialize() {
          return Schema.StringConstraintV1.newBuilder()
-                 .setKind(Schema.StringConstraintV1.Kind.PREFIX)
                  .setPrefix(this.value).build();
       }
 
@@ -110,7 +109,6 @@ public abstract class StrConstraint implements Serializable {
 
       public Schema.StringConstraintV1 serialize() {
          return Schema.StringConstraintV1.newBuilder()
-                 .setKind(Schema.StringConstraintV1.Kind.SUFFIX)
                  .setSuffix(this.value).build();
       }
 
@@ -149,7 +147,6 @@ public abstract class StrConstraint implements Serializable {
 
       public Schema.StringConstraintV1 serialize() {
          return Schema.StringConstraintV1.newBuilder()
-                 .setKind(Schema.StringConstraintV1.Kind.EQUAL)
                  .setEqual(this.value).build();
       }
 
@@ -190,7 +187,6 @@ public abstract class StrConstraint implements Serializable {
 
       public Schema.StringConstraintV1 serialize() {
          return Schema.StringConstraintV1.newBuilder()
-                 .setKind(Schema.StringConstraintV1.Kind.REGEX)
                  .setRegex(this.pattern).build();
       }
 
@@ -228,11 +224,14 @@ public abstract class StrConstraint implements Serializable {
       }
 
       public Schema.StringConstraintV1 serialize() {
-         Schema.StringConstraintV1.Builder b = Schema.StringConstraintV1.newBuilder()
-                 .setKind(Schema.StringConstraintV1.Kind.IN);
-         for (String s: this.value) {
-            b.addInSet(s);
+         Schema.StringConstraintV1.Builder b = Schema.StringConstraintV1.newBuilder();
+         Schema.StringSet.Builder s = Schema.StringSet.newBuilder();
+
+         for (String l: this.value) {
+            s.addSet(l);
          }
+         b.setInSet(s);
+
          return b.build();
       }
 
@@ -250,13 +249,14 @@ public abstract class StrConstraint implements Serializable {
 
       static public Either<Error.FormatError, StrConstraint> deserializeV1(Schema.StringConstraintV1 i) {
          Set<String> values = new HashSet<>();
-         for (String l: i.getInSetList()) {
+         Schema.StringSet s = i.getInSet();
+         for (String l: s.getSetList()) {
             values.add(l);
          }
          if(values.isEmpty()) {
             return Left(new Error.FormatError.DeserializationError("invalid String constraint"));
          } else {
-            return Right(new InSet(values));
+            return Right(new StrConstraint.InSet(values));
          }
       }
    }
@@ -278,11 +278,14 @@ public abstract class StrConstraint implements Serializable {
       }
 
       public Schema.StringConstraintV1 serialize() {
-         Schema.StringConstraintV1.Builder b = Schema.StringConstraintV1.newBuilder()
-                 .setKind(Schema.StringConstraintV1.Kind.NOT_IN);
-         for (String s: this.value) {
-            b.addNotInSet(s);
+         Schema.StringConstraintV1.Builder b = Schema.StringConstraintV1.newBuilder();
+         Schema.StringSet.Builder s = Schema.StringSet.newBuilder();
+
+         for (String l: this.value) {
+            s.addSet(l);
          }
+         b.setNotInSet(s);
+
          return b.build();
       }
 
@@ -300,13 +303,14 @@ public abstract class StrConstraint implements Serializable {
 
       static public Either<Error.FormatError, StrConstraint> deserializeV1(Schema.StringConstraintV1 i) {
          Set<String> values = new HashSet<>();
-         for (String l: i.getNotInSetList()) {
+         Schema.StringSet s = i.getNotInSet();
+         for (String l: s.getSetList()) {
             values.add(l);
          }
          if(values.isEmpty()) {
             return Left(new Error.FormatError.DeserializationError("invalid String constraint"));
          } else {
-            return Right(new NotInSet(values));
+            return Right(new StrConstraint.NotInSet(values));
          }
       }
    }

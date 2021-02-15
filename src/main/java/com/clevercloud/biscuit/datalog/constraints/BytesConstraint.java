@@ -32,11 +32,11 @@ public abstract class BytesConstraint implements Serializable {
     }
 
     static public Either<Error.FormatError, com.clevercloud.biscuit.datalog.constraints.BytesConstraint> deserialize_enumV1(Schema.BytesConstraintV1 c) {
-        if(c.getKind() == Schema.BytesConstraintV1.Kind.EQUAL) {
+        if(c.hasEqual()) {
             return com.clevercloud.biscuit.datalog.constraints.BytesConstraint.Equal.deserializeV1(c);
-        } else if(c.getKind() == Schema.BytesConstraintV1.Kind.IN) {
+        } else if(c.hasInSet()) {
             return com.clevercloud.biscuit.datalog.constraints.BytesConstraint.InSet.deserializeV1(c);
-        } else if(c.getKind() == Schema.BytesConstraintV1.Kind.NOT_IN) {
+        } else if(c.hasNotInSet()) {
             return com.clevercloud.biscuit.datalog.constraints.BytesConstraint.NotInSet.deserializeV1(c);
         } else {
             return Left(new Error.FormatError.DeserializationError("invalid Bytes constraint kind"));
@@ -61,7 +61,6 @@ public abstract class BytesConstraint implements Serializable {
 
         public Schema.BytesConstraintV1 serialize() {
             return Schema.BytesConstraintV1.newBuilder()
-                    .setKind(Schema.BytesConstraintV1.Kind.EQUAL)
                     .setEqual(ByteString.EMPTY.copyFrom(this.value)).build();
         }
 
@@ -99,11 +98,14 @@ public abstract class BytesConstraint implements Serializable {
         }
 
         public Schema.BytesConstraintV1 serialize() {
-            Schema.BytesConstraintV1.Builder b = Schema.BytesConstraintV1.newBuilder()
-                    .setKind(Schema.BytesConstraintV1.Kind.IN);
-            for (byte[] s: this.value) {
-                b.addInSet(ByteString.EMPTY.copyFrom(s));
+            Schema.BytesConstraintV1.Builder b = Schema.BytesConstraintV1.newBuilder();
+            Schema.BytesSet.Builder s = Schema.BytesSet.newBuilder();
+
+            for (byte[] l: this.value) {
+                s.addSet(ByteString.copyFrom(l));
             }
+            b.setInSet(s);
+
             return b.build();
         }
 
@@ -121,13 +123,14 @@ public abstract class BytesConstraint implements Serializable {
 
         static public Either<Error.FormatError, com.clevercloud.biscuit.datalog.constraints.BytesConstraint> deserializeV1(Schema.BytesConstraintV1 i) {
             Set<byte[]> values = new HashSet<>();
-            for (ByteString l: i.getInSetList()) {
+            Schema.BytesSet s = i.getInSet();
+            for (ByteString l: s.getSetList()) {
                 values.add(l.toByteArray());
             }
             if(values.isEmpty()) {
                 return Left(new Error.FormatError.DeserializationError("invalid Bytes constraint"));
             } else {
-                return Right(new InSet(values));
+                return Right(new BytesConstraint.InSet(values));
             }
         }
     }
@@ -149,11 +152,14 @@ public abstract class BytesConstraint implements Serializable {
         }
 
         public Schema.BytesConstraintV1 serialize() {
-            Schema.BytesConstraintV1.Builder b = Schema.BytesConstraintV1.newBuilder()
-                    .setKind(Schema.BytesConstraintV1.Kind.NOT_IN);
-            for (byte[] s: this.value) {
-                b.addNotInSet(ByteString.EMPTY.copyFrom(s));
+            Schema.BytesConstraintV1.Builder b = Schema.BytesConstraintV1.newBuilder();
+            Schema.BytesSet.Builder s = Schema.BytesSet.newBuilder();
+
+            for (byte[] l: this.value) {
+                s.addSet(ByteString.copyFrom(l));
             }
+            b.setNotInSet(s);
+
             return b.build();
         }
 
@@ -171,13 +177,14 @@ public abstract class BytesConstraint implements Serializable {
 
         static public Either<Error.FormatError, com.clevercloud.biscuit.datalog.constraints.BytesConstraint> deserializeV1(Schema.BytesConstraintV1 i) {
             Set<byte[]> values = new HashSet<>();
-            for (ByteString l: i.getNotInSetList()) {
+            Schema.BytesSet s = i.getNotInSet();
+            for (ByteString l: s.getSetList()) {
                 values.add(l.toByteArray());
             }
             if(values.isEmpty()) {
                 return Left(new Error.FormatError.DeserializationError("invalid Bytes constraint"));
             } else {
-                return Right(new NotInSet(values));
+                return Right(new BytesConstraint.NotInSet(values));
             }
         }
     }

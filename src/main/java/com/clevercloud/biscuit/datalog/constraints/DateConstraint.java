@@ -24,9 +24,9 @@ public abstract class DateConstraint implements Serializable {
    }
 
    static public Either<Error.FormatError, DateConstraint> deserialize_enumV1(Schema.DateConstraintV1 c) {
-      if (c.getKind() == Schema.DateConstraintV1.Kind.BEFORE) {
+      if (c.hasBefore()) {
          return Before.deserializeV1(c);
-      } else if (c.getKind() == Schema.DateConstraintV1.Kind.AFTER) {
+      } else if (c.hasAfter()) {
          return After.deserializeV1(c);
       } else {
          return Left(new Error.FormatError.DeserializationError("invalid date constraint kind"));
@@ -51,7 +51,6 @@ public abstract class DateConstraint implements Serializable {
 
       public Schema.DateConstraintV1 serialize() {
          return Schema.DateConstraintV1.newBuilder()
-                 .setKind(Schema.DateConstraintV1.Kind.BEFORE)
                  .setBefore(this.value).build();
       }
 
@@ -90,7 +89,6 @@ public abstract class DateConstraint implements Serializable {
 
       public Schema.DateConstraintV1 serialize() {
          return Schema.DateConstraintV1.newBuilder()
-                 .setKind(Schema.DateConstraintV1.Kind.AFTER)
                  .setAfter(this.value).build();
       }
 
