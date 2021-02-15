@@ -9,6 +9,7 @@ import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Objects;
 
 
@@ -490,6 +491,102 @@ public abstract class ID implements Serializable {
 
       public Term toTerm(SymbolTable symbols) {
          return new Term.Bool(this.value);
+      }
+   }
+
+   public final static class Set extends ID implements Serializable {
+      private final HashSet<ID> value;
+
+      public HashSet<ID> value() {
+         return this.value;
+      }
+
+      public boolean match(final ID other) {
+         if (other instanceof Variable) {
+            return true;
+         }
+         if (other instanceof Set) {
+            return this.value == ((Set) other).value;
+         }
+         return false;
+      }
+
+      public Set(final HashSet<ID> value) {
+         this.value = value;
+      }
+
+      @Override
+      public boolean equals(Object o) {
+         if (this == o) return true;
+         if (o == null || getClass() != o.getClass()) return false;
+
+         Set set = (Set) o;
+
+         return value != null ? value.equals(set.value) : set.value == null;
+      }
+
+      @Override
+      public int hashCode() {
+         return value != null ? value.hashCode() : 0;
+      }
+
+      @Override
+      public String toString() {
+         return "[" +
+                 value +
+                 ']';
+      }
+
+      public Schema.IDV1 serialize() {
+         Schema.IDSet.Builder s = Schema.IDSet.newBuilder();
+
+         for (ID l: this.value) {
+            s.addSet(l.serialize());
+         }
+
+         return Schema.IDV1.newBuilder()
+                 .setSet(s).build();
+      }
+
+      static public Either<Error.FormatError, ID> deserializeV1(Schema.IDV1 id) {
+         if(!id.hasSet()) {
+            return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+         } else {
+            java.util.HashSet<ID> values = new HashSet<>();
+            Schema.IDSet s = id.getSet();
+
+            for (Schema.IDV1 l: s.getSetList()) {
+               Either<Error.FormatError, ID> res = ID.deserialize_enumV1(l);
+               if(res.isLeft()) {
+                  Error.FormatError e = res.getLeft();
+                  return Left(e);
+               } else {
+                  ID value = res.get();
+
+                  if(value instanceof Variable) {
+                     return Left(new Error.FormatError.DeserializationError("sets cannot contain variables"));
+                  }
+
+                  values.add(value);
+               }
+            }
+
+            if(values.isEmpty()) {
+               return Left(new Error.FormatError.DeserializationError("invalid Set value"));
+            } else {
+               return Right(new Set(values));
+            }
+         }
+      }
+
+      public Term toTerm(SymbolTable symbols) {
+         HashSet<Term> s = new HashSet<>();
+
+         for(ID i: this.value) {
+            s.add(i.toTerm(symbols));
+         }
+
+         return new Term.Set(s);
       }
    }
 }

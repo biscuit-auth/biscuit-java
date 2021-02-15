@@ -4,6 +4,7 @@ import com.clevercloud.biscuit.datalog.ID;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Objects;
 
 public abstract class Term {
@@ -237,6 +238,47 @@ public abstract class Term {
         @Override
         public int hashCode() {
             return (value ? 1 : 0);
+        }
+    }
+
+    public static class Set extends Term {
+        HashSet<Term> value;
+
+        public Set(HashSet<Term> value) {
+            this.value = value;
+        }
+
+        @Override
+        public ID convert(SymbolTable symbols) {
+            HashSet<ID> s = new HashSet<>();
+
+            for(Term t: this.value) {
+                s.add(t.convert(symbols));
+            }
+
+            return new ID.Set(s);
+        }
+
+        @Override
+        public String toString() {
+            return "[" +
+                     value +
+                    ']';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Set set = (Set) o;
+
+            return value != null ? value.equals(set.value) : set.value == null;
+        }
+
+        @Override
+        public int hashCode() {
+            return value != null ? value.hashCode() : 0;
         }
     }
 }
