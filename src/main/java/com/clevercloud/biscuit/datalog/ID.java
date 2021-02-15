@@ -46,6 +46,8 @@ public abstract class ID implements Serializable {
          return Symbol.deserializeV1(id);
       } else if(id.hasVariable()) {
          return Variable.deserializeV1(id);
+      } else if(id.hasBool()) {
+         return Bool.deserializeV1(id);
       } else {
          return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
       }
@@ -431,6 +433,63 @@ public abstract class ID implements Serializable {
 
       public Term toTerm(SymbolTable symbols) {
          return new Term.Variable(symbols.print_symbol((int) this.value));
+      }
+   }
+
+   public final static class Bool extends ID implements Serializable {
+      private final boolean value;
+
+      public boolean value() {
+         return this.value;
+      }
+
+      public boolean match(final ID other) {
+         if (other instanceof Variable) {
+            return true;
+         }
+         if (other instanceof Bool) {
+            return this.value == ((Bool) other).value;
+         }
+         return false;
+      }
+
+      public Bool(final boolean value) {
+         this.value = value;
+      }
+
+      @Override
+      public boolean equals(Object o) {
+         if (this == o) return true;
+         if (o == null || getClass() != o.getClass()) return false;
+         Bool bool = (Bool) o;
+         return value == bool.value;
+      }
+
+      @Override
+      public int hashCode() {
+         return Objects.hash(value);
+      }
+
+      @Override
+      public String toString() {
+         return "" + this.value;
+      }
+
+      public Schema.IDV1 serialize() {
+         return Schema.IDV1.newBuilder()
+                 .setBool(this.value).build();
+      }
+
+      static public Either<Error.FormatError, ID> deserializeV1(Schema.IDV1 id) {
+         if(!id.hasBool()) {
+            return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+         } else {
+            return Right(new Bool(id.getBool()));
+         }
+      }
+
+      public Term toTerm(SymbolTable symbols) {
+         return new Term.Bool(this.value);
       }
    }
 }

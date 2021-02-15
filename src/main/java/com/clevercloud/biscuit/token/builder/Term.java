@@ -206,4 +206,37 @@ public abstract class Term {
             return (int) (value ^ (value >>> 32));
         }
     }
+
+    public static class Bool extends Term {
+        boolean value;
+
+        public Bool(boolean value) {
+            this.value = value;
+        }
+
+        @Override
+        public ID convert(SymbolTable symbols) {
+            return new ID.Bool(this.value);
+        }
+
+        @Override
+        public String toString() {
+            return ""+value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Bool bool = (Bool) o;
+
+            return value == bool.value;
+        }
+
+        @Override
+        public int hashCode() {
+            return (value ? 1 : 0);
+        }
+    }
 }
