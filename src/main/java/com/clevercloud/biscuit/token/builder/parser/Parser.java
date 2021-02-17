@@ -1,7 +1,6 @@
 package com.clevercloud.biscuit.token.builder.parser;
 
 import com.clevercloud.biscuit.token.builder.*;
-import com.clevercloud.biscuit.token.builder.constraints.ConstraintBuilder;
 import io.vavr.Tuple2;
 import io.vavr.control.Either;
 
@@ -90,7 +89,7 @@ public class Parser {
         return Either.right(new Tuple2<>(s, Utils.rule(head.getName(), head.getIds(), predicates)));
     }
 
-    public static Either<Error, Tuple2<String, Caveat>> caveat(String s) {
+    public static Either<Error, Tuple2<String, Check>> check(String s) {
         return Either.left(new Error(s, "unimplemented"));
     }
 

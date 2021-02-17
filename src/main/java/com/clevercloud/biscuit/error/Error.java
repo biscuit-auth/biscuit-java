@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class Error {
-    public Option<List<FailedCaveat>> failed_caveats() {
+    public Option<List<FailedCheck>> failed_checks() {
         return Option.none();
     }
 
@@ -298,8 +298,8 @@ public class Error {
         }
 
         @Override
-        public Option<List<FailedCaveat>> failed_caveats() {
-            return this.error.failed_caveats();
+        public Option<List<FailedCheck>> failed_checks() {
+            return this.error.failed_checks();
         }
 
     }

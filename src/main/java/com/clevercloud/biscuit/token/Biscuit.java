@@ -3,7 +3,7 @@ package com.clevercloud.biscuit.token;
 import com.clevercloud.biscuit.crypto.KeyPair;
 import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.datalog.*;
-import com.clevercloud.biscuit.error.FailedCaveat;
+import com.clevercloud.biscuit.error.FailedCheck;
 import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.format.SealedBiscuit;
 import com.clevercloud.biscuit.token.format.SerializedBiscuit;
@@ -308,7 +308,7 @@ public class Biscuit {
     }
 
     Either<Error, HashMap<String, Set<Fact>>> check(SymbolTable symbols, List<Fact> ambient_facts, List<Rule> ambient_rules,
-                              List<Caveat> verifier_caveats, HashMap<String, Rule> queries){
+                                                    List<Check> verifier_checks, HashMap<String, Rule> queries){
         Either<Error, World> wres = this.generate_world();
 
         if (wres.isLeft()) {
@@ -330,10 +330,10 @@ public class Biscuit {
         world.run();
         //System.out.println("world after running rules:\n"+symbols.print_world(world));
 
-        ArrayList<FailedCaveat> errors = new ArrayList<>();
-        for (int j = 0; j < this.authority.caveats.size(); j++) {
+        ArrayList<FailedCheck> errors = new ArrayList<>();
+        for (int j = 0; j < this.authority.checks.size(); j++) {
             boolean successful = false;
-            Caveat c = this.authority.caveats.get(j);
+            Check c = this.authority.checks.get(j);
 
             for(int k = 0; k < c.queries().size(); k++) {
                 Set<Fact> res = world.query_rule(c.queries().get(k));
@@ -344,13 +344,13 @@ public class Biscuit {
             }
 
             if (!successful) {
-                errors.add(new FailedCaveat.FailedBlock(0, j, symbols.print_caveat(this.authority.caveats.get(j))));
+                errors.add(new FailedCheck.FailedBlock(0, j, symbols.print_check(this.authority.checks.get(j))));
             }
         }
 
-        for (int j = 0; j < verifier_caveats.size(); j++) {
+        for (int j = 0; j < verifier_checks.size(); j++) {
             boolean successful = false;
-            Caveat c = verifier_caveats.get(j);
+            Check c = verifier_checks.get(j);
 
             for(int k = 0; k < c.queries().size(); k++) {
                 Set<Fact> res = world.query_rule(c.queries().get(k));
@@ -361,16 +361,16 @@ public class Biscuit {
             }
 
             if (!successful) {
-                errors.add(new FailedCaveat.FailedVerifier(j, symbols.print_caveat(verifier_caveats.get(j))));
+                errors.add(new FailedCheck.FailedVerifier(j, symbols.print_check(verifier_checks.get(j))));
             }
         }
 
         for(int i = 0; i < this.blocks.size(); i++) {
             Block b = this.blocks.get(i);
 
-            for (int j = 0; j < b.caveats.size(); j++) {
+            for (int j = 0; j < b.checks.size(); j++) {
                 boolean successful = false;
-                Caveat c = b.caveats.get(j);
+                Check c = b.checks.get(j);
 
                 for(int k = 0; k < c.queries().size(); k++) {
                     Set<Fact> res = world.query_rule(c.queries().get(k));
@@ -381,7 +381,7 @@ public class Biscuit {
                 }
 
                 if (!successful) {
-                    errors.add(new FailedCaveat.FailedBlock(b.index, j, symbols.print_caveat(b.caveats.get(j))));
+                    errors.add(new FailedCheck.FailedBlock(b.index, j, symbols.print_check(b.checks.get(j))));
                 }
             }
         }
@@ -395,7 +395,7 @@ public class Biscuit {
         if(errors.isEmpty()) {
             return Right(query_results);
         } else {
-            return Left(new Error.FailedLogic(new LogicError.FailedCaveats(errors)));
+            return Left(new Error.FailedLogic(new LogicError.FailedChecks(errors)));
         }
     }
 

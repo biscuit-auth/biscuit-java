@@ -1,11 +1,9 @@
 package com.clevercloud.biscuit.datalog;
 
 import com.clevercloud.biscuit.error.Error;
-import com.clevercloud.biscuit.error.LogicError;
 import io.vavr.control.Either;
 
 import java.io.Serializable;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -19,7 +17,7 @@ import static io.vavr.API.Right;
 public final class World implements Serializable {
    private final Set<Fact> facts;
    private final List<Rule> rules;
-   private final List<Caveat> caveats;
+   private final List<Check> checks;
 
    public void add_fact(final Fact fact) {
       this.facts.add(fact);
@@ -29,7 +27,7 @@ public final class World implements Serializable {
       this.rules.add(rule);
    }
 
-   public void add_caveat(Caveat caveat) { this.caveats.add(caveat); }
+   public void add_check(Check check) { this.checks.add(check); }
 
    public void clearRules() {
       this.rules.clear();
@@ -76,7 +74,7 @@ public final class World implements Serializable {
 
    public List<Rule> rules() { return this.rules; }
 
-   public List<Caveat> caveats() { return this.caveats; }
+   public List<Check> checks() { return this.checks; }
 
    public final Set<Fact> query(final Predicate pred) {
       return this.facts.stream().filter((f) -> {
@@ -109,19 +107,19 @@ public final class World implements Serializable {
    public World() {
       this.facts = new HashSet<>();
       this.rules = new ArrayList<>();
-      this.caveats = new ArrayList<>();
+      this.checks = new ArrayList<>();
    }
 
    public World(Set<Fact> facts, List<Rule> rules) {
       this.facts = facts;
       this.rules = rules;
-      this.caveats = new ArrayList<>();
+      this.checks = new ArrayList<>();
    }
 
-   public World(Set<Fact> facts, List<Rule> rules, List<Caveat> caveats) {
+   public World(Set<Fact> facts, List<Rule> rules, List<Check> checks) {
       this.facts = facts;
       this.rules = rules;
-      this.caveats = caveats;
+      this.checks = checks;
    }
 
    public World(World w) {
@@ -133,9 +131,9 @@ public final class World implements Serializable {
       for(Rule rule: w.rules) {
          this.rules.add(rule);
       }
-      this.caveats = new ArrayList<>();
-      for(Caveat caveat: w.caveats) {
-         this.caveats.add(caveat);
+      this.checks = new ArrayList<>();
+      for(Check check : w.checks) {
+         this.checks.add(check);
       }
    }
 
@@ -152,10 +150,10 @@ public final class World implements Serializable {
          s.append("\n\t\t\t");
          s.append(symbol_table.print_rule(r));
       }
-      s.append("\n\t\t]\n\t\tcaveats: [");
-      for(Caveat c: this.caveats) {
+      s.append("\n\t\t]\n\t\tchecks: [");
+      for(Check c: this.checks) {
          s.append("\n\t\t\t");
-         s.append(symbol_table.print_caveat(c));
+         s.append(symbol_table.print_check(c));
       }
       s.append("\n\t\t]\n\t}");
 

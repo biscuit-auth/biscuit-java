@@ -4,7 +4,7 @@ import com.clevercloud.biscuit.crypto.KeyPair;
 import com.clevercloud.biscuit.datalog.Fact;
 import com.clevercloud.biscuit.datalog.Rule;
 import com.clevercloud.biscuit.datalog.SymbolTable;
-import com.clevercloud.biscuit.datalog.Caveat;
+import com.clevercloud.biscuit.datalog.Check;
 import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.token.Block;
 import io.vavr.control.Either;
@@ -24,7 +24,7 @@ public class Biscuit {
     String context;
     List<Fact> facts;
     List<Rule> rules;
-    List<Caveat> caveats;
+    List<Check> checks;
 
     public Biscuit(final SecureRandom rng, final KeyPair root, SymbolTable base_symbols) {
         this.rng = rng;
@@ -34,7 +34,7 @@ public class Biscuit {
         this.context = "";
         this.facts = new ArrayList<>();
         this.rules = new ArrayList<>();
-        this.caveats = new ArrayList<>();
+        this.checks = new ArrayList<>();
     }
 
     public void add_authority_fact(com.clevercloud.biscuit.token.builder.Fact f) {
@@ -60,8 +60,8 @@ public class Biscuit {
         this.rules.add(rule.convert(this.symbols));
     }
 
-    public void add_authority_caveat(com.clevercloud.biscuit.token.builder.Caveat c) {
-        this.caveats.add(c.convert(this.symbols));
+    public void add_authority_check(com.clevercloud.biscuit.token.builder.Check c) {
+        this.checks.add(c.convert(this.symbols));
     }
 
     public  void set_context(String context) {
@@ -80,7 +80,7 @@ public class Biscuit {
             symbols.add(this.symbols.symbols.get(i));
         }
 
-        Block authority_block = new com.clevercloud.biscuit.token.Block(0, symbols, context, this.facts, this.rules, this.caveats);
+        Block authority_block = new com.clevercloud.biscuit.token.Block(0, symbols, context, this.facts, this.rules, this.checks);
         return com.clevercloud.biscuit.token.Biscuit.make(this.rng, this.root, base_symbols, authority_block);
     }
 

@@ -3,7 +3,7 @@ package com.clevercloud.biscuit.token;
 import biscuit.format.schema.Schema;
 import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.datalog.*;
-import com.clevercloud.biscuit.error.FailedCaveat;
+import com.clevercloud.biscuit.error.FailedCheck;
 import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.format.SerializedBiscuit;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -20,7 +20,7 @@ import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
 /**
- * Represents a token's block with its caveats
+ * Represents a token's block with its checks
  */
 public class Block {
     final long index;
@@ -28,7 +28,7 @@ public class Block {
     final String context;
     final List<Fact> facts;
     final List<Rule> rules;
-    final List<Caveat> caveats;
+    final List<Check> checks;
     final long version;
 
     /**
@@ -42,7 +42,7 @@ public class Block {
         this.context = "";
         this.facts = new ArrayList<>();
         this.rules = new ArrayList<>();
-        this.caveats = new ArrayList<>();
+        this.checks = new ArrayList<>();
         this.version = SerializedBiscuit.MAX_SCHEMA_VERSION;
     }
 
@@ -51,19 +51,19 @@ public class Block {
      * @param index
      * @param base_symbols
      * @param facts
-     * @param caveats
+     * @param checks
      */
-    public Block(long index, SymbolTable base_symbols, String context, List<Fact> facts, List<Rule> rules, List<Caveat> caveats) {
+    public Block(long index, SymbolTable base_symbols, String context, List<Fact> facts, List<Rule> rules, List<Check> checks) {
         this.index = index;
         this.symbols = base_symbols;
         this.context=  context;
         this.facts = facts;
         this.rules = rules;
-        this.caveats = caveats;
+        this.checks = checks;
         this.version = SerializedBiscuit.MAX_SCHEMA_VERSION;
     }
 
-    Either<LogicError, Void> check(long i, World w, SymbolTable symbols, List<Caveat> verifier_caveats,
+    Either<LogicError, Void> check(long i, World w, SymbolTable symbols, List<Check> verifier_checks,
                                    HashMap<String, Rule> queries, HashMap<String, HashMap<Long, Set<Fact>>> query_results) {
         World world = new World(w);
         long authority_index = symbols.get("authority").get().longValue();
@@ -84,11 +84,11 @@ public class Block {
 
         world.run();
 
-        ArrayList<FailedCaveat> errors = new ArrayList<>();
+        ArrayList<FailedCheck> errors = new ArrayList<>();
 
-        for (int j = 0; j < this.caveats.size(); j++) {
+        for (int j = 0; j < this.checks.size(); j++) {
             boolean successful = false;
-            Caveat c = this.caveats.get(j);
+            Check c = this.checks.get(j);
 
             for(int k = 0; k < c.queries().size(); k++) {
                 Set<Fact> res = world.query_rule(c.queries().get(k));
@@ -99,13 +99,13 @@ public class Block {
             }
 
             if (!successful) {
-                errors.add(new FailedCaveat.FailedBlock(i, j, symbols.print_caveat(this.caveats.get(j))));
+                errors.add(new FailedCheck.FailedBlock(i, j, symbols.print_check(this.checks.get(j))));
             }
         }
 
-        for (int j = 0; j < verifier_caveats.size(); j++) {
+        for (int j = 0; j < verifier_checks.size(); j++) {
             boolean successful = false;
-            Caveat c = verifier_caveats.get(j);
+            Check c = verifier_checks.get(j);
 
             for(int k = 0; k < c.queries().size(); k++) {
                 Set<Fact> res = world.query_rule(c.queries().get(k));
@@ -116,7 +116,7 @@ public class Block {
             }
 
             if (!successful) {
-                errors.add(new FailedCaveat.FailedVerifier(j, symbols.print_caveat(verifier_caveats.get(j))));
+                errors.add(new FailedCheck.FailedVerifier(j, symbols.print_check(verifier_checks.get(j))));
             }
         }
 
@@ -128,7 +128,7 @@ public class Block {
         if (errors.isEmpty()) {
             return Right(null);
         } else {
-            return Left(new LogicError.FailedCaveats(errors));
+            return Left(new LogicError.FailedChecks(errors));
         }
     }
 
@@ -156,10 +156,10 @@ public class Block {
             s.append("\n\t\t\t");
             s.append(symbol_table.print_rule(r));
         }
-        s.append("\n\t\t]\n\t\tcaveats: [");
-        for(Caveat c: this.caveats) {
+        s.append("\n\t\t]\n\t\tchecks: [");
+        for(Check c: this.checks) {
             s.append("\n\t\t\t");
-            s.append(symbol_table.print_caveat(c));
+            s.append(symbol_table.print_check(c));
         }
         s.append("\n\t\t]\n\t}");
 
@@ -190,8 +190,8 @@ public class Block {
             b.addRulesV1(this.rules.get(i).serialize());
         }
 
-        for (int i = 0; i < this.caveats.size(); i++) {
-            b.addCaveatsV1(this.caveats.get(i).serialize());
+        for (int i = 0; i < this.checks.size(); i++) {
+            b.addChecksV1(this.checks.get(i).serialize());
         }
 
         b.setVersion(SerializedBiscuit.MAX_SCHEMA_VERSION);
@@ -216,7 +216,7 @@ public class Block {
 
         ArrayList<Fact> facts = new ArrayList<>();
         ArrayList<Rule> rules = new ArrayList<>();
-        ArrayList<Caveat> caveats = new ArrayList<>();
+        ArrayList<Check> checks = new ArrayList<>();
 
         if(version == 0) {
             for (Schema.FactV0 fact : b.getFactsV0List()) {
@@ -242,12 +242,12 @@ public class Block {
 
 
             for (Schema.CaveatV0 caveat : b.getCaveatsV0List()) {
-                Either<Error.FormatError, Caveat> res = Caveat.deserializeV0(caveat);
+                Either<Error.FormatError, Check> res = Check.deserializeV0(caveat);
                 if (res.isLeft()) {
                     Error.FormatError e = res.getLeft();
                     return Left(e);
                 } else {
-                    caveats.add(res.get());
+                    checks.add(res.get());
                 }
             }
         } else {
@@ -273,18 +273,18 @@ public class Block {
             }
 
 
-            for (Schema.CaveatV1 caveat : b.getCaveatsV1List()) {
-                Either<Error.FormatError, Caveat> res = Caveat.deserializeV1(caveat);
+            for (Schema.CheckV1 check : b.getChecksV1List()) {
+                Either<Error.FormatError, Check> res = Check.deserializeV1(check);
                 if (res.isLeft()) {
                     Error.FormatError e = res.getLeft();
                     return Left(e);
                 } else {
-                    caveats.add(res.get());
+                    checks.add(res.get());
                 }
             }
         }
 
-        return Right(new Block(b.getIndex(), symbols, b.getContext(), facts, rules, caveats));
+        return Right(new Block(b.getIndex(), symbols, b.getContext(), facts, rules, checks));
     }
 
     /**

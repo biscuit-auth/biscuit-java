@@ -1,7 +1,5 @@
 package com.clevercloud.biscuit.token.builder;
 
-import com.clevercloud.biscuit.token.builder.constraints.ConstraintBuilder;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -26,8 +24,8 @@ public class Utils {
         return new com.clevercloud.biscuit.token.builder.Rule(pred(head_name, head_ids), predicates, expressions);
     }
 
-    public static com.clevercloud.biscuit.token.builder.Caveat caveat(com.clevercloud.biscuit.token.builder.Rule rule) {
-        return new com.clevercloud.biscuit.token.builder.Caveat(rule);
+    public static Check check(com.clevercloud.biscuit.token.builder.Rule rule) {
+        return new Check(rule);
     }
 
     public static Term integer(long i) {

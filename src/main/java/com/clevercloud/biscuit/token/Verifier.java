@@ -5,7 +5,7 @@ import com.clevercloud.biscuit.datalog.RunLimits;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.datalog.World;
 import com.clevercloud.biscuit.error.Error;
-import com.clevercloud.biscuit.error.FailedCaveat;
+import com.clevercloud.biscuit.error.FailedCheck;
 import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.builder.*;
 import io.vavr.control.Either;
@@ -24,7 +24,7 @@ import static io.vavr.API.Right;
  */
 public class Verifier {
     Biscuit token;
-    List<Caveat> caveats;
+    List<Check> checks;
     World base_world;
     World world;
     SymbolTable base_symbols;
@@ -36,7 +36,7 @@ public class Verifier {
         this.world = new World(this.base_world);
         this.base_symbols = new SymbolTable(this.token.symbols);
         this.symbols = new SymbolTable(this.token.symbols);
-        this.caveats = new ArrayList<>();
+        this.checks = new ArrayList<>();
     }
 
     /**
@@ -69,7 +69,7 @@ public class Verifier {
     public void reset() {
         this.world = new World(this.base_world);
         this.symbols = new SymbolTable(this.base_symbols);
-        this.caveats = new ArrayList<>();
+        this.checks = new ArrayList<>();
     }
 
     public void snapshot() {
@@ -85,9 +85,9 @@ public class Verifier {
         world.add_rule(rule.convert(symbols));
     }
 
-    public void add_caveat(Caveat caveat) {
-        this.caveats.add(caveat);
-        world.add_caveat(caveat.convert(symbols));
+    public void add_check(Check check) {
+        this.checks.add(check);
+        world.add_check(check.convert(symbols));
     }
 
     public void add_resource(String resource) {
@@ -114,7 +114,7 @@ public class Verifier {
                         new Expression.Value(new Term.Set(new HashSet(ids)))))
         ));
 
-        this.caveats.add(new Caveat(q));
+        this.checks.add(new Check(q));
     }
 
     public Either<Error, List<String>> get_revocation_ids() {
@@ -186,10 +186,10 @@ public class Verifier {
 
         SymbolTable symbols = new SymbolTable(this.symbols);
 
-        ArrayList<FailedCaveat> errors = new ArrayList<>();
-        for (int j = 0; j < this.token.authority.caveats.size(); j++) {
+        ArrayList<FailedCheck> errors = new ArrayList<>();
+        for (int j = 0; j < this.token.authority.checks.size(); j++) {
             boolean successful = false;
-            com.clevercloud.biscuit.datalog.Caveat c = this.token.authority.caveats.get(j);
+            com.clevercloud.biscuit.datalog.Check c = this.token.authority.checks.get(j);
 
             for(int k = 0; k < c.queries().size(); k++) {
                 Set<com.clevercloud.biscuit.datalog.Fact> res = world.query_rule(c.queries().get(k));
@@ -205,12 +205,12 @@ public class Verifier {
             }
 
             if (!successful) {
-                errors.add(new FailedCaveat.FailedBlock(0, j, symbols.print_caveat(this.token.authority.caveats.get(j))));
+                errors.add(new FailedCheck.FailedBlock(0, j, symbols.print_check(this.token.authority.checks.get(j))));
             }
         }
 
-        for (int j = 0; j < this.caveats.size(); j++) {
-            com.clevercloud.biscuit.datalog.Caveat c = this.caveats.get(j).convert(symbols);
+        for (int j = 0; j < this.checks.size(); j++) {
+            com.clevercloud.biscuit.datalog.Check c = this.checks.get(j).convert(symbols);
             boolean successful = false;
 
             for(int k = 0; k < c.queries().size(); k++) {
@@ -227,16 +227,16 @@ public class Verifier {
             }
 
             if (!successful) {
-                errors.add(new FailedCaveat.FailedVerifier(j, symbols.print_caveat(c)));
+                errors.add(new FailedCheck.FailedVerifier(j, symbols.print_check(c)));
             }
         }
 
         for(int i = 0; i < this.token.blocks.size(); i++) {
             Block b = this.token.blocks.get(i);
 
-            for (int j = 0; j < b.caveats.size(); j++) {
+            for (int j = 0; j < b.checks.size(); j++) {
                 boolean successful = false;
-                com.clevercloud.biscuit.datalog.Caveat c = b.caveats.get(j);
+                com.clevercloud.biscuit.datalog.Check c = b.checks.get(j);
 
                 for(int k = 0; k < c.queries().size(); k++) {
                     Set<com.clevercloud.biscuit.datalog.Fact> res = world.query_rule(c.queries().get(k));
@@ -252,7 +252,7 @@ public class Verifier {
                 }
 
                 if (!successful) {
-                    errors.add(new FailedCaveat.FailedBlock(b.index, j, symbols.print_caveat(b.caveats.get(j))));
+                    errors.add(new FailedCheck.FailedBlock(b.index, j, symbols.print_check(b.checks.get(j))));
                 }
             }
         }
@@ -261,7 +261,7 @@ public class Verifier {
             return Right(null);
         } else {
             System.out.println(errors);
-            return Left(new Error.FailedLogic(new LogicError.FailedCaveats(errors)));
+            return Left(new Error.FailedLogic(new LogicError.FailedChecks(errors)));
         }
     }
 
@@ -269,21 +269,21 @@ public class Verifier {
         final List<String> facts = this.world.facts().stream().map((f) -> this.symbols.print_fact(f)).collect(Collectors.toList());
         final List<String> rules = this.world.rules().stream().map((r) -> this.symbols.print_rule(r)).collect(Collectors.toList());
 
-        List<String> caveats = new ArrayList<>();
+        List<String> checks = new ArrayList<>();
 
-        for (int j = 0; j < this.caveats.size(); j++) {
-            caveats.add("Verifier["+j+"]: "+this.caveats.get(j).toString());
+        for (int j = 0; j < this.checks.size(); j++) {
+            checks.add("Verifier["+j+"]: "+this.checks.get(j).toString());
         }
 
-        for (int j = 0; j < this.token.authority.caveats.size(); j++) {
-            caveats.add("Block[0]["+j+"]: "+this.symbols.print_caveat(this.token.authority.caveats.get(j)));
+        for (int j = 0; j < this.token.authority.checks.size(); j++) {
+            checks.add("Block[0]["+j+"]: "+this.symbols.print_check(this.token.authority.checks.get(j)));
         }
 
         for(int i = 0; i < this.token.blocks.size(); i++) {
             Block b = this.token.blocks.get(i);
 
-            for (int j = 0; j < b.caveats.size(); j++) {
-                caveats.add("Block["+i+"]["+j+"]: "+this.symbols.print_caveat(b.caveats.get(j)));
+            for (int j = 0; j < b.checks.size(); j++) {
+                checks.add("Block["+i+"]["+j+"]: "+this.symbols.print_check(b.checks.get(j)));
             }
         }
 
@@ -292,8 +292,8 @@ public class Verifier {
         b.append(String.join(",\n\t\t", facts));
         b.append("\n\t],\n\trules: [\n\t\t");
         b.append(String.join(",\n\t\t", rules));
-        b.append("\n\t],\n\tcaveats: [\n\t\t");
-        b.append(String.join(",\n\t\t", caveats));
+        b.append("\n\t],\n\tchecks: [\n\t\t");
+        b.append(String.join(",\n\t\t", checks));
         b.append("\n\t]\n}");
 
         return b.toString();

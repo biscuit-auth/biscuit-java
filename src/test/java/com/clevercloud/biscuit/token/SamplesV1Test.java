@@ -4,9 +4,9 @@ import cafe.cryptography.curve25519.CompressedRistretto;
 import cafe.cryptography.curve25519.InvalidEncodingException;
 import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.error.Error;
-import com.clevercloud.biscuit.error.FailedCaveat;
+import com.clevercloud.biscuit.error.FailedCheck;
 import com.clevercloud.biscuit.error.LogicError;
-import com.clevercloud.biscuit.token.builder.Caveat;
+import com.clevercloud.biscuit.token.builder.Check;
 import com.clevercloud.biscuit.token.builder.Rule;
 import io.vavr.control.Either;
 import junit.framework.Assert;
@@ -203,8 +203,8 @@ public class SamplesV1Test extends TestCase {
 
         Error e = v1.verify().getLeft();
         Assert.assertEquals(
-                new Error.FailedLogic(new LogicError.FailedCaveats(Arrays.asList(
-                        new FailedCaveat.FailedBlock(1, 1, "expiration($date) <- time(#ambient, $date) @ $date <= 1545264000")
+                new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
+                        new FailedCheck.FailedBlock(1, 1, "expiration($date) <- time(#ambient, $date) @ $date <= 1545264000")
                 ))),
                 e);
     }
@@ -245,7 +245,7 @@ public class SamplesV1Test extends TestCase {
         Verifier v1 = token.verify(root).get();
         v1.add_resource("file2");
         v1.add_operation("read");
-        v1.add_caveat(caveat(rule(
+        v1.add_check(check(rule(
                 "caveat1",
                 Arrays.asList(var("0")),
                 Arrays.asList(
@@ -258,8 +258,8 @@ public class SamplesV1Test extends TestCase {
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
-                new Error.FailedLogic(new LogicError.FailedCaveats(Arrays.asList(
-                        new FailedCaveat.FailedVerifier(0, "caveat1($0) <- resource(#ambient, $0), operation(#ambient, $1), right(#authority, $0, $1)")
+                new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
+                        new FailedCheck.FailedVerifier(0, "caveat1($0) <- resource(#ambient, $0), operation(#ambient, $1), right(#authority, $0, $1)")
                 ))),
                 e);
     }
@@ -289,8 +289,8 @@ public class SamplesV1Test extends TestCase {
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
-                new Error.FailedLogic(new LogicError.FailedCaveats(Arrays.asList(
-                        new FailedCaveat.FailedBlock(0, 0, "caveat1(\"file1\") <- resource(#ambient, \"file1\")")
+                new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
+                        new FailedCheck.FailedBlock(0, 0, "caveat1(\"file1\") <- resource(#ambient, \"file1\")")
                 ))),
                 e);
     }
@@ -320,8 +320,8 @@ public class SamplesV1Test extends TestCase {
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
-                new Error.FailedLogic(new LogicError.FailedCaveats(Arrays.asList(
-                        new FailedCaveat.FailedBlock(1, 0, "caveat1($0) <- valid_date($0), resource(#ambient, $0)")
+                new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
+                        new FailedCheck.FailedBlock(1, 0, "caveat1($0) <- valid_date($0), resource(#ambient, $0)")
                 ))),
                 e);
     }
@@ -346,8 +346,8 @@ public class SamplesV1Test extends TestCase {
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
-                new Error.FailedLogic(new LogicError.FailedCaveats(Arrays.asList(
-                        new FailedCaveat.FailedBlock(0, 0, "resource_match($0) <- resource(#ambient, $0) @ $0 matches /file[0-9]+.txt/")
+                new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
+                        new FailedCheck.FailedBlock(0, 0, "resource_match($0) <- resource(#ambient, $0) @ $0 matches /file[0-9]+.txt/")
                 ))),
                 e);
 
@@ -386,7 +386,7 @@ public class SamplesV1Test extends TestCase {
                         pred("mst_be_present", Arrays.asList(var("0")))
                 )
         ));
-        v1.add_caveat(new Caveat(queries));
+        v1.add_check(new Check(queries));
 
         Assert.assertTrue(v1.verify().isRight());
     }
@@ -409,8 +409,8 @@ public class SamplesV1Test extends TestCase {
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
-                new Error.FailedLogic(new LogicError.FailedCaveats(Arrays.asList(
-                        new FailedCaveat.FailedBlock(0, 0, "caveat1(#test) <- resource(#ambient, #hello)")
+                new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
+                        new FailedCheck.FailedBlock(0, 0, "caveat1(#test) <- resource(#ambient, #hello)")
                 ))),
                 e);
     }

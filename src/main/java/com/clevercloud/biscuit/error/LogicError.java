@@ -6,7 +6,7 @@ import java.util.Objects;
 import io.vavr.control.Option;
 
 public class LogicError {
-    public Option<List<FailedCaveat>> failed_caveats() {
+    public Option<List<FailedCheck>> failed_checks() {
         return Option.none();
     }
 
@@ -89,14 +89,14 @@ public class LogicError {
             return "LogicError.InvalidBlockFact{ id: "+id+", error: "+  e + " }";
         }
     }
-    public static class FailedCaveats extends LogicError {
-        final public List<FailedCaveat> errors;
+    public static class FailedChecks extends LogicError {
+        final public List<FailedCheck> errors;
 
-        public FailedCaveats(List<FailedCaveat> errors) {
+        public FailedChecks(List<FailedCheck> errors) {
             this.errors = errors;
         }
 
-        public Option<List<FailedCaveat>> failed_caveats() {
+        public Option<List<FailedCheck>> failed_checks() {
             return Option.some(errors);
         }
 
@@ -104,7 +104,7 @@ public class LogicError {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            FailedCaveats other = (FailedCaveats) o;
+            FailedChecks other = (FailedChecks) o;
             if(errors.size() != other.errors.size()) {
                 return false;
             }

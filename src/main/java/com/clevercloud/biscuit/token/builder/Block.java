@@ -3,12 +3,9 @@ package com.clevercloud.biscuit.token.builder;
 
 import com.clevercloud.biscuit.datalog.Fact;
 import com.clevercloud.biscuit.datalog.Rule;
-import com.clevercloud.biscuit.datalog.Caveat;
+import com.clevercloud.biscuit.datalog.Check;
 import com.clevercloud.biscuit.datalog.SymbolTable;
-import com.clevercloud.biscuit.datalog.constraints.Constraint;
-import com.clevercloud.biscuit.datalog.constraints.ConstraintKind;
-import com.clevercloud.biscuit.datalog.constraints.DateConstraint;
-import com.clevercloud.biscuit.datalog.constraints.StrConstraint;
+
 import static com.clevercloud.biscuit.token.builder.Utils.*;
 
 
@@ -24,7 +21,7 @@ public class Block {
     String context;
     List<Fact> facts;
     List<Rule> rules;
-    List<Caveat> caveats;
+    List<Check> checks;
 
     public Block(long index, SymbolTable base_symbols) {
         this.index = index;
@@ -33,7 +30,7 @@ public class Block {
         this.context = "";
         this.facts = new ArrayList<>();
         this.rules = new ArrayList<>();
-        this.caveats = new ArrayList<>();
+        this.checks = new ArrayList<>();
     }
 
     public void add_fact(com.clevercloud.biscuit.token.builder.Fact f) {
@@ -44,8 +41,8 @@ public class Block {
         this.rules.add(rule.convert(this.symbols));
     }
 
-    public void add_caveat(com.clevercloud.biscuit.token.builder.Caveat caveat) {
-        this.caveats.add(caveat.convert(this.symbols));
+    public void add_check(com.clevercloud.biscuit.token.builder.Check check) {
+        this.checks.add(check.convert(this.symbols));
     }
 
     public  void set_context(String context) {
@@ -59,7 +56,7 @@ public class Block {
             symbols.add(this.symbols.symbols.get(i));
         }
 
-        return new com.clevercloud.biscuit.token.Block(this.index, symbols, this.context, this.facts, this.rules, this.caveats);
+        return new com.clevercloud.biscuit.token.Block(this.index, symbols, this.context, this.facts, this.rules, this.checks);
     }
 
     public void check_right(String right) {
@@ -73,7 +70,7 @@ public class Block {
                         pred("right", Arrays.asList(s("authority"), var("resource"), s(right)))
                 )
         ));
-        this.add_caveat(new com.clevercloud.biscuit.token.builder.Caveat(queries));
+        this.add_check(new com.clevercloud.biscuit.token.builder.Check(queries));
     }
 
     public void resource_prefix(String prefix) {
@@ -86,7 +83,7 @@ public class Block {
                 Arrays.asList(new Expression.Binary(Expression.Op.Prefix, new Expression.Value(var("resource")),
                         new Expression.Value(string(prefix))))
         ));
-        this.add_caveat(new com.clevercloud.biscuit.token.builder.Caveat(queries));
+        this.add_check(new com.clevercloud.biscuit.token.builder.Check(queries));
     }
 
     public void resource_suffix(String suffix) {
@@ -99,7 +96,7 @@ public class Block {
                 Arrays.asList(new Expression.Binary(Expression.Op.Suffix, new Expression.Value(var("resource")),
                         new Expression.Value(string(suffix))))
         ));
-        this.add_caveat(new com.clevercloud.biscuit.token.builder.Caveat(queries));
+        this.add_check(new com.clevercloud.biscuit.token.builder.Check(queries));
     }
 
     public void expiration_date(Date d) {
@@ -112,6 +109,6 @@ public class Block {
                 Arrays.asList(new Expression.Binary(Expression.Op.LessOrEqual, new Expression.Value(var("date")),
                         new Expression.Value(date(d))))
         ));
-        this.add_caveat(new com.clevercloud.biscuit.token.builder.Caveat(queries));
+        this.add_check(new com.clevercloud.biscuit.token.builder.Check(queries));
     }
 }

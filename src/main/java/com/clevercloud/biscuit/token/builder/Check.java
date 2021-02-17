@@ -1,44 +1,35 @@
 package com.clevercloud.biscuit.token.builder;
 
 import com.clevercloud.biscuit.datalog.SymbolTable;
-import com.clevercloud.biscuit.datalog.constraints.Constraint;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Caveat {
+public class Check {
     List<Rule> queries;
 
-    public Caveat(List<Rule> queries) {
+    public Check(List<Rule> queries) {
         this.queries = queries;
     }
-    public Caveat(Rule query) {
+    public Check(Rule query) {
         ArrayList<Rule> r = new ArrayList<>();
         r.add(query);
         queries = r;
     }
 
 
-    public com.clevercloud.biscuit.datalog.Caveat convert(SymbolTable symbols) {
+    public com.clevercloud.biscuit.datalog.Check convert(SymbolTable symbols) {
         ArrayList<com.clevercloud.biscuit.datalog.Rule> queries = new ArrayList<>();
 
         for(Rule q: this.queries) {
             queries.add(q.convert(symbols));
         }
-        return new com.clevercloud.biscuit.datalog.Caveat(queries);
+        return new com.clevercloud.biscuit.datalog.Check(queries);
     }
-
-    /*public static Caveat convert_from(com.clevercloud.biscuit.datalog.Caveat f, SymbolTable symbols) {
-        ArrayList<Rule> queries = new ArrayList<>();
-        for(com.clevercloud.biscuit.datalog.Rule q: f.queries()) {
-            queries.add(Rule.convert_from(q, symbols));
-        }
-        return new Caveat(queries);
-    }*/
 
     @Override
     public String toString() {
-        return "caveat("+queries+")";
+        return "check("+queries+")";
     }
 
     @Override
@@ -46,9 +37,9 @@ public class Caveat {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Caveat caveat = (Caveat) o;
+        Check check = (Check) o;
 
-        return queries != null ? queries.equals(caveat.queries) : caveat.queries == null;
+        return queries != null ? queries.equals(check.queries) : check.queries == null;
     }
 
     @Override

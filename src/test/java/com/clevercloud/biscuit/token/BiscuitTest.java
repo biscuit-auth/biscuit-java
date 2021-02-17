@@ -4,7 +4,7 @@ import com.clevercloud.biscuit.crypto.KeyPair;
 import com.clevercloud.biscuit.datalog.Fact;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.error.Error;
-import com.clevercloud.biscuit.error.FailedCaveat;
+import com.clevercloud.biscuit.error.FailedCheck;
 import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.builder.Block;
 import io.vavr.control.Either;
@@ -17,7 +17,6 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -75,7 +74,7 @@ public class BiscuitTest extends TestCase {
         KeyPair keypair2 = new KeyPair(rng);
 
         Block builder = deser.create_block();
-        builder.add_caveat(caveat(rule(
+        builder.add_check(check(rule(
                 "caveat1",
                 Arrays.asList(var("resource")),
                 Arrays.asList(
@@ -108,7 +107,7 @@ public class BiscuitTest extends TestCase {
         KeyPair keypair3 = new KeyPair(rng);
 
         Block builder3 = deser2.create_block();
-        builder3.add_caveat(caveat(rule(
+        builder3.add_check(check(rule(
                 "caveat2",
                 Arrays.asList(s("file1")),
                 Arrays.asList(
@@ -161,9 +160,9 @@ public class BiscuitTest extends TestCase {
         System.out.println(res2.getLeft());
 
         Assert.assertEquals(
-                new Error.FailedLogic(new LogicError.FailedCaveats(Arrays.asList(
-                        new FailedCaveat.FailedBlock(1, 0, "caveat1($resource) <- resource(#ambient, $resource), operation(#ambient, #read), right(#authority, $resource, #read)"),
-                        new FailedCaveat.FailedBlock(2, 0, "caveat2(#file1) <- resource(#ambient, #file1)")
+                new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
+                        new FailedCheck.FailedBlock(1, 0, "caveat1($resource) <- resource(#ambient, $resource), operation(#ambient, #read), right(#authority, $resource, #read)"),
+                        new FailedCheck.FailedBlock(2, 0, "caveat2(#file1) <- resource(#ambient, #file1)")
                 ))),
                 res2.getLeft());
     }
@@ -217,13 +216,13 @@ public class BiscuitTest extends TestCase {
         Assert.assertTrue(res.isLeft());
 
         System.out.println(v3.print_world());
-        for (FailedCaveat f : e.failed_caveats().get()) {
+        for (FailedCheck f : e.failed_checks().get()) {
             System.out.println(f.toString());
         }
         Assert.assertEquals(
-                new Error.FailedLogic(new LogicError.FailedCaveats(Arrays.asList(
-                        new FailedCaveat.FailedBlock(1, 0, "prefix($resource) <- resource(#ambient, $resource) @ $resource matches /folder1/*"),
-                        new FailedCaveat.FailedBlock(1, 1, "check_right(#read) <- resource(#ambient, $resource), operation(#ambient, #read), right(#authority, $resource, #read)")
+                new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
+                        new FailedCheck.FailedBlock(1, 0, "prefix($resource) <- resource(#ambient, $resource) @ $resource matches /folder1/*"),
+                        new FailedCheck.FailedBlock(1, 1, "check_right(#read) <- resource(#ambient, $resource), operation(#ambient, #read), right(#authority, $resource, #read)")
                 ))),
                 e);
     }
@@ -266,7 +265,7 @@ public class BiscuitTest extends TestCase {
         KeyPair keypair2 = new KeyPair(rng);
 
         Block builder = deser.create_block();
-        builder.add_caveat(caveat(rule(
+        builder.add_check(check(rule(
                 "caveat1",
                 Arrays.asList(var("resource")),
                 Arrays.asList(
