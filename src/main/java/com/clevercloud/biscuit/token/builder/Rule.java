@@ -10,28 +10,28 @@ import java.util.List;
 public class Rule {
     Predicate head;
     List<Predicate> body;
-    List<ConstraintBuilder> constraintsBuilders;
+    List<Expression> expressions;
 
-    public Rule(Predicate head, List<Predicate> body, List<ConstraintBuilder> constraintsBuilders) {
+    public Rule(Predicate head, List<Predicate> body, List<Expression> expressions) {
         this.head = head;
         this.body = body;
-        this.constraintsBuilders = constraintsBuilders;
+        this.expressions = expressions;
     }
 
     public com.clevercloud.biscuit.datalog.Rule convert(SymbolTable symbols) {
         com.clevercloud.biscuit.datalog.Predicate head = this.head.convert(symbols);
         ArrayList<com.clevercloud.biscuit.datalog.Predicate> body = new ArrayList<>();
-        ArrayList<Constraint> constraints = new ArrayList<>();
+        ArrayList<com.clevercloud.biscuit.datalog.expressions.Expression> expressions = new ArrayList<>();
 
         for(Predicate p: this.body) {
             body.add(p.convert(symbols));
         }
 
-        for(ConstraintBuilder cb: this.constraintsBuilders) {
-            constraints.add(cb.convert(symbols));
+        for(Expression e: this.expressions) {
+            expressions.add(e.convert(symbols));
         }
 
-        return new com.clevercloud.biscuit.datalog.Rule(head, body, constraints);
+        return new com.clevercloud.biscuit.datalog.Rule(head, body, expressions);
     }
 
     @Override
@@ -43,19 +43,19 @@ public class Rule {
 
         if (head != null ? !head.equals(rule.head) : rule.head != null) return false;
         if (body != null ? !body.equals(rule.body) : rule.body != null) return false;
-        return constraintsBuilders != null ? constraintsBuilders.equals(rule.constraintsBuilders) : rule.constraintsBuilders == null;
+        return expressions != null ? expressions.equals(rule.expressions) : rule.expressions == null;
     }
 
     @Override
     public int hashCode() {
         int result = head != null ? head.hashCode() : 0;
         result = 31 * result + (body != null ? body.hashCode() : 0);
-        result = 31 * result + (constraintsBuilders != null ? constraintsBuilders.hashCode() : 0);
+        result = 31 * result + (expressions != null ? expressions.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
-        return head.toString() + " <- " + body + " @ "+ constraintsBuilders;
+        return head.toString() + " <- " + body + " @ "+ expressions;
     }
 }

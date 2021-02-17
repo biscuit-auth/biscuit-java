@@ -83,7 +83,8 @@ public class Block {
                 "prefix",
                 Arrays.asList(var("resource")),
                 Arrays.asList(pred("resource", Arrays.asList(s("ambient"), var("resource")))),
-                Arrays.asList(new com.clevercloud.biscuit.token.builder.constraints.StrConstraint.Prefix("resource", prefix))
+                Arrays.asList(new Expression.Binary(Expression.Op.Prefix, new Expression.Value(var("resource")),
+                        new Expression.Value(string(prefix))))
         ));
         this.add_caveat(new com.clevercloud.biscuit.token.builder.Caveat(queries));
     }
@@ -95,7 +96,8 @@ public class Block {
                 "suffix",
                 Arrays.asList(var("resource")),
                 Arrays.asList(pred("resource", Arrays.asList(s("ambient"), var("resource")))),
-                Arrays.asList(new com.clevercloud.biscuit.token.builder.constraints.StrConstraint.Suffix("resource", suffix))
+                Arrays.asList(new Expression.Binary(Expression.Op.Suffix, new Expression.Value(var("resource")),
+                        new Expression.Value(string(suffix))))
         ));
         this.add_caveat(new com.clevercloud.biscuit.token.builder.Caveat(queries));
     }
@@ -107,7 +109,8 @@ public class Block {
                 "expiration",
                 Arrays.asList(var("date")),
                 Arrays.asList(pred("time", Arrays.asList(s("ambient"), var("date")))),
-                Arrays.asList(new com.clevercloud.biscuit.token.builder.constraints.DateConstraint.Before("date", d.getTime() / 1000))
+                Arrays.asList(new Expression.Binary(Expression.Op.LessOrEqual, new Expression.Value(var("date")),
+                        new Expression.Value(date(d))))
         ));
         this.add_caveat(new com.clevercloud.biscuit.token.builder.Caveat(queries));
     }

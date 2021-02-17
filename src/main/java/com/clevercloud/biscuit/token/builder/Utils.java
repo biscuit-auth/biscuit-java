@@ -22,8 +22,8 @@ public class Utils {
 
     public static com.clevercloud.biscuit.token.builder.Rule constrained_rule(String head_name, List<Term> head_ids,
                                                                               List<com.clevercloud.biscuit.token.builder.Predicate> predicates,
-                                                                              List<ConstraintBuilder> constraints) {
-        return new com.clevercloud.biscuit.token.builder.Rule(pred(head_name, head_ids), predicates, constraints);
+                                                                              List<Expression> expressions) {
+        return new com.clevercloud.biscuit.token.builder.Rule(pred(head_name, head_ids), predicates, expressions);
     }
 
     public static com.clevercloud.biscuit.token.builder.Caveat caveat(com.clevercloud.biscuit.token.builder.Rule rule) {

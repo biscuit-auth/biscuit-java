@@ -1,6 +1,8 @@
 package com.clevercloud.biscuit.datalog;
 
 import com.clevercloud.biscuit.datalog.constraints.*;
+import com.clevercloud.biscuit.datalog.expressions.Expression;
+import com.clevercloud.biscuit.datalog.expressions.Op;
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -146,7 +148,12 @@ public class WorldTest extends TestCase {
                                       new ID.Variable(syms.insert("t2_id")),
                                       new ID.Variable(syms.insert("right")),
                                       new ID.Variable(syms.insert("id"))))),
-              Arrays.asList(new Constraint(syms.insert("id"), new ConstraintKind.Int(new IntConstraint.LessThan(1))))));
+              Arrays.asList(new Expression(new ArrayList<Op>(Arrays.asList(
+                      new Op.Value(new ID.Variable(syms.insert("id"))),
+                      new Op.Value(new ID.Integer(1)),
+                      new Op.Binary(Op.BinaryOp.LessThan)
+                      ))))
+      ));
       for (final Fact f : res) {
          System.out.println("\t" + syms.print_fact(f));
       }
@@ -162,9 +169,13 @@ public class WorldTest extends TestCase {
                     new ID.Variable(syms.insert("route_id")),
                     new ID.Variable(syms.insert("app_id")),
                     new ID.Variable(syms.insert("domain"))))
-      ), Arrays.asList(
-            new Constraint(syms.insert("domain"), new ConstraintKind.Str(new StrConstraint.Suffix(suffix)))
-      )));
+      ),
+              Arrays.asList(new Expression(new ArrayList<Op>(Arrays.asList(
+                      new Op.Value(new ID.Variable(syms.insert("domain"))),
+                      new Op.Value(new ID.Str(suffix)),
+                      new Op.Binary(Op.BinaryOp.Suffix)
+              ))))
+      ));
    }
 
    public void testStr() {
@@ -226,12 +237,25 @@ public class WorldTest extends TestCase {
       w.add_fact(new Fact(new Predicate(x, Arrays.asList(new ID.Date(t1.getEpochSecond()), abc))));
       w.add_fact(new Fact(new Predicate(x, Arrays.asList(new ID.Date(t3.getEpochSecond()), def))));
 
-      final Rule r1 = new Rule(new Predicate(before, Arrays.asList(new ID.Variable(syms.insert("date")), new ID.Variable(syms.insert("val")))), Arrays.asList(
-            new Predicate(x, Arrays.asList(new ID.Variable(syms.insert("date")), new ID.Variable(syms.insert("val"))))
-      ), Arrays.asList(
-            new Constraint(syms.insert("date"), new ConstraintKind.Date(new DateConstraint.Before(t2_timestamp))),
-            new Constraint(syms.insert("date"), new ConstraintKind.Date(new DateConstraint.After(0)))
-      ));
+      final Rule r1 = new Rule(new Predicate(
+              before,
+              Arrays.asList(new ID.Variable(syms.insert("date")), new ID.Variable(syms.insert("val")))),
+              Arrays.asList(
+                      new Predicate(x, Arrays.asList(new ID.Variable(syms.insert("date")), new ID.Variable(syms.insert("val"))))
+              ),
+              Arrays.asList(
+                   new Expression(new ArrayList<Op>(Arrays.asList(
+                           new Op.Value(new ID.Variable(syms.insert("date"))),
+                           new Op.Value(new ID.Date(t2_timestamp)),
+                           new Op.Binary(Op.BinaryOp.LessOrEqual)
+                   ))),
+                   new Expression(new ArrayList<Op>(Arrays.asList(
+                           new Op.Value(new ID.Variable(syms.insert("date"))),
+                           new Op.Value(new ID.Date(0)),
+                           new Op.Binary(Op.BinaryOp.GreaterOrEqual)
+                   )))
+              )
+      );
 
       System.out.println("testing r1: " + syms.print_rule(r1));
       Set<Fact> res = w.query_rule(r1);
@@ -241,12 +265,25 @@ public class WorldTest extends TestCase {
       Set<Fact> expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(before, Arrays.asList(new ID.Date(t1.getEpochSecond()), abc)))));
       Assert.assertEquals(expected, res);
 
-      final Rule r2 = new Rule(new Predicate(after, Arrays.asList(new ID.Variable(syms.insert("date")), new ID.Variable(syms.insert("val")))), Arrays.asList(
-            new Predicate(x, Arrays.asList(new ID.Variable(syms.insert("date")), new ID.Variable(syms.insert("val"))))
-      ), Arrays.asList(
-            new Constraint(syms.insert("date"), new ConstraintKind.Date(new DateConstraint.After(t2_timestamp))),
-            new Constraint(syms.insert("date"), new ConstraintKind.Date(new DateConstraint.After(0)))
-      ));
+      final Rule r2 = new Rule(new Predicate(
+              after,
+              Arrays.asList(new ID.Variable(syms.insert("date")), new ID.Variable(syms.insert("val")))),
+              Arrays.asList(
+                      new Predicate(x, Arrays.asList(new ID.Variable(syms.insert("date")), new ID.Variable(syms.insert("val"))))
+              ),
+              Arrays.asList(
+                      new Expression(new ArrayList<Op>(Arrays.asList(
+                              new Op.Value(new ID.Variable(syms.insert("date"))),
+                              new Op.Value(new ID.Date(t2_timestamp)),
+                              new Op.Binary(Op.BinaryOp.LessOrEqual)
+                      ))),
+                     new Expression(new ArrayList<Op>(Arrays.asList(
+                              new Op.Value(new ID.Variable(syms.insert("date"))),
+                              new Op.Value(new ID.Date(0)),
+                              new Op.Binary(Op.BinaryOp.GreaterOrEqual)
+                      )))
+              )
+      );
 
       System.out.println("testing r2: " + syms.print_rule(r2));
       res = w.query_rule(r2);
@@ -271,11 +308,21 @@ public class WorldTest extends TestCase {
       w.add_fact(new Fact(new Predicate(x, Arrays.asList(abc, new ID.Integer(0), new ID.Str("test")))));
       w.add_fact(new Fact(new Predicate(x, Arrays.asList(def, new ID.Integer(2), new ID.Str("hello")))));
 
-      final Rule r1 = new Rule(new Predicate(int_set, Arrays.asList(new ID.Variable(syms.insert("sym")), new ID.Variable(syms.insert("str")))), Arrays.asList(
-            new Predicate(x, Arrays.asList(new ID.Variable(syms.insert("sym")), new ID.Variable(syms.insert("int")), new ID.Variable(syms.insert("str"))))
-      ), Arrays.asList(
-            new Constraint(syms.insert("int"), new ConstraintKind.Int(new IntConstraint.InSet(new HashSet<>(Arrays.asList(0l, 1l)))))
-      ));
+      final Rule r1 = new Rule(new Predicate(
+              int_set,
+              Arrays.asList(new ID.Variable(syms.insert("sym")), new ID.Variable(syms.insert("str")))
+      ),
+              Arrays.asList(new Predicate(x,
+                      Arrays.asList(new ID.Variable(syms.insert("sym")), new ID.Variable(syms.insert("int")), new ID.Variable(syms.insert("str"))))
+      ),
+              Arrays.asList(
+                      new Expression(new ArrayList<Op>(Arrays.asList(
+                              new Op.Value(new ID.Variable(syms.insert("int"))),
+                              new Op.Value(new ID.Set(new HashSet<>(Arrays.asList(new ID.Integer(0l), new ID.Integer(1l))))),
+                              new Op.Binary(Op.BinaryOp.In)
+                      )))
+              )
+      );
       System.out.println("testing r1: " + syms.print_rule(r1));
       Set<Fact> res = w.query_rule(r1);
       for (final Fact f : res) {
@@ -287,11 +334,19 @@ public class WorldTest extends TestCase {
       final long abc_sym_id = syms.insert("abc");
       final long ghi_sym_id = syms.insert("ghi");
 
-      final Rule r2 = new Rule(new Predicate(symbol_set, Arrays.asList(new ID.Variable(syms.insert("sym")), new ID.Variable(syms.insert("int")), new ID.Variable(syms.insert("str")))), Arrays.asList(
-            new Predicate(x, Arrays.asList(new ID.Variable(syms.insert("sym")), new ID.Variable(syms.insert("int")), new ID.Variable(syms.insert("str"))))
-      ), Arrays.asList(
-            new Constraint(syms.insert("sym"), new ConstraintKind.Symbol(new SymbolConstraint.NotInSet(new HashSet<>(Arrays.asList(abc_sym_id, ghi_sym_id)))))
-      ));
+      final Rule r2 = new Rule(new Predicate(symbol_set,
+              Arrays.asList(new ID.Variable(syms.insert("sym")), new ID.Variable(syms.insert("int")), new ID.Variable(syms.insert("str")))),
+              Arrays.asList(new Predicate(x, Arrays.asList(new ID.Variable(syms.insert("sym")), new ID.Variable(syms.insert("int")), new ID.Variable(syms.insert("str"))))
+              ),
+              Arrays.asList(
+                      new Expression(new ArrayList<Op>(Arrays.asList(
+                              new Op.Value(new ID.Variable(syms.insert("sym"))),
+                              new Op.Value(new ID.Set(new HashSet<>(Arrays.asList(new ID.Symbol(abc_sym_id), new ID.Symbol(ghi_sym_id))))),
+                              new Op.Binary(Op.BinaryOp.NotIn)
+                      )))
+              )
+      );
+
       System.out.println("testing r2: " + syms.print_rule(r2));
       res = w.query_rule(r2);
       for (final Fact f : res) {
@@ -300,11 +355,17 @@ public class WorldTest extends TestCase {
       expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(symbol_set, Arrays.asList(def, new ID.Integer(2), new ID.Str("hello"))))));
       Assert.assertEquals(expected, res);
 
-      final Rule r3 = new Rule(new Predicate(string_set, Arrays.asList(new ID.Variable(syms.insert("sym")), new ID.Variable(syms.insert("int")), new ID.Variable(syms.insert("str")))), Arrays.asList(
-            new Predicate(x, Arrays.asList(new ID.Variable(syms.insert("sym")), new ID.Variable(syms.insert("int")), new ID.Variable(syms.insert("str"))))
-      ), Arrays.asList(
-            new Constraint(syms.insert("str"), new ConstraintKind.Str(new StrConstraint.InSet(new HashSet<>(Arrays.asList("test", "aaa")))))
-      ));
+      final Rule r3 = new Rule(
+              new Predicate(string_set, Arrays.asList(new ID.Variable(syms.insert("sym")), new ID.Variable(syms.insert("int")), new ID.Variable(syms.insert("str")))),
+              Arrays.asList(new Predicate(x, Arrays.asList(new ID.Variable(syms.insert("sym")), new ID.Variable(syms.insert("int")), new ID.Variable(syms.insert("str"))))),
+              Arrays.asList(
+                      new Expression(new ArrayList<Op>(Arrays.asList(
+                              new Op.Value(new ID.Variable(syms.insert("str"))),
+                              new Op.Value(new ID.Set(new HashSet<>(Arrays.asList(new ID.Str("test"), new ID.Str("aaa"))))),
+                              new Op.Binary(Op.BinaryOp.In)
+                      )))
+              )
+      );
       System.out.println("testing r3: " + syms.print_rule(r3));
       res = w.query_rule(r3);
       for (final Fact f : res) {

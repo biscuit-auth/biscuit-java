@@ -356,7 +356,7 @@ public class Parser {
         return Either.right(new Tuple2<String, Term.Variable>(remaining, (Term.Variable) var(name)));
     }
 
-    public static Either<Error, Tuple2<String, ConstraintBuilder>> constraint(String s) {
+    public static Either<Error, Tuple2<String, Expression>> expression(String s) {
         return Either.left(new Error(s, "unimplemented"));
     }
 }

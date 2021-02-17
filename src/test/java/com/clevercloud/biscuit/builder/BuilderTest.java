@@ -1,15 +1,19 @@
 package com.clevercloud.biscuit.builder;
 
 import com.clevercloud.biscuit.crypto.KeyPair;
+import com.clevercloud.biscuit.datalog.ID;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.token.Biscuit;
 import com.clevercloud.biscuit.token.builder.Block;
+import com.clevercloud.biscuit.token.builder.Expression;
+import com.clevercloud.biscuit.token.builder.Term;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import java.security.SecureRandom;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -36,18 +40,28 @@ public class BuilderTest extends TestCase {
         authority_builder.add_rule(constrained_rule("right",
                 Arrays.asList(s("authority"), s("namespace"), var("tenant"), var("namespace"), var("operation")),
                 Arrays.asList(pred("ns_operation", Arrays.asList(s("authority"), s("namespace"), var("tenant"), var("namespace"), var("operation")))),
-                Arrays.asList(new com.clevercloud.biscuit.token.builder.constraints.SymbolConstraint.InSet("operation", new HashSet<>(Arrays.asList(
-                        "create_topic",
-                        "get_topic",
-                        "get_topics"
-                ))))
+                Arrays.asList(
+                        new Expression.Binary(
+                                Expression.Op.In,
+                                new Expression.Value(var("operation")),
+                                new Expression.Value(new Term.Set(new HashSet<>(Arrays.asList(
+                                        s("create_topic"),
+                                        s("get_topic"),
+                                        s("get_topics")
+                                )))))
+                )
         ));
         authority_builder.add_rule(constrained_rule("right",
                 Arrays.asList(s("authority"), s("topic"), var("tenant"), var("namespace"), var("topic"), var("operation")),
                 Arrays.asList(pred("topic_operation", Arrays.asList(s("authority"), s("topic"), var("tenant"), var("namespace"), var("topic"), var("operation")))),
-                Arrays.asList(new com.clevercloud.biscuit.token.builder.constraints.SymbolConstraint.InSet("operation", new HashSet<>(Arrays.asList(
-                        "lookup"
-                ))))
+                Arrays.asList(
+                        new Expression.Binary(
+                                Expression.Op.In,
+                                new Expression.Value(var("operation")),
+                                new Expression.Value(new Term.Set(new HashSet<>(Arrays.asList(
+                                        s("lookup")
+                                )))))
+                )
         ));
         Biscuit rootBiscuit = Biscuit.make(rng, root, symbols, authority_builder.build()).get();
 

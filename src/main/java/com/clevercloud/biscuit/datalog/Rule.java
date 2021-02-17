@@ -2,6 +2,7 @@ package com.clevercloud.biscuit.datalog;
 
 import biscuit.format.schema.Schema;
 import com.clevercloud.biscuit.datalog.constraints.Constraint;
+import com.clevercloud.biscuit.datalog.expressions.Expression;
 import com.clevercloud.biscuit.error.Error;
 import io.vavr.control.Either;
 
@@ -15,7 +16,7 @@ import static io.vavr.API.Right;
 public final class Rule implements Serializable {
    private final Predicate head;
    private final List<Predicate> body;
-   private final List<Constraint> constraints;
+   private final List<Expression> expressions;
 
    public final Predicate head() {
       return this.head;
@@ -25,8 +26,8 @@ public final class Rule implements Serializable {
       return this.body;
    }
 
-   public final List<Constraint> constraints() {
-      return this.constraints;
+   public final List<Expression> expressions() {
+      return this.expressions;
    }
 
    public void apply(final Set<Fact> facts, final Set<Fact> new_facts) {
@@ -35,7 +36,7 @@ public final class Rule implements Serializable {
          variables_set.addAll(pred.ids().stream().filter((id) -> id instanceof ID.Variable).map((id) -> ((ID.Variable) id).value()).collect(Collectors.toSet()));
       }
       final MatchedVariables variables = new MatchedVariables(variables_set);
-      for (final Map<Long, ID> h : new Combinator(variables, this.body, this.constraints, facts).combine()) {
+      for (final Map<Long, ID> h : new Combinator(variables, this.body, this.expressions, facts).combine()) {
          final Predicate p = this.head.clone();
          final ListIterator<ID> idit = p.ids_iterator();
          while (idit.hasNext()) {
@@ -50,10 +51,10 @@ public final class Rule implements Serializable {
       }
    }
 
-   public Rule(final Predicate head, final List<Predicate> body, final List<Constraint> constraints) {
+   public Rule(final Predicate head, final List<Predicate> body, final List<Expression>  expressions) {
       this.head = head;
       this.body = body;
-      this.constraints = constraints;
+      this.expressions = expressions;
    }
 
    public Schema.RuleV1 serialize() {
@@ -64,8 +65,8 @@ public final class Rule implements Serializable {
          b.addBody(this.body.get(i).serialize());
       }
 
-      for (int i = 0; i < this.constraints.size(); i++) {
-         b.addConstraints(this.constraints.get(i).serialize());
+      for (int i = 0; i < this.expressions.size(); i++) {
+         b.addExpressions(this.expressions.get(i).serialize());
       }
 
       return b.build();
@@ -83,14 +84,14 @@ public final class Rule implements Serializable {
          }
       }
 
-      ArrayList<Constraint> constraints = new ArrayList<>();
+      ArrayList<Expression> expressions = new ArrayList<>();
       for (Schema.ConstraintV0 constraint: rule.getConstraintsList()) {
-         Either<Error.FormatError, Constraint> res = Constraint.deserializeV0(constraint);
+         Either<Error.FormatError, Expression> res = Constraint.deserializeV0(constraint);
          if(res.isLeft()) {
             Error.FormatError e = res.getLeft();
             return Left(e);
          } else {
-            constraints.add(res.get());
+            expressions.add(res.get());
          }
       }
 
@@ -99,7 +100,7 @@ public final class Rule implements Serializable {
          Error.FormatError e = res.getLeft();
          return Left(e);
       } else {
-         return Right(new Rule(res.get(), body, constraints));
+         return Right(new Rule(res.get(), body, expressions));
       }
    }
 
@@ -115,14 +116,14 @@ public final class Rule implements Serializable {
          }
       }
 
-      ArrayList<Constraint> constraints = new ArrayList<>();
-      for (Schema.ConstraintV1 constraint: rule.getConstraintsList()) {
-         Either<Error.FormatError, Constraint> res = Constraint.deserializeV1(constraint);
+      ArrayList<Expression> expressions = new ArrayList<>();
+      for (Schema.ExpressionV1 expression: rule.getExpressionsList()) {
+         Either<Error.FormatError, Expression> res = Expression.deserializeV1(expression);
          if(res.isLeft()) {
             Error.FormatError e = res.getLeft();
             return Left(e);
          } else {
-            constraints.add(res.get());
+            expressions.add(res.get());
          }
       }
 
@@ -131,7 +132,7 @@ public final class Rule implements Serializable {
          Error.FormatError e = res.getLeft();
          return Left(e);
       } else {
-         return Right(new Rule(res.get(), body, constraints));
+         return Right(new Rule(res.get(), body, expressions));
       }
    }
 }

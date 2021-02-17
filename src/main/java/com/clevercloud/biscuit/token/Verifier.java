@@ -7,10 +7,7 @@ import com.clevercloud.biscuit.datalog.World;
 import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.error.FailedCaveat;
 import com.clevercloud.biscuit.error.LogicError;
-import com.clevercloud.biscuit.token.builder.Term;
-import com.clevercloud.biscuit.token.builder.Fact;
-import com.clevercloud.biscuit.token.builder.Rule;
-import com.clevercloud.biscuit.token.builder.Caveat;
+import com.clevercloud.biscuit.token.builder.*;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 
@@ -113,7 +110,8 @@ public class Verifier {
                 "revocation_check",
                 Arrays.asList((var("id"))),
                 Arrays.asList(pred("revocation_id", Arrays.asList(var("id")))),
-                Arrays.asList(new com.clevercloud.biscuit.token.builder.constraints.IntConstraint.NotInSet("id", new HashSet(ids)))
+                Arrays.asList(new Expression.Binary(Expression.Op.NotIn, new Expression.Value(var("id")),
+                        new Expression.Value(new Term.Set(new HashSet(ids)))))
         ));
 
         this.caveats.add(new Caveat(q));
