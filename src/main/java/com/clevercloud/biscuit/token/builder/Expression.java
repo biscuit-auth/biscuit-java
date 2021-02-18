@@ -7,6 +7,7 @@ public abstract class Expression {
 
     public enum Op {
         Negate,
+        Parens,
         LessThan,
         GreaterThan,
         LessOrEqual,

@@ -56,6 +56,7 @@ public abstract class Op {
 
     public enum UnaryOp {
         Negate,
+        Parens,
     }
 
     public final static class Unary extends Op {
@@ -85,6 +86,9 @@ public abstract class Op {
                 case Negate:
                     b1.setKind(Schema.OpUnary.Kind.Negate);
                     break;
+                case Parens:
+                    b1.setKind(Schema.OpUnary.Kind.Parens);
+                    break;
             }
 
             b.setUnary(b1.build());
@@ -96,6 +100,8 @@ public abstract class Op {
             switch(op.getKind()) {
                 case Negate:
                     return Right(new Op.Unary(UnaryOp.Negate));
+                case Parens:
+                    return Right(new Op.Unary(UnaryOp.Parens));
             }
 
             return Left(new Error.FormatError.DeserializationError("invalid unary operation"));
