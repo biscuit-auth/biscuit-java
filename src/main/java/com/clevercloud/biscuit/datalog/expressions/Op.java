@@ -114,8 +114,7 @@ public abstract class Op {
         LessOrEqual,
         GreaterOrEqual,
         Equal,
-        In,
-        NotIn,
+        Contains,
         Prefix,
         Suffix,
         Regex,
@@ -166,11 +165,8 @@ public abstract class Op {
                 case Equal:
                     b1.setKind(Schema.OpBinary.Kind.Equal);
                     break;
-                case In:
-                    b1.setKind(Schema.OpBinary.Kind.In);
-                    break;
-                case NotIn:
-                    b1.setKind(Schema.OpBinary.Kind.NotIn);
+                case Contains:
+                    b1.setKind(Schema.OpBinary.Kind.Contains);
                     break;
                 case Prefix:
                     b1.setKind(Schema.OpBinary.Kind.Prefix);
@@ -218,10 +214,8 @@ public abstract class Op {
                     return Right(new Op.Binary(BinaryOp.GreaterOrEqual));
                 case Equal:
                     return Right(new Op.Binary(BinaryOp.Equal));
-                case In:
-                    return Right(new Op.Binary(BinaryOp.In));
-                case NotIn:
-                    return Right(new Op.Binary(BinaryOp.NotIn));
+                case Contains:
+                    return Right(new Op.Binary(BinaryOp.Contains));
                 case Prefix:
                     return Right(new Op.Binary(BinaryOp.Prefix));
                 case Suffix:

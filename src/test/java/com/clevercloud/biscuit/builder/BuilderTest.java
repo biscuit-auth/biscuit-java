@@ -42,7 +42,7 @@ public class BuilderTest extends TestCase {
                 Arrays.asList(pred("ns_operation", Arrays.asList(s("authority"), s("namespace"), var("tenant"), var("namespace"), var("operation")))),
                 Arrays.asList(
                         new Expression.Binary(
-                                Expression.Op.In,
+                                Expression.Op.Contains,
                                 new Expression.Value(var("operation")),
                                 new Expression.Value(new Term.Set(new HashSet<>(Arrays.asList(
                                         s("create_topic"),
@@ -56,7 +56,7 @@ public class BuilderTest extends TestCase {
                 Arrays.asList(pred("topic_operation", Arrays.asList(s("authority"), s("topic"), var("tenant"), var("namespace"), var("topic"), var("operation")))),
                 Arrays.asList(
                         new Expression.Binary(
-                                Expression.Op.In,
+                                Expression.Op.Contains,
                                 new Expression.Value(var("operation")),
                                 new Expression.Value(new Term.Set(new HashSet<>(Arrays.asList(
                                         s("lookup")

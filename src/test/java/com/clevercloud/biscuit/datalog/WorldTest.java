@@ -319,7 +319,7 @@ public class WorldTest extends TestCase {
                       new Expression(new ArrayList<Op>(Arrays.asList(
                               new Op.Value(new ID.Variable(syms.insert("int"))),
                               new Op.Value(new ID.Set(new HashSet<>(Arrays.asList(new ID.Integer(0l), new ID.Integer(1l))))),
-                              new Op.Binary(Op.BinaryOp.In)
+                              new Op.Binary(Op.BinaryOp.Contains)
                       )))
               )
       );
@@ -342,7 +342,8 @@ public class WorldTest extends TestCase {
                       new Expression(new ArrayList<Op>(Arrays.asList(
                               new Op.Value(new ID.Variable(syms.insert("sym"))),
                               new Op.Value(new ID.Set(new HashSet<>(Arrays.asList(new ID.Symbol(abc_sym_id), new ID.Symbol(ghi_sym_id))))),
-                              new Op.Binary(Op.BinaryOp.NotIn)
+                              new Op.Binary(Op.BinaryOp.Contains),
+                              new Op.Unary(Op.UnaryOp.Negate)
                       )))
               )
       );
@@ -362,7 +363,7 @@ public class WorldTest extends TestCase {
                       new Expression(new ArrayList<Op>(Arrays.asList(
                               new Op.Value(new ID.Variable(syms.insert("str"))),
                               new Op.Value(new ID.Set(new HashSet<>(Arrays.asList(new ID.Str("test"), new ID.Str("aaa"))))),
-                              new Op.Binary(Op.BinaryOp.In)
+                              new Op.Binary(Op.BinaryOp.Contains)
                       )))
               )
       );

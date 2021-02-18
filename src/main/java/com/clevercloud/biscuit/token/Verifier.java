@@ -112,8 +112,16 @@ public class Verifier {
                 "revocation_check",
                 Arrays.asList((var("id"))),
                 Arrays.asList(pred("revocation_id", Arrays.asList(var("id")))),
-                Arrays.asList(new Expression.Binary(Expression.Op.NotIn, new Expression.Value(var("id")),
-                        new Expression.Value(new Term.Set(new HashSet(ids)))))
+                Arrays.asList(
+                        new Expression.Unary(
+                                Expression.Op.Negate,
+                                new Expression.Binary(
+                                        Expression.Op.Contains,
+                                        new Expression.Value(var("id")),
+                                        new Expression.Value(new Term.Set(new HashSet(ids)))
+                                )
+                        )
+                )
         ));
 
         this.checks.add(new Check(q));

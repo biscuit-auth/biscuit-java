@@ -93,7 +93,7 @@ public final class Constraint implements Serializable {
                         set.add(new ID.Integer(l.longValue()));
                      }
                      ops.add(new Op.Value(new ID.Set(set)));
-                     ops.add(new Op.Binary(Op.BinaryOp.In));
+                     ops.add(new Op.Binary(Op.BinaryOp.Contains));
                      return Right(new Expression(ops));
                   case NOT_IN:
                      HashSet<ID> set2 = new HashSet<>();
@@ -101,7 +101,8 @@ public final class Constraint implements Serializable {
                         set2.add(new ID.Integer(l.longValue()));
                      }
                      ops.add(new Op.Value(new ID.Set(set2)));
-                     ops.add(new Op.Binary(Op.BinaryOp.NotIn));
+                     ops.add(new Op.Binary(Op.BinaryOp.Contains));
+                     ops.add(new Op.Unary(Op.UnaryOp.Negate));
                      return Right(new Expression(ops));
                }
             }
@@ -139,7 +140,7 @@ public final class Constraint implements Serializable {
                         set.add(new ID.Bytes(l.toByteArray()));
                      }
                      ops.add(new Op.Value(new ID.Set(set)));
-                     ops.add(new Op.Binary(Op.BinaryOp.In));
+                     ops.add(new Op.Binary(Op.BinaryOp.Contains));
                      return Right(new Expression(ops));
                   case NOT_IN:
                      HashSet<ID> set2 = new HashSet<>();
@@ -147,7 +148,8 @@ public final class Constraint implements Serializable {
                         set2.add(new ID.Bytes(l.toByteArray()));
                      }
                      ops.add(new Op.Value(new ID.Set(set2)));
-                     ops.add(new Op.Binary(Op.BinaryOp.NotIn));
+                     ops.add(new Op.Binary(Op.BinaryOp.Contains));
+                     ops.add(new Op.Unary(Op.UnaryOp.Negate));
                      return Right(new Expression(ops));
                }
 
@@ -180,7 +182,7 @@ public final class Constraint implements Serializable {
                         set.add(new ID.Str(l));
                      }
                      ops.add(new Op.Value(new ID.Set(set)));
-                     ops.add(new Op.Binary(Op.BinaryOp.In));
+                     ops.add(new Op.Binary(Op.BinaryOp.Contains));
                      return Right(new Expression(ops));
                   case NOT_IN:
                      HashSet<ID> set2 = new HashSet<>();
@@ -188,7 +190,8 @@ public final class Constraint implements Serializable {
                         set2.add(new ID.Str(l));
                      }
                      ops.add(new Op.Value(new ID.Set(set2)));
-                     ops.add(new Op.Binary(Op.BinaryOp.NotIn));
+                     ops.add(new Op.Binary(Op.BinaryOp.Contains));
+                     ops.add(new Op.Unary(Op.UnaryOp.Negate));
                      return Right(new Expression(ops));
                }
             }
@@ -204,7 +207,7 @@ public final class Constraint implements Serializable {
                         set.add(new ID.Symbol(l.longValue()));
                      }
                      ops.add(new Op.Value(new ID.Set(set)));
-                     ops.add(new Op.Binary(Op.BinaryOp.In));
+                     ops.add(new Op.Binary(Op.BinaryOp.Contains));
                      return Right(new Expression(ops));
                   case NOT_IN:
                      HashSet<ID> set2 = new HashSet<>();
@@ -212,7 +215,8 @@ public final class Constraint implements Serializable {
                         set2.add(new ID.Symbol(l.longValue()));
                      }
                      ops.add(new Op.Value(new ID.Set(set2)));
-                     ops.add(new Op.Binary(Op.BinaryOp.NotIn));
+                     ops.add(new Op.Binary(Op.BinaryOp.Contains));
+                     ops.add(new Op.Unary(Op.UnaryOp.Negate));
                      return Right(new Expression(ops));
                }
             }
