@@ -68,8 +68,9 @@ public abstract class ID implements Serializable {
       public boolean match(final ID other) {
          if (other instanceof Variable) {
             return true;
+         } else {
+            return this.equals(other);
          }
-         return false;
       }
 
       public Date(final long value) {
@@ -261,7 +262,7 @@ public abstract class ID implements Serializable {
          if (other instanceof Variable) {
             return true;
          }
-         if (other instanceof Str) {
+         if (other instanceof Bytes) {
             return this.value.equals(((Bytes) other).value);
          }
          return false;
@@ -508,7 +509,7 @@ public abstract class ID implements Serializable {
             return true;
          }
          if (other instanceof Set) {
-            return this.value == ((Set) other).value;
+            return this.value.equals(((Set) other).value);
          }
          return false;
       }
