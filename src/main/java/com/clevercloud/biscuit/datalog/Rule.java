@@ -51,6 +51,18 @@ public final class Rule implements Serializable {
       }
    }
 
+   // do not produce new facts, only find one matching set of facts
+   public boolean test(final Set<Fact> facts) {
+      final Set<Long> variables_set = new HashSet<>();
+      for (final Predicate pred : this.body) {
+         variables_set.addAll(pred.ids().stream().filter((id) -> id instanceof ID.Variable).map((id) -> ((ID.Variable) id).value()).collect(Collectors.toSet()));
+      }
+      final MatchedVariables variables = new MatchedVariables(variables_set);
+      Combinator c = new Combinator(variables, this.body, this.expressions, facts);
+
+      return c.next().isDefined();
+   }
+
    public Rule(final Predicate head, final List<Predicate> body, final List<Expression>  expressions) {
       this.head = head;
       this.body = body;

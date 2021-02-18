@@ -104,6 +104,10 @@ public final class World implements Serializable {
       return new_facts;
    }
 
+   public final boolean test_rule(final Rule rule) {
+      return rule.test(this.facts);
+   }
+
    public World() {
       this.facts = new HashSet<>();
       this.rules = new ArrayList<>();

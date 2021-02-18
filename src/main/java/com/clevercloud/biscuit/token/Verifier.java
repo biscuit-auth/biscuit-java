@@ -228,13 +228,13 @@ public class Verifier {
             com.clevercloud.biscuit.datalog.Check c = this.token.authority.checks.get(j);
 
             for(int k = 0; k < c.queries().size(); k++) {
-                Set<com.clevercloud.biscuit.datalog.Fact> res = world.query_rule(c.queries().get(k));
+                boolean res = world.test_rule(c.queries().get(k));
 
                 if(Instant.now().compareTo(timeLimit) >= 0) {
                     return Left(new Error.Timeout());
                 }
 
-                if (!res.isEmpty()) {
+                if (res) {
                     successful = true;
                     break;
                 }
@@ -250,13 +250,13 @@ public class Verifier {
             boolean successful = false;
 
             for(int k = 0; k < c.queries().size(); k++) {
-                Set<com.clevercloud.biscuit.datalog.Fact> res = world.query_rule(c.queries().get(k));
+                boolean res = world.test_rule(c.queries().get(k));
 
                 if(Instant.now().compareTo(timeLimit) >= 0) {
                     return Left(new Error.Timeout());
                 }
 
-                if (!res.isEmpty()) {
+                if (res) {
                     successful = true;
                     break;
                 }
@@ -275,13 +275,13 @@ public class Verifier {
                 com.clevercloud.biscuit.datalog.Check c = b.checks.get(j);
 
                 for(int k = 0; k < c.queries().size(); k++) {
-                    Set<com.clevercloud.biscuit.datalog.Fact> res = world.query_rule(c.queries().get(k));
+                    boolean res = world.test_rule(c.queries().get(k));
 
                     if(Instant.now().compareTo(timeLimit) >= 0) {
                         return Left(new Error.Timeout());
                     }
 
-                    if (!res.isEmpty()) {
+                    if (res) {
                         successful = true;
                         break;
                     }
@@ -299,13 +299,13 @@ public class Verifier {
                 boolean successful = false;
 
                 for(int k = 0; k < c.queries().size(); k++) {
-                    Set<com.clevercloud.biscuit.datalog.Fact> res = world.query_rule(c.queries().get(k));
+                    boolean res = world.test_rule(c.queries().get(k));
 
                     if(Instant.now().compareTo(timeLimit) >= 0) {
                         return Left(new Error.Timeout());
                     }
 
-                    if (!res.isEmpty()) {
+                    if (res) {
                         return Right(Long.valueOf(i));
                     }
                 }
