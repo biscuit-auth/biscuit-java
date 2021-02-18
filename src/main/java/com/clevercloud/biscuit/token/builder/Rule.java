@@ -1,8 +1,6 @@
 package com.clevercloud.biscuit.token.builder;
 
 import com.clevercloud.biscuit.datalog.SymbolTable;
-import com.clevercloud.biscuit.datalog.constraints.Constraint;
-import com.clevercloud.biscuit.token.builder.constraints.ConstraintBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
