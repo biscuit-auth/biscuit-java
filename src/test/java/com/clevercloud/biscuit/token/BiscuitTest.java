@@ -161,8 +161,8 @@ public class BiscuitTest extends TestCase {
 
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
-                        new FailedCheck.FailedBlock(1, 0, "caveat1($resource) <- resource(#ambient, $resource), operation(#ambient, #read), right(#authority, $resource, #read)"),
-                        new FailedCheck.FailedBlock(2, 0, "caveat2(#file1) <- resource(#ambient, #file1)")
+                        new FailedCheck.FailedBlock(1, 0, "check if resource(#ambient, $resource), operation(#ambient, #read), right(#authority, $resource, #read)"),
+                        new FailedCheck.FailedBlock(2, 0, "check if resource(#ambient, #file1)")
                 ))),
                 res2.getLeft());
     }

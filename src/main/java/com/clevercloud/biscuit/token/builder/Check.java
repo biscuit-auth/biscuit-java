@@ -29,7 +29,7 @@ public class Check {
 
     @Override
     public String toString() {
-        return "check("+queries+")";
+        return "check if "+queries;
     }
 
     @Override

@@ -85,7 +85,7 @@ public final class SymbolTable implements Serializable {
 
    public String print_check(final Check c) {
       String res = "check if ";
-      final List<String> queries = c.queries().stream().map((q) -> this.print_rule(q)).collect(Collectors.toList());
+      final List<String> queries = c.queries().stream().map((q) -> this.print_rule_body(q)).collect(Collectors.toList());
       return res + String.join(" or ", queries);
    }
 

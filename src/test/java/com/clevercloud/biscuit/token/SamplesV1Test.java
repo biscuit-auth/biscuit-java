@@ -395,6 +395,7 @@ public class SamplesV1Test extends TestCase {
                 )
         ));
         v1.add_check(new Check(queries));
+        v1.allow();
 
         Assert.assertTrue(v1.verify().isRight());
     }
