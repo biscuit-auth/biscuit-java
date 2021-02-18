@@ -262,7 +262,7 @@ public class SamplesV1Test extends TestCase {
         Error e = res.getLeft();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
-                        new FailedCheck.FailedVerifier(0, "caveat1($0) <- resource(#ambient, $0), operation(#ambient, $1), right(#authority, $0, $1)")
+                        new FailedCheck.FailedVerifier(0, "check if resource(#ambient, $0), operation(#ambient, $1), right(#authority, $0, $1)")
                 ))),
                 e);
     }
@@ -295,7 +295,7 @@ public class SamplesV1Test extends TestCase {
         Error e = res.getLeft();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
-                        new FailedCheck.FailedBlock(0, 0, "caveat1(\"file1\") <- resource(#ambient, \"file1\")")
+                        new FailedCheck.FailedBlock(0, 0, "check if resource(#ambient, \"file1\")")
                 ))),
                 e);
     }
@@ -328,7 +328,7 @@ public class SamplesV1Test extends TestCase {
         Error e = res.getLeft();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
-                        new FailedCheck.FailedBlock(1, 0, "caveat1($0) <- valid_date($0), resource(#ambient, $0)")
+                        new FailedCheck.FailedBlock(1, 0, "check if valid_date($0), resource(#ambient, $0)")
                 ))),
                 e);
     }
@@ -420,7 +420,7 @@ public class SamplesV1Test extends TestCase {
         Error e = res.getLeft();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
-                        new FailedCheck.FailedBlock(0, 0, "caveat1(#test) <- resource(#ambient, #hello)")
+                        new FailedCheck.FailedBlock(0, 0, "check if resource(#ambient, #hello)")
                 ))),
                 e);
     }

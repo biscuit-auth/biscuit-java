@@ -30,7 +30,7 @@ public abstract class ID implements Serializable {
       } else if(id.getKind() == Schema.IDV0.Kind.VARIABLE) {
          return Variable.deserializeV0(id);
       } else {
-         return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+         return Left(new Error.FormatError.DeserializationError("invalid ID kind: "+id.getKind()));
       }
    }
 
@@ -49,8 +49,10 @@ public abstract class ID implements Serializable {
          return Variable.deserializeV1(id);
       } else if(id.hasBool()) {
          return Bool.deserializeV1(id);
+      } else if(id.hasSet()) {
+         return Set.deserializeV1(id);
       } else {
-         return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+         return Left(new Error.FormatError.DeserializationError("invalid ID kind: id.getKind()"));
       }
    }
 
@@ -99,7 +101,7 @@ public abstract class ID implements Serializable {
 
       static public Either<Error.FormatError, ID> deserializeV0(Schema.IDV0 id) {
          if(id.getKind() != Schema.IDV0.Kind.DATE) {
-            return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+            return Left(new Error.FormatError.DeserializationError("invalid ID kind, expected date"));
          } else {
             return Right(new Date(id.getDate()));
          }
@@ -107,7 +109,7 @@ public abstract class ID implements Serializable {
 
       static public Either<Error.FormatError, ID> deserializeV1(Schema.IDV1 id) {
          if(!id.hasDate()) {
-            return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+            return Left(new Error.FormatError.DeserializationError("invalid ID kind, expected date"));
          } else {
             return Right(new Date(id.getDate()));
          }
@@ -164,7 +166,7 @@ public abstract class ID implements Serializable {
 
       static public Either<Error.FormatError, ID> deserializeV0(Schema.IDV0 id) {
          if(id.getKind() != Schema.IDV0.Kind.INTEGER) {
-            return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+            return Left(new Error.FormatError.DeserializationError("invalid ID kind, expected integer"));
          } else {
             return Right(new Integer(id.getInteger()));
          }
@@ -172,7 +174,7 @@ public abstract class ID implements Serializable {
 
       static public Either<Error.FormatError, ID> deserializeV1(Schema.IDV1 id) {
          if(!id.hasInteger()) {
-            return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+            return Left(new Error.FormatError.DeserializationError("invalid ID kind, expected integer"));
          } else {
             return Right(new Integer(id.getInteger()));
          }
@@ -229,7 +231,7 @@ public abstract class ID implements Serializable {
 
       static public Either<Error.FormatError, ID> deserializeV0(Schema.IDV0 id) {
          if(id.getKind() != Schema.IDV0.Kind.STR) {
-            return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+            return Left(new Error.FormatError.DeserializationError("invalid ID kind, expected string"));
          } else {
             return Right(new Str(id.getStr()));
          }
@@ -237,7 +239,7 @@ public abstract class ID implements Serializable {
 
       static public Either<Error.FormatError, ID> deserializeV1(Schema.IDV1 id) {
          if(!id.hasString()) {
-            return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+            return Left(new Error.FormatError.DeserializationError("invalid ID kind, expected string"));
          } else {
             return Right(new Str(id.getString()));
          }
@@ -294,7 +296,7 @@ public abstract class ID implements Serializable {
 
       static public Either<Error.FormatError, ID> deserializeV0(Schema.IDV0 id) {
          if(id.getKind() != Schema.IDV0.Kind.STR) {
-            return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+            return Left(new Error.FormatError.DeserializationError("invalid ID kind, expected byte array"));
          } else {
             return Right(new Str(id.getStr()));
          }
@@ -302,7 +304,7 @@ public abstract class ID implements Serializable {
 
       static public Either<Error.FormatError, ID> deserializeV1(Schema.IDV1 id) {
          if(!id.hasBytes()) {
-            return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+            return Left(new Error.FormatError.DeserializationError("invalid ID kind, expected byte array"));
          } else {
             return Right(new Bytes(id.getBytes().toByteArray()));
          }
@@ -359,7 +361,7 @@ public abstract class ID implements Serializable {
 
       static public Either<Error.FormatError, ID> deserializeV0(Schema.IDV0 id) {
          if(id.getKind() != Schema.IDV0.Kind.SYMBOL) {
-            return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+            return Left(new Error.FormatError.DeserializationError("invalid ID kind, expected symbol"));
          } else {
             return Right(new Symbol(id.getSymbol()));
          }
@@ -367,7 +369,7 @@ public abstract class ID implements Serializable {
 
       static public Either<Error.FormatError, ID> deserializeV1(Schema.IDV1 id) {
          if(!id.hasSymbol()) {
-            return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+            return Left(new Error.FormatError.DeserializationError("invalid ID kind, expected symbol"));
          } else {
             return Right(new Symbol(id.getSymbol()));
          }
@@ -418,7 +420,7 @@ public abstract class ID implements Serializable {
 
       static public Either<Error.FormatError, ID> deserializeV0(Schema.IDV0 id) {
          if(id.getKind() != Schema.IDV0.Kind.VARIABLE) {
-            return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+            return Left(new Error.FormatError.DeserializationError("invalid ID kind, expected variable"));
          } else {
             return Right(new Variable(id.getVariable()));
          }
@@ -426,7 +428,7 @@ public abstract class ID implements Serializable {
 
       static public Either<Error.FormatError, ID> deserializeV1(Schema.IDV1 id) {
          if(!id.hasVariable()) {
-            return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+            return Left(new Error.FormatError.DeserializationError("invalid ID kind, expected variable"));
          } else {
             return Right(new Variable(id.getVariable()));
          }
@@ -483,7 +485,7 @@ public abstract class ID implements Serializable {
 
       static public Either<Error.FormatError, ID> deserializeV1(Schema.IDV1 id) {
          if(!id.hasBool()) {
-            return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+            return Left(new Error.FormatError.DeserializationError("invalid ID kind, expected boolean"));
          } else {
             return Right(new Bool(id.getBool()));
          }
@@ -550,7 +552,7 @@ public abstract class ID implements Serializable {
 
       static public Either<Error.FormatError, ID> deserializeV1(Schema.IDV1 id) {
          if(!id.hasSet()) {
-            return Left(new Error.FormatError.DeserializationError("invalid ID kind"));
+            return Left(new Error.FormatError.DeserializationError("invalid ID kind, expected set"));
          } else {
             java.util.HashSet<ID> values = new HashSet<>();
             Schema.IDSet s = id.getSet();
