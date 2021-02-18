@@ -146,4 +146,27 @@ public class LogicError {
             return "NoMatchingPolicy{}";
         }
     }
+
+    public static class Denied extends LogicError {
+        private long id;
+
+        public Denied(long id) {
+            this.id = id;
+        }
+
+        @Override
+        public int hashCode() {
+            return super.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return super.equals(obj);
+        }
+
+        @Override
+        public String toString() {
+            return "Denied("+id+")";
+        }
+    }
 }

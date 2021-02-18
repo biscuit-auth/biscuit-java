@@ -306,7 +306,11 @@ public class Verifier {
                     }
 
                     if (res) {
-                        return Right(Long.valueOf(i));
+                        if(this.policies.get(i).kind == Policy.Kind.Deny) {
+                            return Left(new Error.FailedLogic(new LogicError.Denied(i)));
+                        } else {
+                            return Right(Long.valueOf(i));
+                        }
                     }
                 }
             }
