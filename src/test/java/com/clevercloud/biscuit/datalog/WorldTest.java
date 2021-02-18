@@ -28,10 +28,10 @@ public class WorldTest extends TestCase {
       final ID b = syms.add("B");
       final ID c = syms.add("C");
       final ID d = syms.add("D");
-      final ID e = syms.add("e");
+      final ID e = syms.add("E");
       final long parent = syms.insert("parent");
       final long grandparent = syms.insert("grandparent");
-      final long sibling = syms.insert("syblings");
+      final long sibling = syms.insert("siblings");
 
       w.add_fact(new Fact(new Predicate(parent, Arrays.asList(a, b))));
       w.add_fact(new Fact(new Predicate(parent, Arrays.asList(b, c))));
@@ -404,15 +404,17 @@ public class WorldTest extends TestCase {
               Arrays.asList(new Predicate(resource, Arrays.asList(ambient, file1))
       ), new ArrayList<>());
 
-      System.out.println("testing caveat 1: " + syms.print_rule(r1));
+      System.out.println("testing caveat 1(should return nothing): " + syms.print_rule(r1));
       Set<Fact>res = w.query_rule(r1);
+      System.out.println(res);
       for (final Fact f : res) {
          System.out.println("\t" + syms.print_fact(f));
       }
       Assert.assertTrue(res.isEmpty());
 
       final long caveat2 = syms.insert("caveat2");
-      final ID var0 = new ID.Variable(0);
+      final long var0_id = syms.insert("var0");
+      final ID var0 = new ID.Variable(var0_id);
       //r2: caveat1(0?) <- resource(#ambient, 0?) && operation(#ambient, #read) && right(#authority, 0?, #read)
       final Rule r2 = new Rule(
               new Predicate(caveat2, Arrays.asList(var0)),
@@ -424,6 +426,7 @@ public class WorldTest extends TestCase {
 
       System.out.println("testing caveat 2: " + syms.print_rule(r2));
       res = w.query_rule(r2);
+      System.out.println(res);
       for (final Fact f : res) {
          System.out.println("\t" + syms.print_fact(f));
       }
