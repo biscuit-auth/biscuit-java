@@ -25,6 +25,7 @@ import static io.vavr.API.Right;
 public class Verifier {
     Biscuit token;
     List<Check> checks;
+    List<Policy> policies;
     World base_world;
     World world;
     SymbolTable base_symbols;
@@ -37,6 +38,7 @@ public class Verifier {
         this.base_symbols = new SymbolTable(this.token.symbols);
         this.symbols = new SymbolTable(this.token.symbols);
         this.checks = new ArrayList<>();
+        this.policies = new ArrayList<>();
     }
 
     /**
@@ -144,6 +146,32 @@ public class Verifier {
         return Right(ids);
     }
 
+    public void allow() {
+        ArrayList<Rule> q = new ArrayList<>();
+
+        q.add(constrained_rule(
+                "allow",
+                new ArrayList<>(),
+                new ArrayList<>(),
+                Arrays.asList(new Expression.Value(new Term.Bool(true)))
+        ));
+
+        this.policies.add(new Policy(q, Policy.Kind.Allow));
+    }
+
+    public void deny() {
+        ArrayList<Rule> q = new ArrayList<>();
+
+        q.add(constrained_rule(
+                "deny",
+                new ArrayList<>(),
+                new ArrayList<>(),
+                Arrays.asList(new Expression.Value(new Term.Bool(true)))
+        ));
+
+        this.policies.add(new Policy(q, Policy.Kind.Deny));
+    }
+
     public Either<Error, Set<Fact>> query(Rule query) {
         return this.query(query, new RunLimits());
     }
@@ -166,11 +194,11 @@ public class Verifier {
         return Right(s);
     }
 
-    public Either<Error, Void> verify() {
+    public Either<Error, Long> verify() {
         return this.verify(new RunLimits());
     }
 
-    public Either<Error, Void> verify(RunLimits limits) {
+    public Either<Error, Long> verify(RunLimits limits) {
         Instant timeLimit = Instant.now().plus(limits.maxTime);
 
         if(this.symbols.get("authority").isEmpty() || this.symbols.get("ambient").isEmpty()) {
@@ -258,7 +286,24 @@ public class Verifier {
         }
 
         if(errors.isEmpty()) {
-            return Right(null);
+            for (int i = 0; i < this.policies.size(); i++) {
+                com.clevercloud.biscuit.datalog.Check c = this.policies.get(i).convert(symbols);
+                boolean successful = false;
+
+                for(int k = 0; k < c.queries().size(); k++) {
+                    Set<com.clevercloud.biscuit.datalog.Fact> res = world.query_rule(c.queries().get(k));
+
+                    if(Instant.now().compareTo(timeLimit) >= 0) {
+                        return Left(new Error.Timeout());
+                    }
+
+                    if (!res.isEmpty()) {
+                        return Right(Long.valueOf(i));
+                    }
+                }
+            }
+
+            return Left(new Error.FailedLogic(new LogicError.NoMatchingPolicy()));
         } else {
             System.out.println(errors);
             return Left(new Error.FailedLogic(new LogicError.FailedChecks(errors)));

@@ -198,18 +198,21 @@ public class BiscuitTest extends TestCase {
         Verifier v1 = b2.verify(root.public_key()).get();
         v1.add_resource("/folder1/file1");
         v1.add_operation("read");
-        Either<Error, Void> res = v1.verify();
+        v1.allow();
+        Either<Error, Long> res = v1.verify();
         Assert.assertTrue(res.isRight());
 
         Verifier v2 = b2.verify(root.public_key()).get();
         v2.add_resource("/folder2/file3");
         v2.add_operation("read");
+        v2.allow();
         res = v2.verify();
         Assert.assertTrue(res.isLeft());
 
         Verifier v3 = b2.verify(root.public_key()).get();
         v3.add_resource("/folder2/file1");
         v3.add_operation("write");
+        v3.allow();
         res = v3.verify();
 
         Error e = res.getLeft();

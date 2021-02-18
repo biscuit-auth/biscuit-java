@@ -51,7 +51,8 @@ public class SamplesV1Test extends TestCase {
         Verifier v1 = token.verify(root).get();
         v1.add_resource("file1");
         v1.add_operation("read");
-        Either<Error, Void> res = v1.verify();
+        v1.allow();
+        Either<Error, Long> res = v1.verify();
         if(res.isLeft()) {
             System.out.println("error: "+res.getLeft());
         }
@@ -225,7 +226,8 @@ public class SamplesV1Test extends TestCase {
         v1.add_resource("file1");
         v1.add_operation("read");
         v1.add_fact(fact("owner", Arrays.asList(s("ambient"), s("alice"), string("file1"))));
-        Either<Error, Void> res = v1.verify();
+        v1.allow();
+        Either<Error, Long> res = v1.verify();
         System.out.println(res);
         Assert.assertTrue(res.isRight());
     }
@@ -254,7 +256,8 @@ public class SamplesV1Test extends TestCase {
                         pred("right", Arrays.asList(s("authority"), var("0"), var("1")))
                 )
         )));
-        Either<Error, Void> res = v1.verify();
+        v1.allow();
+        Either<Error, Long> res = v1.verify();
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
@@ -279,13 +282,15 @@ public class SamplesV1Test extends TestCase {
         Verifier v1 = token.verify(root).get();
         v1.add_resource("file1");
         v1.add_operation("read");
+        v1.allow();
         Assert.assertTrue(v1.verify().isRight());
 
         Verifier v2 = token.verify(root).get();
         v2.add_resource("file2");
         v2.add_operation("read");
+        v2.allow();
 
-        Either<Error, Void> res = v2.verify();
+        Either<Error, Long> res = v2.verify();
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
@@ -310,13 +315,15 @@ public class SamplesV1Test extends TestCase {
         Verifier v1 = token.verify(root).get();
         v1.add_resource("file1");
         v1.set_time();
+        v1.allow();
         Assert.assertTrue(v1.verify().isRight());
 
         Verifier v2 = token.verify(root).get();
         v2.add_resource("file2");
         v2.set_time();
+        v2.allow();
 
-        Either<Error, Void> res = v2.verify();
+        Either<Error, Long> res = v2.verify();
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
@@ -341,8 +348,9 @@ public class SamplesV1Test extends TestCase {
         Verifier v1 = token.verify(root).get();
         v1.add_resource("file1");
         v1.set_time();
+        v1.allow();
 
-        Either<Error, Void> res = v1.verify();
+        Either<Error, Long> res = v1.verify();
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
@@ -404,8 +412,9 @@ public class SamplesV1Test extends TestCase {
         System.out.println(token.print());
 
         Verifier v1 = token.verify(root).get();
+        v1.allow();
 
-        Either<Error, Void> res = v1.verify();
+        Either<Error, Long> res = v1.verify();
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
