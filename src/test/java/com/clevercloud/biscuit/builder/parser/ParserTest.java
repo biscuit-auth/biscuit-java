@@ -2,6 +2,7 @@ package com.clevercloud.biscuit.builder.parser;
 
 import com.clevercloud.biscuit.datalog.ID;
 import com.clevercloud.biscuit.datalog.SymbolTable;
+import com.clevercloud.biscuit.datalog.expressions.Op;
 import com.clevercloud.biscuit.token.builder.*;
 import com.clevercloud.biscuit.token.builder.parser.Error;
 import com.clevercloud.biscuit.token.builder.parser.Parser;
@@ -185,6 +186,19 @@ public class ParserTest extends TestCase {
                 )),
                 res3);
 
+        SymbolTable s3 = new SymbolTable();
+        long test = s3.insert("test");
+        assertEquals(
+                Arrays.asList(
+                        new Op.Value(new ID.Integer(1)),
+                        new Op.Value(new ID.Variable(test)),
+                        new Op.Value(new ID.Integer(2)),
+                        new Op.Binary(Op.BinaryOp.Add),
+                        new Op.Binary(Op.BinaryOp.LessThan)
+                ),
+                res3.get()._2.convert(s3).getOps()
+        );
+
         Either<Error, Tuple2<String, Expression>> res4 =
                 Parser.expression("  2 < $test && $var2.starts_with(\\\"test\\\") && true ");
 
@@ -231,6 +245,18 @@ public class ParserTest extends TestCase {
         SymbolTable s = new SymbolTable();
 
         com.clevercloud.biscuit.datalog.expressions.Expression ex = e.convert(s);
+
+        assertEquals(
+                Arrays.asList(
+                        new Op.Value(new ID.Integer(1)),
+                        new Op.Value(new ID.Integer(2)),
+                        new Op.Value(new ID.Integer(3)),
+                        new Op.Binary(Op.BinaryOp.Mul),
+                        new Op.Binary(Op.BinaryOp.Add)
+                ),
+                ex.getOps()
+        );
+
         HashMap variables = new HashMap();
         Option<ID> value = ex.evaluate(variables);
         assertEquals(Option.some(new ID.Integer(7)), value);
@@ -260,6 +286,19 @@ public class ParserTest extends TestCase {
         SymbolTable s2 = new SymbolTable();
 
         com.clevercloud.biscuit.datalog.expressions.Expression ex2 = e2.convert(s2);
+
+        assertEquals(
+                Arrays.asList(
+                        new Op.Value(new ID.Integer(1)),
+                        new Op.Value(new ID.Integer(2)),
+                        new Op.Binary(Op.BinaryOp.Add),
+                        new Op.Unary(Op.UnaryOp.Parens),
+                        new Op.Value(new ID.Integer(3)),
+                        new Op.Binary(Op.BinaryOp.Mul)
+                ),
+                ex2.getOps()
+        );
+
         HashMap variables2 = new HashMap();
         Option<ID> value2 = ex2.evaluate(variables2);
         assertEquals(Option.some(new ID.Integer(9)), value2);

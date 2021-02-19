@@ -20,6 +20,10 @@ public class Expression {
         this.ops = ops;
     }
 
+    public ArrayList<Op> getOps() {
+        return ops;
+    }
+
     public Option<ID> evaluate(Map<Long, ID> variables) {
         throw new UnsupportedOperationException("not implemented");
     }
