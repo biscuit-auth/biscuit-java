@@ -35,6 +35,21 @@ public abstract class Expression {
         public  com.clevercloud.biscuit.datalog.expressions.Expression convert(SymbolTable symbols) {
             throw new UnsupportedOperationException("not implemented");
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Value value1 = (Value) o;
+
+            return value != null ? value.equals(value1.value) : value1.value == null;
+        }
+
+        @Override
+        public int hashCode() {
+            return value != null ? value.hashCode() : 0;
+        }
     }
 
     public final static class Unary extends Expression {
@@ -48,6 +63,24 @@ public abstract class Expression {
 
         public  com.clevercloud.biscuit.datalog.expressions.Expression convert(SymbolTable symbols) {
             throw new UnsupportedOperationException("not implemented");
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Unary unary = (Unary) o;
+
+            if (op != unary.op) return false;
+            return arg1.equals(unary.arg1);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = op.hashCode();
+            result = 31 * result + arg1.hashCode();
+            return result;
         }
     }
 
@@ -64,6 +97,26 @@ public abstract class Expression {
 
         public  com.clevercloud.biscuit.datalog.expressions.Expression convert(SymbolTable symbols) {
             throw new UnsupportedOperationException("not implemented");
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Binary binary = (Binary) o;
+
+            if (op != binary.op) return false;
+            if (!arg1.equals(binary.arg1)) return false;
+            return arg2.equals(binary.arg2);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = op.hashCode();
+            result = 31 * result + arg1.hashCode();
+            result = 31 * result + arg2.hashCode();
+            return result;
         }
     }
 }

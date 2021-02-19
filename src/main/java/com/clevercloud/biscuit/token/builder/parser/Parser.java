@@ -24,7 +24,7 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<String, Rule>> rule(String s) {
-        Either<Error, Tuple2<String, Predicate>> res0 = predicate(s.substring(1));
+        Either<Error, Tuple2<String, Predicate>> res0 = predicate(s);
         if (res0.isLeft()) {
             return Either.left(res0.getLeft());
         }

@@ -1,17 +1,20 @@
 package com.clevercloud.biscuit.builder.parser;
 
-import com.clevercloud.biscuit.token.builder.Term;
-import com.clevercloud.biscuit.token.builder.Fact;
-import com.clevercloud.biscuit.token.builder.Rule;
+import com.clevercloud.biscuit.datalog.ID;
+import com.clevercloud.biscuit.datalog.SymbolTable;
+import com.clevercloud.biscuit.token.builder.*;
 import com.clevercloud.biscuit.token.builder.parser.Error;
 import com.clevercloud.biscuit.token.builder.parser.Parser;
 import io.vavr.Tuple2;
 import io.vavr.control.Either;
+import io.vavr.control.Option;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import static com.clevercloud.biscuit.token.builder.Utils.*;
 
@@ -63,17 +66,203 @@ public class ParserTest extends TestCase {
         assertEquals(Either.right(new Tuple2<String, Fact>("",
                 fact("right", Arrays.asList(s("authority"), string("file1"), s("read"))))),
                 res);
+
+        Either<Error, Tuple2<String, Fact>> res2 = Parser.fact("right( #authority, $var, #read )");
+        assertEquals(Either.left(new Error("$var", "variables are not allowed in facts")),
+            res2);
+
+        Either<Error, Tuple2<String, Fact>> res3 = Parser.fact("date(#ambient,2019-12-02T13:49:53Z)");
+        assertEquals(Either.right(new Tuple2<String, Fact>("",
+                        fact("date", Arrays.asList(s("ambient"), new Term.Date(1575294593))))),
+                res3);
     }
 
     public void testRule() {
-        Either<Error, Tuple2<String, Rule>> res = Parser.rule("*right(#authority, $resource, #read) <- resource( #ambient, $resource), operation(#ambient, #read)");
+        Either<Error, Tuple2<String, Rule>> res =
+                Parser.rule("right(#authority, $resource, #read) <- resource( #ambient, $resource), operation(#ambient, #read)");
         assertEquals(Either.right(new Tuple2<String, Rule>("",
-                rule("right",
-                        Arrays.asList(s("authority"), var("resource"), s("read")),
-                        Arrays.asList(
-                                pred("resource", Arrays.asList(s("ambient"),  var("resource"))),
-                                pred("operation", Arrays.asList(s("ambient"), s("read"))))
-                ))),
+                        rule("right",
+                                Arrays.asList(s("authority"), var("resource"), s("read")),
+                                Arrays.asList(
+                                        pred("resource", Arrays.asList(s("ambient"), var("resource"))),
+                                        pred("operation", Arrays.asList(s("ambient"), s("read"))))
+                        ))),
                 res);
+    }
+
+    public void testRuleWithExpression() {
+            Either<Error, Tuple2<String, Rule>> res =
+                Parser.rule("valid_date(\"file1\") <- time(#ambient, $0 ), resource( #ambient, \"file1\"), $0 <= 2019-12-04T09:46:41+00:00");
+        assertEquals(Either.right(new Tuple2<String, Rule>("",
+                        constrained_rule("valid_date",
+                                Arrays.asList(string("file1")),
+                                Arrays.asList(
+                                        pred("time", Arrays.asList(s("ambient"),  var("0"))),
+                                        pred("resource", Arrays.asList(s("ambient"),  string("file1")))
+                                        ),
+                                Arrays.asList(
+                                        new Expression.Binary(
+                                                Expression.Op.LessOrEqual,
+                                                new Expression.Value(var("0")),
+                                                new Expression.Value(new Term.Date(1575452801)))
+                                )
+                        ))),
+                res);
+    }
+
+    public void testRuleWithExpressionOrdering() {
+        Either<Error, Tuple2<String, Rule>> res =
+                Parser.rule("valid_date(\"file1\") <- time(#ambient, $0 ), $0 <= 2019-12-04T09:46:41+00:00, resource( #ambient, \"file1\")");
+        assertEquals(Either.right(new Tuple2<String, Rule>("",
+                        constrained_rule("valid_date",
+                                Arrays.asList(string("file1")),
+                                Arrays.asList(
+                                        pred("time", Arrays.asList(s("ambient"),  var("0"))),
+                                        pred("resource", Arrays.asList(s("ambient"),  string("file1")))
+                                ),
+                                Arrays.asList(
+                                        new Expression.Binary(
+                                                Expression.Op.LessOrEqual,
+                                                new Expression.Value(var("0")),
+                                                new Expression.Value(new Term.Date(1575452801)))
+                                )
+                        ))),
+                res);
+    }
+
+    public void testCheck() {
+        Either<Error, Tuple2<String, Check>> res =
+                Parser.check("check if resource(#ambient, $0), operation(#ambient, #read) or admin(#authority)");
+        assertEquals(Either.right(new Tuple2<String, Check>("", new Check(Arrays.asList(
+                    rule("query",
+                            new ArrayList<>(),
+                            Arrays.asList(
+                                    pred("resource", Arrays.asList(s("ambient"),  var("0"))),
+                                    pred("operation", Arrays.asList(s("ambient"),  s("read")))
+                            )
+                    ),
+                    rule("query",
+                            new ArrayList<>(),
+                            Arrays.asList(
+                                    pred("admin", Arrays.asList(s("authority")))
+                            )
+                    )
+                    )))),
+                res);
+    }
+
+    public void testExpression() {
+        Either<Error, Tuple2<String, Expression>> res =
+                Parser.expression(" -1 ");
+
+        assertEquals(new Tuple2<String, Expression>("",
+                new Expression.Value(integer(-1))),
+                res.get());
+
+        Either<Error, Tuple2<String, Expression>> res2 =
+                Parser.expression(" $0 <= 2019-12-04T09:46:41+00:00");
+
+        assertEquals(new Tuple2<String, Expression>("",
+                        new Expression.Binary(
+                                Expression.Op.LessOrEqual,
+                                new Expression.Value(var("0")),
+                                new Expression.Value(new Term.Date(1575452801)))),
+                res2.get());
+
+        Either<Error, Tuple2<String, Expression>> res3 =
+                Parser.expression(" 1 < $test + 2 ");
+
+        assertEquals(Either.right(new Tuple2<String, Expression>("",
+                        new Expression.Binary(
+                                Expression.Op.LessThan,
+                                new Expression.Value(integer(1)),
+                                new Expression.Binary(
+                                        Expression.Op.Add,
+                                        new Expression.Value(var("test")),
+                                        new Expression.Value(integer(2))
+                                )
+                        )
+                )),
+                res3);
+
+        Either<Error, Tuple2<String, Expression>> res4 =
+                Parser.expression("  2 < $test && $var2.starts_with(\\\"test\\\") && true ");
+
+        assertEquals(Either.right(new Tuple2<String, Expression>("",
+                        new Expression.Binary(
+                                Expression.Op.And,
+                                new Expression.Binary(
+                                        Expression.Op.And,
+                                        new Expression.Binary(
+                                                Expression.Op.LessThan,
+                                                new Expression.Value(integer(2)),
+                                                new Expression.Value(var("test"))
+                                        ),
+                                        new Expression.Binary(
+                                                Expression.Op.Prefix,
+                                                new Expression.Value(var("var2")),
+                                                new Expression.Value(string("test"))
+                                        )
+                                ),
+                                new Expression.Value(new Term.Bool(true))
+                        )
+                )),
+                res4);
+    }
+
+    public void testParens() {
+        Either<Error, Tuple2<String, Expression>> res =
+                Parser.expression("  1 + 2 * 3  ");
+
+        assertEquals(Either.right(new Tuple2<String, Expression>("",
+                        new Expression.Binary(
+                                Expression.Op.Add,
+                                new Expression.Value(integer(1)),
+                                new Expression.Binary(
+                                        Expression.Op.Mul,
+                                        new Expression.Value(integer(2)),
+                                        new Expression.Value(integer(3))
+                                )
+                        )
+                )),
+                res);
+
+        Expression e = res.get()._2;
+        SymbolTable s = new SymbolTable();
+
+        com.clevercloud.biscuit.datalog.expressions.Expression ex = e.convert(s);
+        HashMap variables = new HashMap();
+        Option<ID> value = ex.evaluate(variables);
+        assertEquals(Option.some(new ID.Integer(7)), value);
+        assertEquals("1 + 2 * 3", ex.print(s));
+
+
+        Either<Error, Tuple2<String, Expression>> res2 =
+                Parser.expression("  (1 + 2) * 3  ");
+
+        assertEquals(Either.right(new Tuple2<String, Expression>("",
+                        new Expression.Binary(
+                                Expression.Op.Mul,
+                                new Expression.Unary(
+                                        Expression.Op.Parens,
+                                        new Expression.Binary(
+                                                Expression.Op.Add,
+                                                new Expression.Value(integer(1)),
+                                                new Expression.Value(integer(2))
+                                        ))
+                                ,
+                                new Expression.Value(integer(3))
+                        )
+                )),
+                res2);
+
+        Expression e2 = res2.get()._2;
+        SymbolTable s2 = new SymbolTable();
+
+        com.clevercloud.biscuit.datalog.expressions.Expression ex2 = e2.convert(s2);
+        HashMap variables2 = new HashMap();
+        Option<ID> value2 = ex2.evaluate(variables2);
+        assertEquals(Option.some(new ID.Integer(9)), value2);
+        assertEquals("(1 + 2) * 3", ex2.print(s2));
     }
 }
