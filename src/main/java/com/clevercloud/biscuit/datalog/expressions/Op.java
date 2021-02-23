@@ -5,14 +5,18 @@ import com.clevercloud.biscuit.datalog.ID;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.error.Error;
 import io.vavr.control.Either;
+import io.vavr.control.Option;
 
+import java.util.Arrays;
+import java.util.Deque;
 import java.util.List;
+import java.util.Map;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
 public abstract class Op {
-    public abstract boolean evaluate(List<ID> stack);
+    public abstract boolean evaluate(Deque<ID> stack, Map<Long, ID> variables);
     public abstract String print(List<String> stack, SymbolTable symbols);
     public abstract Schema.Op serialize();
     static public Either<Error.FormatError, Op> deserializeV1(Schema.Op op) {
@@ -35,8 +39,21 @@ public abstract class Op {
         }
 
         @Override
-        public boolean evaluate(List<ID> stack) {
-            throw new UnsupportedOperationException("not implemented");
+        public boolean evaluate(Deque<ID> stack, Map<Long, ID> variables) {
+            if (value instanceof ID.Variable){
+                ID.Variable var = (ID.Variable) value;
+                ID valueVar = variables.get(var.value());
+                if (valueVar != null){
+                    stack.push(valueVar);
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                stack.push(value);
+                return true;
+            }
+
         }
 
         @Override
@@ -68,8 +85,22 @@ public abstract class Op {
         }
 
         @Override
-        public boolean evaluate(List<ID> stack) {
-            throw new UnsupportedOperationException("not implemented");
+        public boolean evaluate(Deque<ID> stack, Map<Long, ID> variables) {
+            ID value = stack.pop();
+            switch(this.op){
+                case Negate:
+                    if(value instanceof ID.Bool){
+                        ID.Bool b = (ID.Bool) value;
+                        stack.push(new ID.Bool(!b.value()));
+                    }else {
+                        return false;
+                    }
+                    break;
+                case Parens:
+                    stack.push(value);
+                    break;
+            }
+            return true;
         }
 
         @Override
@@ -142,8 +173,128 @@ public abstract class Op {
         }
 
         @Override
-        public boolean evaluate(List<ID> stack) {
-            throw new UnsupportedOperationException("not implemented");
+        public boolean evaluate(Deque<ID> stack, Map<Long, ID> variables) {
+            ID right = stack.pop();
+            ID left = stack.pop();
+
+            switch(this.op) {
+                case LessThan:
+                    if(right instanceof ID.Integer && left instanceof ID.Integer){
+                        stack.push(new ID.Bool(((ID.Integer) left).value() < ((ID.Integer) right).value()));
+                        return true;
+                    }
+                    break;
+                case GreaterThan:
+                    if(right instanceof ID.Integer && left instanceof ID.Integer){
+                        stack.push(new ID.Bool(((ID.Integer) left).value() > ((ID.Integer) right).value()));
+                        return true;
+                    }
+                    break;
+                case LessOrEqual:
+                    if(right instanceof ID.Integer && left instanceof ID.Integer){
+                        stack.push(new ID.Bool(((ID.Integer) left).value() <= ((ID.Integer) right).value()));
+                        return true;
+                    }
+                    if(right instanceof ID.Date && left instanceof ID.Date){
+                        stack.push(new ID.Bool(((ID.Date) left).value() <= ((ID.Date) right).value()));
+                        return true;
+                    }
+                    break;
+                case GreaterOrEqual:
+                    if(right instanceof ID.Integer && left instanceof ID.Integer){
+                        stack.push(new ID.Bool(((ID.Integer) left).value() >= ((ID.Integer) right).value()));
+                        return true;
+                    }
+                    if(right instanceof ID.Date && left instanceof ID.Date){
+                        stack.push(new ID.Bool(((ID.Date) left).value() >= ((ID.Date) right).value()));
+                        return true;
+                    }
+                    break;
+                case Equal:
+                    if(right instanceof ID.Integer && left instanceof ID.Integer){
+                        stack.push(new ID.Bool(((ID.Integer) left).value() == ((ID.Integer) right).value()));
+                        return true;
+                    }
+                    if(right instanceof ID.Str && left instanceof ID.Str){
+                        stack.push(new ID.Bool(((ID.Str) left).value().equals(((ID.Str) right).value())));
+                        return true;
+                    }
+                    if(right instanceof ID.Bytes && left instanceof ID.Bytes){
+                        stack.push(new ID.Bool(Arrays.equals(((ID.Bytes) left).value(),(((ID.Bytes) right).value()))));
+                        return true;
+                    }
+                    break;
+                case Contains:
+                    if(left instanceof ID.Set &&
+                            (right instanceof ID.Integer ||
+                                    right instanceof ID.Str ||
+                                    right instanceof ID.Bytes ||
+                                    right instanceof ID.Symbol)) {
+                        stack.push(new ID.Bool(((ID.Set) left).value().contains(right)));
+                        return true;
+                    }
+                    break;
+                case Prefix:
+                    if(right instanceof ID.Str && left instanceof ID.Str){
+                        stack.push(new ID.Bool(((ID.Str) left).value().startsWith(((ID.Str) right).value())));
+                        return true;
+                    }
+                    break;
+                case Suffix:
+                    if(right instanceof ID.Str && left instanceof ID.Str){
+                        stack.push(new ID.Bool(((ID.Str) left).value().endsWith(((ID.Str) right).value())));
+                        return true;
+                    }
+                    break;
+                case Regex:
+                    if(right instanceof ID.Str && left instanceof ID.Str){
+                        stack.push(new ID.Bool(((ID.Str) left).value().matches(((ID.Str) right).value())));
+                        return true;
+                    }
+                    break;
+                case Add:
+                    if(right instanceof ID.Integer && left instanceof ID.Integer){
+                        stack.push(new ID.Integer(((ID.Integer) left).value() + ((ID.Integer) right).value()));
+                        return true;
+                    }
+                    break;
+                case Sub:
+                    if(right instanceof ID.Integer && left instanceof ID.Integer){
+                        stack.push(new ID.Integer(((ID.Integer) left).value() - ((ID.Integer) right).value()));
+                        return true;
+                    }
+                    break;
+                case Mul:
+                    if(right instanceof ID.Integer && left instanceof ID.Integer){
+                        stack.push(new ID.Integer(((ID.Integer) left).value() * ((ID.Integer) right).value()));
+                        return true;
+                    }
+                    break;
+                case Div:
+                    if(right instanceof ID.Integer && left instanceof ID.Integer){
+                        long rl = ((ID.Integer) right).value();
+                        if (rl != 0) {
+                            stack.push(new ID.Integer(((ID.Integer) left).value() / rl));
+                            return true;
+                        }
+                    }
+                    break;
+                case And:
+                    if(right instanceof ID.Bool && left instanceof ID.Bool){
+                        stack.push(new ID.Bool(((ID.Bool) left).value() && ((ID.Bool) right).value()));
+                        return true;
+                    }
+                    break;
+                case Or:
+                    if(right instanceof ID.Bool && left instanceof ID.Bool){
+                        stack.push(new ID.Bool(((ID.Bool) left).value() || ((ID.Bool) right).value()));
+                        return true;
+                    }
+                    break;
+                default:
+                    return false;
+            }
+            return false;
         }
 
         @Override

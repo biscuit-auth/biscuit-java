@@ -7,7 +7,9 @@ import com.clevercloud.biscuit.error.Error;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.Map;
 
 import static io.vavr.API.Left;
@@ -25,7 +27,17 @@ public class Expression {
     }
 
     public Option<ID> evaluate(Map<Long, ID> variables) {
-        throw new UnsupportedOperationException("not implemented");
+        Deque<ID> stack = new ArrayDeque<ID>(16); //Default value
+        for(Op op: ops){
+            if(!op.evaluate(stack,variables)){
+                return Option.none();
+            }
+        }
+        if(stack.size() == 1){
+            return Option.some(stack.pop());
+        } else {
+            return Option.none();
+        }
     }
 
     public Option<String> print(SymbolTable symbols) {
