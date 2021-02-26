@@ -22,6 +22,7 @@ import java.util.Arrays;
 import static com.clevercloud.biscuit.crypto.TokenSignature.fromHex;
 import static com.clevercloud.biscuit.crypto.TokenSignature.hex;
 import static com.clevercloud.biscuit.token.builder.Utils.*;
+import static io.vavr.API.Right;
 
 public class SamplesV1Test extends TestCase {
 
@@ -423,5 +424,23 @@ public class SamplesV1Test extends TestCase {
                         new FailedCheck.FailedBlock(0, 0, "check if resource(#ambient, #hello)")
                 ))),
                 e);
+    }
+
+    public void test17_Expressions() throws IOException, InvalidEncodingException {
+        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test17_expressions.bc");
+
+        byte[] data = new byte[inputStream.available()];
+        inputStream.read(data);
+
+        Biscuit token = Biscuit.from_bytes(data).get();
+        System.out.println(token.print());
+
+        Verifier v1 = token.verify(root).get();
+        v1.allow();
+
+        Assert.assertEquals(v1.verify(), Right(Long.valueOf(0)));
     }
 }

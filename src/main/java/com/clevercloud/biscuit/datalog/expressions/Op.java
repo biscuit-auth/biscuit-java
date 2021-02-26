@@ -57,6 +57,7 @@ public abstract class Op {
     public enum UnaryOp {
         Negate,
         Parens,
+        Length,
     }
 
     public final static class Unary extends Op {
@@ -89,6 +90,9 @@ public abstract class Op {
                 case Parens:
                     b1.setKind(Schema.OpUnary.Kind.Parens);
                     break;
+                case Length:
+                    b1.setKind(Schema.OpUnary.Kind.Length);
+                    break;
             }
 
             b.setUnary(b1.build());
@@ -102,6 +106,8 @@ public abstract class Op {
                     return Right(new Op.Unary(UnaryOp.Negate));
                 case Parens:
                     return Right(new Op.Unary(UnaryOp.Parens));
+                case Length:
+                    return Right(new Op.Unary(UnaryOp.Length));
             }
 
             return Left(new Error.FormatError.DeserializationError("invalid unary operation"));
@@ -124,6 +130,8 @@ public abstract class Op {
         Div,
         And,
         Or,
+        Intersection,
+        Union,
     }
 
     public final static class Binary extends Op {
@@ -195,6 +203,12 @@ public abstract class Op {
                 case Or:
                     b1.setKind(Schema.OpBinary.Kind.Or);
                     break;
+                case Intersection:
+                    b1.setKind(Schema.OpBinary.Kind.Intersection);
+                    break;
+                case Union:
+                    b1.setKind(Schema.OpBinary.Kind.Union);
+                    break;
             }
 
             b.setBinary(b1.build());
@@ -234,6 +248,10 @@ public abstract class Op {
                     return Right(new Op.Binary(BinaryOp.And));
                 case Or:
                     return Right(new Op.Binary(BinaryOp.Or));
+                case Intersection:
+                    return Right(new Op.Binary(BinaryOp.Intersection));
+                case Union:
+                    return Right(new Op.Binary(BinaryOp.Union));
             }
 
             return Left(new Error.FormatError.DeserializationError("invalid binary operation"));

@@ -23,6 +23,9 @@ public abstract class Expression {
         Div,
         And,
         Or,
+        Length,
+        Intersection,
+        Union,
     }
 
     public final static class Value extends Expression {
