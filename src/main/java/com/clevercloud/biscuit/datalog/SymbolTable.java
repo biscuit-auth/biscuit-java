@@ -2,10 +2,7 @@ package com.clevercloud.biscuit.datalog;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.clevercloud.biscuit.datalog.expressions.Expression;
@@ -35,6 +32,44 @@ public final class SymbolTable implements Serializable {
       } else {
          return Option.some(index);
       }
+   }
+
+   public String print_id(final ID value, final Deque<String> stack){
+      String _s = "";
+      if(value instanceof ID.Bool){
+         _s = Boolean.toString(((ID.Bool) value).value());
+         stack.push(_s);
+      } else if (value instanceof ID.Bytes) {
+
+      } else if (value instanceof ID.Date) {
+         _s = Date.from(Instant.ofEpochSecond(((ID.Date) value).value())).toString();
+         stack.push(_s);
+      } else if (value instanceof ID.Integer) {
+         String _s = Long.toString(((ID.Integer) value).value());
+         stack.push(_s);
+      } else if (value instanceof ID.Set) {
+         ID.Set idset = (ID.Set) value;
+         if (idset.value().size()>0) {
+            String _s = "[ ";
+            Deque<String> tmpStack = new ArrayDeque<String>();
+            for(Iterator<ID> it = idset.value().iterator(); it.hasNext(); ){
+               ID _id = it.next();
+               _s += print_id(_id,tmpStack);
+            }
+            _s += " ]";
+            stack.push(_s);
+         }
+      } else if (value instanceof ID.Str) {
+         String _s = "\""+((ID.Str) value).value()+"\"";
+         stack.push(_s);
+      } else if (value instanceof ID.Symbol) {
+         String _s = "#" + print_symbol((int) ((ID.Symbol) value).value());
+         stack.push(_s);
+      } else if (value instanceof ID.Variable) {
+         String _s = "$" + print_symbol((int) ((ID.Variable) value).value());
+         stack.push(_s);
+      }
+      return _s;
    }
 
    public String print_rule(final Rule r) {

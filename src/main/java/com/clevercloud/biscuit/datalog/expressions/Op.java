@@ -5,19 +5,16 @@ import com.clevercloud.biscuit.datalog.ID;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.error.Error;
 import io.vavr.control.Either;
-import io.vavr.control.Option;
 
-import java.util.Arrays;
-import java.util.Deque;
-import java.util.List;
-import java.util.Map;
+import java.time.Instant;
+import java.util.*;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
 public abstract class Op {
     public abstract boolean evaluate(Deque<ID> stack, Map<Long, ID> variables);
-    public abstract String print(List<String> stack, SymbolTable symbols);
+    public abstract String print(Deque<String> stack, SymbolTable symbols);
     public abstract Schema.Op serialize();
     static public Either<Error.FormatError, Op> deserializeV1(Schema.Op op) {
         if(op.hasValue()) {
@@ -57,8 +54,8 @@ public abstract class Op {
         }
 
         @Override
-        public String print(List<String> stack, SymbolTable symbols) {
-            throw new UnsupportedOperationException("not implemented");
+        public String print(Deque<String> stack, SymbolTable symbols) {
+            return symbols.print_id(value,stack);
         }
 
         @Override
@@ -104,8 +101,20 @@ public abstract class Op {
         }
 
         @Override
-        public String print(List<String> stack, SymbolTable symbols) {
-            throw new UnsupportedOperationException("not implemented");
+        public String print(Deque<String> stack, SymbolTable symbols) {
+            String prec = stack.pop();
+            String _s = "";
+            switch(this.op){
+                case Negate:
+                    _s = "! "+prec;
+                    stack.push(_s);
+                    break;
+                case Parens:
+                    _s = "("+prec+")";
+                    stack.push(_s);
+                    break;
+            }
+            return _s;
         }
 
         @Override
@@ -298,7 +307,73 @@ public abstract class Op {
         }
 
         @Override
-        public String print(List<String> stack, SymbolTable symbols) {
+        public String print(Deque<String> stack, SymbolTable symbols) {
+            String right = stack.pop();
+            String left = stack.pop();
+            String _s = "";
+            switch(this.op) {
+                case LessThan:
+                    _s = left + " < " + right;
+                    stack.push(_s);
+                    break;
+                case GreaterThan:
+                    _s = left + " > " + right;
+                    stack.push(_s);
+                    break;
+                case LessOrEqual:
+                    _s = left + " <= " + right;
+                    stack.push(_s);
+                    break;
+                case GreaterOrEqual:
+                    _s = left + " >= " + right;
+                    stack.push(_s);
+                    break;
+                case Equal:
+                    _s = left + " == " + right;
+                    stack.push(_s);
+                    break;
+                case Contains:
+                    _s = left+ ".contains("+right+")";
+                    stack.push(_s);
+                    break;
+                case Prefix:
+                    _s = left+ ".starts_with("+right+")";
+                    stack.push(_s);
+                    break;
+                case Suffix:
+                    _s = left+ ".ends_with("+right+")";
+                    stack.push(_s);
+                    break;
+                case Regex:
+                    _s = left+ ".matches("+right+")";
+                    stack.push(_s);
+                    break;
+                case Add:
+                    _s = left + " + " + right;
+                    stack.push(_s);
+                    break;
+                case Sub:
+                    _s = left + " - " + right;
+                    stack.push(_s);
+                    break;
+                case Mul:
+                    _s = left + " * " + right;
+                    stack.push(_s);
+                    break;
+                case Div:
+                    _s = left + " / " + right;
+                    stack.push(_s);
+                    break;
+                case And:
+                    _s = left + " && " + right;
+                    stack.push(_s);
+                    break;
+                case Or:
+                    _s = left + " || " + right;
+                    stack.push(_s);
+                    break;
+            }
+
             throw new UnsupportedOperationException("not implemented");
         }
 
