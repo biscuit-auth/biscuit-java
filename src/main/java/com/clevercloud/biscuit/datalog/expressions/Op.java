@@ -14,14 +14,17 @@ import static io.vavr.API.Right;
 
 public abstract class Op {
     public abstract boolean evaluate(Deque<ID> stack, Map<Long, ID> variables);
+
     public abstract String print(Deque<String> stack, SymbolTable symbols);
+
     public abstract Schema.Op serialize();
+
     static public Either<Error.FormatError, Op> deserializeV1(Schema.Op op) {
-        if(op.hasValue()) {
+        if (op.hasValue()) {
             return ID.deserialize_enumV1(op.getValue()).map(v -> new Op.Value(v));
-        } else if(op.hasUnary()) {
+        } else if (op.hasUnary()) {
             return Op.Unary.deserializeV1(op.getUnary());
-        } else if(op.hasBinary()) {
+        } else if (op.hasBinary()) {
             return Op.Binary.deserializeV1(op.getBinary());
         } else {
             return Left(new Error.FormatError.DeserializationError("invalid unary operation"));
@@ -37,10 +40,10 @@ public abstract class Op {
 
         @Override
         public boolean evaluate(Deque<ID> stack, Map<Long, ID> variables) {
-            if (value instanceof ID.Variable){
+            if (value instanceof ID.Variable) {
                 ID.Variable var = (ID.Variable) value;
                 ID valueVar = variables.get(var.value());
-                if (valueVar != null){
+                if (valueVar != null) {
                     stack.push(valueVar);
                     return true;
                 } else {
@@ -55,7 +58,7 @@ public abstract class Op {
 
         @Override
         public String print(Deque<String> stack, SymbolTable symbols) {
-            return symbols.print_id(value,stack);
+            return symbols.print_id(value, stack);
         }
 
         @Override
@@ -84,18 +87,28 @@ public abstract class Op {
         @Override
         public boolean evaluate(Deque<ID> stack, Map<Long, ID> variables) {
             ID value = stack.pop();
-            switch(this.op){
+            switch (this.op) {
                 case Negate:
-                    if(value instanceof ID.Bool){
+                    if (value instanceof ID.Bool) {
                         ID.Bool b = (ID.Bool) value;
                         stack.push(new ID.Bool(!b.value()));
-                    }else {
+                    } else {
                         return false;
                     }
                     break;
                 case Parens:
                     stack.push(value);
                     break;
+                case Length:
+                    if (value instanceof ID.Str) {
+                        stack.push(new ID.Integer(((ID.Str) value).value().length()));
+                    } else if (value instanceof ID.Bytes) {
+                        stack.push(new ID.Integer(((ID.Bytes) value).value().length));
+                    } else if (value instanceof ID.Set) {
+                        stack.push(new ID.Integer(((ID.Set) value).value().size()));
+                    } else {
+                        return false;
+                    }
             }
             return true;
         }
@@ -104,13 +117,13 @@ public abstract class Op {
         public String print(Deque<String> stack, SymbolTable symbols) {
             String prec = stack.pop();
             String _s = "";
-            switch(this.op){
+            switch (this.op) {
                 case Negate:
-                    _s = "! "+prec;
+                    _s = "! " + prec;
                     stack.push(_s);
                     break;
                 case Parens:
-                    _s = "("+prec+")";
+                    _s = "(" + prec + ")";
                     stack.push(_s);
                     break;
             }
@@ -123,7 +136,7 @@ public abstract class Op {
 
             Schema.OpUnary.Builder b1 = Schema.OpUnary.newBuilder();
 
-            switch(this.op) {
+            switch (this.op) {
                 case Negate:
                     b1.setKind(Schema.OpUnary.Kind.Negate);
                     break;
@@ -141,7 +154,7 @@ public abstract class Op {
         }
 
         static public Either<Error.FormatError, Op> deserializeV1(Schema.OpUnary op) {
-            switch(op.getKind()) {
+            switch (op.getKind()) {
                 case Negate:
                     return Right(new Op.Unary(UnaryOp.Negate));
                 case Parens:
@@ -186,55 +199,77 @@ public abstract class Op {
             ID right = stack.pop();
             ID left = stack.pop();
 
-            switch(this.op) {
+            switch (this.op) {
                 case LessThan:
-                    if(right instanceof ID.Integer && left instanceof ID.Integer){
+                    if (right instanceof ID.Integer && left instanceof ID.Integer) {
                         stack.push(new ID.Bool(((ID.Integer) left).value() < ((ID.Integer) right).value()));
+                        return true;
+                    }
+                    if (right instanceof ID.Date && left instanceof ID.Date) {
+                        stack.push(new ID.Bool(((ID.Date) left).value() < ((ID.Date) right).value()));
                         return true;
                     }
                     break;
                 case GreaterThan:
-                    if(right instanceof ID.Integer && left instanceof ID.Integer){
+                    if (right instanceof ID.Integer && left instanceof ID.Integer) {
                         stack.push(new ID.Bool(((ID.Integer) left).value() > ((ID.Integer) right).value()));
+                        return true;
+                    }
+                    if (right instanceof ID.Date && left instanceof ID.Date) {
+                        stack.push(new ID.Bool(((ID.Date) left).value() > ((ID.Date) right).value()));
                         return true;
                     }
                     break;
                 case LessOrEqual:
-                    if(right instanceof ID.Integer && left instanceof ID.Integer){
+                    if (right instanceof ID.Integer && left instanceof ID.Integer) {
                         stack.push(new ID.Bool(((ID.Integer) left).value() <= ((ID.Integer) right).value()));
                         return true;
                     }
-                    if(right instanceof ID.Date && left instanceof ID.Date){
+                    if (right instanceof ID.Date && left instanceof ID.Date) {
                         stack.push(new ID.Bool(((ID.Date) left).value() <= ((ID.Date) right).value()));
                         return true;
                     }
                     break;
                 case GreaterOrEqual:
-                    if(right instanceof ID.Integer && left instanceof ID.Integer){
+                    if (right instanceof ID.Integer && left instanceof ID.Integer) {
                         stack.push(new ID.Bool(((ID.Integer) left).value() >= ((ID.Integer) right).value()));
                         return true;
                     }
-                    if(right instanceof ID.Date && left instanceof ID.Date){
+                    if (right instanceof ID.Date && left instanceof ID.Date) {
                         stack.push(new ID.Bool(((ID.Date) left).value() >= ((ID.Date) right).value()));
                         return true;
                     }
                     break;
                 case Equal:
-                    if(right instanceof ID.Integer && left instanceof ID.Integer){
+                    if (right instanceof ID.Integer && left instanceof ID.Integer) {
                         stack.push(new ID.Bool(((ID.Integer) left).value() == ((ID.Integer) right).value()));
                         return true;
                     }
-                    if(right instanceof ID.Str && left instanceof ID.Str){
+                    if (right instanceof ID.Str && left instanceof ID.Str) {
                         stack.push(new ID.Bool(((ID.Str) left).value().equals(((ID.Str) right).value())));
                         return true;
                     }
-                    if(right instanceof ID.Bytes && left instanceof ID.Bytes){
-                        stack.push(new ID.Bool(Arrays.equals(((ID.Bytes) left).value(),(((ID.Bytes) right).value()))));
+                    if (right instanceof ID.Bytes && left instanceof ID.Bytes) {
+                        stack.push(new ID.Bool(Arrays.equals(((ID.Bytes) left).value(), (((ID.Bytes) right).value()))));
+                        return true;
+                    }
+                    if (right instanceof ID.Date && left instanceof ID.Date) {
+                        stack.push(new ID.Bool(((ID.Date) left).value() == ((ID.Date) right).value()));
+                        return true;
+                    }
+                    if (right instanceof ID.Symbol && left instanceof ID.Symbol) {
+                        stack.push(new ID.Bool(((ID.Symbol) left).value() == ((ID.Symbol) right).value()));
+                        return true;
+                    }
+                    if (right instanceof ID.Set && left instanceof ID.Set) {
+                        Set<ID> leftSet = ((ID.Set) left).value();
+                        Set<ID> rightSet = ((ID.Set) right).value();
+                        stack.push(new ID.Bool( leftSet.size() == rightSet.size() && leftSet.containsAll(rightSet)));
                         return true;
                     }
                     break;
                 case Contains:
-                    if(left instanceof ID.Set &&
+                    if (left instanceof ID.Set &&
                             (right instanceof ID.Integer ||
                                     right instanceof ID.Str ||
                                     right instanceof ID.Bytes ||
@@ -242,45 +277,51 @@ public abstract class Op {
                         stack.push(new ID.Bool(((ID.Set) left).value().contains(right)));
                         return true;
                     }
+                    if (right instanceof ID.Set && left instanceof ID.Set) {
+                        Set<ID> leftSet = ((ID.Set) left).value();
+                        Set<ID> rightSet = ((ID.Set) right).value();
+                        stack.push(new ID.Bool(leftSet.containsAll(rightSet)));
+                        return true;
+                    }
                     break;
                 case Prefix:
-                    if(right instanceof ID.Str && left instanceof ID.Str){
+                    if (right instanceof ID.Str && left instanceof ID.Str) {
                         stack.push(new ID.Bool(((ID.Str) left).value().startsWith(((ID.Str) right).value())));
                         return true;
                     }
                     break;
                 case Suffix:
-                    if(right instanceof ID.Str && left instanceof ID.Str){
+                    if (right instanceof ID.Str && left instanceof ID.Str) {
                         stack.push(new ID.Bool(((ID.Str) left).value().endsWith(((ID.Str) right).value())));
                         return true;
                     }
                     break;
                 case Regex:
-                    if(right instanceof ID.Str && left instanceof ID.Str){
+                    if (right instanceof ID.Str && left instanceof ID.Str) {
                         stack.push(new ID.Bool(((ID.Str) left).value().matches(((ID.Str) right).value())));
                         return true;
                     }
                     break;
                 case Add:
-                    if(right instanceof ID.Integer && left instanceof ID.Integer){
+                    if (right instanceof ID.Integer && left instanceof ID.Integer) {
                         stack.push(new ID.Integer(((ID.Integer) left).value() + ((ID.Integer) right).value()));
                         return true;
                     }
                     break;
                 case Sub:
-                    if(right instanceof ID.Integer && left instanceof ID.Integer){
+                    if (right instanceof ID.Integer && left instanceof ID.Integer) {
                         stack.push(new ID.Integer(((ID.Integer) left).value() - ((ID.Integer) right).value()));
                         return true;
                     }
                     break;
                 case Mul:
-                    if(right instanceof ID.Integer && left instanceof ID.Integer){
+                    if (right instanceof ID.Integer && left instanceof ID.Integer) {
                         stack.push(new ID.Integer(((ID.Integer) left).value() * ((ID.Integer) right).value()));
                         return true;
                     }
                     break;
                 case Div:
-                    if(right instanceof ID.Integer && left instanceof ID.Integer){
+                    if (right instanceof ID.Integer && left instanceof ID.Integer) {
                         long rl = ((ID.Integer) right).value();
                         if (rl != 0) {
                             stack.push(new ID.Integer(((ID.Integer) left).value() / rl));
@@ -289,14 +330,39 @@ public abstract class Op {
                     }
                     break;
                 case And:
-                    if(right instanceof ID.Bool && left instanceof ID.Bool){
+                    if (right instanceof ID.Bool && left instanceof ID.Bool) {
                         stack.push(new ID.Bool(((ID.Bool) left).value() && ((ID.Bool) right).value()));
                         return true;
                     }
                     break;
                 case Or:
-                    if(right instanceof ID.Bool && left instanceof ID.Bool){
+                    if (right instanceof ID.Bool && left instanceof ID.Bool) {
                         stack.push(new ID.Bool(((ID.Bool) left).value() || ((ID.Bool) right).value()));
+                        return true;
+                    }
+                    break;
+                case Intersection:
+                    if (right instanceof ID.Set && left instanceof ID.Set) {
+                        HashSet<ID> intersec = new HashSet<ID>();
+                        HashSet<ID> _right = ((ID.Set) right).value();
+                        HashSet<ID> _left = ((ID.Set) left).value();
+                        for (ID _id : _right) {
+                            if (_left.contains(_id)) {
+                                intersec.add(_id);
+                            }
+                        }
+                        stack.push(new ID.Set(intersec));
+                        return true;
+                    }
+                    break;
+                case Union:
+                    if (right instanceof ID.Set && left instanceof ID.Set) {
+                        HashSet<ID> union = new HashSet<ID>();
+                        HashSet<ID> _right = ((ID.Set) right).value();
+                        HashSet<ID> _left = ((ID.Set) left).value();
+                        union.addAll(_right);
+                        union.addAll(_left);
+                        stack.push(new ID.Set(union));
                         return true;
                     }
                     break;
@@ -311,7 +377,7 @@ public abstract class Op {
             String right = stack.pop();
             String left = stack.pop();
             String _s = "";
-            switch(this.op) {
+            switch (this.op) {
                 case LessThan:
                     _s = left + " < " + right;
                     stack.push(_s);
@@ -333,19 +399,19 @@ public abstract class Op {
                     stack.push(_s);
                     break;
                 case Contains:
-                    _s = left+ ".contains("+right+")";
+                    _s = left + ".contains(" + right + ")";
                     stack.push(_s);
                     break;
                 case Prefix:
-                    _s = left+ ".starts_with("+right+")";
+                    _s = left + ".starts_with(" + right + ")";
                     stack.push(_s);
                     break;
                 case Suffix:
-                    _s = left+ ".ends_with("+right+")";
+                    _s = left + ".ends_with(" + right + ")";
                     stack.push(_s);
                     break;
                 case Regex:
-                    _s = left+ ".matches("+right+")";
+                    _s = left + ".matches(" + right + ")";
                     stack.push(_s);
                     break;
                 case Add:
@@ -372,9 +438,17 @@ public abstract class Op {
                     _s = left + " || " + right;
                     stack.push(_s);
                     break;
+                case Intersection:
+                    _s = left + ".intersection("+right+")";
+                    stack.push(_s);
+                    break;
+                case Union:
+                    _s = left + ".union("+right+")";
+                    stack.push(_s);
+                    break;
             }
 
-            throw new UnsupportedOperationException("not implemented");
+            return _s;
         }
 
         @Override
@@ -383,7 +457,7 @@ public abstract class Op {
 
             Schema.OpBinary.Builder b1 = Schema.OpBinary.newBuilder();
 
-            switch(this.op) {
+            switch (this.op) {
                 case LessThan:
                     b1.setKind(Schema.OpBinary.Kind.LessThan);
                     break;

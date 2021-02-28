@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.clevercloud.biscuit.crypto.TokenSignature;
 import com.clevercloud.biscuit.datalog.expressions.Expression;
 import io.vavr.control.Option;
 
@@ -40,17 +41,18 @@ public final class SymbolTable implements Serializable {
          _s = Boolean.toString(((ID.Bool) value).value());
          stack.push(_s);
       } else if (value instanceof ID.Bytes) {
-
+         _s = TokenSignature.hex(((ID.Bytes) value).value());
+         stack.push(_s);
       } else if (value instanceof ID.Date) {
          _s = Date.from(Instant.ofEpochSecond(((ID.Date) value).value())).toString();
          stack.push(_s);
       } else if (value instanceof ID.Integer) {
-         String _s = Long.toString(((ID.Integer) value).value());
+         _s = Long.toString(((ID.Integer) value).value());
          stack.push(_s);
       } else if (value instanceof ID.Set) {
          ID.Set idset = (ID.Set) value;
          if (idset.value().size()>0) {
-            String _s = "[ ";
+            _s = "[ ";
             Deque<String> tmpStack = new ArrayDeque<String>();
             for(Iterator<ID> it = idset.value().iterator(); it.hasNext(); ){
                ID _id = it.next();
@@ -60,13 +62,13 @@ public final class SymbolTable implements Serializable {
             stack.push(_s);
          }
       } else if (value instanceof ID.Str) {
-         String _s = "\""+((ID.Str) value).value()+"\"";
+         _s = "\""+((ID.Str) value).value()+"\"";
          stack.push(_s);
       } else if (value instanceof ID.Symbol) {
-         String _s = "#" + print_symbol((int) ((ID.Symbol) value).value());
+         _s = "#" + print_symbol((int) ((ID.Symbol) value).value());
          stack.push(_s);
       } else if (value instanceof ID.Variable) {
-         String _s = "$" + print_symbol((int) ((ID.Variable) value).value());
+         _s = "$" + print_symbol((int) ((ID.Variable) value).value());
          stack.push(_s);
       }
       return _s;

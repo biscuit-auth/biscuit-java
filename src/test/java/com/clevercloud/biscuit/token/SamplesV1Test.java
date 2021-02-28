@@ -54,8 +54,8 @@ public class SamplesV1Test extends TestCase {
         v1.add_operation("read");
         v1.allow();
         Either<Error, Long> res = v1.verify();
-        if(res.isLeft()) {
-            System.out.println("error: "+res.getLeft());
+        if (res.isLeft()) {
+            System.out.println("error: " + res.getLeft());
         }
         Assert.assertTrue(res.isRight());
 
@@ -64,7 +64,7 @@ public class SamplesV1Test extends TestCase {
         System.out.println(hex(data));
         System.out.println(hex(serialized));
 
-        for(int i = 0; i < data.length; i++) {
+        for (int i = 0; i < data.length; i++) {
             Assert.assertEquals(data[i], serialized[i]);
         }
     }
@@ -80,7 +80,7 @@ public class SamplesV1Test extends TestCase {
 
         Biscuit token = Biscuit.from_bytes(data).get();
         Error e = token.check_root_key(root).getLeft();
-        System.out.println("got error: "+ e);
+        System.out.println("got error: " + e);
         Assert.assertEquals(new Error.FormatError.UnknownPublicKey(), e);
     }
 
@@ -94,7 +94,7 @@ public class SamplesV1Test extends TestCase {
         inputStream.read(data);
 
         Error e = Biscuit.from_bytes(data).getLeft();
-        System.out.println("got error: "+ e);
+        System.out.println("got error: " + e);
         Assert.assertEquals(new Error.FormatError.DeserializationError("java.lang.IllegalArgumentException: Input must by 32 bytes"), e);
     }
 
@@ -108,7 +108,7 @@ public class SamplesV1Test extends TestCase {
         inputStream.read(data);
 
         Error e = Biscuit.from_bytes(data).getLeft();
-        System.out.println("got error: "+ e);
+        System.out.println("got error: " + e);
         Assert.assertEquals(new Error.FormatError.Signature.InvalidSignature(), e);
     }
 
@@ -122,7 +122,7 @@ public class SamplesV1Test extends TestCase {
         inputStream.read(data);
 
         Error e = Biscuit.from_bytes(data).getLeft();
-        System.out.println("got error: "+ e);
+        System.out.println("got error: " + e);
         Assert.assertEquals(new Error.FormatError.Signature.InvalidSignature(), e);
     }
 
@@ -140,8 +140,8 @@ public class SamplesV1Test extends TestCase {
         Either<Error, Verifier> res = token.verify(root);
         System.out.println(token.print());
         System.out.println(res);
-        if(res.isLeft()) {
-            System.out.println("error: "+res.getLeft());
+        if (res.isLeft()) {
+            System.out.println("error: " + res.getLeft());
         }
         Assert.assertEquals(new Error.InvalidBlockIndex(3, 2), res.getLeft());
 
@@ -160,8 +160,8 @@ public class SamplesV1Test extends TestCase {
         System.out.println(token.print());
 
         Either<Error, Verifier> res = token.verify(root);
-        if(res.isLeft()) {
-            System.out.println("error: "+res.getLeft());
+        if (res.isLeft()) {
+            System.out.println("error: " + res.getLeft());
         }
         Assert.assertEquals(new Error.FailedLogic(new LogicError.InvalidBlockFact(0, "right(#authority, \"file1\", #write)")), res.getLeft());
     }
@@ -179,8 +179,8 @@ public class SamplesV1Test extends TestCase {
         System.out.println(token.print());
 
         Either<Error, Verifier> res = token.verify(root);
-        if(res.isLeft()) {
-            System.out.println("error: "+res.getLeft());
+        if (res.isLeft()) {
+            System.out.println("error: " + res.getLeft());
         }
         Assert.assertEquals(new Error.FailedLogic(new LogicError.InvalidBlockFact(0, "right(#ambient, \"file1\", #write)")), res.getLeft());
     }
@@ -387,7 +387,7 @@ public class SamplesV1Test extends TestCase {
                 Arrays.asList(
                         pred("must_be_present", Arrays.asList(s("authority"), var("0")))
                 )
-                ));
+        ));
         queries.add(rule(
                 "test_must_be_present",
                 Arrays.asList(var("0")),

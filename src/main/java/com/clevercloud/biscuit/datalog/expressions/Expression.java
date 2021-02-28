@@ -41,7 +41,15 @@ public class Expression {
     }
 
     public Option<String> print(SymbolTable symbols) {
-        throw new UnsupportedOperationException("not implemented");
+        Deque<String> stack = new ArrayDeque<>();
+        for (Op op : ops){
+            op.print(stack, symbols);
+        }
+        if(stack.size() == 1){
+            return Option.some(stack.remove());
+        } else {
+            return Option.none();
+        }
     }
 
     public Schema.ExpressionV1 serialize() {
