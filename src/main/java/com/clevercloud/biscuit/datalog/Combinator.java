@@ -28,7 +28,7 @@ public final class Combinator implements Serializable {
 
             MatchedVariables next_vars = next_vars_opt.get();
 
-            final Option<Map<Long, ID>> v_opt = this.check_expressions(next_vars);
+            final Option<Map<Long, ID>> v_opt = next_vars.check_expressions(this.expressions);
             if(v_opt.isEmpty()) {
                continue;
             } else {
@@ -67,7 +67,7 @@ public final class Combinator implements Serializable {
 
             // there are no more predicates to check
             if (next_predicates.isEmpty()) {
-               final Option<Map<Long, ID>> v_opt = this.check_expressions(vars);
+               final Option<Map<Long, ID>> v_opt = vars.check_expressions(this.expressions);
                if(v_opt.isEmpty()) {
                   continue;
                } else {
