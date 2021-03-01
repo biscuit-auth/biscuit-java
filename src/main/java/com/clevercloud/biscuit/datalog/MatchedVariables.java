@@ -1,5 +1,8 @@
 package com.clevercloud.biscuit.datalog;
 
+import com.clevercloud.biscuit.datalog.expressions.Expression;
+import io.vavr.control.Option;
+
 import java.io.Serializable;
 import java.util.*;
 
@@ -50,6 +53,29 @@ public final class MatchedVariables implements Serializable {
       this.variables = new HashMap<>();
       for (final Long id : ids) {
          this.variables.put(id, Optional.empty());
+      }
+   }
+
+   public Option<Map<Long, ID>> check_expressions(List<Expression> expressions) {
+      final Optional<Map<Long, ID>> vars = this.complete();
+      if (vars.isPresent()) {
+         Map<Long, ID> variables = vars.get();
+
+         for(Expression e: expressions) {
+            Option<ID> res = e.evaluate(variables);
+
+            if(res.isEmpty()) {
+               return Option.none();
+            }
+
+            if(!res.get().equals(new ID.Bool(true))) {
+               return Option.none();
+            }
+         }
+
+         return Option.some(variables);
+      } else {
+         return Option.none();
       }
    }
 }
