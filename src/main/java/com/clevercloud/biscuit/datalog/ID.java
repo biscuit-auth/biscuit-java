@@ -9,6 +9,7 @@ import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 
@@ -81,13 +82,15 @@ public abstract class ID implements Serializable {
       public boolean equals(Object o) {
          if (this == o) return true;
          if (o == null || getClass() != o.getClass()) return false;
+
          Date date = (Date) o;
+
          return value == date.value;
       }
 
       @Override
       public int hashCode() {
-         return Objects.hash(value);
+         return (int) (value ^ (value >>> 32));
       }
 
       @Override
@@ -146,13 +149,15 @@ public abstract class ID implements Serializable {
       public boolean equals(Object o) {
          if (this == o) return true;
          if (o == null || getClass() != o.getClass()) return false;
+
          Integer integer = (Integer) o;
+
          return value == integer.value;
       }
 
       @Override
       public int hashCode() {
-         return Objects.hash(value);
+         return (int) (value ^ (value >>> 32));
       }
 
       @Override
@@ -211,13 +216,15 @@ public abstract class ID implements Serializable {
       public boolean equals(Object o) {
          if (this == o) return true;
          if (o == null || getClass() != o.getClass()) return false;
+
          Str str = (Str) o;
-         return Objects.equals(value, str.value);
+
+         return value != null ? value.equals(str.value) : str.value == null;
       }
 
       @Override
       public int hashCode() {
-         return Objects.hash(value);
+         return value != null ? value.hashCode() : 0;
       }
 
       @Override
@@ -276,13 +283,15 @@ public abstract class ID implements Serializable {
       public boolean equals(Object o) {
          if (this == o) return true;
          if (o == null || getClass() != o.getClass()) return false;
-         Bytes str = (Bytes) o;
-         return Objects.equals(value, str.value);
+
+         Bytes bytes = (Bytes) o;
+
+         return Arrays.equals(value, bytes.value);
       }
 
       @Override
       public int hashCode() {
-         return Objects.hash(value);
+         return Arrays.hashCode(value);
       }
 
       @Override
@@ -341,13 +350,17 @@ public abstract class ID implements Serializable {
       public boolean equals(Object o) {
          if (this == o) return true;
          if (o == null || getClass() != o.getClass()) return false;
+
          Symbol symbol = (Symbol) o;
-         return value == symbol.value;
+
+         if (value != symbol.value) return false;
+
+         return true;
       }
 
       @Override
       public int hashCode() {
-         return Objects.hash(value);
+         return (int) (value ^ (value >>> 32));
       }
 
       @Override
@@ -400,13 +413,15 @@ public abstract class ID implements Serializable {
       public boolean equals(Object o) {
          if (this == o) return true;
          if (o == null || getClass() != o.getClass()) return false;
+
          Variable variable = (Variable) o;
+
          return value == variable.value;
       }
 
       @Override
       public int hashCode() {
-         return Objects.hash(value);
+         return (int) (value ^ (value >>> 32));
       }
 
       @Override
@@ -465,13 +480,15 @@ public abstract class ID implements Serializable {
       public boolean equals(Object o) {
          if (this == o) return true;
          if (o == null || getClass() != o.getClass()) return false;
+
          Bool bool = (Bool) o;
+
          return value == bool.value;
       }
 
       @Override
       public int hashCode() {
-         return Objects.hash(value);
+         return (value ? 1 : 0);
       }
 
       @Override
@@ -525,12 +542,12 @@ public abstract class ID implements Serializable {
 
          Set set = (Set) o;
 
-         return value != null ? value.equals(set.value) : set.value == null;
+         return value.equals(set.value);
       }
 
       @Override
       public int hashCode() {
-         return value != null ? value.hashCode() : 0;
+         return value.hashCode();
       }
 
       @Override
