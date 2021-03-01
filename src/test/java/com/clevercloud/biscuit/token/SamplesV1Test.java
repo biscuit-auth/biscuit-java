@@ -206,7 +206,7 @@ public class SamplesV1Test extends TestCase {
         Error e = v1.verify().getLeft();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
-                        new FailedCheck.FailedBlock(1, 1, "expiration($date) <- time(#ambient, $date) @ $date <= 1545264000")
+                        new FailedCheck.FailedBlock(1, 1, "check if time(#ambient, $date), $date <= 2018-12-20T00:00:00Z")
                 ))),
                 e);
     }
@@ -356,7 +356,7 @@ public class SamplesV1Test extends TestCase {
         Error e = res.getLeft();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
-                        new FailedCheck.FailedBlock(0, 0, "resource_match($0) <- resource(#ambient, $0) @ $0 matches /file[0-9]+.txt/")
+                        new FailedCheck.FailedBlock(0, 0, "check if resource(#ambient, $0), $0.matches(\"file[0-9]+.txt\")")
                 ))),
                 e);
 

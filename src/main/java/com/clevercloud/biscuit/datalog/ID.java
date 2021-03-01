@@ -535,9 +535,8 @@ public abstract class ID implements Serializable {
 
       @Override
       public String toString() {
-         return "[" +
-                 value +
-                 ']';
+         return "" +
+                 value;
       }
 
       public Schema.IDV1 serialize() {

@@ -1,6 +1,7 @@
 package com.clevercloud.biscuit.datalog;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -44,7 +45,10 @@ public final class SymbolTable implements Serializable {
          _s = TokenSignature.hex(((ID.Bytes) value).value());
          stack.push(_s);
       } else if (value instanceof ID.Date) {
-         _s = Date.from(Instant.ofEpochSecond(((ID.Date) value).value())).toString();
+         Date d = Date.from(Instant.ofEpochSecond(((ID.Date) value).value()));
+         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+         format.setTimeZone(TimeZone.getTimeZone("UTC"));
+         _s  = format.format(d).toString();
          stack.push(_s);
       } else if (value instanceof ID.Integer) {
          _s = Long.toString(((ID.Integer) value).value());
