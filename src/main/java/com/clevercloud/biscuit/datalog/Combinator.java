@@ -28,7 +28,7 @@ public final class Combinator implements Serializable {
 
             MatchedVariables next_vars = next_vars_opt.get();
 
-            final Option<Map<Long, ID>> v_opt = this.check_expressions(next_vars);
+            final Option<Map<Long, ID>> v_opt = next_vars.check_expressions(this.expressions);
             if(v_opt.isEmpty()) {
                continue;
             } else {
@@ -67,7 +67,7 @@ public final class Combinator implements Serializable {
 
             // there are no more predicates to check
             if (next_predicates.isEmpty()) {
-               final Option<Map<Long, ID>> v_opt = this.check_expressions(vars);
+               final Option<Map<Long, ID>> v_opt = vars.check_expressions(this.expressions);
                if(v_opt.isEmpty()) {
                   continue;
                } else {
@@ -117,27 +117,5 @@ public final class Combinator implements Serializable {
          next_predicates.add(predicates.get(i));
       }
       this.next_predicates = next_predicates;
-   }
-
-   public Option<Map<Long, ID>> check_expressions(MatchedVariables matched_variables) {
-      final Optional<Map<Long, ID>> vars = matched_variables.complete();
-      if (vars.isPresent()) {
-         Map<Long, ID> variables = vars.get();
-
-         for(Expression e: this.expressions) {
-            Option<ID> res = e.evaluate(variables);
-            if(res.isEmpty()) {
-               return Option.none();
-            }
-
-            if(res.get() != new ID.Bool(true)) {
-               return Option.none();
-            }
-         }
-
-         return Option.some(variables);
-      } else {
-         return Option.none();
-      }
    }
 }

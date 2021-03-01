@@ -224,8 +224,8 @@ public class BiscuitTest extends TestCase {
         }
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
-                        new FailedCheck.FailedBlock(1, 0, "prefix($resource) <- resource(#ambient, $resource) @ $resource matches /folder1/*"),
-                        new FailedCheck.FailedBlock(1, 1, "check_right(#read) <- resource(#ambient, $resource), operation(#ambient, #read), right(#authority, $resource, #read)")
+                        new FailedCheck.FailedBlock(1, 0, "check if resource(#ambient, $resource), $resource.starts_with(\"/folder1/\")"),
+                        new FailedCheck.FailedBlock(1, 1, "check if resource(#ambient, $resource), operation(#ambient, #read), right(#authority, $resource, #read)")
                 ))),
                 e);
     }

@@ -1,13 +1,12 @@
 package com.clevercloud.biscuit.datalog;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.clevercloud.biscuit.crypto.TokenSignature;
 import com.clevercloud.biscuit.datalog.expressions.Expression;
 import io.vavr.control.Option;
 
@@ -37,6 +36,36 @@ public final class SymbolTable implements Serializable {
       }
    }
 
+   public String print_id(final ID value){
+      String _s = "";
+      if(value instanceof ID.Bool){
+         _s = Boolean.toString(((ID.Bool) value).value());
+      } else if (value instanceof ID.Bytes) {
+         _s = TokenSignature.hex(((ID.Bytes) value).value());
+      } else if (value instanceof ID.Date) {
+         Date d = Date.from(Instant.ofEpochSecond(((ID.Date) value).value()));
+         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+         format.setTimeZone(TimeZone.getTimeZone("UTC"));
+         _s  = format.format(d).toString();
+      } else if (value instanceof ID.Integer) {
+         _s = Long.toString(((ID.Integer) value).value());
+      } else if (value instanceof ID.Set) {
+         ID.Set idset = (ID.Set) value;
+         if (idset.value().size()>0) {
+            _s = "[ ";
+            _s += String.join(", ", idset.value().stream().map((id) -> print_id(id)).collect(Collectors.toList()));
+            _s += " ]";
+         }
+      } else if (value instanceof ID.Str) {
+         _s = "\""+((ID.Str) value).value()+"\"";
+      } else if (value instanceof ID.Symbol) {
+         _s = "#" + print_symbol((int) ((ID.Symbol) value).value());
+      } else if (value instanceof ID.Variable) {
+         _s = "$" + print_symbol((int) ((ID.Variable) value).value());
+      }
+      return _s;
+   }
+
    public String print_rule(final Rule r) {
       String res = this.print_predicate(r.head());
       res += " <- " + this.print_rule_body(r);
@@ -50,7 +79,10 @@ public final class SymbolTable implements Serializable {
 
       String res =  String.join(", ", preds);
       if(!expressions.isEmpty()) {
-         res += ", " + String.join(", ", expressions);
+         if(!preds.isEmpty()) {
+            res += ", ";
+         }
+         res += String.join(", ", expressions);
       }
       return res;
    }

@@ -1,9 +1,21 @@
 package com.clevercloud.biscuit.token.builder;
 
 import com.clevercloud.biscuit.datalog.SymbolTable;
+import com.clevercloud.biscuit.datalog.expressions.Op;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class Expression {
-    public abstract com.clevercloud.biscuit.datalog.expressions.Expression convert(SymbolTable symbols);
+    public com.clevercloud.biscuit.datalog.expressions.Expression convert(SymbolTable symbols) {
+        ArrayList<com.clevercloud.biscuit.datalog.expressions.Op> ops = new ArrayList<>();
+        this.toOpcodes(symbols, ops);
+
+        return new com.clevercloud.biscuit.datalog.expressions.Expression(ops);
+    }
+
+    public abstract void toOpcodes(SymbolTable symbols, List<com.clevercloud.biscuit.datalog.expressions.Op> ops);
+
 
     public enum Op {
         Negate,
@@ -35,8 +47,8 @@ public abstract class Expression {
             this.value = value;
         }
 
-        public  com.clevercloud.biscuit.datalog.expressions.Expression convert(SymbolTable symbols) {
-            throw new UnsupportedOperationException("not implemented");
+        public void toOpcodes(SymbolTable symbols, List<com.clevercloud.biscuit.datalog.expressions.Op> ops) {
+            ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Value(this.value.convert(symbols)));
         }
 
         @Override
@@ -64,8 +76,20 @@ public abstract class Expression {
             this.arg1 = arg1;
         }
 
-        public  com.clevercloud.biscuit.datalog.expressions.Expression convert(SymbolTable symbols) {
-            throw new UnsupportedOperationException("not implemented");
+        public void toOpcodes(SymbolTable symbols, List<com.clevercloud.biscuit.datalog.expressions.Op> ops) {
+            this.arg1.toOpcodes(symbols, ops);
+
+            switch (this.op) {
+                case Negate:
+                    ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Unary(com.clevercloud.biscuit.datalog.expressions.Op.UnaryOp.Negate));
+                    break;
+                case Parens:
+                    ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Unary(com.clevercloud.biscuit.datalog.expressions.Op.UnaryOp.Parens));
+                    break;
+                case Length:
+                    ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Unary(com.clevercloud.biscuit.datalog.expressions.Op.UnaryOp.Length));
+                    break;
+            }
         }
 
         @Override
@@ -98,8 +122,63 @@ public abstract class Expression {
             this.arg2 = arg2;
         }
 
-        public  com.clevercloud.biscuit.datalog.expressions.Expression convert(SymbolTable symbols) {
-            throw new UnsupportedOperationException("not implemented");
+        public void toOpcodes(SymbolTable symbols, List<com.clevercloud.biscuit.datalog.expressions.Op> ops) {
+            this.arg1.toOpcodes(symbols, ops);
+            this.arg2.toOpcodes(symbols, ops);
+
+            switch (this.op) {
+                case LessThan:
+                    ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.LessThan));
+                    break;
+                case GreaterThan:
+                    ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.GreaterThan));
+                    break;
+                case LessOrEqual:
+                    ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.LessOrEqual));
+                    break;
+                case GreaterOrEqual:
+                    ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.GreaterOrEqual));
+                    break;
+                case Equal:
+                    ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.Equal));
+                    break;
+                case Contains:
+                    ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.Contains));
+                    break;
+                case Prefix:
+                    ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.Prefix));
+                    break;
+                case Suffix:
+                    ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.Suffix));
+                    break;
+                case Regex:
+                    ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.Regex));
+                    break;
+                case Add:
+                    ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.Add));
+                    break;
+                case Sub:
+                    ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.Sub));
+                    break;
+                case Mul:
+                    ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.Mul));
+                    break;
+                case Div:
+                    ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.Div));
+                    break;
+                case And:
+                    ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.And));
+                    break;
+                case Or:
+                    ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.Or));
+                    break;
+                case Intersection:
+                    ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.Intersection));
+                    break;
+                case Union:
+                    ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.Union));
+                    break;
+            }
         }
 
         @Override
