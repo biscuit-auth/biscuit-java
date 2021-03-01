@@ -36,44 +36,32 @@ public final class SymbolTable implements Serializable {
       }
    }
 
-   public String print_id(final ID value, final Deque<String> stack){
+   public String print_id(final ID value){
       String _s = "";
       if(value instanceof ID.Bool){
          _s = Boolean.toString(((ID.Bool) value).value());
-         stack.push(_s);
       } else if (value instanceof ID.Bytes) {
          _s = TokenSignature.hex(((ID.Bytes) value).value());
-         stack.push(_s);
       } else if (value instanceof ID.Date) {
          Date d = Date.from(Instant.ofEpochSecond(((ID.Date) value).value()));
          SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
          format.setTimeZone(TimeZone.getTimeZone("UTC"));
          _s  = format.format(d).toString();
-         stack.push(_s);
       } else if (value instanceof ID.Integer) {
          _s = Long.toString(((ID.Integer) value).value());
-         stack.push(_s);
       } else if (value instanceof ID.Set) {
          ID.Set idset = (ID.Set) value;
          if (idset.value().size()>0) {
             _s = "[ ";
-            Deque<String> tmpStack = new ArrayDeque<String>();
-            for(Iterator<ID> it = idset.value().iterator(); it.hasNext(); ){
-               ID _id = it.next();
-               _s += print_id(_id,tmpStack);
-            }
+            _s += String.join(", ", idset.value().stream().map((id) -> print_id(id)).collect(Collectors.toList()));
             _s += " ]";
-            stack.push(_s);
          }
       } else if (value instanceof ID.Str) {
          _s = "\""+((ID.Str) value).value()+"\"";
-         stack.push(_s);
       } else if (value instanceof ID.Symbol) {
          _s = "#" + print_symbol((int) ((ID.Symbol) value).value());
-         stack.push(_s);
       } else if (value instanceof ID.Variable) {
          _s = "$" + print_symbol((int) ((ID.Variable) value).value());
-         stack.push(_s);
       }
       return _s;
    }
@@ -91,7 +79,10 @@ public final class SymbolTable implements Serializable {
 
       String res =  String.join(", ", preds);
       if(!expressions.isEmpty()) {
-         res += ", " + String.join(", ", expressions);
+         if(!preds.isEmpty()) {
+            res += ", ";
+         }
+         res += String.join(", ", expressions);
       }
       return res;
    }
