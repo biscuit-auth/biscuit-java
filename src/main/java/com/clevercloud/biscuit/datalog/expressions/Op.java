@@ -8,6 +8,8 @@ import io.vavr.control.Either;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
@@ -301,7 +303,9 @@ public abstract class Op {
                     break;
                 case Regex:
                     if (right instanceof ID.Str && left instanceof ID.Str) {
-                        stack.push(new ID.Bool(((ID.Str) left).value().matches(((ID.Str) right).value())));
+                        Pattern p = Pattern.compile(((ID.Str) right).value());
+                        Matcher m = p.matcher(((ID.Str) left).value());
+                        stack.push(new ID.Bool(m.find()));
                         return true;
                     }
                     break;
