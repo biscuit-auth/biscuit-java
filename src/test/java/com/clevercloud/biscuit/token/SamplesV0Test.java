@@ -355,13 +355,14 @@ public class SamplesV0Test extends TestCase {
         Error e = res.getLeft();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
-                        new FailedCheck.FailedBlock(0, 0, "resource_match($0) <- resource(#ambient, $0) @ $0 matches /file[0-9]+.txt/")
+                        new FailedCheck.FailedBlock(0, 0, "check if resource(#ambient, $0), $0.matches(\"file[0-9]+.txt\")")
                 ))),
                 e);
 
         Verifier v2 = token.verify(root).get();
         v2.add_resource("file123.txt");
         v2.set_time();
+        v2.allow();
         Assert.assertTrue(v2.verify().isRight());
 
     }
@@ -395,6 +396,7 @@ public class SamplesV0Test extends TestCase {
                 )
         ));
         v1.add_check(new Check(queries));
+        v1.allow();
 
         Assert.assertTrue(v1.verify().isRight());
     }

@@ -363,6 +363,7 @@ public class SamplesV1Test extends TestCase {
         Verifier v2 = token.verify(root).get();
         v2.add_resource("file123.txt");
         v2.set_time();
+        v2.allow();
         Assert.assertTrue(v2.verify().isRight());
 
     }
@@ -441,6 +442,6 @@ public class SamplesV1Test extends TestCase {
         Verifier v1 = token.verify(root).get();
         v1.allow();
 
-        Assert.assertEquals(v1.verify(), Right(Long.valueOf(0)));
+        Assert.assertEquals(Right(Long.valueOf(0)), v1.verify());
     }
 }
