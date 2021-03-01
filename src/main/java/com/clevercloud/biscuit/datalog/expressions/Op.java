@@ -278,7 +278,9 @@ public abstract class Op {
                                     right instanceof ID.Str ||
                                     right instanceof ID.Bytes ||
                                     right instanceof ID.Date ||
+                                    right instanceof ID.Bool ||
                                     right instanceof ID.Symbol)) {
+
                         stack.push(new ID.Bool(((ID.Set) left).value().contains(right)));
                         return true;
                     }
