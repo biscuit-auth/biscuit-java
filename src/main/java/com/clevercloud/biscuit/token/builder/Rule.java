@@ -54,6 +54,6 @@ public class Rule {
 
     @Override
     public String toString() {
-        return head.toString() + " <- " + body + " @ "+ expressions;
+        return head.toString() + " <- " + body + ", "+ expressions;
     }
 }

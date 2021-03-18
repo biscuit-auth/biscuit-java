@@ -53,6 +53,52 @@ public class Parser {
         return Either.right(new Tuple2<>(body._1, new Rule(head, body._2, body._3)));
     }
 
+    public static Either<Error, Tuple2<String, Check>> check(String s) {
+        String prefix = "check if";
+        if(!s.startsWith(prefix)) {
+            return Either.left(new Error(s, "missing check prefix"));
+        }
+
+        s = s.substring(prefix.length());
+
+        List<Rule> queries = new ArrayList<>();
+        Either<Error, Tuple3<String, List<Predicate>, List<Expression>>> bodyRes = rule_body(s);
+        if (bodyRes.isLeft()) {
+            return Either.left(bodyRes.getLeft());
+        }
+
+        Tuple3<String, List<Predicate>, List<Expression>> body = bodyRes.get();
+
+        s = body._1;
+        queries.add(new Rule(new Predicate("query", new ArrayList<>()), body._2, body._3));
+
+        int i = 0;
+        while(true) {
+            if(s.length() == 0) {
+                break;
+            }
+
+            s = space(s);
+
+            if(!s.startsWith("or")) {
+                break;
+            }
+            s = s.substring(2);
+
+            Either<Error, Tuple3<String, List<Predicate>, List<Expression>>> bodyRes2 = rule_body(s);
+            if (bodyRes2.isLeft()) {
+                return Either.left(bodyRes2.getLeft());
+            }
+
+            Tuple3<String, List<Predicate>, List<Expression>> body2 = bodyRes2.get();
+
+            s = body2._1;
+            queries.add(new Rule(new Predicate("query", new ArrayList<>()), body2._2, body2._3));
+        }
+
+        return Either.right(new Tuple2<>(s, new Check(queries)));
+    }
+
     public static Either<Error, Tuple3<String, List<Predicate>, List<Expression>>> rule_body(String s) {
         List<Predicate> predicates = new ArrayList<Predicate>();
         while(true) {
@@ -79,17 +125,6 @@ public class Parser {
         //FIXME: handle constraints
 
         return Either.right(new Tuple3<>(s, predicates, new ArrayList<Expression>()));
-    }
-
-    public static Either<Error, Tuple2<String, Check>> check(String s) {
-        String prefix = "check if";
-        if(!s.startsWith(prefix)) {
-            return Either.left(new Error(s, "missing check prefix"));
-        }
-
-        s = s.substring(prefix.length());
-
-        return Either.left(new Error(s, "unimplemented"));
     }
 
     public static Either<Error, Tuple2<String, Predicate>> predicate(String s) {
