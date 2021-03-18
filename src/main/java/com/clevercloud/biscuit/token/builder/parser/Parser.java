@@ -17,7 +17,7 @@ import static com.clevercloud.biscuit.token.builder.Utils.var;
 
 public class Parser {
     public static Either<Error, Tuple2<String, Fact>> fact(String s) {
-        Either<Error, Tuple2<String, Predicate>> res = predicate(s);
+        Either<Error, Tuple2<String, Predicate>> res = fact_predicate(s);
         if (res.isLeft()) {
             return Either.left(res.getLeft());
         } else {
@@ -208,6 +208,49 @@ public class Parser {
         return Either.right(new Tuple2<String, Predicate>(remaining, new Predicate(name, terms)));
     }
 
+    public static Either<Error, Tuple2<String, Predicate>> fact_predicate(String s) {
+        Tuple2<String, String> tn = take_while(s, (c) -> Character.isAlphabetic(c) || c == '_');
+        String name = tn._1;
+        s = tn._2;
+
+        s = space(s);
+        if(s.length() ==  0 || s.charAt(0) != '(') {
+            return Either.left(new Error(s, "opening parens not found"));
+        }
+        s = s.substring(1);
+
+        List<Term> terms = new ArrayList<Term>();
+        while(true) {
+
+            s = space(s);
+
+            Either<Error, Tuple2<String, Term>> res = fact_atom(s);
+            if (res.isLeft()) {
+                break;
+            }
+
+            Tuple2<String, Term> t = res.get();
+            s = t._1;
+            terms.add(t._2);
+
+            s = space(s);
+
+            if(s.length() == 0 ||s.charAt(0) != ',') {
+                break;
+            } else {
+                s = s.substring(1);
+            }
+        }
+
+        s = space(s);
+        if (0 == s.length() || s.charAt(0) != ')') {
+            return Either.left(new Error(s, "closing parens not found"));
+        }
+        String remaining = s.substring(1);
+
+        return Either.right(new Tuple2<String, Predicate>(remaining, new Predicate(name, terms)));
+    }
+
     public static Either<Error, Tuple2<String, String>> name(String s) {
         Tuple2<String, String> t = take_while(s, (c) -> Character.isAlphabetic(c) || c == '_');
         String name = t._1;
@@ -229,9 +272,41 @@ public class Parser {
             return Either.right(new Tuple2<String, Term>(t._1, t._2));
         }
 
+        Either<Error, Tuple2<String, Term.Date>> res4 = date(s);
+        if(res4.isRight()) {
+            Tuple2<String, Term.Date> t = res4.get();
+            return Either.right(new Tuple2<String, Term>(t._1, t._2));
+        }
+
         Either<Error, Tuple2<String, Term.Integer>> res3 = integer(s);
         if(res3.isRight()) {
             Tuple2<String, Term.Integer> t = res3.get();
+            return Either.right(new Tuple2<String, Term>(t._1, t._2));
+        }
+
+        Either<Error, Tuple2<String, Term.Variable>> res5 = variable(s);
+        if(res5.isRight()) {
+            Tuple2<String, Term.Variable> t = res5.get();
+            return Either.right(new Tuple2<String, Term>(t._1, t._2));
+        }
+
+        return Either.left(new Error(s, "unrecognized value"));
+    }
+
+    public static Either<Error, Tuple2<String, Term>> fact_atom(String s) {
+        if(s.length() > 0 && s.charAt(0) == '$') {
+            return Either.left(new Error(s, "variables are not allowed in facts"));
+        }
+
+        Either<Error, Tuple2<String, Term.Symbol>> res1 = symbol(s);
+        if(res1.isRight()) {
+            Tuple2<String, Term.Symbol> t = res1.get();
+            return Either.right(new Tuple2<String, Term>(t._1, t._2));
+        }
+
+        Either<Error, Tuple2<String, Term.Str>> res2 = string(s);
+        if(res2.isRight()) {
+            Tuple2<String, Term.Str> t = res2.get();
             return Either.right(new Tuple2<String, Term>(t._1, t._2));
         }
 
@@ -241,11 +316,12 @@ public class Parser {
             return Either.right(new Tuple2<String, Term>(t._1, t._2));
         }
 
-        Either<Error, Tuple2<String, Term.Variable>> res5 = variable(s);
-        if(res5.isRight()) {
-            Tuple2<String, Term.Variable> t = res5.get();
+        Either<Error, Tuple2<String, Term.Integer>> res3 = integer(s);
+        if(res3.isRight()) {
+            Tuple2<String, Term.Integer> t = res3.get();
             return Either.right(new Tuple2<String, Term>(t._1, t._2));
         }
+
 
         return Either.left(new Error(s, "unrecognized value"));
     }
