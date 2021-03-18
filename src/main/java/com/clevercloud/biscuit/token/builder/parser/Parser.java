@@ -1,5 +1,6 @@
 package com.clevercloud.biscuit.token.builder.parser;
 
+import com.clevercloud.biscuit.token.Policy;
 import com.clevercloud.biscuit.token.builder.*;
 import io.vavr.Tuple2;
 import io.vavr.Tuple3;
@@ -62,6 +63,43 @@ public class Parser {
         s = s.substring(prefix.length());
 
         List<Rule> queries = new ArrayList<>();
+        Either<Error, Tuple2<String, List<Rule>>> bodyRes = check_body(s);
+        if (bodyRes.isLeft()) {
+            return Either.left(bodyRes.getLeft());
+        }
+
+        Tuple2<String, List<Rule>> t = bodyRes.get();
+
+        return Either.right(new Tuple2<>(t._1, new Check(t._2)));
+    }
+
+    public static Either<Error, Tuple2<String, Policy>> policy(String s) {
+        Policy.Kind p = Policy.Kind.Allow;
+
+        String allow = "allow if";
+        String deny = "deny if";
+        if(s.startsWith(allow)) {
+            s = s.substring(allow.length());
+        } else if(s.startsWith(deny)) {
+            p = Policy.Kind.Deny;
+            s = s.substring(deny.length());
+        } else {
+            return Either.left(new Error(s, "missing policy prefix"));
+        }
+
+        List<Rule> queries = new ArrayList<>();
+        Either<Error, Tuple2<String, List<Rule>>> bodyRes = check_body(s);
+        if (bodyRes.isLeft()) {
+            return Either.left(bodyRes.getLeft());
+        }
+
+        Tuple2<String, List<Rule>> t = bodyRes.get();
+
+        return Either.right(new Tuple2<>(t._1, new Policy(t._2, p)));
+    }
+
+    public static Either<Error, Tuple2<String, List<Rule>>> check_body(String s) {
+        List<Rule> queries = new ArrayList<>();
         Either<Error, Tuple3<String, List<Predicate>, List<Expression>>> bodyRes = rule_body(s);
         if (bodyRes.isLeft()) {
             return Either.left(bodyRes.getLeft());
@@ -96,7 +134,7 @@ public class Parser {
             queries.add(new Rule(new Predicate("query", new ArrayList<>()), body2._2, body2._3));
         }
 
-        return Either.right(new Tuple2<>(s, new Check(queries)));
+        return Either.right(new Tuple2<>(s, queries));
     }
 
     public static Either<Error, Tuple3<String, List<Predicate>, List<Expression>>> rule_body(String s) {
