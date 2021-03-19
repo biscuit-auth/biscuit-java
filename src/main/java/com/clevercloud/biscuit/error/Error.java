@@ -330,4 +330,27 @@ public class Error {
             return true;
         }
     }
+
+    public static class Parser extends Error {
+        final public com.clevercloud.biscuit.token.builder.parser.Error error;
+
+        public Parser(com.clevercloud.biscuit.token.builder.parser.Error error) {
+            this.error = error;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Parser parser = (Parser) o;
+
+            return error.equals(parser.error);
+        }
+
+        @Override
+        public int hashCode() {
+            return error.hashCode();
+        }
+    }
 }

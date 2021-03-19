@@ -5,6 +5,9 @@ import com.clevercloud.biscuit.datalog.Fact;
 import com.clevercloud.biscuit.datalog.Rule;
 import com.clevercloud.biscuit.datalog.Check;
 import com.clevercloud.biscuit.datalog.SymbolTable;
+import com.clevercloud.biscuit.error.Error;
+import io.vavr.Tuple2;
+import io.vavr.control.Either;
 
 import static com.clevercloud.biscuit.token.builder.Utils.*;
 
@@ -37,12 +40,57 @@ public class Block {
         this.facts.add(f.convert(this.symbols));
     }
 
+    public Either<Error, Void> add_fact(String s) {
+        Either<com.clevercloud.biscuit.token.builder.parser.Error, Tuple2<String, com.clevercloud.biscuit.token.builder.Fact>> res =
+                com.clevercloud.biscuit.token.builder.parser.Parser.fact(s);
+
+        if (res.isLeft()) {
+            return Either.left(new Error.Parser(res.getLeft()));
+        }
+
+        Tuple2<String, com.clevercloud.biscuit.token.builder.Fact> t = res.get();
+
+        add_fact(t._2);
+
+        return Either.right(null);
+    }
+
     public void add_rule(com.clevercloud.biscuit.token.builder.Rule rule) {
         this.rules.add(rule.convert(this.symbols));
     }
 
+    public Either<Error, Void> add_rule(String s) {
+        Either<com.clevercloud.biscuit.token.builder.parser.Error, Tuple2<String, com.clevercloud.biscuit.token.builder.Rule>> res =
+                com.clevercloud.biscuit.token.builder.parser.Parser.rule(s);
+
+        if (res.isLeft()) {
+            return Either.left(new Error.Parser(res.getLeft()));
+        }
+
+        Tuple2<String, com.clevercloud.biscuit.token.builder.Rule> t = res.get();
+
+        add_rule(t._2);
+
+        return Either.right(null);
+    }
+
     public void add_check(com.clevercloud.biscuit.token.builder.Check check) {
         this.checks.add(check.convert(this.symbols));
+    }
+
+    public Either<Error, Void> add_check(String s) {
+        Either<com.clevercloud.biscuit.token.builder.parser.Error, Tuple2<String, com.clevercloud.biscuit.token.builder.Check>> res =
+                com.clevercloud.biscuit.token.builder.parser.Parser.check(s);
+
+        if (res.isLeft()) {
+            return Either.left(new Error.Parser(res.getLeft()));
+        }
+
+        Tuple2<String, com.clevercloud.biscuit.token.builder.Check> t = res.get();
+
+        add_check(t._2);
+
+        return Either.right(null);
     }
 
     public  void set_context(String context) {

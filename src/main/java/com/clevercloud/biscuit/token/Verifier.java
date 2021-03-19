@@ -8,6 +8,7 @@ import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.error.FailedCheck;
 import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.builder.*;
+import io.vavr.Tuple2;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 
@@ -83,13 +84,58 @@ public class Verifier {
         world.add_fact(fact.convert(symbols));
     }
 
+    public Either<Error, Void> add_fact(String s) {
+        Either<com.clevercloud.biscuit.token.builder.parser.Error, Tuple2<String, Fact>> res =
+                com.clevercloud.biscuit.token.builder.parser.Parser.fact(s);
+
+        if (res.isLeft()) {
+            return Either.left(new Error.Parser(res.getLeft()));
+        }
+
+        Tuple2<String, com.clevercloud.biscuit.token.builder.Fact> t = res.get();
+
+        add_fact(t._2);
+
+        return Either.right(null);
+    }
+
     public void add_rule(Rule rule) {
         world.add_rule(rule.convert(symbols));
+    }
+
+    public Either<Error, Void> add_rule(String s) {
+        Either<com.clevercloud.biscuit.token.builder.parser.Error, Tuple2<String, com.clevercloud.biscuit.token.builder.Rule>> res =
+                com.clevercloud.biscuit.token.builder.parser.Parser.rule(s);
+
+        if (res.isLeft()) {
+            return Either.left(new Error.Parser(res.getLeft()));
+        }
+
+        Tuple2<String, com.clevercloud.biscuit.token.builder.Rule> t = res.get();
+
+        add_rule(t._2);
+
+        return Either.right(null);
     }
 
     public void add_check(Check check) {
         this.checks.add(check);
         world.add_check(check.convert(symbols));
+    }
+
+    public Either<Error, Void> add_check(String s) {
+        Either<com.clevercloud.biscuit.token.builder.parser.Error, Tuple2<String, com.clevercloud.biscuit.token.builder.Check>> res =
+                com.clevercloud.biscuit.token.builder.parser.Parser.check(s);
+
+        if (res.isLeft()) {
+            return Either.left(new Error.Parser(res.getLeft()));
+        }
+
+        Tuple2<String, com.clevercloud.biscuit.token.builder.Check> t = res.get();
+
+        add_check(t._2);
+
+        return Either.right(null);
     }
 
     public void add_resource(String resource) {
@@ -180,8 +226,35 @@ public class Verifier {
         this.policies.add(new Policy(q, Policy.Kind.Deny));
     }
 
+    public Either<Error, Void> add_policy(String s) {
+        Either<com.clevercloud.biscuit.token.builder.parser.Error, Tuple2<String, com.clevercloud.biscuit.token.Policy>> res =
+                com.clevercloud.biscuit.token.builder.parser.Parser.policy(s);
+
+        if (res.isLeft()) {
+            return Either.left(new Error.Parser(res.getLeft()));
+        }
+
+        Tuple2<String, com.clevercloud.biscuit.token.Policy> t = res.get();
+
+        this.policies.add(t._2);
+        return Either.right(null);
+    }
+
     public Either<Error, Set<Fact>> query(Rule query) {
         return this.query(query, new RunLimits());
+    }
+
+    public Either<Error, Set<Fact>> query(String s) {
+        Either<com.clevercloud.biscuit.token.builder.parser.Error, Tuple2<String, com.clevercloud.biscuit.token.builder.Rule>> res =
+                com.clevercloud.biscuit.token.builder.parser.Parser.rule(s);
+
+        if (res.isLeft()) {
+            return Either.left(new Error.Parser(res.getLeft()));
+        }
+
+        Tuple2<String, com.clevercloud.biscuit.token.builder.Rule> t = res.get();
+
+        return query(t._2);
     }
 
     public Either<Error, Set<Fact>> query(Rule query, RunLimits limits) {
@@ -200,6 +273,19 @@ public class Verifier {
         }
 
         return Right(s);
+    }
+
+    public Either<Error, Set<Fact>> query(String s, RunLimits limits) {
+        Either<com.clevercloud.biscuit.token.builder.parser.Error, Tuple2<String, com.clevercloud.biscuit.token.builder.Rule>> res =
+                com.clevercloud.biscuit.token.builder.parser.Parser.rule(s);
+
+        if (res.isLeft()) {
+            return Either.left(new Error.Parser(res.getLeft()));
+        }
+
+        Tuple2<String, com.clevercloud.biscuit.token.builder.Rule> t = res.get();
+
+        return query(t._2, limits);
     }
 
     public Either<Error, Long> verify() {
