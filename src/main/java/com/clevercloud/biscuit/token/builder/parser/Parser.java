@@ -139,17 +139,26 @@ public class Parser {
 
     public static Either<Error, Tuple3<String, List<Predicate>, List<Expression>>> rule_body(String s) {
         List<Predicate> predicates = new ArrayList<Predicate>();
+        List<Expression> expressions = new ArrayList<>();
+
         while(true) {
             s = space(s);
 
             Either<Error, Tuple2<String, Predicate>> res = predicate(s);
-            if (res.isLeft()) {
-                break;
+            if(res.isRight()) {
+                Tuple2<String, Predicate> t = res.get();
+                s = t._1;
+                predicates.add(t._2);
+            } else {
+                Either<Error, Tuple2<String, Expression>> res2 = expression(s);
+                if(res2.isRight()) {
+                    Tuple2<String, Expression> t2 = res2.get();
+                    s = t2._1;
+                    expressions.add(t2._2);
+                } else {
+                    break;
+                }
             }
-
-            Tuple2<String, Predicate> t = res.get();
-            s = t._1;
-            predicates.add(t._2);
 
             s = space(s);
 
@@ -162,7 +171,7 @@ public class Parser {
 
         //FIXME: handle constraints
 
-        return Either.right(new Tuple3<>(s, predicates, new ArrayList<Expression>()));
+        return Either.right(new Tuple3<>(s, predicates, expressions));
     }
 
     public static Either<Error, Tuple2<String, Predicate>> predicate(String s) {
@@ -449,7 +458,7 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<String, Expression>> expression(String s) {
-        return Either.left(new Error(s, "unimplemented"));
+        return ExpressionParser.parse(s);
     }
 
     public static String space(String s) {

@@ -202,7 +202,7 @@ public class ParserTest extends TestCase {
         );
 
         Either<Error, Tuple2<String, Expression>> res4 =
-                Parser.expression("  2 < $test && $var2.starts_with(\\\"test\\\") && true ");
+                Parser.expression("  2 < $test && $var2.starts_with(\"test\") && true ");
 
         assertEquals(Either.right(new Tuple2<String, Expression>("",
                         new Expression.Binary(
@@ -262,7 +262,7 @@ public class ParserTest extends TestCase {
         HashMap variables = new HashMap();
         Option<ID> value = ex.evaluate(variables);
         assertEquals(Option.some(new ID.Integer(7)), value);
-        assertEquals("1 + 2 * 3", ex.print(s));
+        assertEquals("1 + 2 * 3", ex.print(s).get());
 
 
         Either<Error, Tuple2<String, Expression>> res2 =
@@ -304,6 +304,6 @@ public class ParserTest extends TestCase {
         HashMap variables2 = new HashMap();
         Option<ID> value2 = ex2.evaluate(variables2);
         assertEquals(Option.some(new ID.Integer(9)), value2);
-        assertEquals("(1 + 2) * 3", ex2.print(s2));
+        assertEquals("(1 + 2) * 3", ex2.print(s2).get());
     }
 }
