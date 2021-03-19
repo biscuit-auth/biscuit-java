@@ -266,6 +266,12 @@ public class Parser {
             return Either.right(new Tuple2<String, Term>(t._1, t._2));
         }
 
+        Either<Error, Tuple2<String, Term.Variable>> res5 = variable(s);
+        if(res5.isRight()) {
+            Tuple2<String, Term.Variable> t = res5.get();
+            return Either.right(new Tuple2<String, Term>(t._1, t._2));
+        }
+
         Either<Error, Tuple2<String, Term.Str>> res2 = string(s);
         if(res2.isRight()) {
             Tuple2<String, Term.Str> t = res2.get();
@@ -287,12 +293,6 @@ public class Parser {
         Either<Error, Tuple2<String, Term.Integer>> res3 = integer(s);
         if(res3.isRight()) {
             Tuple2<String, Term.Integer> t = res3.get();
-            return Either.right(new Tuple2<String, Term>(t._1, t._2));
-        }
-
-        Either<Error, Tuple2<String, Term.Variable>> res5 = variable(s);
-        if(res5.isRight()) {
-            Tuple2<String, Term.Variable> t = res5.get();
             return Either.right(new Tuple2<String, Term>(t._1, t._2));
         }
 
