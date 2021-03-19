@@ -272,6 +272,12 @@ public class Parser {
             return Either.right(new Tuple2<String, Term>(t._1, t._2));
         }
 
+        Either<Error, Tuple2<String, Term.Bool>> res6 = bool(s);
+        if(res6.isRight()) {
+            Tuple2<String, Term.Bool> t = res6.get();
+            return Either.right(new Tuple2<>(t._1, t._2));
+        }
+
         Either<Error, Tuple2<String, Term.Date>> res4 = date(s);
         if(res4.isRight()) {
             Tuple2<String, Term.Date> t = res4.get();
@@ -308,6 +314,12 @@ public class Parser {
         if(res2.isRight()) {
             Tuple2<String, Term.Str> t = res2.get();
             return Either.right(new Tuple2<String, Term>(t._1, t._2));
+        }
+
+        Either<Error, Tuple2<String, Term.Bool>> res6 = bool(s);
+        if(res6.isRight()) {
+            Tuple2<String, Term.Bool> t = res6.get();
+            return Either.right(new Tuple2<>(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Date>> res4 = date(s);
@@ -419,6 +431,21 @@ public class Parser {
         Tuple2<String, String> t = take_while(s.substring(1), (c) -> Character.isAlphabetic(c)|| Character.isDigit(c) || c == '_');
 
         return Either.right(new Tuple2<String, Term.Variable>(t._2, (Term.Variable) var(t._1)));
+    }
+
+    public static Either<Error, Tuple2<String, Term.Bool>> bool(String s) {
+        boolean b;
+        if(s.startsWith("true")) {
+            b = true;
+            s = s.substring(4);
+        } else if(s.startsWith("false")) {
+            b = false;
+            s = s.substring(5);
+        } else {
+            return Either.left(new Error(s, "not a boolean"));
+        }
+
+        return Either.right(new Tuple2<>(s, new Term.Bool(b)));
     }
 
     public static Either<Error, Tuple2<String, Expression>> expression(String s) {
