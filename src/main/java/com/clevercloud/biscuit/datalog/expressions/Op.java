@@ -73,6 +73,26 @@ public abstract class Op {
 
             return b.build();
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Value value1 = (Value) o;
+
+            return value.equals(value1.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return value.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            return "Value(" + value + ')';
+        }
     }
 
     public enum UnaryOp {
@@ -168,6 +188,26 @@ public abstract class Op {
             }
 
             return Left(new Error.FormatError.DeserializationError("invalid unary operation"));
+        }
+
+        @Override
+        public String toString() {
+            return "Unary."+op;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Unary unary = (Unary) o;
+
+            return op == unary.op;
+        }
+
+        @Override
+        public int hashCode() {
+            return op.hashCode();
         }
     }
 
@@ -564,6 +604,26 @@ public abstract class Op {
             }
 
             return Left(new Error.FormatError.DeserializationError("invalid binary operation"));
+        }
+
+        @Override
+        public String toString() {
+            return "Binary."+ op;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Binary binary = (Binary) o;
+
+            return op == binary.op;
+        }
+
+        @Override
+        public int hashCode() {
+            return op.hashCode();
         }
     }
 }

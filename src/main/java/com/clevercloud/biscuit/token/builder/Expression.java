@@ -65,6 +65,13 @@ public abstract class Expression {
         public int hashCode() {
             return value != null ? value.hashCode() : 0;
         }
+
+        @Override
+        public String toString() {
+            return "Value{" +
+                    "value=" + value +
+                    '}';
+        }
     }
 
     public final static class Unary extends Expression {
@@ -108,6 +115,14 @@ public abstract class Expression {
             int result = op.hashCode();
             result = 31 * result + arg1.hashCode();
             return result;
+        }
+
+        @Override
+        public String toString() {
+            return "Unary{" +
+                    "op=" + op +
+                    ", arg1=" + arg1 +
+                    '}';
         }
     }
 
@@ -199,6 +214,15 @@ public abstract class Expression {
             result = 31 * result + arg1.hashCode();
             result = 31 * result + arg2.hashCode();
             return result;
+        }
+
+        @Override
+        public String toString() {
+            return "Binary{" +
+                    "op=" + op +
+                    ", arg1=" + arg1 +
+                    ", arg2=" + arg2 +
+                    '}';
         }
     }
 }
