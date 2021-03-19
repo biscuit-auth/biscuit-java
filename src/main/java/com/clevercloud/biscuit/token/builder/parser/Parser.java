@@ -181,7 +181,7 @@ public class Parser {
 
             s = space(s);
 
-            Either<Error, Tuple2<String, Term>> res = atom(s);
+            Either<Error, Tuple2<String, Term>> res = term(s);
             if (res.isLeft()) {
                 break;
             }
@@ -224,7 +224,7 @@ public class Parser {
 
             s = space(s);
 
-            Either<Error, Tuple2<String, Term>> res = fact_atom(s);
+            Either<Error, Tuple2<String, Term>> res = fact_term(s);
             if (res.isLeft()) {
                 break;
             }
@@ -259,7 +259,7 @@ public class Parser {
         return Either.right(new Tuple2<String, String>(remaining, name));
     }
 
-    public static Either<Error, Tuple2<String, Term>> atom(String s) {
+    public static Either<Error, Tuple2<String, Term>> term(String s) {
         Either<Error, Tuple2<String, Term.Symbol>> res1 = symbol(s);
         if(res1.isRight()) {
             Tuple2<String, Term.Symbol> t = res1.get();
@@ -299,7 +299,7 @@ public class Parser {
         return Either.left(new Error(s, "unrecognized value"));
     }
 
-    public static Either<Error, Tuple2<String, Term>> fact_atom(String s) {
+    public static Either<Error, Tuple2<String, Term>> fact_term(String s) {
         if(s.length() > 0 && s.charAt(0) == '$') {
             return Either.left(new Error(s, "variables are not allowed in facts"));
         }
