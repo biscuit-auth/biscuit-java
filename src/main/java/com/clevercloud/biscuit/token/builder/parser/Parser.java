@@ -6,7 +6,7 @@ import io.vavr.Tuple2;
 import io.vavr.Tuple3;
 import io.vavr.control.Either;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -402,9 +402,9 @@ public class Parser {
         Tuple2<String, String> t = take_while(s, (c) -> c != ' ' && c != ',' && c != ')');
 
         try {
-            Instant i = Instant.parse(t._1);
+            OffsetDateTime d = OffsetDateTime.parse(t._1);
             String remaining = t._2;
-            return Either.right(new Tuple2<String, Term.Date>(remaining, new Term.Date(i.getEpochSecond())));
+            return Either.right(new Tuple2<String, Term.Date>(remaining, new Term.Date(d.toEpochSecond())));
         } catch (DateTimeParseException e) {
             return Either.left(new Error(s, "not a date"));
 
