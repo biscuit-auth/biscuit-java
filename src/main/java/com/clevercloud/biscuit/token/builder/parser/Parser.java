@@ -46,16 +46,13 @@ public class Parser {
         Tuple2<Integer, Integer> rTuple = t0._1;
         Predicate head = t0._2;
 
-        //s = space(s);
         int rOffset = space(s, rTuple._1, rTuple._2);
-        //if (s.length() < 2 || s.charAt(0) != '<' || s.charAt(1) != '-') {
         if ((rTuple._2 - rOffset) < 2 || s.charAt(rOffset) != '<' || s.charAt(rOffset + 1) != '-') {
 
             return Either.left(new Error(s.substring(rOffset, rTuple._2), "rule arrow not found"));
         }
 
         List<Predicate> predicates = new ArrayList<Predicate>();
-        //s = s.substring(2);
         rOffset += 2;
 
         Either<Error, Tuple3<Tuple2<Integer, Integer>, List<Predicate>, List<Expression>>> bodyRes = rule_body(s, rOffset, rTuple._2);
@@ -78,7 +75,6 @@ public class Parser {
             return Either.left(new Error(s.substring(offset, end_offset), "missing check prefix"));
         }
 
-        //s = s.substring(prefix.length());
         int rOffset = offset + prefix.length();
 
         List<Rule> queries = new ArrayList<>();
@@ -92,10 +88,6 @@ public class Parser {
         return Either.right(new Tuple2<>(t._1, new Check(t._2)));
     }
 
-    /*public static Either<Error, Tuple2<Tuple2<Integer, Integer>, Policy>> policy(String s) {
-        policy(s,0,s.length());
-    }*/
-
     public static Either<Error, Tuple2<Tuple2<Integer, Integer>, Policy>> policy(String s, int offset, int end_offset) {
         Policy.Kind p = Policy.Kind.Allow;
 
@@ -103,11 +95,9 @@ public class Parser {
         String deny = "deny if";
         int rOffset = offset;
         if (s.startsWith(allow, offset)) {
-            //s = s.substring(allow.length());
             rOffset = offset + allow.length();
         } else if (s.startsWith(deny, offset)) {
             p = Policy.Kind.Deny;
-            //s = s.substring(deny.length());
             rOffset = offset + allow.length();
         } else {
             return Either.left(new Error(s.substring(offset, end_offset), "missing policy prefix"));
@@ -137,7 +127,6 @@ public class Parser {
 
         Tuple3<Tuple2<Integer, Integer>, List<Predicate>, List<Expression>> body = bodyRes.get();
 
-        //s = body._1;
         Tuple2<Integer, Integer> rTuple = body._1;
 
         queries.add(new Rule(new Predicate("query", new ArrayList<>()), body._2, body._3));
@@ -149,14 +138,11 @@ public class Parser {
                 break;
             }
 
-            //s = space(s);
             rOffset = space(s, rOffset, rTuple._2);
 
-            //if (!s.startsWith("or")) {
             if (!s.startsWith("or", rOffset)) {
                 break;
             }
-            //s = s.substring(2);
             rOffset = rOffset + 2;
 
             Either<Error, Tuple3<Tuple2<Integer, Integer>, List<Predicate>, List<Expression>>> bodyRes2 = rule_body(s, rOffset, rTuple._2);
@@ -166,7 +152,6 @@ public class Parser {
 
             Tuple3<Tuple2<Integer, Integer>, List<Predicate>, List<Expression>> body2 = bodyRes2.get();
 
-            //s = body2._1;
             rTuple = body2._1;
             rOffset = rTuple._1;
             queries.add(new Rule(new Predicate("query", new ArrayList<>()), body2._2, body2._3));
@@ -182,13 +167,11 @@ public class Parser {
         int rOffset = offset;
         Tuple2<Integer, Integer> rTuple = new Tuple2<Integer, Integer>(rOffset, end_offset);
         while (true) {
-            // s = space(s);
             rOffset = space(s, rOffset, end_offset);
 
             Either<Error, Tuple2<Tuple2<Integer, Integer>, Predicate>> res = predicate(s, rOffset, rTuple._2);
             if (res.isRight()) {
                 Tuple2<Tuple2<Integer, Integer>, Predicate> t = res.get();
-                //s = t._1;
                 rTuple = t._1;
                 rOffset = rTuple._1;
                 predicates.add(t._2);
@@ -196,7 +179,6 @@ public class Parser {
                 Either<Error, Tuple2<Tuple2<Integer, Integer>, Expression>> res2 = expression(s, rOffset, rTuple._2);
                 if (res2.isRight()) {
                     Tuple2<Tuple2<Integer, Integer>, Expression> t2 = res2.get();
-                    //s = t2._1;
                     rTuple = t2._1;
                     rOffset = rTuple._1;
                     expressions.add(t2._2);
@@ -205,14 +187,11 @@ public class Parser {
                 }
             }
 
-            //s = space(s);
             rOffset = space(s, rOffset, rTuple._2);
 
-            //if (s.length() == 0 || s.charAt(0) != ',') {
             if ((rTuple._2 - rOffset) == 0 || s.charAt(rOffset) != ',') {
                 break;
             } else {
-                //s = s.substring(1);
                 rOffset = rOffset + 1;
             }
         }
@@ -225,21 +204,17 @@ public class Parser {
     public static Either<Error, Tuple2<Tuple2<Integer, Integer>, Predicate>> predicate(String s, int offset, int end_offset) {
         Tuple2<Tuple2<Integer, Integer>, Tuple2<Integer, Integer>> tn = take_while(s, offset, end_offset, (c) -> Character.isAlphabetic(c) || c == '_');
         String name = s.substring(tn._1._1, tn._1._2);
-        //s = tn._2;
         Tuple2<Integer, Integer> rTuple = tn._2;
 
-        //s = space(s);
         int rOffset = space(s, rTuple._1, rTuple._2);
         if ((rTuple._2 - rOffset) == 0 || s.charAt(rOffset) != '(') {
             return Either.left(new Error(s.substring(rOffset, rTuple._2), "opening parens not found"));
         }
-        //s = s.substring(1);
         rOffset += 1;
 
         List<Term> terms = new ArrayList<Term>();
         while (true) {
 
-            //s = space(s);
             rOffset = space(s, rOffset, rTuple._2);
 
             Either<Error, Tuple2<Tuple2<Integer, Integer>, Term>> res = term(s, rOffset, rTuple._2);
@@ -248,54 +223,41 @@ public class Parser {
             }
 
             Tuple2<Tuple2<Integer, Integer>, Term> t = res.get();
-            //s = t._1;
             rTuple = t._1;
 
             terms.add(t._2);
 
-            //s = space(s);
             rOffset = space(s, rTuple._1, rTuple._2);
 
-            //if (s.length() == 0 || s.charAt(0) != ',') {
             if ((rTuple._2 - rOffset) == 0 || s.charAt(rOffset) != ',') {
                 break;
             } else {
-                //s = s.substring(1);
                 rOffset += 1;
             }
         }
 
-        //s = space(s);
         rOffset = space(s, rOffset, rTuple._2);
-        //if (0 == s.length() || s.charAt(0) != ')') {
         if ((rTuple._2 - rOffset) == 0 || s.charAt(rOffset) != ')') {
             return Either.left(new Error(s.substring(rOffset, rTuple._2), "closing parens not found"));
         }
-        //String remaining = s.substring(1);
 
         return Either.right(new Tuple2<Tuple2<Integer, Integer>, Predicate>(new Tuple2<>(rOffset + 1, rTuple._2), new Predicate(name, terms)));
     }
 
     public static Either<Error, Tuple2<Tuple2<Integer, Integer>, Predicate>> fact_predicate(String s, int offset, int end_offset) {
         Tuple2<Tuple2<Integer, Integer>, Tuple2<Integer, Integer>> tn = take_while(s, offset, end_offset, (c) -> Character.isAlphabetic(c) || c == '_');
-        //String name = tn._1;
         String name = s.substring(tn._1._1, tn._1._2);
-        //s = tn._2;
         Tuple2<Integer, Integer> rTuple = tn._2;
 
-        //s = space(s);
         int rOffset = space(s, rTuple._1, rTuple._2);
-        //if (s.length() == 0 || s.charAt(0) != '(') {
         if ((rTuple._2 - rOffset) == 0 || s.charAt(rOffset) != '(') {
             return Either.left(new Error(s.substring(rOffset, rTuple._2), "opening parens not found"));
         }
-        //s = s.substring(1);
         rOffset += 1;
 
         List<Term> terms = new ArrayList<Term>();
         while (true) {
 
-            //s = space(s);
             rOffset = space(s, rOffset, rTuple._2);
 
             Either<Error, Tuple2<Tuple2<Integer, Integer>, Term>> res = fact_term(s, rOffset, rTuple._2);
@@ -304,30 +266,23 @@ public class Parser {
             }
 
             Tuple2<Tuple2<Integer, Integer>, Term> t = res.get();
-            //s = t._1;
             rTuple = t._1;
             rOffset = rTuple._1;
             terms.add(t._2);
 
-            //s = space(s);
             rOffset = space(s, rOffset, rTuple._2);
 
-            //if (s.length() == 0 || s.charAt(0) != ',') {
             if ((rTuple._2 - rOffset) == 0 || s.charAt(rOffset) != ',') {
                 break;
             } else {
-                //s = s.substring(1);
                 rOffset += 1;
             }
         }
 
-        //s = space(s);
         rOffset = space(s, rOffset, rTuple._2);
-        //if (0 == s.length() || s.charAt(0) != ')') {
         if ((rTuple._2 - rOffset) == 0 || s.charAt(rOffset) != ')') {
             return Either.left(new Error(s.substring(rOffset, rTuple._2), "closing parens not found"));
         }
-        //String remaining = s.substring(1);
         rTuple = new Tuple2<>(rOffset + 1, rTuple._2);
 
         return Either.right(new Tuple2<Tuple2<Integer, Integer>, Predicate>(rTuple, new Predicate(name, terms)));
@@ -388,12 +343,7 @@ public class Parser {
         return Either.left(new Error(s.substring(offset, end_offset), "unrecognized value"));
     }
 
-    /*public static Either<Error, Tuple2<Tuple2<Integer, Integer>, Term>> fact_term(String s) {
-        fact_term(s,0,s.length());
-    }*/
-
     public static Either<Error, Tuple2<Tuple2<Integer, Integer>, Term>> fact_term(String s, int offset, int end_offset) {
-        //if (s.length() > 0 && s.charAt(0) == '$') {
         if ((end_offset - offset) == 0 && s.charAt(offset) == '$') {
             return Either.left(new Error(s.substring(offset, end_offset), "variables are not allowed in facts"));
         }
@@ -456,9 +406,7 @@ public class Parser {
             return Either.left(new Error(s.substring(offset, end_offset), "not a string"));
         }
 
-        //int index = s.length();
         int index = end_offset;
-        //for (int i = 1; i < s.length(); i++) {
         for (int i = offset + 1; i < end_offset; i++) {
             char c = s.charAt(i);
 
@@ -473,7 +421,6 @@ public class Parser {
             }
         }
 
-        //if (index == s.length()) {
         if (index == end_offset) {
             return Either.left(new Error(s.substring(offset, end_offset), "end of string not found"));
         }
@@ -482,7 +429,6 @@ public class Parser {
             return Either.left(new Error(s.substring(offset, end_offset), "ending double quote not found"));
         }
 
-        //String string = s.substring(1, index + 1);
         String string = s.substring(offset + 1, index + 1);
         Tuple2<Integer, Integer> remaining = new Tuple2<>(index + 2, end_offset);
 
@@ -500,7 +446,6 @@ public class Parser {
         }
 
         int index2 = end_offset;
-        //for (int i = index; i < s.length(); i++) {
         for (int i = index; i < end_offset; i++) {
             char c = s.charAt(i);
 
@@ -514,9 +459,7 @@ public class Parser {
             return Either.left(new Error(s.substring(offset, end_offset), "not an integer"));
         }
 
-        //Integer i = Integer.parseInt(s.substring(0, index2));
         Integer i = Integer.parseInt(s.substring(offset, index2));
-        //String remaining = s.substring(index2);
 
         return Either.right(new Tuple2<Tuple2<Integer, Integer>, Term.Integer>(new Tuple2<>(index2, end_offset), (Term.Integer) Utils.integer(i.intValue())));
     }
@@ -526,7 +469,6 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<Tuple2<Integer, Integer>, Term.Date>> date(String s, int offset, int end_offset) {
-        //Tuple2<Tuple2<Integer, Integer>, String> t = take_while(s, (c) -> c != ' ' && c != ',' && c != ')');
         Tuple2<Tuple2<Integer, Integer>, Tuple2<Integer, Integer>> t = take_while(s, offset, end_offset, (c) -> c != ' ' && c != ',' && c != ')');
 
         try {
@@ -544,7 +486,6 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<Tuple2<Integer, Integer>, Term.Variable>> variable(String s, int offset, int end_offset) {
-        //if (s.charAt(0) != '$') {
         if (s.charAt(offset) != '$') {
             return Either.left(new Error(s.substring(offset, end_offset), "not a variable"));
         }
@@ -559,11 +500,9 @@ public class Parser {
         int rOffset = offset;
         if (s.startsWith("true", offset)) {
             b = true;
-            //s = s.substring(4);
             rOffset = offset + 4;
         } else if (s.startsWith("false", offset)) {
             b = false;
-            //s = s.substring(5);
             rOffset = offset + 5;
         } else {
             return Either.left(new Error(s.substring(offset, end_offset), "not a boolean"));
