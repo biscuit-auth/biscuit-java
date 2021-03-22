@@ -4,12 +4,10 @@ import biscuit.format.schema.Schema;
 import com.clevercloud.biscuit.datalog.ID;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.error.Error;
+import com.google.re2j.Matcher;
+import com.google.re2j.Pattern;
 import io.vavr.control.Either;
-
-import java.time.Instant;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;

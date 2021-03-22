@@ -3,6 +3,7 @@ package com.clevercloud.biscuit.token;
 import cafe.cryptography.curve25519.CompressedRistretto;
 import cafe.cryptography.curve25519.InvalidEncodingException;
 import com.clevercloud.biscuit.crypto.PublicKey;
+import com.clevercloud.biscuit.datalog.RunLimits;
 import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.error.FailedCheck;
 import com.clevercloud.biscuit.error.LogicError;
@@ -16,6 +17,7 @@ import junit.framework.TestSuite;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -350,7 +352,7 @@ public class SamplesV0Test extends TestCase {
         v1.set_time();
         v1.allow();
 
-        Either<Error, Long> res = v1.verify();
+        Either<Error, Long> res = v1.verify(new RunLimits(1000, 100, Duration.ofMillis(30)));
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
@@ -363,7 +365,7 @@ public class SamplesV0Test extends TestCase {
         v2.add_resource("file123.txt");
         v2.set_time();
         v2.allow();
-        Assert.assertTrue(v2.verify().isRight());
+        Assert.assertTrue(v2.verify(new RunLimits(1000, 100, Duration.ofMillis(30))).isRight());
 
     }
 
