@@ -320,25 +320,27 @@ public class Verifier {
         SymbolTable symbols = new SymbolTable(this.symbols);
 
         ArrayList<FailedCheck> errors = new ArrayList<>();
-        for (int j = 0; j < this.token.authority.checks.size(); j++) {
-            boolean successful = false;
-            com.clevercloud.biscuit.datalog.Check c = this.token.authority.checks.get(j);
+        if(this.token != null) {
+            for (int j = 0; j < this.token.authority.checks.size(); j++) {
+                boolean successful = false;
+                com.clevercloud.biscuit.datalog.Check c = this.token.authority.checks.get(j);
 
-            for(int k = 0; k < c.queries().size(); k++) {
-                boolean res = world.test_rule(c.queries().get(k));
+                for (int k = 0; k < c.queries().size(); k++) {
+                    boolean res = world.test_rule(c.queries().get(k));
 
-                if(Instant.now().compareTo(timeLimit) >= 0) {
-                    return Left(new Error.Timeout());
+                    if (Instant.now().compareTo(timeLimit) >= 0) {
+                        return Left(new Error.Timeout());
+                    }
+
+                    if (res) {
+                        successful = true;
+                        break;
+                    }
                 }
 
-                if (res) {
-                    successful = true;
-                    break;
+                if (!successful) {
+                    errors.add(new FailedCheck.FailedBlock(0, j, symbols.print_check(this.token.authority.checks.get(j))));
                 }
-            }
-
-            if (!successful) {
-                errors.add(new FailedCheck.FailedBlock(0, j, symbols.print_check(this.token.authority.checks.get(j))));
             }
         }
 
@@ -364,28 +366,30 @@ public class Verifier {
             }
         }
 
-        for(int i = 0; i < this.token.blocks.size(); i++) {
-            Block b = this.token.blocks.get(i);
+        if(this.token != null) {
+            for (int i = 0; i < this.token.blocks.size(); i++) {
+                Block b = this.token.blocks.get(i);
 
-            for (int j = 0; j < b.checks.size(); j++) {
-                boolean successful = false;
-                com.clevercloud.biscuit.datalog.Check c = b.checks.get(j);
+                for (int j = 0; j < b.checks.size(); j++) {
+                    boolean successful = false;
+                    com.clevercloud.biscuit.datalog.Check c = b.checks.get(j);
 
-                for(int k = 0; k < c.queries().size(); k++) {
-                    boolean res = world.test_rule(c.queries().get(k));
+                    for (int k = 0; k < c.queries().size(); k++) {
+                        boolean res = world.test_rule(c.queries().get(k));
 
-                    if(Instant.now().compareTo(timeLimit) >= 0) {
-                        return Left(new Error.Timeout());
+                        if (Instant.now().compareTo(timeLimit) >= 0) {
+                            return Left(new Error.Timeout());
+                        }
+
+                        if (res) {
+                            successful = true;
+                            break;
+                        }
                     }
 
-                    if (res) {
-                        successful = true;
-                        break;
+                    if (!successful) {
+                        errors.add(new FailedCheck.FailedBlock(b.index, j, symbols.print_check(b.checks.get(j))));
                     }
-                }
-
-                if (!successful) {
-                    errors.add(new FailedCheck.FailedBlock(b.index, j, symbols.print_check(b.checks.get(j))));
                 }
             }
         }
@@ -429,15 +433,17 @@ public class Verifier {
             checks.add("Verifier["+j+"]: "+this.checks.get(j).toString());
         }
 
-        for (int j = 0; j < this.token.authority.checks.size(); j++) {
-            checks.add("Block[0]["+j+"]: "+this.symbols.print_check(this.token.authority.checks.get(j)));
-        }
+        if(this.token != null) {
+            for (int j = 0; j < this.token.authority.checks.size(); j++) {
+                checks.add("Block[0][" + j + "]: " + this.symbols.print_check(this.token.authority.checks.get(j)));
+            }
 
-        for(int i = 0; i < this.token.blocks.size(); i++) {
-            Block b = this.token.blocks.get(i);
+            for (int i = 0; i < this.token.blocks.size(); i++) {
+                Block b = this.token.blocks.get(i);
 
-            for (int j = 0; j < b.checks.size(); j++) {
-                checks.add("Block["+i+"]["+j+"]: "+this.symbols.print_check(b.checks.get(j)));
+                for (int j = 0; j < b.checks.size(); j++) {
+                    checks.add("Block[" + i + "][" + j + "]: " + this.symbols.print_check(b.checks.get(j)));
+                }
             }
         }
 
