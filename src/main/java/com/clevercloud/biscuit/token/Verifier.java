@@ -27,19 +27,36 @@ public class Verifier {
     Biscuit token;
     List<Check> checks;
     List<Policy> policies;
-    World base_world;
     World world;
-    SymbolTable base_symbols;
     SymbolTable symbols;
 
     private Verifier(Biscuit token, World w) {
         this.token = token;
-        this.base_world = w;
-        this.world = new World(this.base_world);
-        this.base_symbols = new SymbolTable(this.token.symbols);
+        this.world = w;
         this.symbols = new SymbolTable(this.token.symbols);
         this.checks = new ArrayList<>();
         this.policies = new ArrayList<>();
+    }
+
+    /**
+     * Creates an empty verifier
+     *
+     * used to apply policies when unauthenticated (no token)
+     * and to preload a verifier that is cloned for each new request
+     */
+    public Verifier() {
+        this.world = new World();
+        this.symbols = Biscuit.default_symbol_table();
+        this.checks = new ArrayList<>();
+        this.policies = new ArrayList<>();
+    }
+
+    Verifier(Biscuit token, List<Check> checks, List<Policy> policies, World world, SymbolTable symbols) {
+        this.token = token;
+        this.checks = checks;
+        this.policies = policies;
+        this.world = world;
+        this.symbols = symbols;
     }
 
     /**
@@ -69,15 +86,9 @@ public class Verifier {
         return Right(new Verifier(token, res.get()));
     }
 
-    public void reset() {
-        this.world = new World(this.base_world);
-        this.symbols = new SymbolTable(this.base_symbols);
-        this.checks = new ArrayList<>();
-    }
-
-    public void snapshot() {
-        this.base_world = new World(this.world);
-        this.base_symbols = new SymbolTable(this.symbols);
+    public Verifier clone() {
+        return new Verifier(this.token, new ArrayList<>(this.checks), new ArrayList<>(this.policies), new World(this.world),
+                new SymbolTable(this.symbols));
     }
 
     public void add_fact(Fact fact) {

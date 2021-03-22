@@ -392,36 +392,37 @@ public class BiscuitTest extends TestCase {
 
         Verifier v1 = b2.verify(root.public_key()).get();
         v1.allow();
-        v1.snapshot();
 
-        v1.add_resource("/folder1/file1");
-        v1.add_operation("read");
+        Verifier v2 = v1.clone();
+
+        v2.add_resource("/folder1/file1");
+        v2.add_operation("read");
 
 
-        Either<Error, Long> res = v1.verify();
+        Either<Error, Long> res = v2.verify();
         Assert.assertTrue(res.isRight());
 
-        v1.reset();
+        Verifier v3 = v1.clone();
 
-        v1.add_resource("/folder2/file3");
-        v1.add_operation("read");
+        v3.add_resource("/folder2/file3");
+        v3.add_operation("read");
 
-        res = v1.verify();
-        System.out.println(v1.print_world());
+        res = v3.verify();
+        System.out.println(v3.print_world());
 
         Assert.assertTrue(res.isLeft());
 
-        v1.reset();
+        Verifier v4 = v1.clone();
 
-        v1.add_resource("/folder2/file1");
-        v1.add_operation("write");
+        v4.add_resource("/folder2/file1");
+        v4.add_operation("write");
 
-        res = v1.verify();
+        res = v4.verify();
 
         Error e = res.getLeft();
         Assert.assertTrue(res.isLeft());
 
-        System.out.println(v1.print_world());
+        System.out.println(v4.print_world());
         for (FailedCheck f : e.failed_checks().get()) {
             System.out.println(f.toString());
         }
