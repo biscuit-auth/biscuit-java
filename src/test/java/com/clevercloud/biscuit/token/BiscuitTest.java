@@ -8,6 +8,7 @@ import com.clevercloud.biscuit.error.FailedCheck;
 import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.builder.Block;
 import io.vavr.control.Either;
+import io.vavr.control.Option;
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -432,5 +433,50 @@ public class BiscuitTest extends TestCase {
                         new FailedCheck.FailedBlock(1, 1, "check if resource(#ambient, $resource), operation(#ambient, #read), right(#authority, $resource, #read)")
                 ))),
                 e);
+    }
+
+    public void testEmptyVerifier() {
+        byte[] seed = {0, 0, 0, 0};
+        SecureRandom rng = new SecureRandom(seed);
+
+        System.out.println("preparing the authority block");
+
+        KeyPair root = new KeyPair(rng);
+
+        com.clevercloud.biscuit.token.builder.Biscuit builder = Biscuit.builder(rng, root);
+
+        builder.add_right("/folder1/file1", "read");
+        builder.add_right("/folder1/file1", "write");
+        builder.add_right("/folder1/file2", "read");
+        builder.add_right("/folder1/file2", "write");
+        builder.add_right("/folder2/file3", "read");
+
+        System.out.println(builder.build());
+        Biscuit b = builder.build().get();
+
+        System.out.println(b.print());
+
+        Block block2 = b.create_block();
+        block2.resource_prefix("/folder1/");
+        block2.check_right("read");
+
+        KeyPair keypair2 = new KeyPair(rng);
+        Biscuit b2 = b.attenuate(rng, keypair2, block2.build()).get();
+
+        Verifier v1 = new Verifier();
+        v1.allow();
+
+        Either<Error, Long> res = v1.verify();
+        Assert.assertTrue(res.isRight());
+
+        v1.add_token(b2, Option.some(root.public_key())).get();
+
+        v1.add_resource("/folder2/file1");
+        v1.add_operation("write");
+
+        res = v1.verify();
+
+        Error e = res.getLeft();
+        Assert.assertTrue(res.isLeft());
     }
 }

@@ -38,6 +38,10 @@ public abstract class Op {
             this.value = value;
         }
 
+        public ID getValue() {
+            return value;
+        }
+
         @Override
         public boolean evaluate(Deque<ID> stack, Map<Long, ID> variables) {
             if (value instanceof ID.Variable) {
@@ -104,6 +108,10 @@ public abstract class Op {
 
         public Unary(UnaryOp op) {
             this.op = op;
+        }
+
+        public UnaryOp getOp() {
+            return op;
         }
 
         @Override
@@ -234,6 +242,10 @@ public abstract class Op {
 
         public Binary(BinaryOp value) {
             this.op = value;
+        }
+
+        public BinaryOp getOp() {
+            return op;
         }
 
         @Override

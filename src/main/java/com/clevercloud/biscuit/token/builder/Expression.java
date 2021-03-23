@@ -1,9 +1,12 @@
 package com.clevercloud.biscuit.token.builder;
 
+import com.clevercloud.biscuit.datalog.ID;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.datalog.expressions.Op;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 
 public abstract class Expression {
@@ -14,8 +17,97 @@ public abstract class Expression {
         return new com.clevercloud.biscuit.datalog.expressions.Expression(ops);
     }
 
-    public abstract void toOpcodes(SymbolTable symbols, List<com.clevercloud.biscuit.datalog.expressions.Op> ops);
+    public static Expression convert_from(com.clevercloud.biscuit.datalog.expressions.Expression e, SymbolTable symbols) {
+        ArrayList<Op> ops = new ArrayList<>();
+        Deque<Expression> stack = new ArrayDeque<Expression>(16);
+        for(com.clevercloud.biscuit.datalog.expressions.Op op: e.getOps()){
+            if(op instanceof com.clevercloud.biscuit.datalog.expressions.Op.Value) {
+                com.clevercloud.biscuit.datalog.expressions.Op.Value v = (com.clevercloud.biscuit.datalog.expressions.Op.Value) op;
+                stack.push(new Expression.Value(Term.convert_from(v.getValue(), symbols)));
+            } else if(op instanceof com.clevercloud.biscuit.datalog.expressions.Op.Unary) {
+                com.clevercloud.biscuit.datalog.expressions.Op.Unary v = (com.clevercloud.biscuit.datalog.expressions.Op.Unary) op;
+                Expression e1 = stack.pop();
 
+                switch (v.getOp()) {
+                    case Length:
+                        stack.push(new Expression.Unary(Op.Length, e1));
+                        break;
+                    case Negate:
+                        stack.push(new Expression.Unary(Op.Negate, e1));
+                        break;
+                    case Parens:
+                        stack.push(new Expression.Unary(Op.Parens, e1));
+                        break;
+                    default:
+                        return null;
+                }
+            } else if (op instanceof com.clevercloud.biscuit.datalog.expressions.Op.Binary) {
+                com.clevercloud.biscuit.datalog.expressions.Op.Binary v = (com.clevercloud.biscuit.datalog.expressions.Op.Binary) op;
+                Expression e1 = stack.pop();
+                Expression e2 = stack.pop();
+
+                switch (v.getOp()) {
+                    case LessThan:
+                        stack.push(new Expression.Binary(Op.LessThan, e1, e2));
+                        break;
+                    case GreaterThan:
+                        stack.push(new Expression.Binary(Op.GreaterThan, e1, e2));
+                        break;
+                    case LessOrEqual:
+                        stack.push(new Expression.Binary(Op.LessOrEqual, e1, e2));
+                        break;
+                    case GreaterOrEqual:
+                        stack.push(new Expression.Binary(Op.GreaterOrEqual, e1, e2));
+                        break;
+                    case Equal:
+                        stack.push(new Expression.Binary(Op.Equal, e1, e2));
+                        break;
+                    case Contains:
+                        stack.push(new Expression.Binary(Op.Contains, e1, e2));
+                        break;
+                    case Prefix:
+                        stack.push(new Expression.Binary(Op.Prefix, e1, e2));
+                        break;
+                    case Suffix:
+                        stack.push(new Expression.Binary(Op.Suffix, e1, e2));
+                        break;
+                    case Regex:
+                        stack.push(new Expression.Binary(Op.Regex, e1, e2));
+                        break;
+                    case Add:
+                        stack.push(new Expression.Binary(Op.Add, e1, e2));
+                        break;
+                    case Sub:
+                        stack.push(new Expression.Binary(Op.Sub, e1, e2));
+                        break;
+                    case Mul:
+                        stack.push(new Expression.Binary(Op.Mul, e1, e2));
+                        break;
+                    case Div:
+                        stack.push(new Expression.Binary(Op.Div, e1, e2));
+                        break;
+                    case And:
+                        stack.push(new Expression.Binary(Op.And, e1, e2));
+                        break;
+                    case Or:
+                        stack.push(new Expression.Binary(Op.Or, e1, e2));
+                        break;
+                    case Intersection:
+                        stack.push(new Expression.Binary(Op.Intersection, e1, e2));
+                        break;
+                    case Union:
+                        stack.push(new Expression.Binary(Op.Union, e1, e2));
+                        break;
+                    default:
+                        return null;
+                }
+            }
+        }
+
+        return stack.pop();
+    }
+
+    public abstract void toOpcodes(SymbolTable symbols, List<com.clevercloud.biscuit.datalog.expressions.Op> ops);
 
     public enum Op {
         Negate,

@@ -32,6 +32,23 @@ public class Rule {
         return new com.clevercloud.biscuit.datalog.Rule(head, body, expressions);
     }
 
+    public static Rule convert_from(com.clevercloud.biscuit.datalog.Rule r, SymbolTable symbols) {
+        Predicate head = Predicate.convert_from(r.head(), symbols);
+
+        ArrayList<Predicate> body = new ArrayList<>();
+        ArrayList<Expression> expressions = new ArrayList<>();
+
+        for(com.clevercloud.biscuit.datalog.Predicate p: r.body()) {
+            body.add(Predicate.convert_from(p, symbols));
+        }
+
+        for(com.clevercloud.biscuit.datalog.expressions.Expression e: r.expressions()) {
+            expressions.add(Expression.convert_from(e, symbols));
+        }
+
+        return new Rule(head, body, expressions);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

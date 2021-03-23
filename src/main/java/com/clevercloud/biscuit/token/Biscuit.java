@@ -452,6 +452,17 @@ public class Biscuit {
         return Right(new Biscuit(copiedBiscuit.authority, blocks, symbols, Option.some(container)));
     }
 
+    public List<List<com.clevercloud.biscuit.datalog.Check>> checks() {
+        ArrayList<List<com.clevercloud.biscuit.datalog.Check>> l = new ArrayList();
+        l.add(new ArrayList(this.authority.checks));
+
+        for(Block b: this.blocks) {
+            l.add(new ArrayList<>(b.checks));
+        }
+
+        return l;
+    }
+
     public List<Option<String>> context() {
         ArrayList res = new ArrayList();
         if(this.authority.context.isEmpty()) {

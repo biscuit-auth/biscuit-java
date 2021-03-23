@@ -9,6 +9,9 @@ import java.util.Objects;
 
 public abstract class Term {
     abstract public ID convert(SymbolTable symbols);
+    static public Term convert_from(ID id, SymbolTable symbols) {
+        return id.toTerm(symbols);
+    }
 
     public static class Symbol extends Term {
         String value;

@@ -27,6 +27,16 @@ public class Check {
         return new com.clevercloud.biscuit.datalog.Check(queries);
     }
 
+    public static Check convert_from(com.clevercloud.biscuit.datalog.Check r, SymbolTable symbols) {
+        ArrayList<Rule> queries = new ArrayList<>();
+
+        for(com.clevercloud.biscuit.datalog.Rule q: r.queries()) {
+            queries.add(Rule.convert_from(q, symbols));
+        }
+
+        return new Check(queries);
+    }
+
     @Override
     public String toString() {
         return "check if "+queries;
