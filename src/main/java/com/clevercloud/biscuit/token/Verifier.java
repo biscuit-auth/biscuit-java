@@ -162,6 +162,13 @@ public class Verifier {
             token_checks.add(block_checks);
         }
 
+        List<byte[]> revocation_ids = token.revocation_identifiers();
+        long rev = symbols.get("revocation_id").get();
+        for(int i = 0; i < revocation_ids.size(); i++) {
+            byte[] id = revocation_ids.get(i);
+            world.add_fact(new com.clevercloud.biscuit.datalog.Fact(new com.clevercloud.biscuit.datalog.Predicate(rev, Arrays.asList(new ID.Integer(i), new ID.Bytes(id)))));
+        }
+
         return Right(null);
     }
 

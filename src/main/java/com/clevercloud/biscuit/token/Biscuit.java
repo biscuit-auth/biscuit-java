@@ -14,6 +14,7 @@ import io.vavr.control.Option;
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
+import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.*;
 
@@ -304,6 +305,13 @@ public class Biscuit {
             }
         }
 
+        List<byte[]> revocation_ids = this.revocation_identifiers();
+        long rev = symbols.get("revocation_id").get();
+        for(int i = 0; i < revocation_ids.size(); i++) {
+            byte[] id = revocation_ids.get(i);
+            world.add_fact(new Fact(new Predicate(rev, Arrays.asList(new ID.Integer(i), new ID.Bytes(id)))));
+        }
+
         return Right(world);
     }
 
@@ -461,6 +469,40 @@ public class Biscuit {
         }
 
         return l;
+    }
+
+    public List<byte[]> revocation_identifiers() {
+        ArrayList<byte[]> l = new ArrayList<>();
+
+        if(this.container.isEmpty()) {
+            return l;
+        } else {
+            SerializedBiscuit b = this.container.get();
+
+            try {
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                digest.update(b.authority);
+                digest.update(b.keys.get(0).compress().toByteArray());
+                MessageDigest cloned = (MessageDigest)digest.clone();
+                l.add(digest.digest());
+
+                digest = cloned;
+
+                for(int i = 0; i < b.blocks.size(); i++) {
+                    byte[] block = b.blocks.get(i);
+                    digest.update(block);
+                    digest.update(b.keys.get(i+1).compress().toByteArray());
+                    cloned = (MessageDigest)digest.clone();
+                    l.add(digest.digest());
+
+                    digest = cloned;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return l;
+        }
     }
 
     public List<Option<String>> context() {

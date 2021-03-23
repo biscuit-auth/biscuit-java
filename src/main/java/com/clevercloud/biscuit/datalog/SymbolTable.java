@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import com.clevercloud.biscuit.crypto.TokenSignature;
 import com.clevercloud.biscuit.datalog.expressions.Expression;
+import com.clevercloud.biscuit.token.builder.Utils;
 import io.vavr.control.Option;
 
 public final class SymbolTable implements Serializable {
@@ -104,6 +105,8 @@ public final class SymbolTable implements Serializable {
             return "" + ((ID.Integer) i).value();
          } else if (i instanceof ID.Str) {
             return "\""+((ID.Str) i).value()+"\"";
+         } else if(i instanceof ID.Bytes) {
+            return "hex:"+ Utils.byteArrayToHexString(((ID.Bytes) i).value());
          } else {
             return "???";
          }
