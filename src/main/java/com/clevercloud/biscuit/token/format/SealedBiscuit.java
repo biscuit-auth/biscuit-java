@@ -12,6 +12,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
@@ -131,5 +132,31 @@ public class SealedBiscuit {
         } catch(IOException | NoSuchAlgorithmException | InvalidKeyException e) {
             return Left(new Error.FormatError.SerializationError(e.toString()));
         }
+    }
+
+    public List<byte[]> revocation_identifiers() {
+        ArrayList<byte[]> l = new ArrayList<>();
+
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            digest.update(this.authority);
+            MessageDigest cloned = (MessageDigest)digest.clone();
+            l.add(digest.digest());
+
+            digest = cloned;
+
+            for(int i = 0; i < this.blocks.size(); i++) {
+                byte[] block = this.blocks.get(i);
+                digest.update(block);
+                cloned = (MessageDigest)digest.clone();
+                l.add(digest.digest());
+
+                digest = cloned;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return l;
     }
 }

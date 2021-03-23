@@ -15,6 +15,7 @@ import io.vavr.control.Either;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -182,6 +183,33 @@ public class SerializedBiscuit {
         return Right(null);
     }
 
+    public List<byte[]> revocation_identifiers() {
+        ArrayList<byte[]> l = new ArrayList<>();
+
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            digest.update(this.authority);
+            digest.update(this.keys.get(0).compress().toByteArray());
+            MessageDigest cloned = (MessageDigest)digest.clone();
+            l.add(digest.digest());
+
+            digest = cloned;
+
+            for(int i = 0; i < this.blocks.size(); i++) {
+                byte[] block = this.blocks.get(i);
+                digest.update(block);
+                digest.update(this.keys.get(i+1).compress().toByteArray());
+                cloned = (MessageDigest)digest.clone();
+                l.add(digest.digest());
+
+                digest = cloned;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return l;
+    }
 
     SerializedBiscuit(byte[] authority, List<byte[]> blocks, List<RistrettoElement> keys, TokenSignature signature) {
         this.authority = authority;

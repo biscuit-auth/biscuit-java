@@ -304,6 +304,9 @@ public class BiscuitTest extends TestCase {
         System.out.println("trying to attenuate to a sealed token");
         Block builder2 = deser2.create_block();
         Error e2 = deser2.attenuate(rng, keypair2, builder.build()).getLeft();
+
+        Verifier v = deser2.verify_sealed().get();
+        System.out.println(v.print_world());
     }
 
     public void testMultipleAttenuation() {

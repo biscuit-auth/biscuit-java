@@ -26,6 +26,7 @@ public class Biscuit {
     final List<Block> blocks;
     final SymbolTable symbols;
     final Option<SerializedBiscuit> container;
+    final List<byte[]> revocation_ids;
 
 
     /**
@@ -77,16 +78,20 @@ public class Biscuit {
             Error.FormatError e = container.getLeft();
             return Left(e);
         } else {
-            Option<SerializedBiscuit> c = Option.some(container.get());
-            return Right(new Biscuit(authority, blocks, symbols, c));
+            SerializedBiscuit s = container.get();
+            List<byte[]> revocation_ids = s.revocation_identifiers();
+
+            Option<SerializedBiscuit> c = Option.some(s);
+            return Right(new Biscuit(authority, blocks, symbols, c, revocation_ids));
         }
     }
 
-    Biscuit(Block authority, List<Block> blocks, SymbolTable symbols, Option<SerializedBiscuit> container) {
+    Biscuit(Block authority, List<Block> blocks, SymbolTable symbols, Option<SerializedBiscuit> container, List<byte[]> revocation_ids) {
         this.authority = authority;
         this.blocks = blocks;
         this.symbols = symbols;
         this.container = container;
+        this.revocation_ids = revocation_ids;
     }
 
     /**
@@ -166,7 +171,9 @@ public class Biscuit {
             }
         }
 
-        return Right(new Biscuit(authority, blocks, symbols, Option.some(ser)));
+        List<byte[]> revocation_ids = ser.revocation_identifiers();
+
+        return Right(new Biscuit(authority, blocks, symbols, Option.some(ser), revocation_ids));
     }
 
     /**
@@ -241,7 +248,9 @@ public class Biscuit {
             }
         }
 
-        return Right(new Biscuit(authority, blocks, symbols, Option.none()));
+        List<byte[]> revocation_ids = ser.revocation_identifiers();
+
+        return Right(new Biscuit(authority, blocks, symbols, Option.none(), revocation_ids));
     }
 
     public Either<Error.FormatError, byte[]> seal(byte[] secret) {
@@ -457,7 +466,9 @@ public class Biscuit {
         }
         blocks.add(block);
 
-        return Right(new Biscuit(copiedBiscuit.authority, blocks, symbols, Option.some(container)));
+        List<byte[]> revocation_ids = container.revocation_identifiers();
+
+        return Right(new Biscuit(copiedBiscuit.authority, blocks, symbols, Option.some(container), revocation_ids));
     }
 
     public List<List<com.clevercloud.biscuit.datalog.Check>> checks() {
@@ -472,37 +483,7 @@ public class Biscuit {
     }
 
     public List<byte[]> revocation_identifiers() {
-        ArrayList<byte[]> l = new ArrayList<>();
-
-        if(this.container.isEmpty()) {
-            return l;
-        } else {
-            SerializedBiscuit b = this.container.get();
-
-            try {
-                MessageDigest digest = MessageDigest.getInstance("SHA-256");
-                digest.update(b.authority);
-                digest.update(b.keys.get(0).compress().toByteArray());
-                MessageDigest cloned = (MessageDigest)digest.clone();
-                l.add(digest.digest());
-
-                digest = cloned;
-
-                for(int i = 0; i < b.blocks.size(); i++) {
-                    byte[] block = b.blocks.get(i);
-                    digest.update(block);
-                    digest.update(b.keys.get(i+1).compress().toByteArray());
-                    cloned = (MessageDigest)digest.clone();
-                    l.add(digest.digest());
-
-                    digest = cloned;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return l;
-        }
+        return this.revocation_ids;
     }
 
     public List<Option<String>> context() {
