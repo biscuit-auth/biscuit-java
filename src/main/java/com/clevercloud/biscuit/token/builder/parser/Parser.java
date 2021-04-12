@@ -359,7 +359,8 @@ public class Parser {
             return Either.left(new Error(s, "not a symbol"));
         }
 
-        Tuple2<String, String> t = take_while(s.substring(1), (c) -> Character.isAlphabetic(c) || c == '_');
+        Tuple2<String, String> t = take_while(s.substring(1),
+                (c) -> Character.isAlphabetic(c) || Character.isDigit(c) || c == '_');
         String name = t._1;
         String remaining = t._2;
 
