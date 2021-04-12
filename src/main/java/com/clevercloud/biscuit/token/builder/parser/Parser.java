@@ -10,6 +10,7 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
 import java.util.function.Function;
 
 import static com.clevercloud.biscuit.token.builder.Utils.s;
@@ -325,6 +326,12 @@ public class Parser {
             return Either.right(new Tuple2<String, Term>(t._1, t._2));
         }
 
+        Either<Error, Tuple2<String, Term.Set>> res7 = set(s);
+        if(res7.isRight()) {
+            Tuple2<String, Term.Set> t = res7.get();
+            return Either.right(new Tuple2<String, Term>(t._1, t._2));
+        }
+
         Either<Error, Tuple2<String, Term.Bool>> res6 = bool(s);
         if(res6.isRight()) {
             Tuple2<String, Term.Bool> t = res6.get();
@@ -455,6 +462,51 @@ public class Parser {
         }
 
         return Either.right(new Tuple2<>(s, new Term.Bool(b)));
+    }
+
+    public static Either<Error, Tuple2<String, Term.Set>> set(String s) {
+        if(s.length() ==  0 || s.charAt(0) !='[') {
+            return Either.left(new Error(s, "not a set"));
+        }
+
+        s = s.substring(1);
+
+        HashSet<Term> terms = new HashSet<Term>();
+        while(true) {
+
+            s = space(s);
+
+            Either<Error, Tuple2<String, Term>> res = fact_term(s);
+            if (res.isLeft()) {
+                break;
+            }
+
+            Tuple2<String, Term> t = res.get();
+
+            if (t._2 instanceof Term.Variable) {
+                return Either.left(new Error(s, "sets cannot contain variables"));
+            }
+
+            s = t._1;
+            terms.add(t._2);
+
+            s = space(s);
+
+            if(s.length() == 0 ||s.charAt(0) != ',') {
+                break;
+            } else {
+                s = s.substring(1);
+            }
+        }
+
+        s = space(s);
+        if (0 == s.length() || s.charAt(0) != ']') {
+            return Either.left(new Error(s, "closing square bracket not found"));
+        }
+
+        String remaining = s.substring(1);
+
+        return Either.right(new Tuple2<>(remaining, new Term.Set(terms)));
     }
 
     public static Either<Error, Tuple2<String, Expression>> expression(String s) {
