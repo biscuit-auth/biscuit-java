@@ -352,5 +352,12 @@ public class Error {
         public int hashCode() {
             return error.hashCode();
         }
+
+        @Override
+        public String toString() {
+            return "Parser{" +
+                    "error=" + error +
+                    '}';
+        }
     }
 }
