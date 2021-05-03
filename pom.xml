@@ -47,7 +47,7 @@
         <connection>scm:git:https://git@github.com/clevercloud/biscuit-java.git</connection>
         <developerConnection>scm:git:git@github.com:clevercloud/biscuit-java.git</developerConnection>
         <url>git@github.com:clevercloud/biscuit-java.git</url>
-      <tag>HEAD</tag>
+        <tag>HEAD</tag>
   </scm>
 
     <distributionManagement>
