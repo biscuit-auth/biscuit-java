@@ -3,7 +3,7 @@
     <groupId>com.clever-cloud</groupId>
     <artifactId>biscuit-java</artifactId>
     <packaging>jar</packaging>
-    <version>1.1.0</version>
+    <version>1.1.1-SNAPSHOT</version>
     <name>biscuit-java</name>
     <url>https://github.com/clevercloud/biscuit-java</url>
 
@@ -47,7 +47,7 @@
         <connection>scm:git:https://git@github.com/clevercloud/biscuit-java.git</connection>
         <developerConnection>scm:git:git@github.com:clevercloud/biscuit-java.git</developerConnection>
         <url>git@github.com:clevercloud/biscuit-java.git</url>
-      <tag>biscuit-java-1.1.0</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <distributionManagement>
