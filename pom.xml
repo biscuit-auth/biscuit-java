@@ -48,15 +48,12 @@
         <developerConnection>scm:git:git@github.com:clevercloud/biscuit-java.git</developerConnection>
         <url>git@github.com:clevercloud/biscuit-java.git</url>
         <tag>HEAD</tag>
-  </scm>
+    </scm>
 
     <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
         <repository>
             <id>ossrh</id>
+            <name>Central Repository OSSRH</name>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
