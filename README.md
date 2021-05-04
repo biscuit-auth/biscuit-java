@@ -1,29 +1,53 @@
 # biscuit-java
 
-[![Bintray Version](https://img.shields.io/bintray/v/clevercloud/maven/biscuit-java.svg)](https://bintray.com/clevercloud/maven/biscuit-java#)
 [![Central Version](https://img.shields.io/maven-central/v/com.clever-cloud/biscuit-java)](https://mvnrepository.com/artifact/com.clever-cloud/biscuit-java)
 [![Nexus Version](https://img.shields.io/nexus/r/com.clever-cloud/biscuit-java?server=https%3A%2F%2Foss.sonatype.org)](https://search.maven.org/artifact/com.clever-cloud/biscuit-java)
 
-Java library for Biscuit usage.
+[Biscuit's](https://github.com/CleverCloud/biscuit) Java library implementation.
+
+## Usage
+
+```java
+<!-- https://mvnrepository.com/artifact/com.clever-cloud/biscuit-java -->
+<dependency>
+    <groupId>com.clever-cloud</groupId>
+    <artifactId>biscuit-java</artifactId>
+    <version>@VERSION@</version>
+</dependency>
+```
+
+## Development
+
+### Requirements
+
+* JDK v11
+* the Protobuf compiler command `protoc` v3+ is required in `$PATH`.
+
+### Build
+
+```bash
+mvn clean install
+# skip tests
+mvn clean install -DskipTests
+```
 
 ## Publish
 
-You need to define this in `~/.m2/settings.xml` using your bintray APIKEY on the Clever Cloud organisation:
+### Release process
 
-```xml
-<server>
-  <id>bintray-repo-maven-biscuit-java</id>
-  <username>@@BINTRAY_USERNAME@</username>
-  <password>@@YOUR_BINTRAY_API_KEY@@</password>
-</server>
-```
+Set the version in `pom.xml`.
 
-Then run
+Commit and tag the version. Then push and create a GitHub release.
 
-```bash
-mvn deploy
-```
+Finally, publishing to Nexus and Maven Central is **automatically triggered by creating a GitHub release** using GitHub Actions.
 
-It will prompt for GPG passphrase stored on Clever Cloud vault (search for `maven@clever-cloud.com`).
+### GitHub Actions Requirements
 
-Then on bintray package homepage run Sync to Central to push to Maven Central.
+Publish requires following secrets:
+
+`OSSRH_USERNAME` the Sonatype username
+`OSSRH_TOKEN` the Sonatype token
+`OSSRH_GPG_SECRET_KEY` the gpg private key used to sign packages
+`OSSRH_GPG_SECRET_KEY_PASSWORD` the gpg private key password
+
+These are stored in GitHub repository's secrets.
