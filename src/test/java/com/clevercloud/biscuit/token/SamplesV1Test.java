@@ -326,7 +326,7 @@ public class SamplesV1Test extends TestCase {
         v2.set_time();
         v2.allow();
 
-        Either<Error, Long> res = v2.verify();
+        Either<Error, Long> res = v2.verify(new RunLimits(1000, 100, Duration.ofMillis(50)));
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
