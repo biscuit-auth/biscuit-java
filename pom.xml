@@ -190,7 +190,7 @@
                         <configuration>
                             <target>
                                 <mkdir dir="${project.build.directory}/generated-sources" />
-                                <exec executable="/usr/bin/protoc" failonerror="true">
+                                <exec executable="protoc" failonerror="true">
                                     <arg value="-I"/>
                                     <arg value="${project.basedir}"/>
                                     <arg value="--java_out"/>
