@@ -45,9 +45,9 @@ Finally, publishing to Nexus and Maven Central is **automatically triggered by c
 
 Publish requires following secrets:
 
-`OSSRH_USERNAME` the Sonatype username
-`OSSRH_TOKEN` the Sonatype token
-`OSSRH_GPG_SECRET_KEY` the gpg private key used to sign packages
-`OSSRH_GPG_SECRET_KEY_PASSWORD` the gpg private key password
+* `OSSRH_USERNAME` the Sonatype username
+* `OSSRH_TOKEN` the Sonatype token
+* `OSSRH_GPG_SECRET_KEY` the gpg private key used to sign packages
+* `OSSRH_GPG_SECRET_KEY_PASSWORD` the gpg private key password
 
 These are stored in GitHub repository's secrets.
