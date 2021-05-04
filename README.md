@@ -35,11 +35,19 @@ mvn clean install -DskipTests
 
 ### Release process
 
-Set the version in `pom.xml`.
+```bash
+mvn versions:set -DnewVersion=<NEW-VERSION>
+```
 
 Commit and tag the version. Then push and create a GitHub release.
 
 Finally, publishing to Nexus and Maven Central is **automatically triggered by creating a GitHub release** using GitHub Actions.
+
+```bash
+mvn versions:set -DnewVersion=<NEW-VERSION With Minor +1 and -SNAPSHOT>
+```
+
+Commit and push.
 
 ### GitHub Actions Requirements
 
