@@ -3,6 +3,7 @@ package com.clevercloud.biscuit.token;
 import cafe.cryptography.curve25519.CompressedRistretto;
 import cafe.cryptography.curve25519.InvalidEncodingException;
 import com.clevercloud.biscuit.crypto.PublicKey;
+import com.clevercloud.biscuit.datalog.RunLimits;
 import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.error.FailedCheck;
 import com.clevercloud.biscuit.error.LogicError;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.time.Duration;
 
 import static com.clevercloud.biscuit.crypto.TokenSignature.fromHex;
 import static com.clevercloud.biscuit.crypto.TokenSignature.hex;
@@ -442,6 +444,6 @@ public class SamplesV1Test extends TestCase {
         Verifier v1 = token.verify(root).get();
         v1.allow();
 
-        Assert.assertEquals(Right(Long.valueOf(0)), v1.verify());
+        Assert.assertEquals(Right(Long.valueOf(0)), v1.verify(new RunLimits(1000, 100, Duration.ofMillis(500))));
     }
 }
