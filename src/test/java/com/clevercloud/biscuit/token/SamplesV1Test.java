@@ -230,7 +230,7 @@ public class SamplesV1Test extends TestCase {
         v1.add_operation("read");
         v1.add_fact(fact("owner", Arrays.asList(s("ambient"), s("alice"), string("file1"))));
         v1.allow();
-        Either<Error, Long> res = v1.verify();
+        Either<Error, Long> res = v1.verify(new RunLimits(1000, 100, Duration.ofMillis(500)));
         System.out.println(res);
         Assert.assertTrue(res.isRight());
     }
