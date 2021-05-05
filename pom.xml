@@ -3,7 +3,7 @@
     <groupId>com.clever-cloud</groupId>
     <artifactId>biscuit-java</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.7</version>
+    <version>1.0.8</version>
     <name>biscuit-java</name>
     <url>https://github.com/clevercloud/biscuit-java</url>
 
