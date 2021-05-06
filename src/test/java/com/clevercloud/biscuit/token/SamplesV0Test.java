@@ -54,7 +54,7 @@ public class SamplesV0Test extends TestCase {
         v1.add_resource("file1");
         v1.add_operation("read");
         v1.allow();
-        Either<Error, Long> res = v1.verify();
+        Either<Error, Long> res = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
         if(res.isLeft()) {
             System.out.println("error: "+res.getLeft());
         }
@@ -204,7 +204,7 @@ public class SamplesV0Test extends TestCase {
         v1.set_time();
         System.out.println(v1.print_world());
 
-        Error e = v1.verify().getLeft();
+        Error e = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500))).getLeft();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
                         new FailedCheck.FailedBlock(1, 1, "check if time(#ambient, $date), $date <= 2018-12-20T00:00:00Z")
@@ -229,7 +229,7 @@ public class SamplesV0Test extends TestCase {
         v1.add_operation("read");
         v1.add_fact(fact("owner", Arrays.asList(s("ambient"), s("alice"), string("file1"))));
         v1.allow();
-        Either<Error, Long> res = v1.verify();
+        Either<Error, Long> res = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println(res);
         Assert.assertTrue(res.isRight());
     }
@@ -259,7 +259,7 @@ public class SamplesV0Test extends TestCase {
                 )
         )));
         v1.allow();
-        Either<Error, Long> res = v1.verify();
+        Either<Error, Long> res = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
@@ -285,14 +285,14 @@ public class SamplesV0Test extends TestCase {
         v1.add_resource("file1");
         v1.add_operation("read");
         v1.allow();
-        Assert.assertTrue(v1.verify().isRight());
+        Assert.assertTrue(v1.verify(new RunLimits(500, 100, Duration.ofMillis(500))).isRight());
 
         Verifier v2 = token.verify(root).get();
         v2.add_resource("file2");
         v2.add_operation("read");
         v2.allow();
 
-        Either<Error, Long> res = v2.verify();
+        Either<Error, Long> res = v2.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
@@ -318,14 +318,14 @@ public class SamplesV0Test extends TestCase {
         v1.add_resource("file1");
         v1.set_time();
         v1.allow();
-        Assert.assertTrue(v1.verify().isRight());
+        Assert.assertTrue(v1.verify(new RunLimits(500, 100, Duration.ofMillis(500))).isRight());
 
         Verifier v2 = token.verify(root).get();
         v2.add_resource("file2");
         v2.set_time();
         v2.allow();
 
-        Either<Error, Long> res = v2.verify();
+        Either<Error, Long> res = v2.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
@@ -400,7 +400,7 @@ public class SamplesV0Test extends TestCase {
         v1.add_check(new Check(queries));
         v1.allow();
 
-        Assert.assertTrue(v1.verify().isRight());
+        Assert.assertTrue(v1.verify(new RunLimits(500, 100, Duration.ofMillis(500))).isRight());
     }
 
     public void test16_CaveatHeadName() throws IOException, InvalidEncodingException {
@@ -419,7 +419,7 @@ public class SamplesV0Test extends TestCase {
         v1.allow();
 
 
-        Either<Error, Long> res = v1.verify();
+        Either<Error, Long> res = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
