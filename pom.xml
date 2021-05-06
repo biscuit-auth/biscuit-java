@@ -13,6 +13,23 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.target>11</maven.compiler.target>
         <maven.compiler.source>11</maven.compiler.source>
+
+        <!-- plugins -->
+        <maven-gpg.version>1.6</maven-gpg.version>
+        <maven-source.version>2.2.1</maven-source.version>
+        <maven-javadoc.version>2.9.1</maven-javadoc.version>
+        <maven-antrun.version>1.8</maven-antrun.version>
+        <nexus-staging-maven.version>1.6.7</nexus-staging-maven.version>
+        <build-helper-maven.version>3.0.0</build-helper-maven.version>
+
+        <!-- dependencies -->
+        <protobuf-java.version>3.13.0</protobuf-java.version>
+        <curve25519-elisabetch.version>0.1.0</curve25519-elisabetch.version>
+        <vavr.version>0.10.3</vavr.version>
+        <re2j.version>1.6</re2j.version>
+
+        <!-- test dependencies -->
+        <junit.version>4.13.1</junit.version>
     </properties>
 
     <licenses>
@@ -87,28 +104,11 @@
     </profiles>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <artifactId>maven-gpg-plugin</artifactId>
-                    <version>1.6</version>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-source-plugin</artifactId>
-                    <version>2.2.1</version>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>2.9.1</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-
         <plugins>
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.7</version>
+                <version>${nexus-staging-maven.version}</version>
                 <extensions>true</extensions>
                 <configuration>
                     <serverId>ossrh</serverId>
@@ -117,7 +117,9 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
+                <version>${maven-source.version}</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -128,7 +130,9 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven-javadoc.version}</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -144,7 +148,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
+                <version>${maven-antrun.version}</version>
                 <executions>
                     <execution>
                         <id>exec-protoc</id>
@@ -170,7 +174,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>${build-helper-maven.version}</version>
                 <executions>
                     <execution>
                         <id>add-classes</id>
@@ -193,28 +197,29 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-            <version>3.13.0</version>
+            <version>${protobuf-java.version}</version>
         </dependency>
         <dependency>
             <groupId>cafe.cryptography</groupId>
             <artifactId>curve25519-elisabeth</artifactId>
-            <version>0.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.1</version>
-            <scope>test</scope>
+            <version>${curve25519-elisabetch.version}</version>
         </dependency>
         <dependency>
             <groupId>io.vavr</groupId>
             <artifactId>vavr</artifactId>
-            <version>0.10.3</version>
+            <version>${vavr.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.re2j</groupId>
             <artifactId>re2j</artifactId>
-            <version>1.6</version>
+            <version>${re2j.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
