@@ -63,6 +63,7 @@ public class Block {
         this.version = SerializedBiscuit.MAX_SCHEMA_VERSION;
     }
 
+    /*
     Either<LogicError, Void> check(long i, World w, SymbolTable symbols, List<Check> verifier_checks,
                                    HashMap<String, Rule> queries, HashMap<String, HashMap<Long, Set<Fact>>> query_results) {
         World world = new World(w);
@@ -130,7 +131,7 @@ public class Block {
         } else {
             return Left(new LogicError.FailedChecks(errors));
         }
-    }
+    }*/
 
     /**
      * pretty printing for a block

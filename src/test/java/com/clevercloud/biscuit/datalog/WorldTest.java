@@ -56,7 +56,7 @@ public class WorldTest extends TestCase {
 
       System.out.println("adding r2: " + syms.print_rule(r2));
       w.add_rule(r2);
-      w.run();
+      w.run(new HashSet());
 
       System.out.println("parents:");
       for (final Fact fact : w.query(new Predicate(parent,
@@ -72,7 +72,7 @@ public class WorldTest extends TestCase {
                       .stream().map((f) -> syms.print_fact(f)).collect(Collectors.toSet())) + "]");
 
       w.add_fact(new Fact(new Predicate(parent, Arrays.asList(c, e))));
-      w.run();
+      w.run(new HashSet<>());
 
       final Set<Fact> res = w.query(new Predicate(grandparent,
               Arrays.asList(new ID.Variable(syms.insert("grandparent")), new ID.Variable(syms.insert("grandchild")))));
@@ -90,7 +90,7 @@ public class WorldTest extends TestCase {
             new Predicate(parent, Arrays.asList(new ID.Variable(syms.insert("parent")), new ID.Variable(syms.insert("sibling1")))),
             new Predicate(parent, Arrays.asList(new ID.Variable(syms.insert("parent")), new ID.Variable(syms.insert("sibling2"))))
       ), new ArrayList<>()));
-      w.run();
+      w.run(new HashSet<>());
 
       System.out.println("siblings: [" + String.join(", ",
               w.query(new Predicate(sibling, Arrays.asList(

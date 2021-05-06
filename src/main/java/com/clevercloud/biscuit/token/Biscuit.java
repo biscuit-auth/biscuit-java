@@ -291,7 +291,7 @@ public class Biscuit {
         }
 
         for(Rule rule: this.authority.rules) {
-            world.add_rule(rule);
+            world.add_privileged_rule(rule);
         }
 
         for(int i = 0; i < this.blocks.size(); i++) {
@@ -340,11 +340,14 @@ public class Biscuit {
         }
 
         for(Rule rule: ambient_rules) {
-            world.add_rule(rule);
+            world.add_privileged_rule(rule);
         }
 
+        HashSet<Long> restricted_symbols = new HashSet<>();
+        restricted_symbols.add(symbols.get("authority").get());
+        restricted_symbols.add(symbols.get("ambient").get());
         //System.out.println("world after adding ambient rules:\n"+symbols.print_world(world));
-        world.run();
+        world.run(restricted_symbols);
         //System.out.println("world after running rules:\n"+symbols.print_world(world));
 
         ArrayList<FailedCheck> errors = new ArrayList<>();

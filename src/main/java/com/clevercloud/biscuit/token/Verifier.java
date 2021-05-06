@@ -123,7 +123,7 @@ public class Verifier {
 
         for(com.clevercloud.biscuit.datalog.Rule rule: token.authority.rules) {
             com.clevercloud.biscuit.datalog.Rule converted_rule = Rule.convert_from(rule, token.symbols).convert(this.symbols);
-            world.add_rule(converted_rule);
+            world.add_privileged_rule(converted_rule);
         }
 
         List<com.clevercloud.biscuit.datalog.Check> authority_checks = new ArrayList<>();
@@ -192,7 +192,7 @@ public class Verifier {
     }
 
     public void add_rule(Rule rule) {
-        world.add_rule(rule.convert(symbols));
+        world.add_privileged_rule(rule.convert(symbols));
     }
 
     public Either<Error, Void> add_rule(String s) {
@@ -349,7 +349,7 @@ public class Verifier {
     }
 
     public Either<Error, Set<Fact>> query(Rule query, RunLimits limits) {
-        Either<Error, Void> runRes = world.run(limits);
+        Either<Error, Void> runRes = world.run(limits, new HashSet<>());
         if (runRes.isLeft()) {
             Error e = runRes.getLeft();
             return Left(e);
@@ -389,7 +389,11 @@ public class Verifier {
             return Left(new Error.MissingSymbols());
         }
 
-        Either<Error, Void> runRes = world.run(limits);
+        HashSet<Long> restricted_symbols = new HashSet<>();
+        restricted_symbols.add(this.symbols.get("authority").get());
+        restricted_symbols.add(this.symbols.get("ambient").get());
+
+        Either<Error, Void> runRes = world.run(limits, restricted_symbols);
         if (runRes.isLeft()) {
             Error e = runRes.getLeft();
             return Left(e);

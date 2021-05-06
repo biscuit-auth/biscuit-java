@@ -466,4 +466,24 @@ public class SamplesV1Test extends TestCase {
         System.out.println("result: "+result);
         Assert.assertTrue(result.isLeft());
     }
+
+    public void test19_generating_ambient_from_variables() throws IOException, InvalidEncodingException {
+        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test19_generating_ambient_from_variables.bc");
+
+        byte[] data = new byte[inputStream.available()];
+        inputStream.read(data);
+
+        Biscuit token = Biscuit.from_bytes(data).get();
+        System.out.println(token.print());
+
+        Verifier v1 = token.verify(root).get();
+        v1.add_operation("write");
+        v1.allow();
+        Either<Error, Long> result = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
+        System.out.println("result: "+result);
+        Assert.assertTrue(result.isLeft());
+    }
 }
