@@ -30,15 +30,15 @@ public final class Predicate implements Serializable {
       return this.ids.listIterator();
    }
 
-   public boolean match(final Predicate other) {
-      if (this.name != other.name) {
+   public boolean match(final Predicate rule_predicate) {
+      if (this.name != rule_predicate.name) {
          return false;
       }
-      if (this.ids.size() != other.ids.size()) {
+      if (this.ids.size() != rule_predicate.ids.size()) {
          return false;
       }
       for (int i = 0; i < this.ids.size(); ++i) {
-         if (!this.ids.get(i).match(other.ids.get(i))) {
+         if (!this.ids.get(i).match(rule_predicate.ids.get(i))) {
             return false;
          }
       }

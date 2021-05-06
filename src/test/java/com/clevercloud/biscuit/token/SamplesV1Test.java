@@ -446,4 +446,24 @@ public class SamplesV1Test extends TestCase {
 
         Assert.assertEquals(Right(Long.valueOf(0)), v1.verify(new RunLimits(500, 100, Duration.ofMillis(500))));
     }
+
+    public void test18_Unbound_Variables() throws IOException, InvalidEncodingException {
+        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test18_unbound_variables_in_rule.bc");
+
+        byte[] data = new byte[inputStream.available()];
+        inputStream.read(data);
+
+        Biscuit token = Biscuit.from_bytes(data).get();
+        System.out.println(token.print());
+
+        Verifier v1 = token.verify(root).get();
+        v1.add_operation("write");
+        v1.allow();
+        Either<Error, Long> result = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
+        System.out.println("result: "+result);
+        Assert.assertTrue(result.isLeft());
+    }
 }

@@ -59,17 +59,26 @@ public final class Rule implements Serializable {
       for (final Map<Long, ID> h : new Combinator(variables, this.body, this.expressions, facts).combine()) {
          final Predicate p = this.head.clone();
          final ListIterator<ID> idit = p.ids_iterator();
+         boolean unbound_variable = false;
          while (idit.hasNext()) {
-            //FIXME: variables that appear in the head should appear in the body and constraints as well
             final ID id = idit.next();
             if (id instanceof ID.Variable) {
                final ID value = h.get(((ID.Variable) id).value());
                idit.set(value);
+
+               // variables that appear in the head should appear in the body and constraints as well
+               if(value == null) {
+                  unbound_variable = true;
+               }
             }
          }
-         new_facts.add(new Fact(p));
+
+         if (!unbound_variable) {
+            new_facts.add(new Fact(p));
+         }
       }
    }
+
 
    // do not produce new facts, only find one matching set of facts
    public boolean test(final Set<Fact> facts) {
