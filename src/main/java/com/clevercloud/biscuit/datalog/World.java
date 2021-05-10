@@ -86,6 +86,8 @@ public final class World implements Serializable {
       return this.facts;
    }
 
+   public List<Rule> privileged_rules() { return this.privileged_rules; }
+
    public List<Rule> rules() { return this.rules; }
 
    public List<Check> checks() { return this.checks; }

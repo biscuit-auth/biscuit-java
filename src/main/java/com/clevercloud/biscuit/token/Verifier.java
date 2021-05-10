@@ -483,6 +483,8 @@ public class Verifier {
     public String print_world() {
         final List<String> facts = this.world.facts().stream().map((f) -> this.symbols.print_fact(f)).collect(Collectors.toList());
         final List<String> rules = this.world.rules().stream().map((r) -> this.symbols.print_rule(r)).collect(Collectors.toList());
+        final List<String> privileged_rules = this.world.privileged_rules().stream().map((r) -> this.symbols.print_rule(r)).collect(Collectors.toList());
+
 
         List<String> checks = new ArrayList<>();
 
@@ -507,6 +509,8 @@ public class Verifier {
         StringBuilder b = new StringBuilder();
         b.append("World {\n\tfacts: [\n\t\t");
         b.append(String.join(",\n\t\t", facts));
+        b.append("\n\t],\n\tprivileged rules: [\n\t\t");
+        b.append(String.join(",\n\t\t", privileged_rules));
         b.append("\n\t],\n\trules: [\n\t\t");
         b.append(String.join(",\n\t\t", rules));
         b.append("\n\t],\n\tchecks: [\n\t\t");
