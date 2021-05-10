@@ -305,6 +305,12 @@ public class Parser {
             return Either.right(new Tuple2<String, Term>(t._1, t._2));
         }
 
+        Either<Error, Tuple2<String, Term.Set>> res7 = set(s);
+        if(res7.isRight()) {
+            Tuple2<String, Term.Set> t = res7.get();
+            return Either.right(new Tuple2<String, Term>(t._1, t._2));
+        }
+
         Either<Error, Tuple2<String, Term.Bool>> res6 = bool(s);
         if(res6.isRight()) {
             Tuple2<String, Term.Bool> t = res6.get();

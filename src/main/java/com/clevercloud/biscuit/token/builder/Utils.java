@@ -2,6 +2,7 @@ package com.clevercloud.biscuit.token.builder;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 public class Utils {
@@ -46,6 +47,10 @@ public class Utils {
 
     public static Term var(String name) {
         return new Term.Variable(name);
+    }
+
+    public static Term set(HashSet<Term> s) {
+        return new Term.Set(s);
     }
 
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();

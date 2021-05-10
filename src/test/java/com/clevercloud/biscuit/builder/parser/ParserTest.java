@@ -16,6 +16,7 @@ import junit.framework.TestSuite;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import static com.clevercloud.biscuit.token.builder.Utils.*;
 
@@ -224,6 +225,22 @@ public class ParserTest extends TestCase {
                         )
                 )),
                 res4);
+
+        Either<Error, Tuple2<String, Expression>> res5 =
+                Parser.expression("  [ #abc, #def ].contains($operation) ");
+
+        HashSet<Term> s = new HashSet();
+        s.add(s("abc"));
+        s.add(s("def"));
+
+        assertEquals(Either.right(new Tuple2<String, Expression>("",
+                        new Expression.Binary(
+                                Expression.Op.Contains,
+                                new Expression.Value(set(s)),
+                                new Expression.Value(var("operation"))
+                        )
+                )),
+                res5);
     }
 
     public void testParens() {
