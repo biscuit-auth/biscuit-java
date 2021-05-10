@@ -4,6 +4,7 @@ import com.clevercloud.biscuit.datalog.SymbolTable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Rule {
     Predicate head;
@@ -71,6 +72,14 @@ public class Rule {
 
     @Override
     public String toString() {
-        return head.toString() + " <- " + body + ", "+ expressions;
+        final List<String> b = body.stream().map((pred) -> pred.toString()).collect(Collectors.toList());
+        String res = head.toString() + " <- " + String.join(", ", b);
+
+        if(!expressions.isEmpty()) {
+            final List<String> e = expressions.stream().map((expression) -> expression.toString()).collect(Collectors.toList());
+            res += ", "+ String.join(", ", e);
+        }
+
+        return res;
     }
 }

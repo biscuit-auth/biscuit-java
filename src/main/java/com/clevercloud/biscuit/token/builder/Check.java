@@ -4,6 +4,7 @@ import com.clevercloud.biscuit.datalog.SymbolTable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Check {
     List<Rule> queries;
@@ -39,7 +40,19 @@ public class Check {
 
     @Override
     public String toString() {
-        return "check if "+queries;
+        final List<String> qs = queries.stream().map((q) -> {
+            final List<String> b = q.body.stream().map((pred) -> pred.toString()).collect(Collectors.toList());
+            String res = String.join(", ", b);
+
+            if(!q.expressions.isEmpty()) {
+                final List<String> e = q.expressions.stream().map((expression) -> expression.toString()).collect(Collectors.toList());
+                res += ", "+ String.join(", ", e);
+            }
+
+            return res;
+        }).collect(Collectors.toList());
+
+        return "check if " + String.join(" or ", qs);
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.clevercloud.biscuit.datalog.SymbolTable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Predicate {
     String name;
@@ -46,7 +47,8 @@ public class Predicate {
 
     @Override
     public String toString() {
-        return ""+name+"("+ids+")";
+        final List<String> i = ids.stream().map((id) -> id.toString()).collect(Collectors.toList());
+        return ""+name+"("+String.join(", ", i)+")";
     }
 
     @Override
