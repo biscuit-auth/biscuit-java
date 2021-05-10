@@ -23,6 +23,11 @@ public class Parser {
             return Either.left(res.getLeft());
         } else {
             Tuple2<String, Predicate> t = res.get();
+
+            if(!t._1.isEmpty()) {
+                return Either.left(new Error(s, "the string was not entirely parsed, remaining: "+t._1));
+            }
+
             return Either.right(new Tuple2<>(t._1, new Fact(t._2)));
         }
     }
@@ -52,6 +57,10 @@ public class Parser {
 
         Tuple3<String, List<Predicate>, List<Expression>> body = bodyRes.get();
 
+        if(!body._1.isEmpty()) {
+            return Either.left(new Error(s, "the string was not entirely parsed, remaining: "+body._1));
+        }
+
         return Either.right(new Tuple2<>(body._1, new Rule(head, body._2, body._3)));
     }
 
@@ -70,6 +79,10 @@ public class Parser {
         }
 
         Tuple2<String, List<Rule>> t = bodyRes.get();
+
+        if(!t._1.isEmpty()) {
+            return Either.left(new Error(s, "the string was not entirely parsed, remaining: "+t._1));
+        }
 
         return Either.right(new Tuple2<>(t._1, new Check(t._2)));
     }
@@ -95,6 +108,10 @@ public class Parser {
         }
 
         Tuple2<String, List<Rule>> t = bodyRes.get();
+
+        if(!t._1.isEmpty()) {
+            return Either.left(new Error(s, "the string was not entirely parsed, remaining: "+t._1));
+        }
 
         return Either.right(new Tuple2<>(t._1, new Policy(t._2, p)));
     }
