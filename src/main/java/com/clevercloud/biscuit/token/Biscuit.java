@@ -17,6 +17,7 @@ import static io.vavr.API.Right;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Biscuit auth token
@@ -314,10 +315,10 @@ public class Biscuit {
             }
         }
 
-        List<byte[]> revocation_ids = this.revocation_identifiers();
+        List<RevocationIdentifier> revocation_ids = this.revocation_identifiers();
         long rev = symbols.get("revocation_id").get();
         for(int i = 0; i < revocation_ids.size(); i++) {
-            byte[] id = revocation_ids.get(i);
+            byte[] id = revocation_ids.get(i).getBytes();
             world.add_fact(new Fact(new Predicate(rev, Arrays.asList(new ID.Integer(i), new ID.Bytes(id)))));
         }
 
@@ -485,8 +486,10 @@ public class Biscuit {
         return l;
     }
 
-    public List<byte[]> revocation_identifiers() {
-        return this.revocation_ids;
+    public List<RevocationIdentifier> revocation_identifiers() {
+        return this.revocation_ids.stream()
+                .map(e -> RevocationIdentifier.from_bytes(e))
+                .collect(Collectors.toList());
     }
 
     public List<Option<String>> context() {
