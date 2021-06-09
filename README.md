@@ -3,7 +3,7 @@
 [![Tests](https://github.com/clevercloud/biscuit-java/actions/workflows/java_ci.yml/badge.svg)](https://github.com/CleverCloud/biscuit-java/actions/workflows/java_ci.yml)
 
 [![Central Version](https://img.shields.io/maven-central/v/com.clever-cloud/biscuit-java)](https://mvnrepository.com/artifact/com.clever-cloud/biscuit-java)
-[![Nexus Version](https://img.shields.io/nexus/r/com.clever-cloud/biscuit-java?server=https%3A%2F%2Foss.sonatype.org)](https://search.maven.org/artifact/com.clever-cloud/biscuit-java)
+[![Nexus Version](https://img.shields.io/nexus/r/com.clever-cloud/biscuit-java?server=https%3A%2F%2Fs01.oss.sonatype.org)](https://search.maven.org/artifact/com.clever-cloud/biscuit-java)
 
 [Biscuit's](https://github.com/CleverCloud/biscuit) Java library implementation.
 
