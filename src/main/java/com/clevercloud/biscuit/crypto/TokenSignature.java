@@ -38,10 +38,8 @@ public class TokenSignature {
         Scalar d = hash_points(l);
         Scalar e = hash_message(keypair.public_key, message);
 
-        Scalar z = r.multiply(d).subtract(e.multiply(keypair.private_key));
-
+        this.z = r.multiply(d).subtract(e.multiply(keypair.private_key));
         this.parameters = l;
-        this.z = z;
     }
 
     TokenSignature(final ArrayList<RistrettoElement> parameters, final Scalar z) {
@@ -67,9 +65,9 @@ public class TokenSignature {
         Scalar d = hash_points(l);
         Scalar e = hash_message(keypair.public_key, message);
 
-        Scalar z = r.multiply(d).subtract(e.multiply(keypair.private_key));
+        Scalar localZ = r.multiply(d).subtract(e.multiply(keypair.private_key));
 
-        TokenSignature sig = new TokenSignature(this.parameters, this.z.add(z));
+        TokenSignature sig = new TokenSignature(this.parameters, this.z.add(localZ));
         sig.parameters.add(A);
 
         return sig;
@@ -87,26 +85,15 @@ public class TokenSignature {
             return Left(new Error.FormatError.Signature.InvalidFormat());
         }
 
-        //System.out.println("z, zp");
         RistrettoElement zP = Constants.RISTRETTO_GENERATOR.multiply(this.z);
-        //System.out.println(hex(z.toByteArray()));
-        //System.out.println(hex(zP.compress().toByteArray()));
-
-
-        //System.out.println("eiXi");
+        
         RistrettoElement eiXi = RistrettoElement.IDENTITY;
         for(int i = 0; i < public_keys.size(); i++) {
             Scalar e = hash_message(public_keys.get(i), messages.get(i));
-            //System.out.println(hex(e.toByteArray()));
-            //System.out.println(hex((public_keys.get(i).multiply(e)).compress().toByteArray()));
-
-
+            
             eiXi = eiXi.add(public_keys.get(i).multiply(e));
-            //System.out.println(hex(eiXi.compress().toByteArray()));
-
         }
 
-        //System.out.println("diAi");
         RistrettoElement diAi = RistrettoElement.IDENTITY;
         for (RistrettoElement A: parameters) {
             ArrayList<RistrettoElement> l = new ArrayList<>();
@@ -116,15 +103,7 @@ public class TokenSignature {
             diAi = diAi.add(A.multiply(d));
         }
 
-        //System.out.println(hex(eiXi.compress().toByteArray()));
-        //System.out.println(hex(diAi.compress().toByteArray()));
-
-
-
         RistrettoElement res = zP.add(eiXi).subtract(diAi);
-
-        //System.out.println(hex(RistrettoElement.IDENTITY.compress().toByteArray()));
-        //System.out.println(hex(res.compress().toByteArray()));
 
         if (res.ctEquals(RistrettoElement.IDENTITY) == 1) {
             return Right(null);
@@ -140,10 +119,7 @@ public class TokenSignature {
     public Schema.Signature serialize() {
         Schema.Signature.Builder sig = Schema.Signature.newBuilder()
                 .setZ(ByteString.copyFrom(this.z.toByteArray()));
-
-        //System.out.println(this.parameters.size());
         for (int i = 0; i < this.parameters.size(); i++) {
-            //System.out.println(i);
             sig.addParameters(ByteString.copyFrom(this.parameters.get(i).compress().toByteArray()));
         }
 
@@ -155,15 +131,12 @@ public class TokenSignature {
      * @param sig
      * @return
      */
-    static public  Either<Error, TokenSignature> deserialize(Schema.Signature sig) {
+    public static  Either<Error, TokenSignature> deserialize(Schema.Signature sig) {
         try {
             ArrayList<RistrettoElement> parameters = new ArrayList<>();
             for (ByteString parameter : sig.getParametersList()) {
                 parameters.add((new CompressedRistretto(parameter.toByteArray())).decompress());
             }
-
-            //System.out.println(hex(sig.getZ().toByteArray()));
-            //System.out.println(sig.getZ().toByteArray().length);
 
             Scalar z = Scalar.fromBytesModOrder(sig.getZ().toByteArray());
 
@@ -206,7 +179,7 @@ public class TokenSignature {
         return null;
     }
 
-    static public String hex(byte[] byteArray) {
+    public static String hex(byte[] byteArray) {
         StringBuilder result = new StringBuilder();
         for (byte bb : byteArray) {
             result.append(String.format("%02X", bb));

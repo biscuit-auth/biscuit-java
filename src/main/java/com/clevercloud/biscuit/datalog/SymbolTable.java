@@ -18,7 +18,7 @@ public final class SymbolTable implements Serializable {
       int index = this.symbols.indexOf(symbol);
       if (index == -1) {
          this.symbols.add(symbol);
-         return this.symbols.size() - 1;
+         return this.symbols.size() - 1L;
       } else {
          return index;
       }

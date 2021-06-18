@@ -8,17 +8,15 @@ import com.clevercloud.biscuit.error.Error;
 import com.google.protobuf.ByteString;
 import io.vavr.control.Either;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
 public final class Constraint {
-   static public Either<Error.FormatError, Expression> deserializeV0(Schema.ConstraintV0 c) {
-      ArrayList<Op> ops = new ArrayList<Op>();
+   public static Either<Error.FormatError, Expression> deserializeV0(Schema.ConstraintV0 c) {
+      ArrayList<Op> ops = new ArrayList<>();
 
       long id = c.getId();
       ops.add(new Op.Value(new ID.Variable(id)));

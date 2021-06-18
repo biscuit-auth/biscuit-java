@@ -8,8 +8,8 @@ import java.util.HashSet;
 import java.util.Objects;
 
 public abstract class Term {
-    abstract public ID convert(SymbolTable symbols);
-    static public Term convert_from(ID id, SymbolTable symbols) {
+    public abstract  ID convert(SymbolTable symbols);
+    public static Term convert_from(ID id, SymbolTable symbols) {
         return id.toTerm(symbols);
     }
 

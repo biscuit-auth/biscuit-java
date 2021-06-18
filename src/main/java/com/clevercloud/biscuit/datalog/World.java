@@ -93,7 +93,7 @@ public final class World implements Serializable {
    public List<Check> checks() { return this.checks; }
 
    public final Set<Fact> query(final Predicate pred) {
-      return this.facts.stream().filter((f) -> {
+      return this.facts.stream().filter(f -> {
          if (f.predicate().name() != pred.name()) {
             return false;
          }

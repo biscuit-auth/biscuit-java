@@ -32,14 +32,14 @@ public class SerializedBiscuit {
     public List<RistrettoElement> keys;
     public TokenSignature signature;
 
-    public static int MAX_SCHEMA_VERSION = 1;
+    public static final int MAX_SCHEMA_VERSION = 1;
 
     /**
      * Deserializes a SerializedBiscuit from a byte array
      * @param slice
      * @return
      */
-    static public Either<Error, SerializedBiscuit> from_bytes(byte[] slice) {
+    public static Either<Error, SerializedBiscuit> from_bytes(byte[] slice) {
         try {
             Schema.Biscuit data = Schema.Biscuit.parseFrom(slice);
 
@@ -111,7 +111,7 @@ public class SerializedBiscuit {
 
     }
 
-    static public Either<Error.FormatError, SerializedBiscuit> make(final SecureRandom rng, final KeyPair root,
+    public static Either<Error.FormatError, SerializedBiscuit> make(final SecureRandom rng, final KeyPair root,
                                                              final Block authority) {
         Schema.Block b = authority.serialize();
         try {
@@ -176,7 +176,7 @@ public class SerializedBiscuit {
             return Left(new Error.FormatError.EmptyKeys());
         }
 
-        if(!(this.keys.get(0).ctEquals(public_key.key) == 1)) {
+        if((this.keys.get(0).ctEquals(public_key.key) != 1)) {
             return Left(new Error.FormatError.UnknownPublicKey());
         }
 

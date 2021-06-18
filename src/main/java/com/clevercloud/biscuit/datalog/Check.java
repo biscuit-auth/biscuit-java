@@ -47,7 +47,7 @@ public class Check {
         return b.build();
     }
 
-    static public Either<Error.FormatError, Check> deserializeV0(Schema.CaveatV0 caveat) {
+    public static Either<Error.FormatError, Check> deserializeV0(Schema.CaveatV0 caveat) {
         ArrayList<Rule> queries = new ArrayList<>();
 
         for (Schema.RuleV0 query: caveat.getQueriesList()) {
@@ -63,7 +63,7 @@ public class Check {
         return Right(new Check(queries));
     }
 
-    static public Either<Error.FormatError, Check> deserializeV1(Schema.CheckV1 check) {
+    public static Either<Error.FormatError, Check> deserializeV1(Schema.CheckV1 check) {
         ArrayList<Rule> queries = new ArrayList<>();
 
         for (Schema.RuleV1 query: check.getQueriesList()) {

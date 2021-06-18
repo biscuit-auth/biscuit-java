@@ -77,7 +77,7 @@ public final class Rule implements Serializable {
          // if the generated fact has #authority or #ambient as first element and we're n ot in a privileged rule
          // do not generate it
          ID first = p.ids().get(0);
-         if(first != null && first instanceof ID.Symbol) {
+         if(first instanceof ID.Symbol) {
             if( restricted_symbols.contains(((ID.Symbol) first).value()) ) {
                continue;
             }
@@ -127,7 +127,7 @@ public final class Rule implements Serializable {
       return b.build();
    }
 
-   static public Either<Error.FormatError, Rule> deserializeV0(Schema.RuleV0 rule) {
+   public static Either<Error.FormatError, Rule> deserializeV0(Schema.RuleV0 rule) {
       ArrayList<Predicate> body = new ArrayList<>();
       for (Schema.PredicateV0 predicate: rule.getBodyList()) {
          Either<Error.FormatError, Predicate> res = Predicate.deserializeV0(predicate);
@@ -159,7 +159,7 @@ public final class Rule implements Serializable {
       }
    }
 
-   static public Either<Error.FormatError, Rule> deserializeV1(Schema.RuleV1 rule) {
+   public static Either<Error.FormatError, Rule> deserializeV1(Schema.RuleV1 rule) {
       ArrayList<Predicate> body = new ArrayList<>();
       for (Schema.PredicateV1 predicate: rule.getBodyList()) {
          Either<Error.FormatError, Predicate> res = Predicate.deserializeV1(predicate);

@@ -14,7 +14,6 @@ import io.vavr.control.Option;
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
-import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -62,7 +61,7 @@ public class Biscuit {
      * @param authority authority block
      * @return
      */
-    static public Either<Error, Biscuit> make(final SecureRandom rng, final KeyPair root, final SymbolTable symbols, final Block authority) {
+    public static Either<Error, Biscuit> make(final SecureRandom rng, final KeyPair root, final SymbolTable symbols, final Block authority) {
         if(!Collections.disjoint(symbols.symbols, authority.symbols.symbols)) {
             return Left(new Error.SymbolTableOverlap());
         }
@@ -107,7 +106,7 @@ public class Biscuit {
      * @param data
      * @return
      */
-    static public Either<Error, Biscuit> from_b64(String data)  {
+    public static Either<Error, Biscuit> from_b64(String data)  {
         return Biscuit.from_bytes(Base64.getUrlDecoder().decode(data));
     }
 
@@ -123,7 +122,7 @@ public class Biscuit {
      * @param data
      * @return
      */
-    static public Either<Error, Biscuit> from_bytes(byte[] data)  {
+    public static Either<Error, Biscuit> from_bytes(byte[] data)  {
         return Biscuit.from_bytes_with_symbols(data, default_symbol_table());
     }
 
@@ -137,7 +136,7 @@ public class Biscuit {
      * @param data
      * @return
      */
-    static public Either<Error, Biscuit> from_bytes_with_symbols(byte[] data, SymbolTable symbols)  {
+    public static Either<Error, Biscuit> from_bytes_with_symbols(byte[] data, SymbolTable symbols)  {
         Either<Error, SerializedBiscuit> res = SerializedBiscuit.from_bytes(data);
         if(res.isLeft()) {
             Error e = res.getLeft();
@@ -347,10 +346,9 @@ public class Biscuit {
         HashSet<Long> restricted_symbols = new HashSet<>();
         restricted_symbols.add(symbols.get("authority").get());
         restricted_symbols.add(symbols.get("ambient").get());
-        //System.out.println("world after adding ambient rules:\n"+symbols.print_world(world));
+        
         world.run(restricted_symbols);
-        //System.out.println("world after running rules:\n"+symbols.print_world(world));
-
+        
         ArrayList<FailedCheck> errors = new ArrayList<>();
         for (int j = 0; j < this.authority.checks.size(); j++) {
             boolean successful = false;
@@ -534,7 +532,7 @@ public class Biscuit {
     /**
      * Default symbols list
      */
-    static public SymbolTable default_symbol_table() {
+    public static SymbolTable default_symbol_table() {
         SymbolTable syms = new SymbolTable();
         syms.insert("authority");
         syms.insert("ambient");

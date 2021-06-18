@@ -1,7 +1,6 @@
 package com.clevercloud.biscuit.builder;
 
 import com.clevercloud.biscuit.crypto.KeyPair;
-import com.clevercloud.biscuit.datalog.ID;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.token.Biscuit;
 import com.clevercloud.biscuit.token.builder.Block;
@@ -13,7 +12,6 @@ import junit.framework.TestSuite;
 
 import java.security.SecureRandom;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;

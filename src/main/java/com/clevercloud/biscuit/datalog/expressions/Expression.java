@@ -27,7 +27,7 @@ public class Expression {
     }
 
     public Option<ID> evaluate(Map<Long, ID> variables) {
-        Deque<ID> stack = new ArrayDeque<ID>(16); //Default value
+        Deque<ID> stack = new ArrayDeque<>(16); //Default value
         for(Op op: ops){
             if(!op.evaluate(stack,variables)){
                 return Option.none();
@@ -62,7 +62,7 @@ public class Expression {
         return b.build();
     }
 
-    static public Either<Error.FormatError, Expression> deserializeV1(Schema.ExpressionV1 e) {
+    public static Either<Error.FormatError, Expression> deserializeV1(Schema.ExpressionV1 e) {
         ArrayList<Op> ops = new ArrayList<>();
 
         for(Schema.Op op: e.getOpsList()) {

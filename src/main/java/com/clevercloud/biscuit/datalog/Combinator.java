@@ -68,9 +68,7 @@ public final class Combinator implements Serializable {
             // there are no more predicates to check
             if (next_predicates.isEmpty()) {
                final Option<Map<Long, ID>> v_opt = vars.check_expressions(this.expressions);
-               if(v_opt.isEmpty()) {
-                  continue;
-               } else {
+               if(!v_opt.isEmpty()) {
                   return Option.some(vars);
                }
             } else {

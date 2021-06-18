@@ -1,6 +1,5 @@
 package com.clevercloud.biscuit.token.builder;
 
-import com.clevercloud.biscuit.datalog.ID;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.datalog.expressions.Op;
 
@@ -18,8 +17,7 @@ public abstract class Expression {
     }
 
     public static Expression convert_from(com.clevercloud.biscuit.datalog.expressions.Expression e, SymbolTable symbols) {
-        ArrayList<Op> ops = new ArrayList<>();
-        Deque<Expression> stack = new ArrayDeque<Expression>(16);
+        Deque<Expression> stack = new ArrayDeque<>(16);
         for(com.clevercloud.biscuit.datalog.expressions.Op op: e.getOps()){
             if(op instanceof com.clevercloud.biscuit.datalog.expressions.Op.Value) {
                 com.clevercloud.biscuit.datalog.expressions.Op.Value v = (com.clevercloud.biscuit.datalog.expressions.Op.Value) op;
@@ -132,7 +130,7 @@ public abstract class Expression {
         Union,
     }
 
-    public final static class Value extends Expression {
+    public static final class Value extends Expression {
         private final Term value;
 
         public Value(Term value) {
@@ -166,7 +164,7 @@ public abstract class Expression {
         }
     }
 
-    public final static class Unary extends Expression {
+    public static final class Unary extends Expression {
         private final Op op;
         private final Expression arg1;
 
@@ -218,7 +216,7 @@ public abstract class Expression {
         }
     }
 
-    public final static class Binary extends Expression {
+    public static final class Binary extends Expression {
         private final Op op;
         private final Expression arg1;
         private final Expression arg2;

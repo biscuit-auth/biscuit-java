@@ -30,7 +30,7 @@ public class SealedBiscuit {
      * @param slice
      * @return
      */
-    static public Either<Error, SealedBiscuit> from_bytes(byte[] slice, byte[] secret) {
+    public static Either<Error, SealedBiscuit> from_bytes(byte[] slice, byte[] secret) {
         try {
             Schema.SealedBiscuit data = Schema.SealedBiscuit.parseFrom(slice);
 

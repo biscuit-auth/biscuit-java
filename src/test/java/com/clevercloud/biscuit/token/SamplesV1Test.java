@@ -87,8 +87,6 @@ public class SamplesV1Test extends TestCase {
     }
 
     public void test3_InvalidSignatureFormat() throws IOException, InvalidEncodingException {
-        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
-
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test3_invalid_signature_format.bc");
 
@@ -101,8 +99,6 @@ public class SamplesV1Test extends TestCase {
     }
 
     public void test4_random_block() throws IOException, InvalidEncodingException {
-        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
-
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test4_random_block.bc");
 
@@ -115,8 +111,6 @@ public class SamplesV1Test extends TestCase {
     }
 
     public void test5_InvalidSignature() throws IOException, InvalidEncodingException {
-        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
-
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test5_invalid_signature.bc");
 

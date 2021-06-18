@@ -49,7 +49,7 @@ public final class Fact implements Serializable {
               .build();
    }
 
-   static public Either<Error.FormatError, Fact> deserializeV0(Schema.FactV0 fact) {
+   public static Either<Error.FormatError, Fact> deserializeV0(Schema.FactV0 fact) {
       Either<Error.FormatError, Predicate> res = Predicate.deserializeV0(fact.getPredicate());
       if(res.isLeft()) {
          Error.FormatError e = res.getLeft();
@@ -59,7 +59,7 @@ public final class Fact implements Serializable {
       }
    }
 
-   static public Either<Error.FormatError, Fact> deserializeV1(Schema.FactV1 fact) {
+   public static Either<Error.FormatError, Fact> deserializeV1(Schema.FactV1 fact) {
       Either<Error.FormatError, Predicate> res = Predicate.deserializeV1(fact.getPredicate());
       if(res.isLeft()) {
          Error.FormatError e = res.getLeft();

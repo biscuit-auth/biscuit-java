@@ -60,9 +60,6 @@ public class ParserTest extends TestCase {
         assertEquals(Either.right(new Tuple2<String, Term.Variable>("", (Term.Variable) var("name"))), res);
     }
 
-    public void testConstraint() {
-    }
-
     public void testFact() {
         Either<Error, Tuple2<String, Fact>> res = Parser.fact("right( #authority, \"file1\", #read )");
         assertEquals(Either.right(new Tuple2<String, Fact>("",
@@ -70,8 +67,7 @@ public class ParserTest extends TestCase {
                 res);
 
         Either<Error, Tuple2<String, Fact>> res2 = Parser.fact("right( #authority, $var, #read )");
-        //assertEquals(Either.left(new Error("$var, #read )", "variables are not allowed in facts")),
-        //    res2);
+        
         assertEquals(Either.left(new Error("$var, #read )", "closing parens not found")),
                 res2);
 
@@ -229,7 +225,7 @@ public class ParserTest extends TestCase {
         Either<Error, Tuple2<String, Expression>> res5 =
                 Parser.expression("  [ #abc, #def ].contains($operation) ");
 
-        HashSet<Term> s = new HashSet();
+        HashSet<Term> s = new HashSet<>();
         s.add(s("abc"));
         s.add(s("def"));
 
@@ -276,7 +272,7 @@ public class ParserTest extends TestCase {
                 ex.getOps()
         );
 
-        HashMap variables = new HashMap();
+        HashMap<Long,ID> variables = new HashMap<>();
         Option<ID> value = ex.evaluate(variables);
         assertEquals(Option.some(new ID.Integer(7)), value);
         assertEquals("1 + 2 * 3", ex.print(s).get());
@@ -318,7 +314,7 @@ public class ParserTest extends TestCase {
                 ex2.getOps()
         );
 
-        HashMap variables2 = new HashMap();
+        HashMap<Long, ID> variables2 = new HashMap<>();
         Option<ID> value2 = ex2.evaluate(variables2);
         assertEquals(Option.some(new ID.Integer(9)), value2);
         assertEquals("(1 + 2) * 3", ex2.print(s2).get());

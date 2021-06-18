@@ -204,7 +204,7 @@ public class Block {
      * @param b
      * @return
      */
-    static public Either<Error.FormatError, Block> deserialize(Schema.Block b) {
+    public static Either<Error.FormatError, Block> deserialize(Schema.Block b) {
         int version = b.getVersion();
         if(version > SerializedBiscuit.MAX_SCHEMA_VERSION) {
             return Left(new Error.FormatError.Version(SerializedBiscuit.MAX_SCHEMA_VERSION, version));
@@ -293,7 +293,7 @@ public class Block {
      * @param slice
      * @return
      */
-    static public Either<Error.FormatError, Block> from_bytes(byte[] slice) {
+    public static Either<Error.FormatError, Block> from_bytes(byte[] slice) {
         try {
             Schema.Block data = Schema.Block.parseFrom(slice);
             return Block.deserialize(data);

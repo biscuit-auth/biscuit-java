@@ -47,7 +47,6 @@ public class Parser {
             return Either.left(new Error(s, "rule arrow not found"));
         }
 
-        List<Predicate> predicates = new ArrayList<Predicate>();
         s = s.substring(2);
 
         Either<Error, Tuple3<String, List<Predicate>, List<Expression>>> bodyRes = rule_body(s);
@@ -72,7 +71,6 @@ public class Parser {
 
         s = s.substring(prefix.length());
 
-        List<Rule> queries = new ArrayList<>();
         Either<Error, Tuple2<String, List<Rule>>> bodyRes = check_body(s);
         if (bodyRes.isLeft()) {
             return Either.left(bodyRes.getLeft());
@@ -101,7 +99,6 @@ public class Parser {
             return Either.left(new Error(s, "missing policy prefix"));
         }
 
-        List<Rule> queries = new ArrayList<>();
         Either<Error, Tuple2<String, List<Rule>>> bodyRes = check_body(s);
         if (bodyRes.isLeft()) {
             return Either.left(bodyRes.getLeft());
@@ -128,7 +125,6 @@ public class Parser {
         s = body._1;
         queries.add(new Rule(new Predicate("query", new ArrayList<>()), body._2, body._3));
 
-        int i = 0;
         while(true) {
             if(s.length() == 0) {
                 break;
@@ -156,7 +152,7 @@ public class Parser {
     }
 
     public static Either<Error, Tuple3<String, List<Predicate>, List<Expression>>> rule_body(String s) {
-        List<Predicate> predicates = new ArrayList<Predicate>();
+        List<Predicate> predicates = new ArrayList<>();
         List<Expression> expressions = new ArrayList<>();
 
         while(true) {
@@ -193,7 +189,7 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<String, Predicate>> predicate(String s) {
-        Tuple2<String, String> tn = take_while(s, (c) -> Character.isAlphabetic(c) || c == '_');
+        Tuple2<String, String> tn = take_while(s, c -> Character.isAlphabetic(c) || c == '_');
         String name = tn._1;
         s = tn._2;
 
@@ -203,7 +199,7 @@ public class Parser {
         }
         s = s.substring(1);
 
-        List<Term> terms = new ArrayList<Term>();
+        List<Term> terms = new ArrayList<>();
         while(true) {
 
             s = space(s);
@@ -236,7 +232,7 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<String, Predicate>> fact_predicate(String s) {
-        Tuple2<String, String> tn = take_while(s, (c) -> Character.isAlphabetic(c) || c == '_');
+        Tuple2<String, String> tn = take_while(s, c -> Character.isAlphabetic(c) || c == '_');
         String name = tn._1;
         s = tn._2;
 
@@ -246,7 +242,7 @@ public class Parser {
         }
         s = s.substring(1);
 
-        List<Term> terms = new ArrayList<Term>();
+        List<Term> terms = new ArrayList<>();
         while(true) {
 
             s = space(s);
@@ -279,7 +275,7 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<String, String>> name(String s) {
-        Tuple2<String, String> t = take_while(s, (c) -> Character.isAlphabetic(c) || c == '_');
+        Tuple2<String, String> t = take_while(s, c -> Character.isAlphabetic(c) || c == '_');
         String name = t._1;
         String remaining = t._2;
 
@@ -383,7 +379,7 @@ public class Parser {
         }
 
         Tuple2<String, String> t = take_while(s.substring(1),
-                (c) -> Character.isAlphabetic(c) || Character.isDigit(c) || c == '_');
+                c -> Character.isAlphabetic(c) || Character.isDigit(c) || c == '_');
         String name = t._1;
         String remaining = t._2;
 
@@ -451,7 +447,7 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<String, Term.Date>> date(String s) {
-        Tuple2<String, String> t = take_while(s, (c) -> c != ' ' && c != ',' && c != ')');
+        Tuple2<String, String> t = take_while(s, c -> c != ' ' && c != ',' && c != ')');
 
         try {
             OffsetDateTime d = OffsetDateTime.parse(t._1);
@@ -468,7 +464,7 @@ public class Parser {
             return Either.left(new Error(s, "not a variable"));
         }
 
-        Tuple2<String, String> t = take_while(s.substring(1), (c) -> Character.isAlphabetic(c)|| Character.isDigit(c) || c == '_');
+        Tuple2<String, String> t = take_while(s.substring(1), c -> Character.isAlphabetic(c)|| Character.isDigit(c) || c == '_');
 
         return Either.right(new Tuple2<String, Term.Variable>(t._2, (Term.Variable) var(t._1)));
     }
@@ -495,7 +491,7 @@ public class Parser {
 
         s = s.substring(1);
 
-        HashSet<Term> terms = new HashSet<Term>();
+        HashSet<Term> terms = new HashSet<>();
         while(true) {
 
             s = space(s);

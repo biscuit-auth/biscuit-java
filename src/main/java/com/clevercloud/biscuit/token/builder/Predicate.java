@@ -26,7 +26,7 @@ public class Predicate {
 
     public com.clevercloud.biscuit.datalog.Predicate convert(SymbolTable symbols) {
         long name = symbols.insert(this.name);
-        ArrayList<ID> ids = new ArrayList<ID>();
+        ArrayList<ID> ids = new ArrayList<>();
 
         for(Term a: this.ids) {
             ids.add(a.convert(symbols));
@@ -47,7 +47,7 @@ public class Predicate {
 
     @Override
     public String toString() {
-        final List<String> i = ids.stream().map((id) -> id.toString()).collect(Collectors.toList());
+        final List<String> i = ids.stream().map(id -> id.toString()).collect(Collectors.toList());
         return ""+name+"("+String.join(", ", i)+")";
     }
 

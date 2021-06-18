@@ -302,8 +302,8 @@ public class BiscuitTest extends TestCase {
         System.out.println(deser2.print());
 
         System.out.println("trying to attenuate to a sealed token");
-        Block builder2 = deser2.create_block();
-        Error e2 = deser2.attenuate(rng, keypair2, builder.build()).getLeft();
+        
+        deser2.attenuate(rng, keypair2, builder.build()).getLeft();
 
         Verifier v = deser2.verify_sealed().get();
         System.out.println(v.print_world());
@@ -479,7 +479,6 @@ public class BiscuitTest extends TestCase {
 
         res = v1.verify();
 
-        Error e = res.getLeft();
         Assert.assertTrue(res.isLeft());
     }
 }

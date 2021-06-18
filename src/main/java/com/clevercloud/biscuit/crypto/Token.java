@@ -27,10 +27,10 @@ class Token {
     }
 
     public Token append(final SecureRandom rng, KeyPair keypair, byte[] message) {
-        TokenSignature signature = this.signature.sign(rng, keypair, message);
+        TokenSignature tokenSignature = this.signature.sign(rng, keypair, message);
 
 
-        Token token = new Token(this.blocks, this.keys, signature);
+        Token token = new Token(this.blocks, this.keys, tokenSignature);
         token.blocks.add(message);
         token.keys.add(keypair.public_key);
 

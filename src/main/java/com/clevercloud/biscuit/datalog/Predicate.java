@@ -86,7 +86,7 @@ public final class Predicate implements Serializable {
       return builder.build();
    }
 
-   static public Either<Error.FormatError, Predicate> deserializeV0(Schema.PredicateV0 predicate) {
+   public static Either<Error.FormatError, Predicate> deserializeV0(Schema.PredicateV0 predicate) {
       ArrayList<ID> ids = new ArrayList<>();
       for (Schema.IDV0 id: predicate.getIdsList()) {
          Either<Error.FormatError, ID> res = ID.deserialize_enumV0(id);
@@ -101,7 +101,7 @@ public final class Predicate implements Serializable {
       return Right(new Predicate(predicate.getName(), ids));
    }
 
-   static public Either<Error.FormatError, Predicate> deserializeV1(Schema.PredicateV1 predicate) {
+   public static Either<Error.FormatError, Predicate> deserializeV1(Schema.PredicateV1 predicate) {
       ArrayList<ID> ids = new ArrayList<>();
       for (Schema.IDV1 id: predicate.getIdsList()) {
          Either<Error.FormatError, ID> res = ID.deserialize_enumV1(id);

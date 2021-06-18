@@ -19,7 +19,7 @@ public abstract class Op {
 
     public abstract Schema.Op serialize();
 
-    static public Either<Error.FormatError, Op> deserializeV1(Schema.Op op) {
+    public static Either<Error.FormatError, Op> deserializeV1(Schema.Op op) {
         if (op.hasValue()) {
             return ID.deserialize_enumV1(op.getValue()).map(v -> new Op.Value(v));
         } else if (op.hasUnary()) {
@@ -31,7 +31,7 @@ public abstract class Op {
         }
     }
 
-    public final static class Value extends Op {
+    public static final class Value extends Op {
         private final ID value;
 
         public Value(ID value) {
@@ -103,7 +103,7 @@ public abstract class Op {
         Length,
     }
 
-    public final static class Unary extends Op {
+    public static final class Unary extends Op {
         private final UnaryOp op;
 
         public Unary(UnaryOp op) {
@@ -183,7 +183,7 @@ public abstract class Op {
             return b.build();
         }
 
-        static public Either<Error.FormatError, Op> deserializeV1(Schema.OpUnary op) {
+        public static Either<Error.FormatError, Op> deserializeV1(Schema.OpUnary op) {
             switch (op.getKind()) {
                 case Negate:
                     return Right(new Op.Unary(UnaryOp.Negate));
@@ -237,7 +237,7 @@ public abstract class Op {
         Union,
     }
 
-    public final static class Binary extends Op {
+    public static final class Binary extends Op {
         private final BinaryOp op;
 
         public Binary(BinaryOp value) {
@@ -402,7 +402,7 @@ public abstract class Op {
                     break;
                 case Intersection:
                     if (right instanceof ID.Set && left instanceof ID.Set) {
-                        HashSet<ID> intersec = new HashSet<ID>();
+                        HashSet<ID> intersec = new HashSet<>();
                         HashSet<ID> _right = ((ID.Set) right).value();
                         HashSet<ID> _left = ((ID.Set) left).value();
                         for (ID _id : _right) {
@@ -575,7 +575,7 @@ public abstract class Op {
             return b.build();
         }
 
-        static public Either<Error.FormatError, Op> deserializeV1(Schema.OpBinary op) {
+        public static Either<Error.FormatError, Op> deserializeV1(Schema.OpBinary op) {
             switch (op.getKind()) {
                 case LessThan:
                     return Right(new Op.Binary(BinaryOp.LessThan));

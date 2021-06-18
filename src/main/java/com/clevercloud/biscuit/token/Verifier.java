@@ -73,7 +73,7 @@ public class Verifier {
      * @param root
      * @return
      */
-    static public Either<Error, Verifier> make(Biscuit token, Option<PublicKey> root) {
+    public static Either<Error, Verifier> make(Biscuit token, Option<PublicKey> root) {
         if(!token.is_sealed()) {
             Either<Error, Void> res = token.check_root_key(root.get());
             if (res.isLeft()) {
@@ -136,7 +136,7 @@ public class Verifier {
         for(int i = 0; i < token.blocks.size(); i++) {
             Block b = token.blocks.get(i);
             if (b.index != i + 1) {
-                return Left(new Error.InvalidBlockIndex(1 + token.blocks.size(), token.blocks.get(i).index));
+                return Left(new Error.InvalidBlockIndex(1L + token.blocks.size(), token.blocks.get(i).index));
             }
 
             for (com.clevercloud.biscuit.datalog.Fact fact : b.facts) {
@@ -356,7 +356,7 @@ public class Verifier {
         }
 
         Set<com.clevercloud.biscuit.datalog.Fact> facts = world.query_rule(query.convert(symbols));
-        Set<Fact> s = new HashSet();
+        Set<Fact> s = new HashSet<>();
 
         for(com.clevercloud.biscuit.datalog.Fact f: facts) {
             s.add(Fact.convert_from(f, symbols));
@@ -455,8 +455,7 @@ public class Verifier {
         if(errors.isEmpty()) {
             for (int i = 0; i < this.policies.size(); i++) {
                 com.clevercloud.biscuit.datalog.Check c = this.policies.get(i).convert(symbols);
-                boolean successful = false;
-
+                
                 for(int k = 0; k < c.queries().size(); k++) {
                     boolean res = world.test_rule(c.queries().get(k));
 
@@ -481,9 +480,9 @@ public class Verifier {
     }
 
     public String print_world() {
-        final List<String> facts = this.world.facts().stream().map((f) -> this.symbols.print_fact(f)).collect(Collectors.toList());
-        final List<String> rules = this.world.rules().stream().map((r) -> this.symbols.print_rule(r)).collect(Collectors.toList());
-        final List<String> privileged_rules = this.world.privileged_rules().stream().map((r) -> this.symbols.print_rule(r)).collect(Collectors.toList());
+        final List<String> facts = this.world.facts().stream().map(f -> this.symbols.print_fact(f)).collect(Collectors.toList());
+        final List<String> rules = this.world.rules().stream().map(r -> this.symbols.print_rule(r)).collect(Collectors.toList());
+        final List<String> privileged_rules = this.world.privileged_rules().stream().map(r -> this.symbols.print_rule(r)).collect(Collectors.toList());
 
 
         List<String> checks = new ArrayList<>();
