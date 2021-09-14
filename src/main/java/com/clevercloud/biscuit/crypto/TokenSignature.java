@@ -1,7 +1,6 @@
 package com.clevercloud.biscuit.crypto;
 
 import biscuit.format.schema.Schema;
-import cafe.cryptography.curve25519.*;
 import com.clevercloud.biscuit.error.Error;
 import com.google.protobuf.ByteString;
 import io.vavr.control.Either;
@@ -18,15 +17,11 @@ import static io.vavr.API.Right;
  * Signature aggregation
  */
 public class TokenSignature {
+    /*
     final ArrayList<RistrettoElement> parameters;
     final Scalar z;
 
-    /**
-     * Generates a new valid signature for a message and a private key
-     * @param rng
-     * @param keypair
-     * @param message
-     */
+
     public TokenSignature(final SecureRandom rng, KeyPair keypair, byte[] message) {
         byte[] b = new byte[64];
         rng.nextBytes(b);
@@ -49,13 +44,7 @@ public class TokenSignature {
         this.z = z;
     }
 
-    /**
-     * Generates a new valid signature from an existing one, a private key and a message
-     * @param rng
-     * @param keypair
-     * @param message
-     * @return
-     */
+
     public TokenSignature sign(final SecureRandom rng, KeyPair keypair, byte[] message) {
         byte[] b = new byte[64];
         rng.nextBytes(b);
@@ -75,12 +64,7 @@ public class TokenSignature {
         return sig;
     }
 
-    /**
-     * checks that a signature is valid for a set of public keys and messages
-     * @param public_keys
-     * @param messages
-     * @return
-     */
+
     public Either<Error, Void> verify(List<RistrettoElement> public_keys, List<byte[]> messages) {
         if (!(public_keys.size() == messages.size() && public_keys.size() == this.parameters.size())) {
             System.out.println(("lists are not the same size"));
@@ -133,10 +117,6 @@ public class TokenSignature {
         }
     }
 
-    /**
-     * Serializes a signature to its Protobuf representation
-     * @return
-     */
     public Schema.Signature serialize() {
         Schema.Signature.Builder sig = Schema.Signature.newBuilder()
                 .setZ(ByteString.copyFrom(this.z.toByteArray()));
@@ -150,11 +130,7 @@ public class TokenSignature {
         return sig.build();
     }
 
-    /**
-     * Deserializes a signature from its Protobuf representation
-     * @param sig
-     * @return
-     */
+
     static public  Either<Error, TokenSignature> deserialize(Schema.Signature sig) {
         try {
             ArrayList<RistrettoElement> parameters = new ArrayList<>();
@@ -204,7 +180,7 @@ public class TokenSignature {
             e.printStackTrace();
         }
         return null;
-    }
+    }*/
 
     static public String hex(byte[] byteArray) {
         StringBuilder result = new StringBuilder();

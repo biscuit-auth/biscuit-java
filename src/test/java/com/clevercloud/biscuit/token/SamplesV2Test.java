@@ -1,7 +1,5 @@
 package com.clevercloud.biscuit.token;
 
-import cafe.cryptography.curve25519.CompressedRistretto;
-import cafe.cryptography.curve25519.InvalidEncodingException;
 import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.datalog.RunLimits;
 import com.clevercloud.biscuit.error.Error;
@@ -17,41 +15,47 @@ import junit.framework.TestSuite;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.time.Duration;
 
 import static com.clevercloud.biscuit.crypto.TokenSignature.fromHex;
 import static com.clevercloud.biscuit.crypto.TokenSignature.hex;
 import static com.clevercloud.biscuit.token.builder.Utils.*;
 import static io.vavr.API.Right;
 
-public class SamplesV1Test extends TestCase {
 
-    public SamplesV1Test(String testName) {
+public class SamplesV2Test extends TestCase {
+
+    public SamplesV2Test(String testName) {
         super(testName);
     }
 
     public static Test suite() {
-        return new TestSuite(SamplesV1Test.class);
+        return new TestSuite(SamplesV2Test.class);
     }
 
-    static byte[] rootData = fromHex("529e780f28d9181c968b0eab9977ed8494a27a4544c3adc1910f41bb3dc36958");
+    static byte[] rootData = fromHex("acdd6d5b53bfee478bf689f8e012fe7988bf755e3d7c5152947abc149bc20189");
 
-    public void test1_Basic() throws IOException, InvalidEncodingException {
-        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+
+    public void test1_Basic() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        PublicKey root = new PublicKey(rootData);
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test1_basic.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test1_basic.bc");
 
         System.out.println("a");
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data).get();
+        Either<Error, Biscuit> deser_res = Biscuit.from_bytes(data, root);
+        Biscuit token = deser_res.get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verify(root).get();
+        Verifier v1 = token.verifier().get();
         v1.add_resource("file1");
         v1.add_operation("read");
         v1.allow();
@@ -71,135 +75,132 @@ public class SamplesV1Test extends TestCase {
         }
     }
 
-    public void test2_DifferentRootKey() throws IOException, InvalidEncodingException {
-        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+    public void test2_DifferentRootKey() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        PublicKey root = new PublicKey(rootData);
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test2_different_root_key.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test2_different_root_key.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data).get();
-        Error e = token.check_root_key(root).getLeft();
-        System.out.println("got error: " + e);
-        Assert.assertEquals(new Error.FormatError.UnknownPublicKey(), e);
-    }
-
-    public void test3_InvalidSignatureFormat() throws IOException, InvalidEncodingException {
-        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
-
-        InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test3_invalid_signature_format.bc");
-
-        byte[] data = new byte[inputStream.available()];
-        inputStream.read(data);
-
-        Error e = Biscuit.from_bytes(data).getLeft();
-        System.out.println("got error: " + e);
-        Assert.assertEquals(new Error.FormatError.DeserializationError("java.lang.IllegalArgumentException: Input must by 32 bytes"), e);
-    }
-
-    public void test4_random_block() throws IOException, InvalidEncodingException {
-        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
-
-        InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test4_random_block.bc");
-
-        byte[] data = new byte[inputStream.available()];
-        inputStream.read(data);
-
-        Error e = Biscuit.from_bytes(data).getLeft();
+        Either<Error, Biscuit> token = Biscuit.from_bytes(data, root);
+        Error e = token.getLeft();
         System.out.println("got error: " + e);
         Assert.assertEquals(new Error.FormatError.Signature.InvalidSignature(), e);
     }
 
-    public void test5_InvalidSignature() throws IOException, InvalidEncodingException {
-        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+    public void test3_InvalidSignatureFormat() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        PublicKey root = new PublicKey(rootData);
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test5_invalid_signature.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test3_invalid_signature_format.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Error e = Biscuit.from_bytes(data).getLeft();
-        System.out.println("got error: " + e);
-        Assert.assertEquals(new Error.FormatError.Signature.InvalidSignature(), e);
-    }
-
-    public void test6_reordered_blocks() throws IOException, InvalidEncodingException {
-        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
-
-        InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test6_reordered_blocks.bc");
-
-        byte[] data = new byte[inputStream.available()];
-        inputStream.read(data);
-
-        Biscuit token = Biscuit.from_bytes(data).get();
-
-        Either<Error, Verifier> res = token.verify(root);
-        System.out.println(token.print());
-        System.out.println(res);
-        if (res.isLeft()) {
-            System.out.println("error: " + res.getLeft());
+        try {
+            Error e = Biscuit.from_bytes(data, root).getLeft();
+            fail();
+        } catch(SignatureException e) {
+            System.out.println("got error: " + e);
         }
-        Assert.assertEquals(new Error.InvalidBlockIndex(3, 2), res.getLeft());
-
     }
 
-    public void test7_invalid_block_fact_authority() throws IOException, InvalidEncodingException {
-        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+    public void test4_random_block() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        PublicKey root = new PublicKey(rootData);
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test7_invalid_block_fact_authority.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test4_random_block.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data).get();
+        Error e = Biscuit.from_bytes(data, root).getLeft();
+        System.out.println("got error: " + e);
+        Assert.assertEquals(new Error.FormatError.Signature.InvalidSignature(), e);
+    }
+
+    public void test5_InvalidSignature() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        PublicKey root = new PublicKey(rootData);
+
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test5_invalid_signature.bc");
+
+        byte[] data = new byte[inputStream.available()];
+        inputStream.read(data);
+
+        Error e = Biscuit.from_bytes(data, root).getLeft();
+        System.out.println("got error: " + e);
+        Assert.assertEquals(new Error.FormatError.Signature.InvalidSignature(), e);
+    }
+
+    public void test6_reordered_blocks() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        PublicKey root = new PublicKey(rootData);
+
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test6_reordered_blocks.bc");
+
+        byte[] data = new byte[inputStream.available()];
+        inputStream.read(data);
+
+        Either<Error, Biscuit> deser =  Biscuit.from_bytes(data, root);
+        Error e = deser.getLeft();
+        assertEquals(e, new Error.FormatError.Signature.InvalidSignature());
+
+    }
+
+    public void test7_invalid_block_fact_authority() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        PublicKey root = new PublicKey(rootData);
+
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test7_invalid_block_fact_authority.bc");
+
+        byte[] data = new byte[inputStream.available()];
+        inputStream.read(data);
+
+        Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Either<Error, Verifier> res = token.verify(root);
+        Either<Error, Verifier> res = token.verifier();
         if (res.isLeft()) {
             System.out.println("error: " + res.getLeft());
         }
         Assert.assertEquals(new Error.FailedLogic(new LogicError.InvalidBlockFact(0, "right(#authority, \"file1\", #write)")), res.getLeft());
     }
 
-    public void test8_invalid_block_fact_ambient() throws IOException, InvalidEncodingException {
-        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+    public void test8_invalid_block_fact_ambient() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        PublicKey root = new PublicKey(rootData);
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test8_invalid_block_fact_ambient.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test8_invalid_block_fact_ambient.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data).get();
+        Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Either<Error, Verifier> res = token.verify(root);
+        Either<Error, Verifier> res = token.verifier();
         if (res.isLeft()) {
             System.out.println("error: " + res.getLeft());
         }
         Assert.assertEquals(new Error.FailedLogic(new LogicError.InvalidBlockFact(0, "right(#ambient, \"file1\", #write)")), res.getLeft());
     }
 
-    public void test9_ExpiredToken() throws IOException, InvalidEncodingException {
-        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+    public void test9_ExpiredToken() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        PublicKey root = new PublicKey(rootData);
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test9_expired_token.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test9_expired_token.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data).get();
+        Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verify(root).get();
+        Verifier v1 = token.verifier().get();
         v1.add_resource("file1");
         v1.add_operation("read");
         v1.set_time();
@@ -213,19 +214,19 @@ public class SamplesV1Test extends TestCase {
                 e);
     }
 
-    public void test10_AuthorityRules() throws IOException, InvalidEncodingException {
-        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+    public void test10_AuthorityRules() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        PublicKey root = new PublicKey(rootData);
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test10_authority_rules.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test10_authority_rules.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data).get();
+        Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verify(root).get();
+        Verifier v1 = token.verifier().get();
         v1.add_resource("file1");
         v1.add_operation("read");
         v1.add_fact(fact("owner", Arrays.asList(s("ambient"), s("alice"), string("file1"))));
@@ -235,19 +236,19 @@ public class SamplesV1Test extends TestCase {
         Assert.assertTrue(res.isRight());
     }
 
-    public void test11_VerifierAuthorityCaveats() throws IOException, InvalidEncodingException {
-        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+    public void test11_VerifierAuthorityCaveats() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        PublicKey root = new PublicKey(rootData);
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test11_verifier_authority_caveats.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test11_verifier_authority_caveats.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data).get();
+        Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verify(root).get();
+        Verifier v1 = token.verifier().get();
         v1.add_resource("file2");
         v1.add_operation("read");
         v1.add_check(check(rule(
@@ -270,25 +271,25 @@ public class SamplesV1Test extends TestCase {
                 e);
     }
 
-    public void test12_VerifierAuthorityCaveats() throws IOException, InvalidEncodingException {
-        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+    public void test12_VerifierAuthorityCaveats() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        PublicKey root = new PublicKey(rootData);
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test12_authority_caveats.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test12_authority_caveats.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data).get();
+        Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verify(root).get();
+        Verifier v1 = token.verifier().get();
         v1.add_resource("file1");
         v1.add_operation("read");
         v1.allow();
         Assert.assertTrue(v1.verify(new RunLimits(500, 100, Duration.ofMillis(500))).isRight());
 
-        Verifier v2 = token.verify(root).get();
+        Verifier v2 = token.verifier().get();
         v2.add_resource("file2");
         v2.add_operation("read");
         v2.allow();
@@ -303,25 +304,25 @@ public class SamplesV1Test extends TestCase {
                 e);
     }
 
-    public void test13_BlockRules() throws IOException, InvalidEncodingException {
-        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+    public void test13_BlockRules() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        PublicKey root = new PublicKey(rootData);
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test13_block_rules.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test13_block_rules.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data).get();
+        Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verify(root).get();
+        Verifier v1 = token.verifier().get();
         v1.add_resource("file1");
         v1.set_time();
         v1.allow();
         Assert.assertTrue(v1.verify(new RunLimits(500, 100, Duration.ofMillis(500))).isRight());
 
-        Verifier v2 = token.verify(root).get();
+        Verifier v2 = token.verifier().get();
         v2.add_resource("file2");
         v2.set_time();
         v2.allow();
@@ -336,19 +337,19 @@ public class SamplesV1Test extends TestCase {
                 e);
     }
 
-    public void test14_RegexConstraint() throws IOException, InvalidEncodingException {
-        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+    public void test14_RegexConstraint() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        PublicKey root = new PublicKey(rootData);
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test14_regex_constraint.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test14_regex_constraint.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data).get();
+        Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verify(root).get();
+        Verifier v1 = token.verifier().get();
         v1.add_resource("file1");
         v1.set_time();
         v1.allow();
@@ -362,7 +363,7 @@ public class SamplesV1Test extends TestCase {
                 ))),
                 e);
 
-        Verifier v2 = token.verify(root).get();
+        Verifier v2 = token.verifier().get();
         v2.add_resource("file123.txt");
         v2.set_time();
         v2.allow();
@@ -370,19 +371,19 @@ public class SamplesV1Test extends TestCase {
 
     }
 
-    public void test15_MultiQueriesCaveats() throws IOException, InvalidEncodingException {
-        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+    public void test15_MultiQueriesCaveats() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        PublicKey root = new PublicKey(rootData);
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test15_multi_queries_caveats.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test15_multi_queries_caveats.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data).get();
+        Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verify(root).get();
+        Verifier v1 = token.verifier().get();
         ArrayList<Rule> queries = new ArrayList<>();
         queries.add(rule(
                 "test_must_be_present_authority",
@@ -404,19 +405,19 @@ public class SamplesV1Test extends TestCase {
         Assert.assertTrue(v1.verify(new RunLimits(500, 100, Duration.ofMillis(500))).isRight());
     }
 
-    public void test16_CaveatHeadName() throws IOException, InvalidEncodingException {
-        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+    public void test16_CaveatHeadName() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        PublicKey root = new PublicKey(rootData);
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test16_caveat_head_name.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test16_caveat_head_name.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data).get();
+        Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verify(root).get();
+        Verifier v1 = token.verifier().get();
         v1.allow();
 
         Either<Error, Long> res = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
@@ -429,37 +430,37 @@ public class SamplesV1Test extends TestCase {
                 e);
     }
 
-    public void test17_Expressions() throws IOException, InvalidEncodingException {
-        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+    public void test17_Expressions() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        PublicKey root = new PublicKey(rootData);
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test17_expressions.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test17_expressions.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data).get();
+        Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verify(root).get();
+        Verifier v1 = token.verifier().get();
         v1.allow();
 
         Assert.assertEquals(Right(Long.valueOf(0)), v1.verify(new RunLimits(500, 100, Duration.ofMillis(500))));
     }
 
-    public void test18_Unbound_Variables() throws IOException, InvalidEncodingException {
-        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+    public void test18_Unbound_Variables() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        PublicKey root = new PublicKey(rootData);
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test18_unbound_variables_in_rule.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test18_unbound_variables_in_rule.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data).get();
+        Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verify(root).get();
+        Verifier v1 = token.verifier().get();
         v1.add_operation("write");
         v1.allow();
         Either<Error, Long> result = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
@@ -467,19 +468,19 @@ public class SamplesV1Test extends TestCase {
         Assert.assertTrue(result.isLeft());
     }
 
-    public void test19_generating_ambient_from_variables() throws IOException, InvalidEncodingException {
-        PublicKey root = new PublicKey((new CompressedRistretto(rootData)).decompress());
+    public void test19_generating_ambient_from_variables() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        PublicKey root = new PublicKey(rootData);
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v1/test19_generating_ambient_from_variables.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test19_generating_ambient_from_variables.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data).get();
+        Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verify(root).get();
+        Verifier v1 = token.verifier().get();
         v1.add_operation("write");
         v1.allow();
         Either<Error, Long> result = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));

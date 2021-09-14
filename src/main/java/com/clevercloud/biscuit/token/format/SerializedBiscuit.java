@@ -1,25 +1,23 @@
 package com.clevercloud.biscuit.token.format;
 
 import biscuit.format.schema.Schema;
-import cafe.cryptography.curve25519.CompressedRistretto;
-import cafe.cryptography.curve25519.InvalidEncodingException;
-import cafe.cryptography.curve25519.RistrettoElement;
 import com.clevercloud.biscuit.crypto.KeyPair;
 import com.clevercloud.biscuit.crypto.PublicKey;
-import com.clevercloud.biscuit.crypto.TokenSignature;
 import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.token.Block;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.vavr.control.Either;
+import io.vavr.control.Option;
+import net.i2p.crypto.eddsa.EdDSAEngine;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.SecureRandom;
+import java.security.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.clevercloud.biscuit.crypto.KeyPair.ed25519;
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
@@ -27,10 +25,9 @@ import static io.vavr.API.Right;
  * Intermediate representation of a token before full serialization
  */
 public class SerializedBiscuit {
-    public byte[] authority;
-    public List<byte[]> blocks;
-    public List<RistrettoElement> keys;
-    public TokenSignature signature;
+    public SignedBlock authority;
+    public List<SignedBlock> blocks;
+    public Proof proof;
 
     public static int MAX_SCHEMA_VERSION = 1;
 
@@ -39,66 +36,147 @@ public class SerializedBiscuit {
      * @param slice
      * @return
      */
-    static public Either<Error, SerializedBiscuit> from_bytes(byte[] slice) {
+    static public Either<Error, SerializedBiscuit> from_bytes(byte[] slice, PublicKey root) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         try {
+            //System.out.println("will parse protobuf");
             Schema.Biscuit data = Schema.Biscuit.parseFrom(slice);
+            //System.out.println("parse protobuf");
 
-            ArrayList<RistrettoElement> keys = new ArrayList<>();
-            for (ByteString key: data.getKeysList()) {
-                keys.add((new CompressedRistretto(key.toByteArray())).decompress());
+            SignedBlock authority = new SignedBlock(
+                    data.getAuthority().getBlock().toByteArray(),
+                    new PublicKey(data.getAuthority().getNextKey().toByteArray()),
+                    data.getAuthority().getSignature().toByteArray()
+            );
+
+            ArrayList<SignedBlock> blocks = new ArrayList<>();
+            for(Schema.SignedBlock block: data.getBlocksList()) {
+                blocks.add(new SignedBlock(
+                        block.getBlock().toByteArray(),
+                        new PublicKey(block.getNextKey().toByteArray()),
+                        block.getSignature().toByteArray()
+                ));
             }
 
-            byte[] authority = data.getAuthority().toByteArray();
+            //System.out.println("parsed blocks");
 
-            ArrayList<byte[]> blocks = new ArrayList<>();
-            for (ByteString block: data.getBlocksList()) {
-                blocks.add(block.toByteArray());
+            Option<KeyPair> secretKey = Option.none();
+            if (data.getProof().hasNextSecret()) {
+                secretKey = Option.some(new KeyPair(data.getProof().getNextSecret().toByteArray()));
             }
 
-            Either<Error, TokenSignature> signatureRes = TokenSignature.deserialize(data.getSignature());
-
-            if(signatureRes.isLeft()) {
-                Error e = signatureRes.getLeft();
-                return Left(e);
+            Option<byte[]> signature = Option.none();
+            if (data.getProof().hasFinalSignature()) {
+                signature = Option.some(data.getProof().getFinalSignature().toByteArray());
             }
 
-            TokenSignature signature = signatureRes.get();
+            if(secretKey.isEmpty() && signature.isEmpty()) {
+                return Left(new Error.FormatError.DeserializationError("empty proof"));
+            }
+            Proof proof = new Proof(secretKey, signature);
 
-            SerializedBiscuit b = new SerializedBiscuit(authority, blocks, keys, signature);
+            //System.out.println("parse proof");
 
-            Either<Error, Void> res = b.verify();
+            SerializedBiscuit b = new SerializedBiscuit(authority, blocks, proof);
+
+            Either<Error, Void> res = b.verify(root);
             if(res.isLeft()) {
                 Error e = res.getLeft();
+                //System.out.println("verification error: "+e.toString());
                 return Left(e);
             } else {
                 return Right(b);
             }
         } catch(InvalidProtocolBufferException e) {
             return Left(new Error.FormatError.DeserializationError(e.toString()));
-        } catch(InvalidEncodingException e) {
+        }
+    }
+
+    /**
+     * Warning: this deserializes without verifying the signature
+     * @param slice
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws SignatureException
+     * @throws InvalidKeyException
+     */
+    static public Either<Error, SerializedBiscuit> unsafe_deserialize(byte[] slice) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        try {
+            Schema.Biscuit data = Schema.Biscuit.parseFrom(slice);
+
+            SignedBlock authority = new SignedBlock(
+                    data.getAuthority().getBlock().toByteArray(),
+                    new PublicKey(data.getAuthority().getNextKey().toByteArray()),
+                    data.getAuthority().getSignature().toByteArray()
+            );
+
+            ArrayList<SignedBlock> blocks = new ArrayList<>();
+            for(Schema.SignedBlock block: data.getBlocksList()) {
+                blocks.add(new SignedBlock(
+                        block.getBlock().toByteArray(),
+                        new PublicKey(block.getNextKey().toByteArray()),
+                        block.getSignature().toByteArray()
+                ));
+            }
+
+            Option<KeyPair> secretKey = Option.none();
+            if (data.getProof().hasNextSecret()) {
+                secretKey = Option.some(new KeyPair(data.getProof().getNextSecret().toByteArray()));
+            }
+
+            Option<byte[]> signature = Option.none();
+            if (data.getProof().hasFinalSignature()) {
+                signature = Option.some(data.getProof().getFinalSignature().toByteArray());
+            }
+
+            if(secretKey.isEmpty() && signature.isEmpty()) {
+                return Left(new Error.FormatError.DeserializationError("empty proof"));
+            }
+            Proof proof = new Proof(secretKey, signature);
+
+            SerializedBiscuit b = new SerializedBiscuit(authority, blocks, proof);
+            return Right(b);
+        } catch(InvalidProtocolBufferException e) {
             return Left(new Error.FormatError.DeserializationError(e.toString()));
         }
     }
+
 
     /**
      * Serializes a SerializedBiscuit to a byte array
      * @return
      */
     public Either<Error, byte[]> serialize() {
-        Schema.Biscuit.Builder b = Schema.Biscuit.newBuilder()
-                .setSignature(this.signature.serialize());
-
-        for (int i = 0; i < this.keys.size(); i++) {
-            b.addKeys(ByteString.copyFrom(this.keys.get(i).compress().toByteArray()));
+        Schema.Biscuit.Builder biscuitBuilder = Schema.Biscuit.newBuilder();
+        Schema.SignedBlock.Builder authorityBuilder = Schema.SignedBlock.newBuilder();
+        {
+            SignedBlock block = this.authority;
+            authorityBuilder.setBlock(ByteString.copyFrom(block.block));
+            authorityBuilder.setNextKey(ByteString.copyFrom(block.key.toBytes()));
+            authorityBuilder.setSignature(ByteString.copyFrom(block.signature));
         }
 
-        b.setAuthority(ByteString.copyFrom(this.authority));
+        biscuitBuilder.setAuthority(authorityBuilder.build());
 
-        for (int i = 0; i < this.blocks.size(); i++) {
-            b.addBlocks(ByteString.copyFrom(this.blocks.get(i)));
+        for(SignedBlock block: this.blocks) {
+             Schema.SignedBlock.Builder blockBuilder = Schema.SignedBlock.newBuilder();
+            blockBuilder.setBlock(ByteString.copyFrom(block.block));
+            blockBuilder.setNextKey(ByteString.copyFrom(block.key.toBytes()));
+            blockBuilder.setSignature(ByteString.copyFrom(block.signature));
+
+            biscuitBuilder.addBlocks(blockBuilder.build());
         }
 
-        Schema.Biscuit biscuit = b.build();
+        Schema.Proof.Builder proofBuilder = Schema.Proof.newBuilder();
+        if(!this.proof.secretKey.isEmpty()) {
+            proofBuilder.setNextSecret(ByteString.copyFrom(this.proof.secretKey.get().toBytes()));
+        } else {
+            proofBuilder.setFinalSignature(ByteString.copyFrom(this.proof.signature.get()));
+        }
+
+        biscuitBuilder.setProof(proofBuilder.build());
+
+        //FIXME: set the root key id
+        Schema.Biscuit biscuit = biscuitBuilder.build();
 
         try {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -111,110 +189,195 @@ public class SerializedBiscuit {
 
     }
 
-    static public Either<Error.FormatError, SerializedBiscuit> make(final SecureRandom rng, final KeyPair root,
-                                                             final Block authority) {
+    static public Either<Error.FormatError, SerializedBiscuit> make(final KeyPair root,
+                                                             final Block authority, final KeyPair next) {
         Schema.Block b = authority.serialize();
         try {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             b.writeTo(stream);
-            byte[] data = stream.toByteArray();
+            byte[] block = stream.toByteArray();
+            PublicKey next_key = next.public_key();
 
-            TokenSignature signature = new TokenSignature(rng, root, data);
-            ArrayList<RistrettoElement> keys = new ArrayList<>();
-            keys.add(root.public_key);
+            Signature sgr = new EdDSAEngine(MessageDigest.getInstance(ed25519.getHashAlgorithm()));
+            sgr.initSign(root.private_key);
+            sgr.update(block);
+            sgr.update(next_key.toBytes());
+            byte[] signature = sgr.sign();
 
-            return Right(new SerializedBiscuit(data, new ArrayList<>(), keys, signature));
-        } catch(IOException e) {
+            SignedBlock signedBlock = new SignedBlock(block, next_key, signature);
+            Proof proof = new Proof(next);
+
+            return Right(new SerializedBiscuit(signedBlock, new ArrayList<>(), proof));
+        } catch(IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
             return Left(new Error.FormatError.SerializationError(e.toString()));
         }
     }
 
-    public Either<Error.FormatError, SerializedBiscuit> append(final SecureRandom rng, final KeyPair keypair,
-                                                               final Block block) {
-        Schema.Block b = block.serialize();
+    public Either<Error.FormatError, SerializedBiscuit> append(final KeyPair next,
+                                                               final Block newBlock) {
+        if(this.proof.secretKey.isEmpty()) {
+            return Left(new Error.FormatError.SerializationError("the token is sealed"));
+        }
+
+        Schema.Block b = newBlock.serialize();
         try {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             b.writeTo(stream);
-            byte[] data = stream.toByteArray();
 
-            TokenSignature signature = this.signature.sign(rng, keypair, data);
+            byte[] block = stream.toByteArray();
+            PublicKey next_key = next.public_key();
 
-            ArrayList<RistrettoElement> keys = new ArrayList<>();
-            for(RistrettoElement key: this.keys) {
-                keys.add(key);
-            }
-            keys.add(keypair.public_key);
+            Signature sgr = new EdDSAEngine(MessageDigest.getInstance(ed25519.getHashAlgorithm()));
+            sgr.initSign(this.proof.secretKey.get().private_key);
+            sgr.update(block);
+            sgr.update(next_key.toBytes());
+            byte[] signature = sgr.sign();
 
-            ArrayList<byte[]> blocks = new ArrayList<>();
-            for(byte[] bl: this.blocks) {
+            SignedBlock signedBlock = new SignedBlock(block, next_key, signature);
+
+            ArrayList<SignedBlock> blocks = new ArrayList<>();
+            for(SignedBlock bl: this.blocks) {
                 blocks.add(bl);
             }
-            blocks.add(data);
+            blocks.add(signedBlock);
 
-            return Right(new SerializedBiscuit(this.authority, blocks, keys, signature));
-        } catch(IOException e) {
+            Proof proof = new Proof(next);
+
+            return Right(new SerializedBiscuit(this.authority, blocks, proof));
+        } catch(IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
             return Left(new Error.FormatError.SerializationError(e.toString()));
         }
     }
 
-    public Either<Error, Void> verify() {
-        if(this.keys.isEmpty()) {
-            return Left(new Error.FormatError.EmptyKeys());
+    public Either<Error, Void> verify(PublicKey root) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        PublicKey current_key = root;
+
+        {
+            byte[] block = this.authority.block;
+            PublicKey next_key = this.authority.key;
+            ;
+            byte[] signature = this.authority.signature;
+
+            //System.out.println("verifying block "+"authority"+" with current key "+current_key.toHex()+" block "+block+" next key "+next_key.toHex()+" signature "+signature);
+
+            Signature sgr = new EdDSAEngine(MessageDigest.getInstance(ed25519.getHashAlgorithm()));
+
+            sgr.initVerify(current_key.key);
+            sgr.update(block);
+            sgr.update(next_key.toBytes());
+            if (sgr.verify(signature)) {
+                current_key = next_key;
+            } else {
+                return Left(new Error.FormatError.Signature.InvalidSignature());
+            }
         }
 
-        ArrayList<byte[]> blocks = new ArrayList<>();
-        blocks.add(this.authority);
-        for(byte[] bl: this.blocks) {
-            blocks.add(bl);
+        for(SignedBlock b: this.blocks) {
+            byte[] block = b.block;
+            PublicKey next_key = b.key;
+            byte[] signature = b.signature;
+
+            //System.out.println("verifying block ? with current key "+current_key.toHex()+" block "+block+" next key "+next_key.toHex()+" signature "+signature);
+
+            Signature sgr = new EdDSAEngine(MessageDigest.getInstance(ed25519.getHashAlgorithm()));
+
+            sgr.initVerify(current_key.key);
+            sgr.update(block);
+            sgr.update(next_key.toBytes());
+            if (sgr.verify(signature)) {
+                current_key = next_key;
+            } else {
+                return Left(new Error.FormatError.Signature.InvalidSignature());
+            }
         }
 
-        return this.signature.verify(this.keys, blocks);
+        //System.out.println("signatures verified, checking proof");
+
+        if(!this.proof.secretKey.isEmpty()) {
+            //System.out.println("checking secret key");
+            //System.out.println("current key: "+current_key.toHex());
+            //System.out.println("key from proof: "+this.proof.secretKey.get().public_key().toHex());
+            if(this.proof.secretKey.get().public_key().equals(current_key)) {
+                //System.out.println("public keys are equal");
+
+                return Right(null);
+            } else {
+                //System.out.println("public keys are not equal");
+
+                return Left(new Error.FormatError.Signature.InvalidSignature());
+            }
+        } else {
+            //System.out.println("checking final signature");
+
+            byte[] finalSignature = this.proof.signature.get();
+
+            SignedBlock b;
+            if(this.blocks.isEmpty()) {
+                b = this.authority;
+            } else {
+                b = this.blocks.get(this.blocks.size() - 1);
+            }
+
+            byte[] block = b.block;
+            PublicKey next_key = b.key;
+            byte[] signature = b.signature;
+
+            Signature sgr = new EdDSAEngine(MessageDigest.getInstance(ed25519.getHashAlgorithm()));
+
+            sgr.initVerify(current_key.key);
+            sgr.update(block);
+            sgr.update(next_key.toBytes());
+            sgr.update(signature);
+
+            if (sgr.verify(finalSignature)) {
+                return Right(null);
+            } else {
+                return Left(new Error.FormatError.Signature.SealedSignature());
+            }
+
+        }
     }
 
-    public Either<Error, Void> check_root_key(PublicKey public_key) {
-        if(this.keys.isEmpty()) {
-            return Left(new Error.FormatError.EmptyKeys());
+    public Either<Error, Void> seal() throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {
+        if(this.proof.secretKey.isEmpty()) {
+            return Left(new Error.Sealed());
         }
 
-        if(!(this.keys.get(0).ctEquals(public_key.key) == 1)) {
-            return Left(new Error.FormatError.UnknownPublicKey());
+        SignedBlock block;
+        if(this.blocks.isEmpty()) {
+            block = this.authority;
+        } else {
+            block = this.blocks.get(this.blocks.size() - 1);
         }
+
+        Signature sgr = new EdDSAEngine(MessageDigest.getInstance(ed25519.getHashAlgorithm()));
+
+        sgr.initSign(this.proof.secretKey.get().private_key);
+        sgr.update(block.block);
+        sgr.update(block.key.toBytes());
+        sgr.update(block.signature);
+
+        byte[] signature = sgr.sign();
+
+        this.proof.secretKey = Option.none();
+        this.proof.signature = Option.some(signature);
 
         return Right(null);
     }
 
     public List<byte[]> revocation_identifiers() {
         ArrayList<byte[]> l = new ArrayList<>();
+        l.add(this.authority.signature);
 
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            digest.update(this.authority);
-            digest.update(this.keys.get(0).compress().toByteArray());
-            MessageDigest cloned = (MessageDigest)digest.clone();
-            l.add(digest.digest());
-
-            digest = cloned;
-
-            for(int i = 0; i < this.blocks.size(); i++) {
-                byte[] block = this.blocks.get(i);
-                digest.update(block);
-                digest.update(this.keys.get(i+1).compress().toByteArray());
-                cloned = (MessageDigest)digest.clone();
-                l.add(digest.digest());
-
-                digest = cloned;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        for(SignedBlock block: this.blocks) {
+            l.add(block.signature);
         }
-
         return l;
     }
 
-    SerializedBiscuit(byte[] authority, List<byte[]> blocks, List<RistrettoElement> keys, TokenSignature signature) {
+    SerializedBiscuit(SignedBlock authority, List<SignedBlock> blocks, Proof proof) {
         this.authority = authority;
         this.blocks = blocks;
-        this.keys = keys;
-        this.signature = signature;
+        this.proof = proof;
     }
 }

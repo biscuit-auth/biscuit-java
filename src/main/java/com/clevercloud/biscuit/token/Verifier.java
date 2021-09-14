@@ -1,6 +1,5 @@
 package com.clevercloud.biscuit.token;
 
-import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.datalog.ID;
 import com.clevercloud.biscuit.datalog.RunLimits;
 import com.clevercloud.biscuit.datalog.SymbolTable;
@@ -11,7 +10,6 @@ import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.builder.*;
 import io.vavr.Tuple2;
 import io.vavr.control.Either;
-import io.vavr.control.Option;
 
 import java.time.Instant;
 import java.util.*;
@@ -73,15 +71,7 @@ public class Verifier {
      * @param root
      * @return
      */
-    static public Either<Error, Verifier> make(Biscuit token, Option<PublicKey> root) {
-        if(!token.is_sealed()) {
-            Either<Error, Void> res = token.check_root_key(root.get());
-            if (res.isLeft()) {
-                Error e = res.getLeft();
-                return Left(e);
-            }
-        }
-
+    static public Either<Error, Verifier> make(Biscuit token) {
         Either<Error, World> res = token.generate_world();
         if (res.isLeft()) {
             Error e = res.getLeft();
@@ -96,15 +86,7 @@ public class Verifier {
                 new ArrayList<>(this.token_checks), new World(this.world), new SymbolTable(this.symbols));
     }
 
-    public Either<Error, Void> add_token(Biscuit token, Option<PublicKey> root) {
-        if(!token.is_sealed()) {
-            Either<Error, Void> res = token.check_root_key(root.get());
-            if (res.isLeft()) {
-                Error e = res.getLeft();
-                return Left(e);
-            }
-        }
-
+    public Either<Error, Void> add_token(Biscuit token) {
         if(this.token != null) {
             return Either.left(new Error.FailedLogic(new LogicError.VerifierNotEmpty()));
         }

@@ -24,7 +24,7 @@
 
         <!-- dependencies -->
         <protobuf-java.version>3.16.1</protobuf-java.version>
-        <curve25519-elisabetch.version>0.1.0</curve25519-elisabetch.version>
+        <net.i2p.crypto.eddsa.version>0.3.0</net.i2p.crypto.eddsa.version>
         <vavr.version>0.10.3</vavr.version>
         <re2j.version>1.6</re2j.version>
 
@@ -200,9 +200,9 @@
             <version>${protobuf-java.version}</version>
         </dependency>
         <dependency>
-            <groupId>cafe.cryptography</groupId>
-            <artifactId>curve25519-elisabeth</artifactId>
-            <version>${curve25519-elisabetch.version}</version>
+            <groupId>net.i2p.crypto</groupId>
+            <artifactId>eddsa</artifactId>
+            <version>${net.i2p.crypto.eddsa.version}</version>
         </dependency>
         <dependency>
             <groupId>io.vavr</groupId>

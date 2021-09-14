@@ -1,9 +1,10 @@
 package com.clevercloud.biscuit.crypto;
 
-import cafe.cryptography.curve25519.Constants;
-import cafe.cryptography.curve25519.RistrettoElement;
-import cafe.cryptography.curve25519.Scalar;
+
 import com.clevercloud.biscuit.token.builder.Utils;
+import net.i2p.crypto.eddsa.EdDSAPrivateKey;
+import net.i2p.crypto.eddsa.EdDSAPublicKey;
+import net.i2p.crypto.eddsa.spec.*;
 
 import java.security.SecureRandom;
 
@@ -11,24 +12,41 @@ import java.security.SecureRandom;
  * Private and public key
  */
 public final class KeyPair {
-    public final Scalar private_key;
-    public final RistrettoElement public_key;
+    public final EdDSAPrivateKey private_key;
+    public final EdDSAPublicKey public_key;
+
+    private static final int ED25519_PUBLIC_KEYSIZE = 32;
+    private static final int ED25519_PRIVATE_KEYSIZE = 64;
+    private static final int ED25519_SEED_SIZE = 32;
+    public static final EdDSANamedCurveSpec ed25519 = EdDSANamedCurveTable.getByName(EdDSANamedCurveTable.ED_25519);
 
     public KeyPair(final SecureRandom rng) {
-        byte[] b = new byte[64];
+        byte[] b = new byte[32];
         rng.nextBytes(b);
 
-        this.private_key = Scalar.fromBytesModOrderWide(b);
-        this.public_key = Constants.RISTRETTO_GENERATOR.multiply(this.private_key);
+        EdDSAPrivateKeySpec privKeySpec = new EdDSAPrivateKeySpec(b, ed25519);
+        EdDSAPrivateKey privKey = new EdDSAPrivateKey(privKeySpec);
+
+        EdDSAPublicKeySpec pubKeySpec = new EdDSAPublicKeySpec(privKey.getA(), ed25519);
+        EdDSAPublicKey pubKey = new EdDSAPublicKey(pubKeySpec);
+
+        this.private_key = privKey;
+        this.public_key = pubKey;
     }
 
     public byte[] toBytes() {
-        return this.private_key.toByteArray();
+        return this.private_key.getSeed();
     }
 
     public KeyPair(byte[] b) {
-        this.private_key = Scalar.fromBytesModOrderWide(b);
-        this.public_key = Constants.RISTRETTO_GENERATOR.multiply(this.private_key);
+        EdDSAPrivateKeySpec privKeySpec = new EdDSAPrivateKeySpec(b, ed25519);
+        EdDSAPrivateKey privKey = new EdDSAPrivateKey(privKeySpec);
+
+        EdDSAPublicKeySpec pubKeySpec = new EdDSAPublicKeySpec(privKey.getA(), ed25519);
+        EdDSAPublicKey pubKey = new EdDSAPublicKey(pubKeySpec);
+
+        this.private_key = privKey;
+        this.public_key = pubKey;
     }
 
     public String toHex() {
@@ -37,8 +55,15 @@ public final class KeyPair {
 
     public KeyPair(String hex) {
         byte[] b = Utils.hexStringToByteArray(hex);
-        this.private_key = Scalar.fromBytesModOrder(b);
-        this.public_key = Constants.RISTRETTO_GENERATOR.multiply(this.private_key);
+
+        EdDSAPrivateKeySpec privKeySpec = new EdDSAPrivateKeySpec(b, ed25519);
+        EdDSAPrivateKey privKey = new EdDSAPrivateKey(privKeySpec);
+
+        EdDSAPublicKeySpec pubKeySpec = new EdDSAPublicKeySpec(privKey.getA(), ed25519);
+        EdDSAPublicKey pubKey = new EdDSAPublicKey(pubKeySpec);
+
+        this.private_key = privKey;
+        this.public_key = pubKey;
     }
 
     public PublicKey public_key() {

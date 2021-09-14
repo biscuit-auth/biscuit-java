@@ -5,17 +5,19 @@ import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.datalog.*;
 import com.clevercloud.biscuit.error.FailedCheck;
 import com.clevercloud.biscuit.error.LogicError;
-import com.clevercloud.biscuit.token.format.SealedBiscuit;
 import com.clevercloud.biscuit.token.format.SerializedBiscuit;
 import com.clevercloud.biscuit.error.Error;
 
+import com.clevercloud.biscuit.token.format.SignedBlock;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
-import java.security.MessageDigest;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.SignatureException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -74,7 +76,9 @@ public class Biscuit {
         symbols.symbols.addAll(authority.symbols.symbols);
         ArrayList<Block> blocks = new ArrayList<>();
 
-        Either<Error.FormatError, SerializedBiscuit> container = SerializedBiscuit.make(rng, root, authority);
+        KeyPair next = new KeyPair(rng);
+
+        Either<Error.FormatError, SerializedBiscuit> container = SerializedBiscuit.make(root, authority, next);
         if(container.isLeft()) {
             Error.FormatError e = container.getLeft();
             return Left(e);
@@ -107,8 +111,8 @@ public class Biscuit {
      * @param data
      * @return
      */
-    static public Either<Error, Biscuit> from_b64(String data)  {
-        return Biscuit.from_bytes(Base64.getUrlDecoder().decode(data));
+    static public Either<Error, Biscuit> from_b64(String data, PublicKey root) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        return Biscuit.from_bytes(Base64.getUrlDecoder().decode(data), root);
     }
 
     /**
@@ -123,8 +127,8 @@ public class Biscuit {
      * @param data
      * @return
      */
-    static public Either<Error, Biscuit> from_bytes(byte[] data)  {
-        return Biscuit.from_bytes_with_symbols(data, default_symbol_table());
+    static public Either<Error, Biscuit> from_bytes(byte[] data, PublicKey root) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        return Biscuit.from_bytes_with_symbols(data, root, default_symbol_table());
     }
 
     /**
@@ -137,15 +141,26 @@ public class Biscuit {
      * @param data
      * @return
      */
-    static public Either<Error, Biscuit> from_bytes_with_symbols(byte[] data, SymbolTable symbols)  {
-        Either<Error, SerializedBiscuit> res = SerializedBiscuit.from_bytes(data);
+    static public Either<Error, Biscuit> from_bytes_with_symbols(byte[] data, PublicKey root, SymbolTable symbols) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        //System.out.println("will deserialize and verify token");
+        Either<Error, SerializedBiscuit> res = SerializedBiscuit.from_bytes(data, root);
         if(res.isLeft()) {
             Error e = res.getLeft();
             return Left(e);
         }
 
         SerializedBiscuit ser = res.get();
-        Either<Error.FormatError, Block> authRes = Block.from_bytes(ser.authority);
+        //System.out.println("deserialized token, will populate Biscuit structure");
+
+        return Biscuit.from_serialize_biscuit(ser, symbols);
+    }
+
+    /**
+     * Fills a Biscuit structure from a deserialized token
+     * @return
+     */
+    static Either<Error, Biscuit> from_serialize_biscuit(SerializedBiscuit ser, SymbolTable symbols) {
+        Either<Error.FormatError, Block> authRes = Block.from_bytes(ser.authority.block);
         if(authRes.isLeft()){
             Error e = authRes.getLeft();
             return Left(e);
@@ -153,8 +168,8 @@ public class Biscuit {
         Block authority = authRes.get();
 
         ArrayList<Block> blocks = new ArrayList<>();
-        for(byte[] bdata: ser.blocks) {
-            Either<Error.FormatError, Block> blockRes = Block.from_bytes(bdata);
+        for(SignedBlock bdata: ser.blocks) {
+            Either<Error.FormatError, Block> blockRes = Block.from_bytes(bdata.block);
             if(blockRes.isLeft()) {
                 Error e = blockRes.getLeft();
                 return Left(e);
@@ -177,19 +192,25 @@ public class Biscuit {
         return Right(new Biscuit(authority, blocks, symbols, Option.some(ser), revocation_ids));
     }
 
+    static Either<Error, Biscuit> unsafe_from_bytes(byte[] data, SymbolTable symbols) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        Either<Error, SerializedBiscuit> res = SerializedBiscuit.unsafe_deserialize(data);
+        if(res.isLeft()) {
+            Error e = res.getLeft();
+            return Left(e);
+        }
+
+        SerializedBiscuit ser = res.get();
+        return Biscuit.from_serialize_biscuit(ser, symbols);
+    }
+
     /**
      * Creates a verifier for this token
      *
      * This function checks that the root key is the one we expect
-     * @param root root public key
      * @return
      */
-    public Either<Error, Verifier> verify(PublicKey root) {
-        return Verifier.make(this, Option.some(root));
-    }
-
-    public Either<Error, Verifier> verify_sealed() {
-        return Verifier.make(this, Option.none());
+    public Either<Error, Verifier> verifier() {
+        return Verifier.make(this);
     }
 
     /**
@@ -211,75 +232,23 @@ public class Biscuit {
         return serialize().map(Base64.getUrlEncoder()::encodeToString);
     }
 
-    public static Either<Error, Biscuit> from_sealed(byte[] data, byte[] secret)  {
-        //FIXME: needs a version of from_sealed with custom symbol table support
-        SymbolTable symbols = default_symbol_table();
+    public Either<Error, byte[]> seal() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        if(this.container.isEmpty()) {
+            return Left(new Error.FormatError.SerializationError("no internal container"));
+        }
 
-        Either<Error, SealedBiscuit> res = SealedBiscuit.from_bytes(data, secret);
+        SerializedBiscuit ser = this.container.get();
+        Either<Error, Void> res = ser.seal();
         if(res.isLeft()) {
-            Error e = res.getLeft();
-            return Left(e);
+            return Left(res.getLeft());
         }
 
-        SealedBiscuit ser = res.get();
-        Either<Error.FormatError, Block> authRes = Block.from_bytes(ser.authority);
-        if(authRes.isLeft()){
-            Error e = authRes.getLeft();
-            return Left(e);
-        }
-        Block authority = authRes.get();
-
-        ArrayList<Block> blocks = new ArrayList<>();
-        for(byte[] bdata: ser.blocks) {
-            Either<Error.FormatError, Block> blockRes = Block.from_bytes(bdata);
-            if(blockRes.isLeft()) {
-                Error e = blockRes.getLeft();
-                return Left(e);
-            }
-            blocks.add(blockRes.get());
-        }
-
-        for(String s: authority.symbols.symbols) {
-            symbols.add(s);
-        }
-
-        for(Block b: blocks) {
-            for(String s: b.symbols.symbols) {
-                symbols.add(s);
-            }
-        }
-
-        List<byte[]> revocation_ids = ser.revocation_identifiers();
-
-        return Right(new Biscuit(authority, blocks, symbols, Option.none(), revocation_ids));
-    }
-
-    public Either<Error.FormatError, byte[]> seal(byte[] secret) {
-        Either<Error.FormatError, SealedBiscuit> res = SealedBiscuit.make(authority, blocks, secret);
-        if(res.isLeft()) {
-            Error.FormatError e = res.getLeft();
-            return Left(e);
-        }
-
-        SealedBiscuit b = res.get();
-        return b.serialize();
+        return ser.serialize();
     }
 
     public boolean is_sealed() {
-        return this.container.isEmpty();
-    }
-
-    /**
-     * Verifies that a token is valid for a root public key
-     * @param public_key
-     * @return
-     */
-    public Either<Error, Void> check_root_key(PublicKey public_key) {
-        if (this.container.isEmpty()) {
-            return Left(new Error.Sealed());
-        } else {
-            return this.container.get().check_root_key(public_key);
-        }
+        return this.container.isEmpty() ||
+                this.container.get().proof.secretKey.isEmpty();
     }
 
     Either<Error, World> generate_world() {
@@ -435,8 +404,8 @@ public class Biscuit {
      * @param block new block (should be generated from a Block builder)
      * @return
      */
-    public Either<Error, Biscuit> attenuate(final SecureRandom rng, final KeyPair keypair, Block block) {
-        Either<Error, Biscuit> e = this.copy();
+    public Either<Error, Biscuit> attenuate(final SecureRandom rng, final KeyPair keypair, Block block) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+       Either<Error, Biscuit> e = this.copy();
 
         if (e.isLeft()) {
             return Left(e.getLeft());
@@ -452,7 +421,7 @@ public class Biscuit {
             return Left(new Error.InvalidBlockIndex(1 + copiedBiscuit.blocks.size(), block.index));
         }
 
-        Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.container.get().append(rng, keypair, block);
+        Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.container.get().append(keypair, block);
         if(containerRes.isLeft()) {
             Error.FormatError error = containerRes.getLeft();
             return Left(error);
@@ -547,13 +516,18 @@ public class Biscuit {
         return syms;
     }
 
-    public Either<Error, Biscuit> copy() {
-        return this
-                .serialize()
-                .map(Biscuit::from_bytes)
-                .flatMap(e -> {
-                    Either<Error, Biscuit> y = Either.narrow(e);
-                    return y;
-                });
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+
+
+    public Either<Error, Biscuit> copy() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException  {
+        Either<Error, byte[]> s = this.serialize();
+        if (s.isLeft()) {
+            return Left(s.getLeft());
+        }
+
+        return Biscuit.unsafe_from_bytes(s.get(), this.symbols);
     }
 }
