@@ -104,7 +104,7 @@ public class Block {
             symbols.add(this.symbols.symbols.get(i));
         }
 
-        return new com.clevercloud.biscuit.token.Block(this.index, symbols, this.context, this.facts, this.rules, this.checks);
+        return new com.clevercloud.biscuit.token.Block(symbols, this.context, this.facts, this.rules, this.checks);
     }
 
     public void check_right(String right) {

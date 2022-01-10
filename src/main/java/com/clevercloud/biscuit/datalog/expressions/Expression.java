@@ -52,8 +52,8 @@ public class Expression {
         }
     }
 
-    public Schema.ExpressionV1 serialize() {
-        Schema.ExpressionV1.Builder b = Schema.ExpressionV1.newBuilder();
+    public Schema.ExpressionV2 serialize() {
+        Schema.ExpressionV2.Builder b = Schema.ExpressionV2.newBuilder();
 
         for(Op op: this.ops) {
             b.addOps(op.serialize());
@@ -62,11 +62,11 @@ public class Expression {
         return b.build();
     }
 
-    static public Either<Error.FormatError, Expression> deserializeV1(Schema.ExpressionV1 e) {
+    static public Either<Error.FormatError, Expression> deserializeV2(Schema.ExpressionV2 e) {
         ArrayList<Op> ops = new ArrayList<>();
 
         for(Schema.Op op: e.getOpsList()) {
-            Either<Error.FormatError, Op> res = Op.deserializeV1(op);
+            Either<Error.FormatError, Op> res = Op.deserializeV2(op);
 
             if(res.isLeft()) {
                 Error.FormatError err = res.getLeft();

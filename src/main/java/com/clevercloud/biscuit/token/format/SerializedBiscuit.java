@@ -29,7 +29,7 @@ public class SerializedBiscuit {
     public List<SignedBlock> blocks;
     public Proof proof;
 
-    public static int MAX_SCHEMA_VERSION = 1;
+    public static int MAX_SCHEMA_VERSION = 2;
 
     /**
      * Deserializes a SerializedBiscuit from a byte array
