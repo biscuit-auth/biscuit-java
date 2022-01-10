@@ -23,7 +23,7 @@
         <build-helper-maven.version>3.0.0</build-helper-maven.version>
 
         <!-- dependencies -->
-        <protobuf-java.version>3.13.0</protobuf-java.version>
+        <protobuf-java.version>3.16.1</protobuf-java.version>
         <curve25519-elisabetch.version>0.1.0</curve25519-elisabetch.version>
         <vavr.version>0.10.3</vavr.version>
         <re2j.version>1.6</re2j.version>
