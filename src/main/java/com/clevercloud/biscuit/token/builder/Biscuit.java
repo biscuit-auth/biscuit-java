@@ -126,7 +126,7 @@ public class Biscuit {
             symbols.add(this.symbols.symbols.get(i));
         }
 
-        Block authority_block = new com.clevercloud.biscuit.token.Block(0, symbols, context, this.facts, this.rules, this.checks);
+        Block authority_block = new com.clevercloud.biscuit.token.Block(symbols, context, this.facts, this.rules, this.checks);
         return com.clevercloud.biscuit.token.Biscuit.make(this.rng, this.root, base_symbols, authority_block);
     }
 

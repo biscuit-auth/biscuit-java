@@ -43,24 +43,14 @@ public final class Fact implements Serializable {
       return this.predicate.toString();
    }
 
-   public Schema.FactV1 serialize() {
-      return Schema.FactV1.newBuilder()
+   public Schema.FactV2 serialize() {
+      return Schema.FactV2.newBuilder()
               .setPredicate(this.predicate.serialize())
               .build();
    }
 
-   static public Either<Error.FormatError, Fact> deserializeV0(Schema.FactV0 fact) {
-      Either<Error.FormatError, Predicate> res = Predicate.deserializeV0(fact.getPredicate());
-      if(res.isLeft()) {
-         Error.FormatError e = res.getLeft();
-         return Left(e);
-      } else {
-         return Right(new Fact(res.get()));
-      }
-   }
-
-   static public Either<Error.FormatError, Fact> deserializeV1(Schema.FactV1 fact) {
-      Either<Error.FormatError, Predicate> res = Predicate.deserializeV1(fact.getPredicate());
+   static public Either<Error.FormatError, Fact> deserializeV2(Schema.FactV2 fact) {
+      Either<Error.FormatError, Predicate> res = Predicate.deserializeV2(fact.getPredicate());
       if(res.isLeft()) {
          Error.FormatError e = res.getLeft();
          return Left(e);

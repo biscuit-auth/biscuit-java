@@ -23,7 +23,6 @@ import static io.vavr.API.Right;
  * Represents a token's block with its checks
  */
 public class Block {
-    final long index;
     final SymbolTable symbols;
     final String context;
     final List<Fact> facts;
@@ -33,11 +32,11 @@ public class Block {
 
     /**
      * creates a new block
+     *
      * @param index
      * @param base_symbols
      */
-    public Block(long index, SymbolTable base_symbols) {
-        this.index = index;
+    public Block(SymbolTable base_symbols) {
         this.symbols = base_symbols;
         this.context = "";
         this.facts = new ArrayList<>();
@@ -48,15 +47,15 @@ public class Block {
 
     /**
      * creates a new block
+     *
      * @param index
      * @param base_symbols
      * @param facts
      * @param checks
      */
-    public Block(long index, SymbolTable base_symbols, String context, List<Fact> facts, List<Rule> rules, List<Check> checks) {
-        this.index = index;
+    public Block(SymbolTable base_symbols, String context, List<Fact> facts, List<Rule> rules, List<Check> checks) {
         this.symbols = base_symbols;
-        this.context=  context;
+        this.context = context;
         this.facts = facts;
         this.rules = rules;
         this.checks = checks;
@@ -135,30 +134,30 @@ public class Block {
 
     /**
      * pretty printing for a block
+     *
      * @param symbol_table
      * @return
      */
     public String print(SymbolTable symbol_table) {
         StringBuilder s = new StringBuilder();
 
-        s.append("Block[");
-        s.append(this.index);
-        s.append("] {\n\t\tsymbols: ");
+        s.append("Block");
+        s.append(" {\n\t\tsymbols: ");
         s.append(this.symbols.symbols);
         s.append("\n\t\tcontext: ");
         s.append(this.context);
         s.append("\n\t\tfacts: [");
-        for(Fact f: this.facts) {
+        for (Fact f : this.facts) {
             s.append("\n\t\t\t");
             s.append(symbol_table.print_fact(f));
         }
         s.append("\n\t\t]\n\t\trules: [");
-        for(Rule r: this.rules) {
+        for (Rule r : this.rules) {
             s.append("\n\t\t\t");
             s.append(symbol_table.print_rule(r));
         }
         s.append("\n\t\t]\n\t\tchecks: [");
-        for(Check c: this.checks) {
+        for (Check c : this.checks) {
             s.append("\n\t\t\t");
             s.append(symbol_table.print_check(c));
         }
@@ -169,30 +168,30 @@ public class Block {
 
     /**
      * Serializes a Block to its Protobuf representation
+     *
      * @return
      */
     public Schema.Block serialize() {
-        Schema.Block.Builder b = Schema.Block.newBuilder()
-                .setIndex((int) this.index);
+        Schema.Block.Builder b = Schema.Block.newBuilder();
 
         for (int i = 0; i < this.symbols.symbols.size(); i++) {
             b.addSymbols(this.symbols.symbols.get(i));
         }
 
-        if(!this.context.isEmpty()) {
+        if (!this.context.isEmpty()) {
             b.setContext(this.context);
         }
 
         for (int i = 0; i < this.facts.size(); i++) {
-            b.addFactsV1(this.facts.get(i).serialize());
+            b.addFactsV2(this.facts.get(i).serialize());
         }
 
         for (int i = 0; i < this.rules.size(); i++) {
-            b.addRulesV1(this.rules.get(i).serialize());
+            b.addRulesV2(this.rules.get(i).serialize());
         }
 
         for (int i = 0; i < this.checks.size(); i++) {
-            b.addChecksV1(this.checks.get(i).serialize());
+            b.addChecksV2(this.checks.get(i).serialize());
         }
 
         b.setVersion(SerializedBiscuit.MAX_SCHEMA_VERSION);
@@ -201,12 +200,13 @@ public class Block {
 
     /**
      * Deserializes a block from its Protobuf representation
+     *
      * @param b
      * @return
      */
     static public Either<Error.FormatError, Block> deserialize(Schema.Block b) {
         int version = b.getVersion();
-        if(version > SerializedBiscuit.MAX_SCHEMA_VERSION) {
+        if (version > SerializedBiscuit.MAX_SCHEMA_VERSION) {
             return Left(new Error.FormatError.Version(SerializedBiscuit.MAX_SCHEMA_VERSION, version));
         }
 
@@ -219,9 +219,9 @@ public class Block {
         ArrayList<Rule> rules = new ArrayList<>();
         ArrayList<Check> checks = new ArrayList<>();
 
-        if(version == 0) {
-            for (Schema.FactV0 fact : b.getFactsV0List()) {
-                Either<Error.FormatError, Fact> res = Fact.deserializeV0(fact);
+        if (version == 2) {
+            for (Schema.FactV2 fact : b.getFactsV2List()) {
+                Either<Error.FormatError, Fact> res = Fact.deserializeV2(fact);
                 if (res.isLeft()) {
                     Error.FormatError e = res.getLeft();
                     return Left(e);
@@ -231,8 +231,8 @@ public class Block {
             }
 
 
-            for (Schema.RuleV0 rule : b.getRulesV0List()) {
-                Either<Error.FormatError, Rule> res = Rule.deserializeV0(rule);
+            for (Schema.RuleV2 rule : b.getRulesV2List()) {
+                Either<Error.FormatError, Rule> res = Rule.deserializeV2(rule);
                 if (res.isLeft()) {
                     Error.FormatError e = res.getLeft();
                     return Left(e);
@@ -242,8 +242,8 @@ public class Block {
             }
 
 
-            for (Schema.CaveatV0 caveat : b.getCaveatsV0List()) {
-                Either<Error.FormatError, Check> res = Check.deserializeV0(caveat);
+            for (Schema.CheckV2 check : b.getChecksV2List()) {
+                Either<Error.FormatError, Check> res = Check.deserializeV2(check);
                 if (res.isLeft()) {
                     Error.FormatError e = res.getLeft();
                     return Left(e);
@@ -251,45 +251,15 @@ public class Block {
                     checks.add(res.get());
                 }
             }
+            return Right(new Block(symbols, b.getContext(), facts, rules, checks));
         } else {
-            for (Schema.FactV1 fact : b.getFactsV1List()) {
-                Either<Error.FormatError, Fact> res = Fact.deserializeV1(fact);
-                if (res.isLeft()) {
-                    Error.FormatError e = res.getLeft();
-                    return Left(e);
-                } else {
-                    facts.add(res.get());
-                }
-            }
-
-
-            for (Schema.RuleV1 rule : b.getRulesV1List()) {
-                Either<Error.FormatError, Rule> res = Rule.deserializeV1(rule);
-                if (res.isLeft()) {
-                    Error.FormatError e = res.getLeft();
-                    return Left(e);
-                } else {
-                    rules.add(res.get());
-                }
-            }
-
-
-            for (Schema.CheckV1 check : b.getChecksV1List()) {
-                Either<Error.FormatError, Check> res = Check.deserializeV1(check);
-                if (res.isLeft()) {
-                    Error.FormatError e = res.getLeft();
-                    return Left(e);
-                } else {
-                    checks.add(res.get());
-                }
-            }
+            return Left(new Error.FormatError.Version(SerializedBiscuit.MAX_SCHEMA_VERSION, version));
         }
-
-        return Right(new Block(b.getIndex(), symbols, b.getContext(), facts, rules, checks));
     }
 
     /**
      * Deserializes a Block from a byte array
+     *
      * @param slice
      * @return
      */
@@ -309,7 +279,7 @@ public class Block {
             b.writeTo(stream);
             byte[] data = stream.toByteArray();
             return Right(data);
-        } catch(IOException e) {
+        } catch (IOException e) {
             return Left(new Error.FormatError.SerializationError(e.toString()));
         }
     }

@@ -1,7 +1,6 @@
 package com.clevercloud.biscuit.datalog;
 
 import biscuit.format.schema.Schema;
-import com.clevercloud.biscuit.datalog.constraints.Constraint;
 import com.clevercloud.biscuit.datalog.expressions.Expression;
 import com.clevercloud.biscuit.error.Error;
 import io.vavr.control.Either;
@@ -112,8 +111,8 @@ public final class Rule implements Serializable {
       this.expressions = expressions;
    }
 
-   public Schema.RuleV1 serialize() {
-      Schema.RuleV1.Builder b = Schema.RuleV1.newBuilder()
+   public Schema.RuleV2 serialize() {
+      Schema.RuleV2.Builder b = Schema.RuleV2.newBuilder()
               .setHead(this.head.serialize());
 
       for (int i = 0; i < this.body.size(); i++) {
@@ -127,10 +126,10 @@ public final class Rule implements Serializable {
       return b.build();
    }
 
-   static public Either<Error.FormatError, Rule> deserializeV0(Schema.RuleV0 rule) {
+   static public Either<Error.FormatError, Rule> deserializeV2(Schema.RuleV2 rule) {
       ArrayList<Predicate> body = new ArrayList<>();
-      for (Schema.PredicateV0 predicate: rule.getBodyList()) {
-         Either<Error.FormatError, Predicate> res = Predicate.deserializeV0(predicate);
+      for (Schema.PredicateV2 predicate: rule.getBodyList()) {
+         Either<Error.FormatError, Predicate> res = Predicate.deserializeV2(predicate);
          if(res.isLeft()) {
             Error.FormatError e = res.getLeft();
             return Left(e);
@@ -140,8 +139,8 @@ public final class Rule implements Serializable {
       }
 
       ArrayList<Expression> expressions = new ArrayList<>();
-      for (Schema.ConstraintV0 constraint: rule.getConstraintsList()) {
-         Either<Error.FormatError, Expression> res = Constraint.deserializeV0(constraint);
+      for (Schema.ExpressionV2 expression: rule.getExpressionsList()) {
+         Either<Error.FormatError, Expression> res = Expression.deserializeV2(expression);
          if(res.isLeft()) {
             Error.FormatError e = res.getLeft();
             return Left(e);
@@ -150,39 +149,7 @@ public final class Rule implements Serializable {
          }
       }
 
-      Either<Error.FormatError, Predicate> res = Predicate.deserializeV0(rule.getHead());
-      if(res.isLeft()) {
-         Error.FormatError e = res.getLeft();
-         return Left(e);
-      } else {
-         return Right(new Rule(res.get(), body, expressions));
-      }
-   }
-
-   static public Either<Error.FormatError, Rule> deserializeV1(Schema.RuleV1 rule) {
-      ArrayList<Predicate> body = new ArrayList<>();
-      for (Schema.PredicateV1 predicate: rule.getBodyList()) {
-         Either<Error.FormatError, Predicate> res = Predicate.deserializeV1(predicate);
-         if(res.isLeft()) {
-            Error.FormatError e = res.getLeft();
-            return Left(e);
-         } else {
-            body.add(res.get());
-         }
-      }
-
-      ArrayList<Expression> expressions = new ArrayList<>();
-      for (Schema.ExpressionV1 expression: rule.getExpressionsList()) {
-         Either<Error.FormatError, Expression> res = Expression.deserializeV1(expression);
-         if(res.isLeft()) {
-            Error.FormatError e = res.getLeft();
-            return Left(e);
-         } else {
-            expressions.add(res.get());
-         }
-      }
-
-      Either<Error.FormatError, Predicate> res = Predicate.deserializeV1(rule.getHead());
+      Either<Error.FormatError, Predicate> res = Predicate.deserializeV2(rule.getHead());
       if(res.isLeft()) {
          Error.FormatError e = res.getLeft();
          return Left(e);

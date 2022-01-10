@@ -117,9 +117,6 @@ public class Verifier {
 
         for(int i = 0; i < token.blocks.size(); i++) {
             Block b = token.blocks.get(i);
-            if (b.index != i + 1) {
-                return Left(new Error.InvalidBlockIndex(1 + token.blocks.size(), token.blocks.get(i).index));
-            }
 
             for (com.clevercloud.biscuit.datalog.Fact fact : b.facts) {
                 if (fact.predicate().ids().get(0).equals(new ID.Symbol(authority_index)) ||

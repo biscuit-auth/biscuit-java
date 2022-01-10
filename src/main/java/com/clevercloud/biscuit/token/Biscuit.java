@@ -69,10 +69,6 @@ public class Biscuit {
             return Left(new Error.SymbolTableOverlap());
         }
 
-        if(authority.index != 0) {
-            return Left(new Error.InvalidAuthorityIndex(authority.index));
-        }
-
         symbols.symbols.addAll(authority.symbols.symbols);
         ArrayList<Block> blocks = new ArrayList<>();
 
@@ -266,9 +262,6 @@ public class Biscuit {
 
         for(int i = 0; i < this.blocks.size(); i++) {
             Block b = this.blocks.get(i);
-            if (b.index != i + 1) {
-                return Left(new Error.InvalidBlockIndex(1 + this.blocks.size(), this.blocks.get(i).index));
-            }
 
             for (Fact fact : b.facts) {
                 if (fact.predicate().ids().get(0).equals(new ID.Symbol(authority_index)) ||
@@ -351,7 +344,7 @@ public class Biscuit {
             }
 
             if (!successful) {
-                errors.add(new FailedCheck.FailedVerifier(j, symbols.print_check(verifier_checks.get(j))));
+                errors.add(new FailedCheck.FailedVerifier(j + 1, symbols.print_check(verifier_checks.get(j))));
             }
         }
 
@@ -371,7 +364,7 @@ public class Biscuit {
                 }
 
                 if (!successful) {
-                    errors.add(new FailedCheck.FailedBlock(b.index, j, symbols.print_check(b.checks.get(j))));
+                    errors.add(new FailedCheck.FailedBlock(i + 1, j, symbols.print_check(b.checks.get(j))));
                 }
             }
         }
@@ -415,10 +408,6 @@ public class Biscuit {
 
         if(!Collections.disjoint(copiedBiscuit.symbols.symbols, block.symbols.symbols)) {
             return Left(new Error.SymbolTableOverlap());
-        }
-
-        if(block.index != 1 + this.blocks.size()) {
-            return Left(new Error.InvalidBlockIndex(1 + copiedBiscuit.blocks.size(), block.index));
         }
 
         Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.container.get().append(keypair, block);
