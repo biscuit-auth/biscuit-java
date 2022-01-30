@@ -43,8 +43,8 @@ public abstract class Expression {
                 }
             } else if (op instanceof com.clevercloud.biscuit.datalog.expressions.Op.Binary) {
                 com.clevercloud.biscuit.datalog.expressions.Op.Binary v = (com.clevercloud.biscuit.datalog.expressions.Op.Binary) op;
-                Expression e1 = stack.pop();
                 Expression e2 = stack.pop();
+                Expression e1 = stack.pop();
 
                 switch (v.getOp()) {
                     case LessThan:
