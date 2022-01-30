@@ -39,16 +39,6 @@ public class Biscuit {
     }
 
     public void add_authority_fact(com.clevercloud.biscuit.token.builder.Fact f) {
-        Term.Symbol authority_symbol = new Term.Symbol("authority");
-        if(f.predicate.ids.isEmpty() || !(f.predicate.ids.get(0).equals(authority_symbol))) {
-            ArrayList<Term> ids = new ArrayList<>();
-            ids.add(authority_symbol);
-            for(Term id: f.predicate.ids) {
-                ids.add(id);
-            }
-            f.predicate.ids = ids;
-        }
-
         this.facts.add(f.convert(this.symbols));
     }
 
@@ -68,11 +58,6 @@ public class Biscuit {
     }
 
     public void add_authority_rule(com.clevercloud.biscuit.token.builder.Rule rule) {
-        Term.Symbol authority_symbol = new Term.Symbol("authority");
-        if(rule.head.ids.isEmpty() || !(rule.head.ids.get(0).equals(authority_symbol))) {
-            rule.head.ids.add(0, authority_symbol);
-        }
-
         this.rules.add(rule.convert(this.symbols));
     }
 
@@ -131,6 +116,6 @@ public class Biscuit {
     }
 
     public void add_right(String resource, String right) {
-            this.add_authority_fact(fact("right", Arrays.asList(s("authority"), string(resource), s(right))));
+            this.add_authority_fact(fact("right", Arrays.asList(string(resource), s(right))));
     }
 }

@@ -7,6 +7,7 @@ import com.clevercloud.biscuit.error.FailedCheck;
 import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.builder.Check;
 import com.clevercloud.biscuit.token.builder.Rule;
+import com.clevercloud.biscuit.token.builder.Term;
 import io.vavr.control.Either;
 import org.junit.Assert;
 import junit.framework.Test;
@@ -21,6 +22,7 @@ import java.security.SignatureException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 
 import static com.clevercloud.biscuit.crypto.TokenSignature.fromHex;
 import static com.clevercloud.biscuit.crypto.TokenSignature.hex;
@@ -150,11 +152,11 @@ public class SamplesV2Test extends TestCase {
 
     }
 
-    public void test7_invalid_block_fact_authority() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void test7_scoped_rules() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         PublicKey root = new PublicKey(rootData);
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test7_invalid_block_fact_authority.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test7_scoped_rules.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
@@ -162,18 +164,22 @@ public class SamplesV2Test extends TestCase {
         Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Either<Error, Verifier> res = token.verifier();
-        if (res.isLeft()) {
-            System.out.println("error: " + res.getLeft());
-        }
-        Assert.assertEquals(new Error.FailedLogic(new LogicError.InvalidBlockFact(0, "right(#authority, \"file1\", #write)")), res.getLeft());
+        Verifier v1 = token.verifier().get();
+        v1.add_resource("file2");
+        v1.add_operation("read");
+        v1.allow();
+        Either<Error, Long> res = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
+
+        Assert.assertEquals(new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
+                new FailedCheck.FailedBlock(1, 0, "check if resource($0), operation(#read), right($0, #read)")
+        ))), res.getLeft());
     }
 
-    public void test8_invalid_block_fact_ambient() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void test8_scoped_checks() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         PublicKey root = new PublicKey(rootData);
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test8_invalid_block_fact_ambient.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test8_scoped_checks.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
@@ -181,11 +187,15 @@ public class SamplesV2Test extends TestCase {
         Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Either<Error, Verifier> res = token.verifier();
-        if (res.isLeft()) {
-            System.out.println("error: " + res.getLeft());
-        }
-        Assert.assertEquals(new Error.FailedLogic(new LogicError.InvalidBlockFact(0, "right(#ambient, \"file1\", #write)")), res.getLeft());
+        Verifier v1 = token.verifier().get();
+        v1.add_resource("file2");
+        v1.add_operation("read");
+        v1.allow();
+        Either<Error, Long> res = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
+
+        Assert.assertEquals(new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
+                new FailedCheck.FailedBlock(1, 0, "check if resource($0), operation(#read), right($0, #read)")
+        ))), res.getLeft());
     }
 
     public void test9_ExpiredToken() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
@@ -204,21 +214,22 @@ public class SamplesV2Test extends TestCase {
         v1.add_resource("file1");
         v1.add_operation("read");
         v1.set_time();
+        v1.allow();
         System.out.println(v1.print_world());
 
         Error e = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500))).getLeft();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
-                        new FailedCheck.FailedBlock(1, 1, "check if time(#ambient, $date), $date <= 2018-12-20T00:00:00Z")
+                        new FailedCheck.FailedBlock(1, 1, "check if time($date), $date <= 2018-12-20T00:00:00Z")
                 ))),
                 e);
     }
 
-    public void test10_AuthorityRules() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void test10_VerifierScope() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         PublicKey root = new PublicKey(rootData);
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test10_authority_rules.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test10_verifier_scope.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
@@ -227,13 +238,17 @@ public class SamplesV2Test extends TestCase {
         System.out.println(token.print());
 
         Verifier v1 = token.verifier().get();
-        v1.add_resource("file1");
+        v1.add_resource("file2");
         v1.add_operation("read");
-        v1.add_fact(fact("owner", Arrays.asList(s("ambient"), s("alice"), string("file1"))));
+        v1.add_check("check if right($0, $1), resource($0), operation($1)");
         v1.allow();
         Either<Error, Long> res = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println(res);
-        Assert.assertTrue(res.isRight());
+        Assert.assertEquals(
+                new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
+                        new FailedCheck.FailedVerifier(0, "check if right($0, $1), resource($0), operation($1)")
+                ))),
+                res.getLeft());
     }
 
     public void test11_VerifierAuthorityCaveats() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
@@ -255,9 +270,9 @@ public class SamplesV2Test extends TestCase {
                 "caveat1",
                 Arrays.asList(var("0")),
                 Arrays.asList(
-                        pred("resource", Arrays.asList(s("ambient"), var("0"))),
-                        pred("operation", Arrays.asList(s("ambient"), var("1"))),
-                        pred("right", Arrays.asList(s("authority"), var("0"), var("1")))
+                        pred("resource", Arrays.asList(var("0"))),
+                        pred("operation", Arrays.asList(var("1"))),
+                        pred("right", Arrays.asList(var("0"), var("1")))
                 )
         )));
         v1.allow();
@@ -266,7 +281,7 @@ public class SamplesV2Test extends TestCase {
         Error e = res.getLeft();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
-                        new FailedCheck.FailedVerifier(0, "check if resource(#ambient, $0), operation(#ambient, $1), right(#authority, $0, $1)")
+                        new FailedCheck.FailedVerifier(0, "check if resource($0), operation($1), right($0, $1)")
                 ))),
                 e);
     }
@@ -299,7 +314,7 @@ public class SamplesV2Test extends TestCase {
         Error e = res.getLeft();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
-                        new FailedCheck.FailedBlock(0, 0, "check if resource(#ambient, \"file1\")")
+                        new FailedCheck.FailedBlock(0, 0, "check if resource(\"file1\")")
                 ))),
                 e);
     }
@@ -318,13 +333,18 @@ public class SamplesV2Test extends TestCase {
 
         Verifier v1 = token.verifier().get();
         v1.add_resource("file1");
+        //v1.add_fact(fact("time", Arrays.asList(new Term.Date(1608542592))));
         v1.set_time();
         v1.allow();
-        Assert.assertTrue(v1.verify(new RunLimits(500, 100, Duration.ofMillis(500))).isRight());
+        Either<Error, Long> res1 = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
+        System.out.println(res1);
+        System.out.println(v1.print_world());
+        Assert.assertTrue(res1.isRight());
 
         Verifier v2 = token.verifier().get();
         v2.add_resource("file2");
-        v2.set_time();
+        v1.set_time();
+        //v2.add_fact(fact("time", Arrays.asList(new Term.Date(1608542592))));
         v2.allow();
 
         Either<Error, Long> res = v2.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
@@ -332,7 +352,7 @@ public class SamplesV2Test extends TestCase {
         Error e = res.getLeft();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
-                        new FailedCheck.FailedBlock(1, 0, "check if valid_date($0), resource(#ambient, $0)")
+                        new FailedCheck.FailedBlock(1, 0, "check if valid_date($0), resource($0)")
                 ))),
                 e);
     }
@@ -359,7 +379,7 @@ public class SamplesV2Test extends TestCase {
         Error e = res.getLeft();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
-                        new FailedCheck.FailedBlock(0, 0, "check if resource(#ambient, $0), $0.matches(\"file[0-9]+.txt\")")
+                        new FailedCheck.FailedBlock(0, 0, "check if resource($0), $0.matches(\"file[0-9]+.txt\")")
                 ))),
                 e);
 
@@ -389,7 +409,7 @@ public class SamplesV2Test extends TestCase {
                 "test_must_be_present_authority",
                 Arrays.asList(var("0")),
                 Arrays.asList(
-                        pred("must_be_present", Arrays.asList(s("authority"), var("0")))
+                        pred("must_be_present", Arrays.asList(var("0")))
                 )
         ));
         queries.add(rule(
@@ -425,7 +445,7 @@ public class SamplesV2Test extends TestCase {
         Error e = res.getLeft();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
-                        new FailedCheck.FailedBlock(0, 0, "check if resource(#ambient, #hello)")
+                        new FailedCheck.FailedBlock(0, 0, "check if resource(#hello)")
                 ))),
                 e);
     }
