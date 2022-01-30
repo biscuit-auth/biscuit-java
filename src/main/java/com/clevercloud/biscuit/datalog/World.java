@@ -38,11 +38,11 @@ public final class World implements Serializable {
       this.rules.clear();
    }
 
-   public Either<Error, Void> run(final Set<Long> restricted_symbols) {
-      return this.run(new RunLimits(), restricted_symbols);
+   public Either<Error, Void> run(final SymbolTable symbols) {
+      return this.run(new RunLimits(), symbols);
    }
 
-   public Either<Error, Void> run(RunLimits limits, final Set<Long> restricted_symbols) {
+   public Either<Error, Void> run(RunLimits limits, final SymbolTable symbols) {
       int iterations = 0;
       Instant limit = Instant.now().plus(limits.maxTime);
 
@@ -50,7 +50,7 @@ public final class World implements Serializable {
          final Set<Fact> new_facts = new HashSet<>();
 
          for (final Rule rule : this.privileged_rules) {
-            rule.apply(this.facts, new_facts, new HashSet<>());
+            rule.apply(this.facts, new_facts, symbols);
 
             if(Instant.now().compareTo(limit) >= 0) {
                return Left(new Error.Timeout());
@@ -58,7 +58,7 @@ public final class World implements Serializable {
          }
 
          for (final Rule rule : this.rules) {
-            rule.apply(this.facts, new_facts, restricted_symbols);
+            rule.apply(this.facts, new_facts, symbols);
 
             if(Instant.now().compareTo(limit) >= 0) {
                return Left(new Error.Timeout());
@@ -101,27 +101,28 @@ public final class World implements Serializable {
          for (int i = 0; i < min_size; ++i) {
             final ID fid = f.predicate().ids().get(i);
             final ID pid = pred.ids().get(i);
-            if ((fid instanceof ID.Symbol || fid instanceof ID.Integer || fid instanceof ID.Str || fid instanceof ID.Date)
+            if ((fid instanceof ID.Integer || fid instanceof ID.Str || fid instanceof ID.Date)
                     && fid.getClass() == pid.getClass()) {
                if (!fid.equals(pid)) {
                   return false;
                }
+            /* FIXME: is it still necessary?
             } else if (!(fid instanceof ID.Symbol && pid instanceof ID.Variable)) {
-               return false;
+               return false;*/
             }
          }
          return true;
       }).collect(Collectors.toSet());
    }
 
-   public final Set<Fact> query_rule(final Rule rule) {
+   public final Set<Fact> query_rule(final Rule rule, SymbolTable symbols) {
       final Set<Fact> new_facts = new HashSet<>();
-      rule.apply(this.facts, new_facts, new HashSet<>());
+      rule.apply(this.facts, new_facts, symbols);
       return new_facts;
    }
 
-   public final boolean test_rule(final Rule rule) {
-      return rule.test(this.facts);
+   public final boolean test_rule(final Rule rule, SymbolTable symbols) {
+      return rule.test(this.facts, symbols);
    }
 
    public World() {

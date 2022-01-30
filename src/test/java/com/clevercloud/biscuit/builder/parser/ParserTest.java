@@ -28,13 +28,8 @@ public class ParserTest extends TestCase {
     }
 
     public void testName() {
-        Either<Error, Tuple2<String, String>> res = Parser.name("operation(#ambient, #read)");
-        assertEquals(Either.right(new Tuple2<String, String>("(#ambient, #read)", "operation")), res);
-    }
-
-    public void testSymbol() {
-        Either<Error, Tuple2<String, Term.Symbol>> res = Parser.symbol("#ambient");
-        assertEquals(Either.right(new Tuple2<String, Term.Symbol>("", (Term.Symbol) s("ambient"))), res);
+        Either<Error, Tuple2<String, String>> res = Parser.name("operation(read)");
+        assertEquals(Either.right(new Tuple2<String, String>("(read)", "operation")), res);
     }
 
     public void testString() {
@@ -64,45 +59,45 @@ public class ParserTest extends TestCase {
     }
 
     public void testFact() {
-        Either<Error, Tuple2<String, Fact>> res = Parser.fact("right( #authority, \"file1\", #read )");
+        Either<Error, Tuple2<String, Fact>> res = Parser.fact("right( \"file1\", \"read\" )");
         assertEquals(Either.right(new Tuple2<String, Fact>("",
-                fact("right", Arrays.asList(s("authority"), string("file1"), s("read"))))),
+                fact("right", Arrays.asList(string("file1"), s("read"))))),
                 res);
 
-        Either<Error, Tuple2<String, Fact>> res2 = Parser.fact("right( #authority, $var, #read )");
+        Either<Error, Tuple2<String, Fact>> res2 = Parser.fact("right( $var, \"read\" )");
         //assertEquals(Either.left(new Error("$var, #read )", "variables are not allowed in facts")),
         //    res2);
-        assertEquals(Either.left(new Error("$var, #read )", "closing parens not found")),
+        assertEquals(Either.left(new Error("$var, \"read\" )", "closing parens not found")),
                 res2);
 
-        Either<Error, Tuple2<String, Fact>> res3 = Parser.fact("date(#ambient,2019-12-02T13:49:53Z)");
+        Either<Error, Tuple2<String, Fact>> res3 = Parser.fact("date(2019-12-02T13:49:53Z)");
         assertEquals(Either.right(new Tuple2<String, Fact>("",
-                        fact("date", Arrays.asList(s("ambient"), new Term.Date(1575294593))))),
+                        fact("date", Arrays.asList(new Term.Date(1575294593))))),
                 res3);
     }
 
     public void testRule() {
         Either<Error, Tuple2<String, Rule>> res =
-                Parser.rule("right(#authority, $resource, #read) <- resource( #ambient, $resource), operation(#ambient, #read)");
+                Parser.rule("right($resource, \"read\") <- resource($resource), operation(\"read\")");
         assertEquals(Either.right(new Tuple2<String, Rule>("",
                         rule("right",
-                                Arrays.asList(s("authority"), var("resource"), s("read")),
+                                Arrays.asList(var("resource"), s("read")),
                                 Arrays.asList(
-                                        pred("resource", Arrays.asList(s("ambient"), var("resource"))),
-                                        pred("operation", Arrays.asList(s("ambient"), s("read"))))
+                                        pred("resource", Arrays.asList(var("resource"))),
+                                        pred("operation", Arrays.asList(s("read"))))
                         ))),
                 res);
     }
 
     public void testRuleWithExpression() {
             Either<Error, Tuple2<String, Rule>> res =
-                Parser.rule("valid_date(\"file1\") <- time(#ambient, $0 ), resource( #ambient, \"file1\"), $0 <= 2019-12-04T09:46:41+00:00");
+                Parser.rule("valid_date(\"file1\") <- time($0 ), resource( \"file1\"), $0 <= 2019-12-04T09:46:41+00:00");
         assertEquals(Either.right(new Tuple2<String, Rule>("",
                         constrained_rule("valid_date",
                                 Arrays.asList(string("file1")),
                                 Arrays.asList(
-                                        pred("time", Arrays.asList(s("ambient"),  var("0"))),
-                                        pred("resource", Arrays.asList(s("ambient"),  string("file1")))
+                                        pred("time", Arrays.asList(var("0"))),
+                                        pred("resource", Arrays.asList( string("file1")))
                                         ),
                                 Arrays.asList(
                                         new Expression.Binary(
@@ -116,13 +111,13 @@ public class ParserTest extends TestCase {
 
     public void testRuleWithExpressionOrdering() {
         Either<Error, Tuple2<String, Rule>> res =
-                Parser.rule("valid_date(\"file1\") <- time(#ambient, $0 ), $0 <= 2019-12-04T09:46:41+00:00, resource( #ambient, \"file1\")");
+                Parser.rule("valid_date(\"file1\") <- time($0 ), $0 <= 2019-12-04T09:46:41+00:00, resource(\"file1\")");
         assertEquals(Either.right(new Tuple2<String, Rule>("",
                         constrained_rule("valid_date",
                                 Arrays.asList(string("file1")),
                                 Arrays.asList(
-                                        pred("time", Arrays.asList(s("ambient"),  var("0"))),
-                                        pred("resource", Arrays.asList(s("ambient"),  string("file1")))
+                                        pred("time", Arrays.asList(var("0"))),
+                                        pred("resource", Arrays.asList(string("file1")))
                                 ),
                                 Arrays.asList(
                                         new Expression.Binary(
@@ -136,19 +131,19 @@ public class ParserTest extends TestCase {
 
     public void testCheck() {
         Either<Error, Tuple2<String, Check>> res =
-                Parser.check("check if resource(#ambient, $0), operation(#ambient, #read) or admin(#authority)");
+                Parser.check("check if resource($0), operation(\"read\") or admin()");
         assertEquals(Either.right(new Tuple2<String, Check>("", new Check(Arrays.asList(
                     rule("query",
                             new ArrayList<>(),
                             Arrays.asList(
-                                    pred("resource", Arrays.asList(s("ambient"),  var("0"))),
-                                    pred("operation", Arrays.asList(s("ambient"),  s("read")))
+                                    pred("resource", Arrays.asList(var("0"))),
+                                    pred("operation", Arrays.asList(s("read")))
                             )
                     ),
                     rule("query",
                             new ArrayList<>(),
                             Arrays.asList(
-                                    pred("admin", Arrays.asList(s("authority")))
+                                    pred("admin", Arrays.asList())
                             )
                     )
                     )))),
@@ -227,7 +222,7 @@ public class ParserTest extends TestCase {
                 res4);
 
         Either<Error, Tuple2<String, Expression>> res5 =
-                Parser.expression("  [ #abc, #def ].contains($operation) ");
+                Parser.expression("  [ \"abc\", \"def\" ].contains($operation) ");
 
         HashSet<Term> s = new HashSet();
         s.add(s("abc"));
@@ -277,7 +272,7 @@ public class ParserTest extends TestCase {
         );
 
         HashMap variables = new HashMap();
-        Option<ID> value = ex.evaluate(variables);
+        Option<ID> value = ex.evaluate(variables, s);
         assertEquals(Option.some(new ID.Integer(7)), value);
         assertEquals("1 + 2 * 3", ex.print(s).get());
 
@@ -319,7 +314,7 @@ public class ParserTest extends TestCase {
         );
 
         HashMap variables2 = new HashMap();
-        Option<ID> value2 = ex2.evaluate(variables2);
+        Option<ID> value2 = ex2.evaluate(variables2, s2);
         assertEquals(Option.some(new ID.Integer(9)), value2);
         assertEquals("(1 + 2) * 3", ex2.print(s2).get());
     }

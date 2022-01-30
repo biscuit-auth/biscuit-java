@@ -43,7 +43,7 @@ public class WorldTest extends TestCase {
       ), new ArrayList<>());
 
       System.out.println("testing r1: " + syms.print_rule(r1));
-      Set<Fact> query_rule_result = w.query_rule(r1);
+      Set<Fact> query_rule_result = w.query_rule(r1, syms);
       System.out.println("grandparents query_rules: [" + String.join(", ", query_rule_result.stream().map((f) -> syms.print_fact(f)).collect(Collectors.toList())) + "]");
       System.out.println("current facts: [" + String.join(", ", w.facts().stream().map((f) -> syms.print_fact(f)).collect(Collectors.toList())) + "]");
 
@@ -55,7 +55,7 @@ public class WorldTest extends TestCase {
 
       System.out.println("adding r2: " + syms.print_rule(r2));
       w.add_rule(r2);
-      w.run(new HashSet());
+      w.run(syms);
 
       System.out.println("parents:");
       for (final Fact fact : w.query(new Predicate(parent,
@@ -71,7 +71,7 @@ public class WorldTest extends TestCase {
                       .stream().map((f) -> syms.print_fact(f)).collect(Collectors.toSet())) + "]");
 
       w.add_fact(new Fact(new Predicate(parent, Arrays.asList(c, e))));
-      w.run(new HashSet<>());
+      w.run(syms);
 
       final Set<Fact> res = w.query(new Predicate(grandparent,
               Arrays.asList(new ID.Variable(syms.insert("grandparent")), new ID.Variable(syms.insert("grandchild")))));
@@ -89,7 +89,7 @@ public class WorldTest extends TestCase {
             new Predicate(parent, Arrays.asList(new ID.Variable(syms.insert("parent")), new ID.Variable(syms.insert("sibling1")))),
             new Predicate(parent, Arrays.asList(new ID.Variable(syms.insert("parent")), new ID.Variable(syms.insert("sibling2"))))
       ), new ArrayList<>()));
-      w.run(new HashSet<>());
+      w.run(syms);
 
       System.out.println("siblings: [" + String.join(", ",
               w.query(new Predicate(sibling, Arrays.asList(
@@ -132,7 +132,7 @@ public class WorldTest extends TestCase {
                             Arrays.asList(
                                     new ID.Variable(syms.insert("t2_id")),
                                     new ID.Variable(syms.insert("right")),
-                                    new ID.Variable(syms.insert("id"))))), new ArrayList<>()));
+                                    new ID.Variable(syms.insert("id"))))), new ArrayList<>()), syms);
       for (final Fact f : res) {
          System.out.println("\t" + syms.print_fact(f));
       }
@@ -152,7 +152,7 @@ public class WorldTest extends TestCase {
                       new Op.Value(new ID.Integer(1)),
                       new Op.Binary(Op.BinaryOp.LessThan)
                       ))))
-      ));
+      ), syms);
       for (final Fact f : res) {
          System.out.println("\t" + syms.print_fact(f));
       }
@@ -171,10 +171,10 @@ public class WorldTest extends TestCase {
       ),
               Arrays.asList(new Expression(new ArrayList<Op>(Arrays.asList(
                       new Op.Value(new ID.Variable(syms.insert("domain"))),
-                      new Op.Value(new ID.Str(suffix)),
+                      new Op.Value(syms.add(suffix)),
                       new Op.Binary(Op.BinaryOp.Suffix)
               ))))
-      ));
+      ), syms);
    }
 
    public void testStr() {
@@ -187,17 +187,17 @@ public class WorldTest extends TestCase {
       final long route = syms.insert("route");
       final long suff = syms.insert("route suffix");
 
-      w.add_fact(new Fact(new Predicate(route, Arrays.asList(new ID.Integer(0), app_0, new ID.Str("example.com")))));
-      w.add_fact(new Fact(new Predicate(route, Arrays.asList(new ID.Integer(1), app_1, new ID.Str("test.com")))));
-      w.add_fact(new Fact(new Predicate(route, Arrays.asList(new ID.Integer(2), app_2, new ID.Str("test.fr")))));
-      w.add_fact(new Fact(new Predicate(route, Arrays.asList(new ID.Integer(3), app_0, new ID.Str("www.example.com")))));
-      w.add_fact(new Fact(new Predicate(route, Arrays.asList(new ID.Integer(4), app_1, new ID.Str("mx.example.com")))));
+      w.add_fact(new Fact(new Predicate(route, Arrays.asList(new ID.Integer(0), app_0, syms.add("example.com")))));
+      w.add_fact(new Fact(new Predicate(route, Arrays.asList(new ID.Integer(1), app_1, syms.add("test.com")))));
+      w.add_fact(new Fact(new Predicate(route, Arrays.asList(new ID.Integer(2), app_2, syms.add("test.fr")))));
+      w.add_fact(new Fact(new Predicate(route, Arrays.asList(new ID.Integer(3), app_0, syms.add("www.example.com")))));
+      w.add_fact(new Fact(new Predicate(route, Arrays.asList(new ID.Integer(4), app_1, syms.add("mx.example.com")))));
 
       Set<Fact> res = testSuffix(w, syms, suff, route, ".fr");
       for (final Fact f : res) {
          System.out.println("\t" + syms.print_fact(f));
       }
-      Set<Fact> expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(suff, Arrays.asList(app_2, new ID.Str("test.fr"))))));
+      Set<Fact> expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(suff, Arrays.asList(app_2, syms.add("test.fr"))))));
       Assert.assertEquals(expected, res);
 
       res = testSuffix(w, syms, suff, route, "example.com");
@@ -207,10 +207,10 @@ public class WorldTest extends TestCase {
       expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(suff,
               Arrays.asList(
                       app_0,
-                      new ID.Str("example.com")))),
+                      syms.add("example.com")))),
               new Fact(new Predicate(suff,
-                      Arrays.asList(app_0, new ID.Str("www.example.com")))),
-              new Fact(new Predicate(suff, Arrays.asList(app_1, new ID.Str("mx.example.com"))))));
+                      Arrays.asList(app_0, syms.add("www.example.com")))),
+              new Fact(new Predicate(suff, Arrays.asList(app_1, syms.add("mx.example.com"))))));
       Assert.assertEquals(expected, res);
    }
 
@@ -257,7 +257,7 @@ public class WorldTest extends TestCase {
       );
 
       System.out.println("testing r1: " + syms.print_rule(r1));
-      Set<Fact> res = w.query_rule(r1);
+      Set<Fact> res = w.query_rule(r1, syms);
       for (final Fact f : res) {
          System.out.println("\t" + syms.print_fact(f));
       }
@@ -285,7 +285,7 @@ public class WorldTest extends TestCase {
       );
 
       System.out.println("testing r2: " + syms.print_rule(r2));
-      res = w.query_rule(r2);
+      res = w.query_rule(r2, syms);
       for (final Fact f : res) {
          System.out.println("\t" + syms.print_fact(f));
       }
@@ -304,8 +304,8 @@ public class WorldTest extends TestCase {
       final long symbol_set = syms.insert("symbol_set");
       final long string_set = syms.insert("string_set");
 
-      w.add_fact(new Fact(new Predicate(x, Arrays.asList(abc, new ID.Integer(0), new ID.Str("test")))));
-      w.add_fact(new Fact(new Predicate(x, Arrays.asList(def, new ID.Integer(2), new ID.Str("hello")))));
+      w.add_fact(new Fact(new Predicate(x, Arrays.asList(abc, new ID.Integer(0), syms.add("test")))));
+      w.add_fact(new Fact(new Predicate(x, Arrays.asList(def, new ID.Integer(2), syms.add("hello")))));
 
       final Rule r1 = new Rule(new Predicate(
               int_set,
@@ -323,11 +323,11 @@ public class WorldTest extends TestCase {
               )
       );
       System.out.println("testing r1: " + syms.print_rule(r1));
-      Set<Fact> res = w.query_rule(r1);
+      Set<Fact> res = w.query_rule(r1, syms);
       for (final Fact f : res) {
          System.out.println("\t" + syms.print_fact(f));
       }
-      Set<Fact> expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(int_set, Arrays.asList(abc, new ID.Str("test"))))));
+      Set<Fact> expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(int_set, Arrays.asList(abc, syms.add("test"))))));
       Assert.assertEquals(expected, res);
 
       final long abc_sym_id = syms.insert("abc");
@@ -339,7 +339,7 @@ public class WorldTest extends TestCase {
               ),
               Arrays.asList(
                       new Expression(new ArrayList<Op>(Arrays.asList(
-                              new Op.Value(new ID.Set(new HashSet<>(Arrays.asList(new ID.Symbol(abc_sym_id), new ID.Symbol(ghi_sym_id))))),
+                              new Op.Value(new ID.Set(new HashSet<>(Arrays.asList(new ID.Str(abc_sym_id), new ID.Str(ghi_sym_id))))),
                               new Op.Value(new ID.Variable(syms.insert("sym"))),
                               new Op.Binary(Op.BinaryOp.Contains),
                               new Op.Unary(Op.UnaryOp.Negate)
@@ -348,11 +348,11 @@ public class WorldTest extends TestCase {
       );
 
       System.out.println("testing r2: " + syms.print_rule(r2));
-      res = w.query_rule(r2);
+      res = w.query_rule(r2, syms);
       for (final Fact f : res) {
          System.out.println("\t" + syms.print_fact(f));
       }
-      expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(symbol_set, Arrays.asList(def, new ID.Integer(2), new ID.Str("hello"))))));
+      expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(symbol_set, Arrays.asList(def, new ID.Integer(2), syms.add("hello"))))));
       Assert.assertEquals(expected, res);
 
       final Rule r3 = new Rule(
@@ -360,18 +360,18 @@ public class WorldTest extends TestCase {
               Arrays.asList(new Predicate(x, Arrays.asList(new ID.Variable(syms.insert("sym")), new ID.Variable(syms.insert("int")), new ID.Variable(syms.insert("str"))))),
               Arrays.asList(
                       new Expression(new ArrayList<Op>(Arrays.asList(
-                              new Op.Value(new ID.Set(new HashSet<>(Arrays.asList(new ID.Str("test"), new ID.Str("aaa"))))),
+                              new Op.Value(new ID.Set(new HashSet<>(Arrays.asList(syms.add("test"), syms.add("aaa"))))),
                               new Op.Value(new ID.Variable(syms.insert("str"))),
                               new Op.Binary(Op.BinaryOp.Contains)
                       )))
               )
       );
       System.out.println("testing r3: " + syms.print_rule(r3));
-      res = w.query_rule(r3);
+      res = w.query_rule(r3, syms);
       for (final Fact f : res) {
          System.out.println("\t" + syms.print_fact(f));
       }
-      expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(string_set, Arrays.asList(abc, new ID.Integer(0), new ID.Str("test"))))));
+      expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(string_set, Arrays.asList(abc, new ID.Integer(0), syms.add("test"))))));
       Assert.assertEquals(expected, res);
    }
 
@@ -390,21 +390,19 @@ public class WorldTest extends TestCase {
       final ID write = syms.add("write");
 
 
-      w.add_fact(new Fact(new Predicate(resource, Arrays.asList(ambient, file2))));
-      w.add_fact(new Fact(new Predicate(operation, Arrays.asList(ambient, write))));
-      w.add_fact(new Fact(new Predicate(right, Arrays.asList(authority, file1, read))));
-      w.add_fact(new Fact(new Predicate(right, Arrays.asList(authority, file2, read))));
-      w.add_fact(new Fact(new Predicate(right, Arrays.asList(authority, file1, write))));
+      w.add_fact(new Fact(new Predicate(right, Arrays.asList(file1, read))));
+      w.add_fact(new Fact(new Predicate(right, Arrays.asList(file2, read))));
+      w.add_fact(new Fact(new Predicate(right, Arrays.asList(file1, write))));
 
       final long caveat1 = syms.insert("caveat1");
       //r1: caveat2(#file1) <- resource(#ambient, #file1)
       final Rule r1 = new Rule(
               new Predicate(caveat1, Arrays.asList(file1)),
-              Arrays.asList(new Predicate(resource, Arrays.asList(ambient, file1))
+              Arrays.asList(new Predicate(resource, Arrays.asList(file1))
       ), new ArrayList<>());
 
       System.out.println("testing caveat 1(should return nothing): " + syms.print_rule(r1));
-      Set<Fact>res = w.query_rule(r1);
+      Set<Fact>res = w.query_rule(r1, syms);
       System.out.println(res);
       for (final Fact f : res) {
          System.out.println("\t" + syms.print_fact(f));
@@ -418,13 +416,13 @@ public class WorldTest extends TestCase {
       final Rule r2 = new Rule(
               new Predicate(caveat2, Arrays.asList(var0)),
               Arrays.asList(
-                      new Predicate(resource, Arrays.asList(ambient, var0)),
-                      new Predicate(operation, Arrays.asList(ambient, read)),
-                      new Predicate(right, Arrays.asList(authority, var0, read))
+                      new Predicate(resource, Arrays.asList(var0)),
+                      new Predicate(operation, Arrays.asList(read)),
+                      new Predicate(right, Arrays.asList(var0, read))
               ), new ArrayList<>());
 
       System.out.println("testing caveat 2: " + syms.print_rule(r2));
-      res = w.query_rule(r2);
+      res = w.query_rule(r2, syms);
       System.out.println(res);
       for (final Fact f : res) {
          System.out.println("\t" + syms.print_fact(f));

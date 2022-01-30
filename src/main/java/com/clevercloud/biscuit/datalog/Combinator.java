@@ -14,7 +14,7 @@ public final class Combinator implements Serializable {
    private final Predicate pred;
    private final Iterator<Fact> fit;
    private Combinator current_it;
-
+   private SymbolTable symbols;
 
    public Option<MatchedVariables> next() {
       while(true) {
@@ -28,7 +28,7 @@ public final class Combinator implements Serializable {
 
             MatchedVariables next_vars = next_vars_opt.get();
 
-            final Option<Map<Long, ID>> v_opt = next_vars.check_expressions(this.expressions);
+            final Option<Map<Long, ID>> v_opt = next_vars.check_expressions(this.expressions, symbols);
             if(v_opt.isEmpty()) {
                continue;
             } else {
@@ -67,7 +67,7 @@ public final class Combinator implements Serializable {
 
             // there are no more predicates to check
             if (next_predicates.isEmpty()) {
-               final Option<Map<Long, ID>> v_opt = vars.check_expressions(this.expressions);
+               final Option<Map<Long, ID>> v_opt = vars.check_expressions(this.expressions, symbols);
                if(v_opt.isEmpty()) {
                   continue;
                } else {
@@ -76,7 +76,7 @@ public final class Combinator implements Serializable {
             } else {
                // we found a matching fact, we create a new combinator over the rest of the predicates
                // no need to copy all of the expressions at all levels
-               this.current_it = new Combinator(vars, next_predicates, new ArrayList<>(), this.all_facts);
+               this.current_it = new Combinator(vars, next_predicates, new ArrayList<>(), this.all_facts, this.symbols);
             }
          } else {
             break;
@@ -104,13 +104,14 @@ public final class Combinator implements Serializable {
    }
 
    public Combinator(final MatchedVariables variables, final List<Predicate> predicates, final List<Expression> expressions,
-                     final Set<Fact> all_facts) {
+                     final Set<Fact> all_facts, final SymbolTable symbols) {
       this.variables = variables;
       this.expressions = expressions;
       this.all_facts = all_facts;
       this.current_it = null;
       this.pred = predicates.get(0);
       this.fit = all_facts.stream().filter((fact) -> fact.match_predicate(predicates.get(0))).iterator();
+      this.symbols = symbols;
 
       final List<Predicate> next_predicates = new ArrayList<>();
       for (int i = 1; i < predicates.size(); ++i) {

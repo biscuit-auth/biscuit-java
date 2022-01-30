@@ -287,11 +287,6 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<String, Term>> term(String s) {
-        Either<Error, Tuple2<String, Term.Symbol>> res1 = symbol(s);
-        if(res1.isRight()) {
-            Tuple2<String, Term.Symbol> t = res1.get();
-            return Either.right(new Tuple2<String, Term>(t._1, t._2));
-        }
 
         Either<Error, Tuple2<String, Term.Variable>> res5 = variable(s);
         if(res5.isRight()) {
@@ -337,12 +332,6 @@ public class Parser {
             return Either.left(new Error(s, "variables are not allowed in facts"));
         }
 
-        Either<Error, Tuple2<String, Term.Symbol>> res1 = symbol(s);
-        if(res1.isRight()) {
-            Tuple2<String, Term.Symbol> t = res1.get();
-            return Either.right(new Tuple2<String, Term>(t._1, t._2));
-        }
-
         Either<Error, Tuple2<String, Term.Str>> res2 = string(s);
         if(res2.isRight()) {
             Tuple2<String, Term.Str> t = res2.get();
@@ -375,19 +364,6 @@ public class Parser {
 
 
         return Either.left(new Error(s, "unrecognized value"));
-    }
-
-    public static Either<Error, Tuple2<String, Term.Symbol>> symbol(String s) {
-        if(s.charAt(0) !='#') {
-            return Either.left(new Error(s, "not a symbol"));
-        }
-
-        Tuple2<String, String> t = take_while(s.substring(1),
-                (c) -> Character.isAlphabetic(c) || Character.isDigit(c) || c == '_');
-        String name = t._1;
-        String remaining = t._2;
-
-        return Either.right(new Tuple2<String, Term.Symbol>(remaining, (Term.Symbol) s(name)));
     }
 
     public static Either<Error, Tuple2<String, Term.Str>> string(String s) {

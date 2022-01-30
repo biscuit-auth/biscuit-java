@@ -56,13 +56,13 @@ public final class MatchedVariables implements Serializable {
       }
    }
 
-   public Option<Map<Long, ID>> check_expressions(List<Expression> expressions) {
+   public Option<Map<Long, ID>> check_expressions(List<Expression> expressions, SymbolTable symbols) {
       final Optional<Map<Long, ID>> vars = this.complete();
       if (vars.isPresent()) {
          Map<Long, ID> variables = vars.get();
 
          for(Expression e: expressions) {
-            Option<ID> res = e.evaluate(variables);
+            Option<ID> res = e.evaluate(variables, symbols);
 
             if(res.isEmpty()) {
                return Option.none();

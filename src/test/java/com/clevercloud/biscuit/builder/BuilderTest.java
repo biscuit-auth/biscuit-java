@@ -36,10 +36,10 @@ public class BuilderTest extends TestCase {
 
         Block authority_builder = new Block(0, symbols);
         authority_builder.add_fact(fact("revocation_id", Arrays.asList(date(Date.from(Instant.now())))));
-        authority_builder.add_fact(fact("right", Arrays.asList(s("authority"), s("admin"))));
+        authority_builder.add_fact(fact("right", Arrays.asList(s("admin"))));
         authority_builder.add_rule(constrained_rule("right",
-                Arrays.asList(s("authority"), s("namespace"), var("tenant"), var("namespace"), var("operation")),
-                Arrays.asList(pred("ns_operation", Arrays.asList(s("authority"), s("namespace"), var("tenant"), var("namespace"), var("operation")))),
+                Arrays.asList(s("namespace"), var("tenant"), var("namespace"), var("operation")),
+                Arrays.asList(pred("ns_operation", Arrays.asList(s("namespace"), var("tenant"), var("namespace"), var("operation")))),
                 Arrays.asList(
                         new Expression.Binary(
                                 Expression.Op.Contains,
@@ -52,8 +52,8 @@ public class BuilderTest extends TestCase {
                 )
         ));
         authority_builder.add_rule(constrained_rule("right",
-                Arrays.asList(s("authority"), s("topic"), var("tenant"), var("namespace"), var("topic"), var("operation")),
-                Arrays.asList(pred("topic_operation", Arrays.asList(s("authority"), s("topic"), var("tenant"), var("namespace"), var("topic"), var("operation")))),
+                Arrays.asList(s("topic"), var("tenant"), var("namespace"), var("topic"), var("operation")),
+                Arrays.asList(pred("topic_operation", Arrays.asList(s("topic"), var("tenant"), var("namespace"), var("topic"), var("operation")))),
                 Arrays.asList(
                         new Expression.Binary(
                                 Expression.Op.Contains,

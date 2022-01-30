@@ -44,7 +44,7 @@ public class ExpressionTest extends TestCase {
 
         Assert.assertEquals(
                 new ID.Bool(true),
-                e.evaluate(variables).get()
+                e.evaluate(variables, symbols).get()
         );
     }
 }

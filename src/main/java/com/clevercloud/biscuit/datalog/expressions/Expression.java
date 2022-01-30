@@ -26,10 +26,10 @@ public class Expression {
         return ops;
     }
 
-    public Option<ID> evaluate(Map<Long, ID> variables) {
+    public Option<ID> evaluate(Map<Long, ID> variables, SymbolTable symbols) {
         Deque<ID> stack = new ArrayDeque<ID>(16); //Default value
         for(Op op: ops){
-            if(!op.evaluate(stack,variables)){
+            if(!op.evaluate(stack,variables, symbols)){
                 return Option.none();
             }
         }
