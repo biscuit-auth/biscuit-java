@@ -171,7 +171,7 @@ public class SamplesV2Test extends TestCase {
         Either<Error, Long> res = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
 
         Assert.assertEquals(new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
-                new FailedCheck.FailedBlock(1, 0, "check if resource($0), operation(#read), right($0, #read)")
+                new FailedCheck.FailedBlock(1, 0, "check if resource($0), operation(\"read\"), right($0, \"read\")")
         ))), res.getLeft());
     }
 
@@ -194,7 +194,7 @@ public class SamplesV2Test extends TestCase {
         Either<Error, Long> res = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
 
         Assert.assertEquals(new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
-                new FailedCheck.FailedBlock(1, 0, "check if resource($0), operation(#read), right($0, #read)")
+                new FailedCheck.FailedBlock(1, 0, "check if resource($0), operation(\"read\"), right($0, \"read\")")
         ))), res.getLeft());
     }
 
@@ -445,7 +445,7 @@ public class SamplesV2Test extends TestCase {
         Error e = res.getLeft();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
-                        new FailedCheck.FailedBlock(0, 0, "check if resource(#hello)")
+                        new FailedCheck.FailedBlock(0, 0, "check if resource(\"hello\")")
                 ))),
                 e);
     }

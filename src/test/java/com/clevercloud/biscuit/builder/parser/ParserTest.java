@@ -32,11 +32,6 @@ public class ParserTest extends TestCase {
         assertEquals(Either.right(new Tuple2<String, String>("(#ambient, #read)", "operation")), res);
     }
 
-    public void testSymbol() {
-        Either<Error, Tuple2<String, Term.Symbol>> res = Parser.symbol("#ambient");
-        assertEquals(Either.right(new Tuple2<String, Term.Symbol>("", (Term.Symbol) s("ambient"))), res);
-    }
-
     public void testString() {
         Either<Error, Tuple2<String, Term.Str>> res = Parser.string("\"file1 a hello - 123_\"");
         assertEquals(Either.right(new Tuple2<String, Term.Str>("", (Term.Str) string("file1 a hello - 123_"))), res);
@@ -136,19 +131,19 @@ public class ParserTest extends TestCase {
 
     public void testCheck() {
         Either<Error, Tuple2<String, Check>> res =
-                Parser.check("check if resource(#ambient, $0), operation(#ambient, #read) or admin(#authority)");
+                Parser.check("check if resource($0), operation(\"read\") or admin()");
         assertEquals(Either.right(new Tuple2<String, Check>("", new Check(Arrays.asList(
                     rule("query",
                             new ArrayList<>(),
                             Arrays.asList(
-                                    pred("resource", Arrays.asList(s("ambient"),  var("0"))),
-                                    pred("operation", Arrays.asList(s("ambient"),  s("read")))
+                                    pred("resource", Arrays.asList(var("0"))),
+                                    pred("operation", Arrays.asList(s("read")))
                             )
                     ),
                     rule("query",
                             new ArrayList<>(),
                             Arrays.asList(
-                                    pred("admin", Arrays.asList(s("authority")))
+                                    pred("admin", Arrays.asList())
                             )
                     )
                     )))),
@@ -277,7 +272,7 @@ public class ParserTest extends TestCase {
         );
 
         HashMap variables = new HashMap();
-        Option<ID> value = ex.evaluate(variables);
+        Option<ID> value = ex.evaluate(variables, s);
         assertEquals(Option.some(new ID.Integer(7)), value);
         assertEquals("1 + 2 * 3", ex.print(s).get());
 
@@ -319,7 +314,7 @@ public class ParserTest extends TestCase {
         );
 
         HashMap variables2 = new HashMap();
-        Option<ID> value2 = ex2.evaluate(variables2);
+        Option<ID> value2 = ex2.evaluate(variables2, s2);
         assertEquals(Option.some(new ID.Integer(9)), value2);
         assertEquals("(1 + 2) * 3", ex2.print(s2).get());
     }

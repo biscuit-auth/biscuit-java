@@ -25,7 +25,7 @@ public final class SymbolTable implements Serializable {
    }
 
    public ID add(final String symbol) {
-      return new ID.Symbol(this.insert(symbol));
+      return new ID.Str(this.insert(symbol));
    }
 
    public Option<Long> get(final String symbol) {
@@ -34,6 +34,14 @@ public final class SymbolTable implements Serializable {
          return Option.none();
       } else {
          return Option.some(index);
+      }
+   }
+
+   public Option<String> get_s(int i) {
+      if (i >=0 && i < this.symbols.size()) {
+         return Option.some(this.symbols.get(i));
+      } else {
+         return Option.none();
       }
    }
 
@@ -58,9 +66,7 @@ public final class SymbolTable implements Serializable {
             _s += " ]";
          }
       } else if (value instanceof ID.Str) {
-         _s = "\""+((ID.Str) value).value()+"\"";
-      } else if (value instanceof ID.Symbol) {
-         _s = "#" + print_symbol((int) ((ID.Symbol) value).value());
+         _s = "\""+print_symbol((int) ((ID.Str) value).value())+"\"";
       } else if (value instanceof ID.Variable) {
          _s = "$" + print_symbol((int) ((ID.Variable) value).value());
       }
@@ -97,14 +103,12 @@ public final class SymbolTable implements Serializable {
       List<String> ids = p.ids().stream().map((i) -> {
          if (i instanceof ID.Variable) {
             return "$" + this.print_symbol((int) ((ID.Variable) i).value());
-         } else if (i instanceof ID.Symbol) {
-            return "#" + this.print_symbol((int) ((ID.Symbol) i).value());
          } else if (i instanceof ID.Date) {
             return Date.from(Instant.ofEpochSecond(((ID.Date) i).value())).toString();
          } else if (i instanceof ID.Integer) {
             return "" + ((ID.Integer) i).value();
          } else if (i instanceof ID.Str) {
-            return "\""+((ID.Str) i).value()+"\"";
+            return "\""+this.print_symbol((int) ((ID.Str) i).value())+"\"";
          } else if(i instanceof ID.Bytes) {
             return "hex:"+ Utils.byteArrayToHexString(((ID.Bytes) i).value());
          } else {

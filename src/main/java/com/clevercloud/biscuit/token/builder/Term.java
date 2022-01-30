@@ -13,29 +13,33 @@ public abstract class Term {
         return id.toTerm(symbols);
     }
 
-    public static class Symbol extends Term {
+    public static class Str extends Term {
         String value;
 
-        public Symbol(String value) {
+        public String getValue() {
+            return value;
+        }
+
+        public Str(String value) {
             this.value = value;
         }
 
         @Override
         public ID convert(SymbolTable symbols) {
-            return new ID.Symbol(symbols.insert(this.value));
+            return new ID.Str(symbols.insert(this.value));
         }
 
             @Override
         public String toString() {
-            return "#"+value;
+            return "\""+value+"\"";
         }
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Symbol symbol = (Symbol) o;
-            return Objects.equals(value, symbol.value);
+            Str s = (Str) o;
+            return Objects.equals(value, s.value);
         }
 
         @Override
@@ -110,40 +114,6 @@ public abstract class Term {
         }
     }
 
-    public static class Str extends Term {
-        String value;
-
-        public Str(String value) {
-            this.value = value;
-        }
-
-        @Override
-        public ID convert(SymbolTable symbols) {
-            return new ID.Str(this.value);
-        }
-
-        @Override
-        public String toString() {
-            return "\""+value+"\"";
-        }
-
-        public String value() { return value; }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            Str str = (Str) o;
-
-            return value != null ? value.equals(str.value) : str.value == null;
-        }
-
-        @Override
-        public int hashCode() {
-            return value != null ? value.hashCode() : 0;
-        }
-    }
 
     public static class Bytes extends Term {
         byte[] value;

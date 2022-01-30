@@ -38,7 +38,7 @@ public class Utils {
     }
 
     public static Term s(String str) {
-        return new Term.Symbol(str);
+        return new Term.Str(str);
     }
 
     public static Term date(Date d) {

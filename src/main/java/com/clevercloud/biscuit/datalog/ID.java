@@ -27,8 +27,6 @@ public abstract class ID implements Serializable {
          return Str.deserializeV2(id);
       } else if(id.hasBytes()) {
          return Bytes.deserializeV2(id);
-      } else if(id.hasSymbol()) {
-         return Symbol.deserializeV2(id);
       } else if(id.hasVariable()) {
          return Variable.deserializeV2(id);
       } else if(id.hasBool()) {
@@ -158,65 +156,6 @@ public abstract class ID implements Serializable {
       }
    }
 
-   public final static class Str extends ID implements Serializable {
-      private final String value;
-
-      public String value() {
-         return this.value;
-      }
-
-      public boolean match(final ID other) {
-         if (other instanceof Variable) {
-            return true;
-         }
-         if (other instanceof Str) {
-            return this.value.equals(((Str) other).value);
-         }
-         return false;
-      }
-
-      public Str(final String value) {
-         this.value = value;
-      }
-
-      @Override
-      public boolean equals(Object o) {
-         if (this == o) return true;
-         if (o == null || getClass() != o.getClass()) return false;
-
-         Str str = (Str) o;
-
-         return value != null ? value.equals(str.value) : str.value == null;
-      }
-
-      @Override
-      public int hashCode() {
-         return value != null ? value.hashCode() : 0;
-      }
-
-      @Override
-      public String toString() {
-         return this.value;
-      }
-
-      public Schema.IDV2 serialize() {
-         return Schema.IDV2.newBuilder()
-                 .setString(this.value).build();
-      }
-
-      static public Either<Error.FormatError, ID> deserializeV2(Schema.IDV2 id) {
-         if(!id.hasString()) {
-            return Left(new Error.FormatError.DeserializationError("invalid ID kind, expected string"));
-         } else {
-            return Right(new Str(id.getString()));
-         }
-      }
-
-      public Term toTerm(SymbolTable symbols) {
-         return new Term.Str(this.value);
-      }
-   }
-
    public final static class Bytes extends ID implements Serializable {
       private final byte[] value;
 
@@ -276,7 +215,7 @@ public abstract class ID implements Serializable {
       }
    }
 
-   public final static class Symbol extends ID implements Serializable {
+   public final static class Str extends ID implements Serializable {
       private final long value;
 
       public long value() {
@@ -287,13 +226,13 @@ public abstract class ID implements Serializable {
          if (other instanceof Variable) {
             return true;
          }
-         if (other instanceof Symbol) {
-            return this.value == ((Symbol) other).value;
+         if (other instanceof Str) {
+            return this.value == ((Str) other).value;
          }
          return false;
       }
 
-      public Symbol(final long value) {
+      public Str(final long value) {
          this.value = value;
       }
 
@@ -302,9 +241,9 @@ public abstract class ID implements Serializable {
          if (this == o) return true;
          if (o == null || getClass() != o.getClass()) return false;
 
-         Symbol symbol = (Symbol) o;
+         Str s = (Str) o;
 
-         if (value != symbol.value) return false;
+         if (value != s.value) return false;
 
          return true;
       }
@@ -314,26 +253,21 @@ public abstract class ID implements Serializable {
          return (int) (value ^ (value >>> 32));
       }
 
-      @Override
-      public String toString() {
-         return "#" + this.value;
-      }
-
       public Schema.IDV2 serialize() {
          return Schema.IDV2.newBuilder()
-                 .setSymbol(this.value).build();
+                 .setString(this.value).build();
       }
 
       static public Either<Error.FormatError, ID> deserializeV2(Schema.IDV2 id) {
-         if(!id.hasSymbol()) {
-            return Left(new Error.FormatError.DeserializationError("invalid ID kind, expected symbol"));
+         if(!id.hasString()) {
+            return Left(new Error.FormatError.DeserializationError("invalid ID kind, expected string"));
          } else {
-            return Right(new Symbol(id.getSymbol()));
+            return Right(new Str(id.getString()));
          }
       }
 
       public Term toTerm(SymbolTable symbols) {
-         return new Term.Symbol(symbols.print_symbol((int) this.value));
+         return new Term.Str(symbols.print_symbol((int) this.value));
       }
    }
 

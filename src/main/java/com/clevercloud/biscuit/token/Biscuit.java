@@ -248,8 +248,6 @@ public class Biscuit {
 
     Either<Error, World> generate_world() {
         World world = new World();
-        long authority_index = symbols.get("authority").get();
-        long ambient_index = symbols.get("ambient").get();
 
         for(Fact fact: this.authority.facts) {
             world.add_fact(fact);
@@ -263,11 +261,6 @@ public class Biscuit {
             Block b = this.blocks.get(i);
 
             for (Fact fact : b.facts) {
-                if (fact.predicate().ids().get(0).equals(new ID.Symbol(authority_index)) ||
-                        fact.predicate().ids().get(0).equals(new ID.Symbol(ambient_index))) {
-                    return Left(new Error.FailedLogic(new LogicError.InvalidBlockFact(i, symbols.print_fact(fact))));
-                }
-
                 world.add_fact(fact);
             }
 
@@ -305,12 +298,7 @@ public class Biscuit {
             world.add_privileged_rule(rule);
         }
 
-        HashSet<Long> restricted_symbols = new HashSet<>();
-        restricted_symbols.add(symbols.get("authority").get());
-        restricted_symbols.add(symbols.get("ambient").get());
-        //System.out.println("world after adding ambient rules:\n"+symbols.print_world(world));
-        world.run(restricted_symbols);
-        //System.out.println("world after running rules:\n"+symbols.print_world(world));
+        world.run(symbols);
 
         ArrayList<FailedCheck> errors = new ArrayList<>();
         for (int j = 0; j < this.authority.checks.size(); j++) {
@@ -318,7 +306,7 @@ public class Biscuit {
             Check c = this.authority.checks.get(j);
 
             for(int k = 0; k < c.queries().size(); k++) {
-                Set<Fact> res = world.query_rule(c.queries().get(k));
+                Set<Fact> res = world.query_rule(c.queries().get(k), symbols);
                 if (!res.isEmpty()) {
                     successful = true;
                     break;
@@ -335,7 +323,7 @@ public class Biscuit {
             Check c = verifier_checks.get(j);
 
             for(int k = 0; k < c.queries().size(); k++) {
-                Set<Fact> res = world.query_rule(c.queries().get(k));
+                Set<Fact> res = world.query_rule(c.queries().get(k), symbols);
                 if (!res.isEmpty()) {
                     successful = true;
                     break;
@@ -355,7 +343,7 @@ public class Biscuit {
                 Check c = b.checks.get(j);
 
                 for(int k = 0; k < c.queries().size(); k++) {
-                    Set<Fact> res = world.query_rule(c.queries().get(k));
+                    Set<Fact> res = world.query_rule(c.queries().get(k), symbols);
                     if (!res.isEmpty()) {
                         successful = true;
                         break;
@@ -370,7 +358,7 @@ public class Biscuit {
 
         HashMap<String, Set<Fact>> query_results = new HashMap();
         for(String name: queries.keySet()) {
-            Set<Fact> res = world.query_rule(queries.get(name));
+            Set<Fact> res = world.query_rule(queries.get(name), symbols);
             query_results.put(name, res);
         }
 

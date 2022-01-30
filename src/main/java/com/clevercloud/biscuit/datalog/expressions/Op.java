@@ -7,13 +7,15 @@ import com.clevercloud.biscuit.error.Error;
 import com.google.re2j.Matcher;
 import com.google.re2j.Pattern;
 import io.vavr.control.Either;
+import io.vavr.control.Option;
+
 import java.util.*;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
 public abstract class Op {
-    public abstract boolean evaluate(Deque<ID> stack, Map<Long, ID> variables);
+    public abstract boolean evaluate(Deque<ID> stack, Map<Long, ID> variables, SymbolTable symbols);
 
     public abstract String print(Deque<String> stack, SymbolTable symbols);
 
@@ -43,7 +45,7 @@ public abstract class Op {
         }
 
         @Override
-        public boolean evaluate(Deque<ID> stack, Map<Long, ID> variables) {
+        public boolean evaluate(Deque<ID> stack, Map<Long, ID> variables, SymbolTable symbols) {
             if (value instanceof ID.Variable) {
                 ID.Variable var = (ID.Variable) value;
                 ID valueVar = variables.get(var.value());
@@ -115,7 +117,7 @@ public abstract class Op {
         }
 
         @Override
-        public boolean evaluate(Deque<ID> stack, Map<Long, ID> variables) {
+        public boolean evaluate(Deque<ID> stack, Map<Long, ID> variables, SymbolTable symbols) {
             ID value = stack.pop();
             switch (this.op) {
                 case Negate:
@@ -131,7 +133,12 @@ public abstract class Op {
                     break;
                 case Length:
                     if (value instanceof ID.Str) {
-                        stack.push(new ID.Integer(((ID.Str) value).value().length()));
+                        Option<String> s = symbols.get_s((int)((ID.Str) value).value());
+                        if(s.isEmpty()) {
+                            return false;
+                        } else {
+                            stack.push(new ID.Integer(s.get().length()));
+                        }
                     } else if (value instanceof ID.Bytes) {
                         stack.push(new ID.Integer(((ID.Bytes) value).value().length));
                     } else if (value instanceof ID.Set) {
@@ -249,7 +256,7 @@ public abstract class Op {
         }
 
         @Override
-        public boolean evaluate(Deque<ID> stack, Map<Long, ID> variables) {
+        public boolean evaluate(Deque<ID> stack, Map<Long, ID> variables, SymbolTable symbols) {
             ID right = stack.pop();
             ID left = stack.pop();
 
@@ -300,7 +307,7 @@ public abstract class Op {
                         return true;
                     }
                     if (right instanceof ID.Str && left instanceof ID.Str) {
-                        stack.push(new ID.Bool(((ID.Str) left).value().equals(((ID.Str) right).value())));
+                        stack.push(new ID.Bool(((ID.Str) left).value() == ((ID.Str) right).value()));
                         return true;
                     }
                     if (right instanceof ID.Bytes && left instanceof ID.Bytes) {
@@ -309,10 +316,6 @@ public abstract class Op {
                     }
                     if (right instanceof ID.Date && left instanceof ID.Date) {
                         stack.push(new ID.Bool(((ID.Date) left).value() == ((ID.Date) right).value()));
-                        return true;
-                    }
-                    if (right instanceof ID.Symbol && left instanceof ID.Symbol) {
-                        stack.push(new ID.Bool(((ID.Symbol) left).value() == ((ID.Symbol) right).value()));
                         return true;
                     }
                     if (right instanceof ID.Set && left instanceof ID.Set) {
@@ -328,8 +331,7 @@ public abstract class Op {
                                     right instanceof ID.Str ||
                                     right instanceof ID.Bytes ||
                                     right instanceof ID.Date ||
-                                    right instanceof ID.Bool ||
-                                    right instanceof ID.Symbol)) {
+                                    right instanceof ID.Bool)) {
 
                         stack.push(new ID.Bool(((ID.Set) left).value().contains(right)));
                         return true;
@@ -343,20 +345,37 @@ public abstract class Op {
                     break;
                 case Prefix:
                     if (right instanceof ID.Str && left instanceof ID.Str) {
-                        stack.push(new ID.Bool(((ID.Str) left).value().startsWith(((ID.Str) right).value())));
+                        Option<String> left_s = symbols.get_s((int)((ID.Str) left).value());
+                        Option<String> right_s = symbols.get_s((int)((ID.Str) right).value());
+                        if(left_s.isEmpty() || right_s.isEmpty()) {
+                            return false;
+                        }
+
+                        stack.push(new ID.Bool(left_s.get().startsWith(right_s.get())));
                         return true;
                     }
                     break;
                 case Suffix:
                     if (right instanceof ID.Str && left instanceof ID.Str) {
-                        stack.push(new ID.Bool(((ID.Str) left).value().endsWith(((ID.Str) right).value())));
+                        Option<String> left_s = symbols.get_s((int)((ID.Str) left).value());
+                        Option<String> right_s = symbols.get_s((int)((ID.Str) right).value());
+                        if(left_s.isEmpty() || right_s.isEmpty()) {
+                            return false;
+                        }
+                        stack.push(new ID.Bool(left_s.get().endsWith(right_s.get())));
                         return true;
                     }
                     break;
                 case Regex:
                     if (right instanceof ID.Str && left instanceof ID.Str) {
-                        Pattern p = Pattern.compile(((ID.Str) right).value());
-                        Matcher m = p.matcher(((ID.Str) left).value());
+                        Option<String> left_s = symbols.get_s((int)((ID.Str) left).value());
+                        Option<String> right_s = symbols.get_s((int)((ID.Str) right).value());
+                        if(left_s.isEmpty() || right_s.isEmpty()) {
+                            return false;
+                        }
+
+                        Pattern p = Pattern.compile(right_s.get());
+                        Matcher m = p.matcher(left_s.get());
                         stack.push(new ID.Bool(m.find()));
                         return true;
                     }

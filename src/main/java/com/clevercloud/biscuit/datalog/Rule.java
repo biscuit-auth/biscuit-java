@@ -30,7 +30,7 @@ public final class Rule implements Serializable {
       return this.expressions;
    }
 
-   public void apply(final Set<Fact> facts, final Set<Fact> new_facts, final Set<Long> restricted_symbols) {
+   public void apply(final Set<Fact> facts, final Set<Fact> new_facts, SymbolTable symbols) {
       final Set<Long> variables_set = new HashSet<>();
       for (final Predicate pred : this.body) {
          variables_set.addAll(pred.ids().stream().filter((id) -> id instanceof ID.Variable).map((id) -> ((ID.Variable) id).value()).collect(Collectors.toSet()));
@@ -38,7 +38,7 @@ public final class Rule implements Serializable {
       final MatchedVariables variables = new MatchedVariables(variables_set);
 
       if(this.body.isEmpty()) {
-         final Option<Map<Long, ID>> h_opt = variables.check_expressions(this.expressions);
+         final Option<Map<Long, ID>> h_opt = variables.check_expressions(this.expressions, symbols);
          if(h_opt.isDefined()) {
             final Map<Long, ID> h = h_opt.get();
             final Predicate p = this.head.clone();
@@ -56,7 +56,7 @@ public final class Rule implements Serializable {
          }
       }
 
-      for (final Map<Long, ID> h : new Combinator(variables, this.body, this.expressions, facts).combine()) {
+      for (final Map<Long, ID> h : new Combinator(variables, this.body, this.expressions, facts, symbols).combine()) {
          final Predicate p = this.head.clone();
          final ListIterator<ID> idit = p.ids_iterator();
          boolean unbound_variable = false;
@@ -73,14 +73,6 @@ public final class Rule implements Serializable {
             }
          }
 
-         // if the generated fact has #authority or #ambient as first element and we're n ot in a privileged rule
-         // do not generate it
-         ID first = p.ids().get(0);
-         if(first != null && first instanceof ID.Symbol) {
-            if( restricted_symbols.contains(((ID.Symbol) first).value()) ) {
-               continue;
-            }
-         }
          if (!unbound_variable) {
             new_facts.add(new Fact(p));
          }
@@ -89,7 +81,7 @@ public final class Rule implements Serializable {
 
 
    // do not produce new facts, only find one matching set of facts
-   public boolean test(final Set<Fact> facts) {
+   public boolean test(final Set<Fact> facts, SymbolTable symbols) {
       final Set<Long> variables_set = new HashSet<>();
       for (final Predicate pred : this.body) {
          variables_set.addAll(pred.ids().stream().filter((id) -> id instanceof ID.Variable).map((id) -> ((ID.Variable) id).value()).collect(Collectors.toSet()));
@@ -97,10 +89,10 @@ public final class Rule implements Serializable {
       final MatchedVariables variables = new MatchedVariables(variables_set);
 
       if(this.body.isEmpty()) {
-         return variables.check_expressions(this.expressions).isDefined();
+         return variables.check_expressions(this.expressions, symbols).isDefined();
       }
 
-      Combinator c = new Combinator(variables, this.body, this.expressions, facts);
+      Combinator c = new Combinator(variables, this.body, this.expressions, facts, symbols);
 
       return c.next().isDefined();
    }

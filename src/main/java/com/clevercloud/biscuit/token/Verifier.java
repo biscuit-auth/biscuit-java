@@ -201,7 +201,7 @@ public class Verifier {
         queryRes.get().stream().forEach(fact -> {
             fact.ids().stream().forEach(id -> {
                 if (id instanceof Term.Str) {
-                    ids.add((((Term.Str) id).value()));
+                    ids.add(((Term.Str) id).getValue());
                 }
             });
         });
@@ -267,13 +267,13 @@ public class Verifier {
     }
 
     public Either<Error, Set<Fact>> query(Rule query, RunLimits limits) {
-        Either<Error, Void> runRes = world.run(limits, new HashSet<>());
+        Either<Error, Void> runRes = world.run(limits, symbols);
         if (runRes.isLeft()) {
             Error e = runRes.getLeft();
             return Left(e);
         }
 
-        Set<com.clevercloud.biscuit.datalog.Fact> facts = world.query_rule(query.convert(symbols));
+        Set<com.clevercloud.biscuit.datalog.Fact> facts = world.query_rule(query.convert(symbols), symbols);
         Set<Fact> s = new HashSet();
 
         for(com.clevercloud.biscuit.datalog.Fact f: facts) {
@@ -320,10 +320,7 @@ public class Verifier {
         }
         token_checks.add(authority_checks);
 
-        //FIXME: we can remove restricted symbols now
-        HashSet<Long> restricted_symbols = new HashSet<>();
-
-        Either<Error, Void> runRes = world.run(limits, restricted_symbols);
+        Either<Error, Void> runRes = world.run(limits, symbols);
         if (runRes.isLeft()) {
             Error e = runRes.getLeft();
             return Left(e);
@@ -336,7 +333,7 @@ public class Verifier {
             boolean successful = false;
 
             for(int k = 0; k < c.queries().size(); k++) {
-                boolean res = world.test_rule(c.queries().get(k));
+                boolean res = world.test_rule(c.queries().get(k), symbols);
 
                 if(Instant.now().compareTo(timeLimit) >= 0) {
                     return Left(new Error.Timeout());
@@ -358,7 +355,7 @@ public class Verifier {
             com.clevercloud.biscuit.datalog.Check c = authority_checks.get(j);
 
             for (int k = 0; k < c.queries().size(); k++) {
-                boolean res = world.test_rule(c.queries().get(k));
+                boolean res = world.test_rule(c.queries().get(k), symbols);
 
                 if (Instant.now().compareTo(timeLimit) >= 0) {
                     return Left(new Error.Timeout());
@@ -395,7 +392,7 @@ public class Verifier {
             }
             token_checks.add(block_checks);
 
-            runRes = world.run(limits, restricted_symbols);
+            runRes = world.run(limits, symbols);
             if (runRes.isLeft()) {
                 Error e = runRes.getLeft();
                 return Left(e);
@@ -406,7 +403,7 @@ public class Verifier {
                 com.clevercloud.biscuit.datalog.Check c = block_checks.get(j);
 
                 for (int k = 0; k < c.queries().size(); k++) {
-                    boolean res = world.test_rule(c.queries().get(k));
+                    boolean res = world.test_rule(c.queries().get(k), symbols);
 
                     if (Instant.now().compareTo(timeLimit) >= 0) {
                         return Left(new Error.Timeout());
@@ -430,7 +427,7 @@ public class Verifier {
                 boolean successful = false;
 
                 for(int k = 0; k < c.queries().size(); k++) {
-                    boolean res = world.test_rule(c.queries().get(k));
+                    boolean res = world.test_rule(c.queries().get(k), symbols);
 
                     if(Instant.now().compareTo(timeLimit) >= 0) {
                         return Left(new Error.Timeout());
