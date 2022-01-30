@@ -123,7 +123,7 @@ public class LogicError {
 
         @Override
         public String toString() {
-            return "LogicError.FailedCaveats{ errors: " + errors + " }";
+            return "LogicError.FailedChecks{ errors: " + errors + " }";
         }
     }
 

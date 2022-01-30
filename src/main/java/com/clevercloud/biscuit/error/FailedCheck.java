@@ -29,7 +29,7 @@ public class FailedCheck {
 
         @Override
         public String toString() {
-            return "FailedCaveat.FailedBlock { block_id: " + block_id + ", caveat_id: "+caveat_id+
+            return "FailedCheck.FailedBlock { block_id: " + block_id + ", caveat_id: "+caveat_id+
                     ", rule: "+rule+" }";
         }
     }
