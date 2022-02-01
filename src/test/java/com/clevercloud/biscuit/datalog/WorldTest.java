@@ -390,17 +390,15 @@ public class WorldTest extends TestCase {
       final ID write = syms.add("write");
 
 
-      w.add_fact(new Fact(new Predicate(resource, Arrays.asList(ambient, file2))));
-      w.add_fact(new Fact(new Predicate(operation, Arrays.asList(ambient, write))));
-      w.add_fact(new Fact(new Predicate(right, Arrays.asList(authority, file1, read))));
-      w.add_fact(new Fact(new Predicate(right, Arrays.asList(authority, file2, read))));
-      w.add_fact(new Fact(new Predicate(right, Arrays.asList(authority, file1, write))));
+      w.add_fact(new Fact(new Predicate(right, Arrays.asList(file1, read))));
+      w.add_fact(new Fact(new Predicate(right, Arrays.asList(file2, read))));
+      w.add_fact(new Fact(new Predicate(right, Arrays.asList(file1, write))));
 
       final long caveat1 = syms.insert("caveat1");
       //r1: caveat2(#file1) <- resource(#ambient, #file1)
       final Rule r1 = new Rule(
               new Predicate(caveat1, Arrays.asList(file1)),
-              Arrays.asList(new Predicate(resource, Arrays.asList(ambient, file1))
+              Arrays.asList(new Predicate(resource, Arrays.asList(file1))
       ), new ArrayList<>());
 
       System.out.println("testing caveat 1(should return nothing): " + syms.print_rule(r1));
@@ -418,9 +416,9 @@ public class WorldTest extends TestCase {
       final Rule r2 = new Rule(
               new Predicate(caveat2, Arrays.asList(var0)),
               Arrays.asList(
-                      new Predicate(resource, Arrays.asList(ambient, var0)),
-                      new Predicate(operation, Arrays.asList(ambient, read)),
-                      new Predicate(right, Arrays.asList(authority, var0, read))
+                      new Predicate(resource, Arrays.asList(var0)),
+                      new Predicate(operation, Arrays.asList(read)),
+                      new Predicate(right, Arrays.asList(var0, read))
               ), new ArrayList<>());
 
       System.out.println("testing caveat 2: " + syms.print_rule(r2));

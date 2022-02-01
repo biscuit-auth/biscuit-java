@@ -43,9 +43,9 @@ public class BiscuitTest extends TestCase {
         SymbolTable symbols = Biscuit.default_symbol_table();
         Block authority_builder = new Block(0, symbols);
 
-        authority_builder.add_fact(fact("right", Arrays.asList(s("authority"), s("file1"), s("read"))));
-        authority_builder.add_fact(fact("right", Arrays.asList(s("authority"), s("file2"), s("read"))));
-        authority_builder.add_fact(fact("right", Arrays.asList(s("authority"), s("file1"), s("write"))));
+        authority_builder.add_fact(fact("right", Arrays.asList(s("file1"), s("read"))));
+        authority_builder.add_fact(fact("right", Arrays.asList(s("file2"), s("read"))));
+        authority_builder.add_fact(fact("right", Arrays.asList(s("file1"), s("write"))));
 
         Biscuit b = Biscuit.make(rng, root, Biscuit.default_symbol_table(), authority_builder.build()).get();
 
@@ -74,9 +74,9 @@ public class BiscuitTest extends TestCase {
                 "caveat1",
                 Arrays.asList(var("resource")),
                 Arrays.asList(
-                        pred("resource", Arrays.asList(s("ambient"), var("resource"))),
-                        pred("operation", Arrays.asList(s("ambient"), s("read"))),
-                        pred("right", Arrays.asList(s("authority"), var("resource"), s("read")))
+                        pred("resource", Arrays.asList(var("resource"))),
+                        pred("operation", Arrays.asList(s("read"))),
+                        pred("right", Arrays.asList(var("resource"), s("read")))
                 )
         )));
 
@@ -107,7 +107,7 @@ public class BiscuitTest extends TestCase {
                 "caveat2",
                 Arrays.asList(s("file1")),
                 Arrays.asList(
-                        pred("resource", Arrays.asList(s("ambient"), s("file1")))
+                        pred("resource", Arrays.asList(s("file1")))
                 )
         )));
 
@@ -133,8 +133,8 @@ public class BiscuitTest extends TestCase {
 
         SymbolTable check_symbols = new SymbolTable(final_token.symbols);
         List<Fact> ambient_facts = Arrays.asList(
-                fact("resource", Arrays.asList(s("ambient"), s("file1"))).convert(check_symbols),
-                fact("operation", Arrays.asList(s("ambient"), s("read"))).convert(check_symbols)
+                fact("resource", Arrays.asList(s("file1"))).convert(check_symbols),
+                fact("operation", Arrays.asList(s("read"))).convert(check_symbols)
         );
 
         Either<Error, HashMap<String, Set<Fact>>> res = final_token.check(check_symbols, ambient_facts,
@@ -146,8 +146,8 @@ public class BiscuitTest extends TestCase {
 
         SymbolTable check_symbols2 = new SymbolTable(final_token.symbols);
         List<Fact> ambient_facts2 = Arrays.asList(
-                fact("resource", Arrays.asList(s("ambient"), s("file2"))).convert(check_symbols2),
-                fact("operation", Arrays.asList(s("ambient"), s("write"))).convert(check_symbols2)
+                fact("resource", Arrays.asList(s("file2"))).convert(check_symbols2),
+                fact("operation", Arrays.asList(s("write"))).convert(check_symbols2)
         );
 
         Either<Error, HashMap<String, Set<Fact>>> res2 = final_token.check(check_symbols2, ambient_facts2,
@@ -157,8 +157,8 @@ public class BiscuitTest extends TestCase {
 
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
-                        new FailedCheck.FailedBlock(1, 0, "check if resource(#ambient, $resource), operation(#ambient, #read), right(#authority, $resource, #read)"),
-                        new FailedCheck.FailedBlock(2, 0, "check if resource(#ambient, #file1)")
+                        new FailedCheck.FailedBlock(1, 0, "check if resource($resource), operation(\"read\"), right($resource, \"read\")"),
+                        new FailedCheck.FailedBlock(2, 0, "check if resource(\"file1\")")
                 ))),
                 res2.getLeft());
     }
@@ -220,8 +220,8 @@ public class BiscuitTest extends TestCase {
         }
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
-                        new FailedCheck.FailedBlock(1, 0, "check if resource(#ambient, $resource), $resource.starts_with(\"/folder1/\")"),
-                        new FailedCheck.FailedBlock(1, 1, "check if resource(#ambient, $resource), operation(#ambient, #read), right(#authority, $resource, #read)")
+                        new FailedCheck.FailedBlock(1, 0, "check if resource($resource), $resource.starts_with(\"/folder1/\")"),
+                        new FailedCheck.FailedBlock(1, 1, "check if resource($resource), operation(\"read\"), right($resource, \"read\")")
                 ))),
                 e);
     }
@@ -237,9 +237,9 @@ public class BiscuitTest extends TestCase {
         SymbolTable symbols = Biscuit.default_symbol_table();
         Block authority_builder = new Block(0, symbols);
 
-        authority_builder.add_fact(fact("right", Arrays.asList(s("authority"), s("file1"), s("read"))));
-        authority_builder.add_fact(fact("right", Arrays.asList(s("authority"), s("file2"), s("read"))));
-        authority_builder.add_fact(fact("right", Arrays.asList(s("authority"), s("file1"), s("write"))));
+        authority_builder.add_fact(fact("right", Arrays.asList(s("file1"), s("read"))));
+        authority_builder.add_fact(fact("right", Arrays.asList(s("file2"), s("read"))));
+        authority_builder.add_fact(fact("right", Arrays.asList(s("file1"), s("write"))));
 
         Biscuit b = Biscuit.make(rng, root, Biscuit.default_symbol_table(), authority_builder.build()).get();
 
@@ -268,9 +268,9 @@ public class BiscuitTest extends TestCase {
                 "caveat1",
                 Arrays.asList(var("resource")),
                 Arrays.asList(
-                        pred("resource", Arrays.asList(s("ambient"), var("resource"))),
-                        pred("operation", Arrays.asList(s("ambient"), s("read"))),
-                        pred("right", Arrays.asList(s("authority"), var("resource"), s("read")))
+                        pred("resource", Arrays.asList(var("resource"))),
+                        pred("operation", Arrays.asList(s("read"))),
+                        pred("right", Arrays.asList(var("resource"), s("read")))
                 )
         )));
 
@@ -399,8 +399,8 @@ public class BiscuitTest extends TestCase {
         }
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
-                        new FailedCheck.FailedBlock(1, 0, "check if resource(#ambient, $resource), $resource.starts_with(\"/folder1/\")"),
-                        new FailedCheck.FailedBlock(1, 1, "check if resource(#ambient, $resource), operation(#ambient, #read), right(#authority, $resource, #read)")
+                        new FailedCheck.FailedBlock(1, 0, "check if resource($resource), $resource.starts_with(\"/folder1/\")"),
+                        new FailedCheck.FailedBlock(1, 1, "check if resource($resource), operation(\"read\"), right($resource, \"read\")")
                 ))),
                 e);
     }
