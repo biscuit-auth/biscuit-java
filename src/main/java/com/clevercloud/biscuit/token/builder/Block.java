@@ -113,9 +113,9 @@ public class Block {
                 "check_right",
                 Arrays.asList(s(right)),
                 Arrays.asList(
-                        pred("resource", Arrays.asList(s("ambient"), var("resource"))),
-                        pred("operation", Arrays.asList(s("ambient"), s(right))),
-                        pred("right", Arrays.asList(s("authority"), var("resource"), s(right)))
+                        pred("resource", Arrays.asList(var("resource"))),
+                        pred("operation", Arrays.asList( s(right))),
+                        pred("right", Arrays.asList(var("resource"), s(right)))
                 )
         ));
         this.add_check(new com.clevercloud.biscuit.token.builder.Check(queries));
@@ -127,7 +127,7 @@ public class Block {
         queries.add(constrained_rule(
                 "prefix",
                 Arrays.asList(var("resource")),
-                Arrays.asList(pred("resource", Arrays.asList(s("ambient"), var("resource")))),
+                Arrays.asList(pred("resource", Arrays.asList( var("resource")))),
                 Arrays.asList(new Expression.Binary(Expression.Op.Prefix, new Expression.Value(var("resource")),
                         new Expression.Value(string(prefix))))
         ));
@@ -140,7 +140,7 @@ public class Block {
         queries.add(constrained_rule(
                 "suffix",
                 Arrays.asList(var("resource")),
-                Arrays.asList(pred("resource", Arrays.asList(s("ambient"), var("resource")))),
+                Arrays.asList(pred("resource", Arrays.asList(var("resource")))),
                 Arrays.asList(new Expression.Binary(Expression.Op.Suffix, new Expression.Value(var("resource")),
                         new Expression.Value(string(suffix))))
         ));
@@ -153,7 +153,7 @@ public class Block {
         queries.add(constrained_rule(
                 "expiration",
                 Arrays.asList(var("date")),
-                Arrays.asList(pred("time", Arrays.asList(s("ambient"), var("date")))),
+                Arrays.asList(pred("time", Arrays.asList(var("date")))),
                 Arrays.asList(new Expression.Binary(Expression.Op.LessOrEqual, new Expression.Value(var("date")),
                         new Expression.Value(date(d))))
         ));
