@@ -506,4 +506,25 @@ public class SamplesV2Test extends TestCase {
         System.out.println("result: "+result);
         Assert.assertTrue(result.isLeft());
     }
+
+    public void test20_sealed_token() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        PublicKey root = new PublicKey(rootData);
+
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test20_sealed.bc");
+
+        byte[] data = new byte[inputStream.available()];
+        inputStream.read(data);
+
+        Biscuit token = Biscuit.from_bytes(data, root).get();
+        System.out.println(token.print());
+
+        Verifier v1 = token.verifier().get();
+        v1.add_operation("read");
+        v1.add_resource("file1");
+        v1.allow();
+        Either<Error, Long> result = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
+        System.out.println("result: "+result);
+        Assert.assertEquals(Right(Long.valueOf(0)),result);
+    }
 }
