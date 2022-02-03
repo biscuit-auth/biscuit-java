@@ -1,6 +1,7 @@
 package com.clevercloud.biscuit.crypto;
 
 
+import biscuit.format.schema.Schema;
 import com.clevercloud.biscuit.token.builder.Utils;
 import net.i2p.crypto.eddsa.EdDSAPrivateKey;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
@@ -67,6 +68,6 @@ public final class KeyPair {
     }
 
     public PublicKey public_key() {
-        return new PublicKey(this.public_key);
+        return new PublicKey(Schema.PublicKey.Algorithm.Ed25519, this.public_key);
     }
 }

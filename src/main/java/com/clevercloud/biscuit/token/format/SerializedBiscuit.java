@@ -13,6 +13,8 @@ import net.i2p.crypto.eddsa.EdDSAEngine;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.security.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +46,7 @@ public class SerializedBiscuit {
 
             SignedBlock authority = new SignedBlock(
                     data.getAuthority().getBlock().toByteArray(),
-                    new PublicKey(data.getAuthority().getNextKey().toByteArray()),
+                    new PublicKey(data.getAuthority().getNextKey().getAlgorithm(),data.getAuthority().getNextKey().getKey().toByteArray()),
                     data.getAuthority().getSignature().toByteArray()
             );
 
@@ -52,7 +54,7 @@ public class SerializedBiscuit {
             for(Schema.SignedBlock block: data.getBlocksList()) {
                 blocks.add(new SignedBlock(
                         block.getBlock().toByteArray(),
-                        new PublicKey(block.getNextKey().toByteArray()),
+                        new PublicKey(block.getNextKey().getAlgorithm(),block.getNextKey().getKey().toByteArray()),
                         block.getSignature().toByteArray()
                 ));
             }
@@ -105,7 +107,7 @@ public class SerializedBiscuit {
 
             SignedBlock authority = new SignedBlock(
                     data.getAuthority().getBlock().toByteArray(),
-                    new PublicKey(data.getAuthority().getNextKey().toByteArray()),
+                    new PublicKey(data.getAuthority().getNextKey().getAlgorithm(),data.getAuthority().getNextKey().getKey().toByteArray()),
                     data.getAuthority().getSignature().toByteArray()
             );
 
@@ -113,7 +115,7 @@ public class SerializedBiscuit {
             for(Schema.SignedBlock block: data.getBlocksList()) {
                 blocks.add(new SignedBlock(
                         block.getBlock().toByteArray(),
-                        new PublicKey(block.getNextKey().toByteArray()),
+                        new PublicKey(block.getNextKey().getAlgorithm(),block.getNextKey().getKey().toByteArray()),
                         block.getSignature().toByteArray()
                 ));
             }
@@ -150,17 +152,22 @@ public class SerializedBiscuit {
         Schema.SignedBlock.Builder authorityBuilder = Schema.SignedBlock.newBuilder();
         {
             SignedBlock block = this.authority;
+            Schema.PublicKey.Builder publicKey = Schema.PublicKey.newBuilder();
+            publicKey.setKey(ByteString.copyFrom(block.key.toBytes()));
+            publicKey.setAlgorithm(block.key.algorithm);
             authorityBuilder.setBlock(ByteString.copyFrom(block.block));
-            authorityBuilder.setNextKey(ByteString.copyFrom(block.key.toBytes()));
+            authorityBuilder.setNextKey(publicKey.build());
             authorityBuilder.setSignature(ByteString.copyFrom(block.signature));
         }
-
         biscuitBuilder.setAuthority(authorityBuilder.build());
 
         for(SignedBlock block: this.blocks) {
              Schema.SignedBlock.Builder blockBuilder = Schema.SignedBlock.newBuilder();
+            Schema.PublicKey.Builder publicKey = Schema.PublicKey.newBuilder();
+            publicKey.setKey(ByteString.copyFrom(block.key.toBytes()));
+            publicKey.setAlgorithm(block.key.algorithm);
             blockBuilder.setBlock(ByteString.copyFrom(block.block));
-            blockBuilder.setNextKey(ByteString.copyFrom(block.key.toBytes()));
+            blockBuilder.setNextKey(publicKey.build());
             blockBuilder.setSignature(ByteString.copyFrom(block.signature));
 
             biscuitBuilder.addBlocks(blockBuilder.build());
@@ -197,10 +204,14 @@ public class SerializedBiscuit {
             b.writeTo(stream);
             byte[] block = stream.toByteArray();
             PublicKey next_key = next.public_key();
+            ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
+            algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
+            algo_buf.flip();
 
             Signature sgr = new EdDSAEngine(MessageDigest.getInstance(ed25519.getHashAlgorithm()));
             sgr.initSign(root.private_key);
             sgr.update(block);
+            sgr.update(algo_buf);
             sgr.update(next_key.toBytes());
             byte[] signature = sgr.sign();
 
@@ -226,10 +237,14 @@ public class SerializedBiscuit {
 
             byte[] block = stream.toByteArray();
             PublicKey next_key = next.public_key();
+            ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
+            algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
+            algo_buf.flip();
 
             Signature sgr = new EdDSAEngine(MessageDigest.getInstance(ed25519.getHashAlgorithm()));
             sgr.initSign(this.proof.secretKey.get().private_key);
             sgr.update(block);
+            sgr.update(algo_buf);
             sgr.update(next_key.toBytes());
             byte[] signature = sgr.sign();
 
@@ -251,12 +266,13 @@ public class SerializedBiscuit {
 
     public Either<Error, Void> verify(PublicKey root) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         PublicKey current_key = root;
-
+        ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
         {
             byte[] block = this.authority.block;
             PublicKey next_key = this.authority.key;
-            ;
             byte[] signature = this.authority.signature;
+            algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
+            algo_buf.flip();
 
             //System.out.println("verifying block "+"authority"+" with current key "+current_key.toHex()+" block "+block+" next key "+next_key.toHex()+" signature "+signature);
 
@@ -264,6 +280,7 @@ public class SerializedBiscuit {
 
             sgr.initVerify(current_key.key);
             sgr.update(block);
+            sgr.update(algo_buf);
             sgr.update(next_key.toBytes());
             if (sgr.verify(signature)) {
                 current_key = next_key;
@@ -276,13 +293,16 @@ public class SerializedBiscuit {
             byte[] block = b.block;
             PublicKey next_key = b.key;
             byte[] signature = b.signature;
-
+            algo_buf.clear();
+            algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
+            algo_buf.flip();
             //System.out.println("verifying block ? with current key "+current_key.toHex()+" block "+block+" next key "+next_key.toHex()+" signature "+signature);
 
             Signature sgr = new EdDSAEngine(MessageDigest.getInstance(ed25519.getHashAlgorithm()));
 
             sgr.initVerify(current_key.key);
             sgr.update(block);
+            sgr.update(algo_buf);
             sgr.update(next_key.toBytes());
             if (sgr.verify(signature)) {
                 current_key = next_key;
@@ -321,11 +341,15 @@ public class SerializedBiscuit {
             byte[] block = b.block;
             PublicKey next_key = b.key;
             byte[] signature = b.signature;
+            algo_buf.clear();
+            algo_buf.putInt(next_key.algorithm.getNumber());
+            algo_buf.flip();
 
             Signature sgr = new EdDSAEngine(MessageDigest.getInstance(ed25519.getHashAlgorithm()));
 
             sgr.initVerify(current_key.key);
             sgr.update(block);
+            sgr.update(algo_buf);
             sgr.update(next_key.toBytes());
             sgr.update(signature);
 
@@ -351,9 +375,14 @@ public class SerializedBiscuit {
         }
 
         Signature sgr = new EdDSAEngine(MessageDigest.getInstance(ed25519.getHashAlgorithm()));
+        ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
+        algo_buf.putInt(Integer.valueOf(block.key.algorithm.getNumber()));
+        algo_buf.flip();
+
 
         sgr.initSign(this.proof.secretKey.get().private_key);
         sgr.update(block.block);
+        sgr.update(algo_buf);
         sgr.update(block.key.toBytes());
         sgr.update(block.signature);
 

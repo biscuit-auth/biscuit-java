@@ -4,6 +4,8 @@ import com.clevercloud.biscuit.error.Error;
 import io.vavr.control.Either;
 import net.i2p.crypto.eddsa.EdDSAEngine;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.security.*;
 import java.util.ArrayList;
 
@@ -19,8 +21,12 @@ class Token {
 
     public Token(KeyPair rootKeyPair, byte[] message, KeyPair next) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         Signature sgr = new EdDSAEngine(MessageDigest.getInstance(ed25519.getHashAlgorithm()));
+        ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
+        algo_buf.putInt(Integer.valueOf(next.public_key().algorithm.getNumber()));
+        algo_buf.flip();
         sgr.initSign(rootKeyPair.private_key);
         sgr.update(message);
+        sgr.update(algo_buf);
         sgr.update(next.public_key().toBytes());
 
         byte[] signature = sgr.sign();
@@ -45,7 +51,11 @@ class Token {
     public Token append(KeyPair keyPair, byte[] message) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         Signature sgr = new EdDSAEngine(MessageDigest.getInstance(ed25519.getHashAlgorithm()));
         sgr.initSign(this.next.private_key);
+        ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
+        algo_buf.putInt(Integer.valueOf(next.public_key().algorithm.getNumber()));
+        algo_buf.flip();
         sgr.update(message);
+        sgr.update(algo_buf);
         sgr.update(keyPair.public_key().toBytes());
 
         byte[] signature = sgr.sign();
@@ -68,9 +78,12 @@ class Token {
 
             System.out.println("verifying block "+i+" with current key "+current_key.toHex()+" block "+block+" next key "+next_key.toHex()+" signature "+signature);
             Signature sgr = new EdDSAEngine(MessageDigest.getInstance(ed25519.getHashAlgorithm()));
-
+            ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
+            algo_buf.putInt(Integer.valueOf(next.public_key().algorithm.getNumber()));
+            algo_buf.flip();
             sgr.initVerify(current_key.key);
             sgr.update(block);
+            sgr.update(algo_buf);
             sgr.update(next_key.toBytes());
 
             if (sgr.verify(signature)) {

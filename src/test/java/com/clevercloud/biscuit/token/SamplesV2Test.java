@@ -1,5 +1,6 @@
 package com.clevercloud.biscuit.token;
 
+import biscuit.format.schema.Schema;
 import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.datalog.RunLimits;
 import com.clevercloud.biscuit.error.Error;
@@ -43,7 +44,7 @@ public class SamplesV2Test extends TestCase {
 
 
     public void test1_Basic() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        PublicKey root = new PublicKey(rootData);
+        PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test1_basic.bc");
@@ -77,7 +78,7 @@ public class SamplesV2Test extends TestCase {
     }
 
     public void test2_DifferentRootKey() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        PublicKey root = new PublicKey(rootData);
+        PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test2_different_root_key.bc");
@@ -92,7 +93,7 @@ public class SamplesV2Test extends TestCase {
     }
 
     public void test3_InvalidSignatureFormat() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        PublicKey root = new PublicKey(rootData);
+        PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test3_invalid_signature_format.bc");
@@ -109,7 +110,7 @@ public class SamplesV2Test extends TestCase {
     }
 
     public void test4_random_block() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        PublicKey root = new PublicKey(rootData);
+        PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test4_random_block.bc");
@@ -123,7 +124,7 @@ public class SamplesV2Test extends TestCase {
     }
 
     public void test5_InvalidSignature() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        PublicKey root = new PublicKey(rootData);
+        PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test5_invalid_signature.bc");
@@ -137,7 +138,7 @@ public class SamplesV2Test extends TestCase {
     }
 
     public void test6_reordered_blocks() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        PublicKey root = new PublicKey(rootData);
+        PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test6_reordered_blocks.bc");
@@ -152,7 +153,7 @@ public class SamplesV2Test extends TestCase {
     }
 
     public void test7_scoped_rules() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        PublicKey root = new PublicKey(rootData);
+        PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test7_scoped_rules.bc");
@@ -175,7 +176,7 @@ public class SamplesV2Test extends TestCase {
     }
 
     public void test8_scoped_checks() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        PublicKey root = new PublicKey(rootData);
+        PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test8_scoped_checks.bc");
@@ -198,7 +199,7 @@ public class SamplesV2Test extends TestCase {
     }
 
     public void test9_ExpiredToken() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        PublicKey root = new PublicKey(rootData);
+        PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test9_expired_token.bc");
@@ -225,7 +226,7 @@ public class SamplesV2Test extends TestCase {
     }
 
     public void test10_VerifierScope() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        PublicKey root = new PublicKey(rootData);
+        PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test10_verifier_scope.bc");
@@ -251,7 +252,7 @@ public class SamplesV2Test extends TestCase {
     }
 
     public void test11_VerifierAuthorityCaveats() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        PublicKey root = new PublicKey(rootData);
+        PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test11_verifier_authority_caveats.bc");
@@ -286,7 +287,7 @@ public class SamplesV2Test extends TestCase {
     }
 
     public void test12_VerifierAuthorityCaveats() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        PublicKey root = new PublicKey(rootData);
+        PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test12_authority_caveats.bc");
@@ -319,7 +320,7 @@ public class SamplesV2Test extends TestCase {
     }
 
     public void test13_BlockRules() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        PublicKey root = new PublicKey(rootData);
+        PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test13_block_rules.bc");
@@ -357,7 +358,7 @@ public class SamplesV2Test extends TestCase {
     }
 
     public void test14_RegexConstraint() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        PublicKey root = new PublicKey(rootData);
+        PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test14_regex_constraint.bc");
@@ -391,7 +392,7 @@ public class SamplesV2Test extends TestCase {
     }
 
     public void test15_MultiQueriesCaveats() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        PublicKey root = new PublicKey(rootData);
+        PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test15_multi_queries_caveats.bc");
@@ -425,7 +426,7 @@ public class SamplesV2Test extends TestCase {
     }
 
     public void test16_CaveatHeadName() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        PublicKey root = new PublicKey(rootData);
+        PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test16_caveat_head_name.bc");
@@ -450,7 +451,7 @@ public class SamplesV2Test extends TestCase {
     }
 
     public void test17_Expressions() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        PublicKey root = new PublicKey(rootData);
+        PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test17_expressions.bc");
@@ -468,7 +469,7 @@ public class SamplesV2Test extends TestCase {
     }
 
     public void test18_Unbound_Variables() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        PublicKey root = new PublicKey(rootData);
+        PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test18_unbound_variables_in_rule.bc");
@@ -488,7 +489,7 @@ public class SamplesV2Test extends TestCase {
     }
 
     public void test19_generating_ambient_from_variables() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        PublicKey root = new PublicKey(rootData);
+        PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test19_generating_ambient_from_variables.bc");
@@ -508,7 +509,7 @@ public class SamplesV2Test extends TestCase {
     }
 
     public void test20_sealed_token() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        PublicKey root = new PublicKey(rootData);
+        PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test20_sealed.bc");
@@ -516,7 +517,8 @@ public class SamplesV2Test extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data, root).get();
+        Either<Error,Biscuit> res = Biscuit.from_bytes(data, root);
+        Biscuit token = res.get();
         System.out.println(token.print());
 
         Verifier v1 = token.verifier().get();

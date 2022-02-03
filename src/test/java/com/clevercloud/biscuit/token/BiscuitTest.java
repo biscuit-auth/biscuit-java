@@ -294,7 +294,8 @@ public class BiscuitTest extends TestCase {
                 e);
 
         System.out.println("deserializing the sealed token with a valid key");
-        Biscuit deser2 = Biscuit.from_bytes(sealed, root.public_key()).get();
+        Either<Error,Biscuit> res = Biscuit.from_bytes(sealed, root.public_key());
+        Biscuit deser2 = res.get();
         System.out.println(deser2.print());
 
         System.out.println("trying to attenuate to a sealed token");

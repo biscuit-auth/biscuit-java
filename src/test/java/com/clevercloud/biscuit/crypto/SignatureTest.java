@@ -1,5 +1,6 @@
 package com.clevercloud.biscuit.crypto;
 
+import biscuit.format.schema.Schema;
 import org.junit.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -12,19 +13,20 @@ import java.security.SignatureException;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
+
 import com.clevercloud.biscuit.error.Error;
 
 /**
  * @serial exclude
  */
 public class SignatureTest extends TestCase {
-        public SignatureTest(String testName) {
-            super(testName);
-        }
+    public SignatureTest(String testName) {
+        super(testName);
+    }
 
-        public static Test suite() {
-            return new TestSuite(SignatureTest.class);
-        }
+    public static Test suite() {
+        return new TestSuite(SignatureTest.class);
+    }
 
     public void testSerialize() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         byte[] seed = {1, 2, 3, 4};
@@ -37,7 +39,7 @@ public class SignatureTest extends TestCase {
         byte[] serializedPublicKey = pubkey.toBytes();
 
         KeyPair deserializedSecretKey = new KeyPair(serializedSecretKey);
-        PublicKey deserializedPublicKey = new PublicKey(serializedPublicKey);
+        PublicKey deserializedPublicKey = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, serializedPublicKey);
 
         assertEquals(32, serializedSecretKey.length);
         assertEquals(32, serializedPublicKey.length);
@@ -51,30 +53,30 @@ public class SignatureTest extends TestCase {
     }
 
     public void testThreeMessages() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-            byte[] seed = {0, 0, 0, 0};
-            SecureRandom rng = new SecureRandom(seed);
+        byte[] seed = {0, 0, 0, 0};
+        SecureRandom rng = new SecureRandom(seed);
 
-            String message1 = "hello";
-            KeyPair root = new KeyPair(rng);
-            KeyPair keypair2 = new KeyPair(rng);
-            System.out.println("root key: "+root.toHex());
-            System.out.println("keypair2: "+keypair2.toHex());
-        System.out.println("root key public: "+root.public_key().toHex());
-        System.out.println("keypair2 public: "+keypair2.public_key().toHex());
+        String message1 = "hello";
+        KeyPair root = new KeyPair(rng);
+        KeyPair keypair2 = new KeyPair(rng);
+        System.out.println("root key: " + root.toHex());
+        System.out.println("keypair2: " + keypair2.toHex());
+        System.out.println("root key public: " + root.public_key().toHex());
+        System.out.println("keypair2 public: " + keypair2.public_key().toHex());
 
-            Token token1 = new Token(root, message1.getBytes(), keypair2);
-            Assert.assertEquals(Right(null), token1.verify(root.public_key()));
+        Token token1 = new Token(root, message1.getBytes(), keypair2);
+        Assert.assertEquals(Right(null), token1.verify(root.public_key()));
 
-            String message2 = "world";
-            KeyPair keypair3 = new KeyPair(rng);
-            Token token2 = token1.append(keypair3, message2.getBytes());
-            Assert.assertEquals(Right(null), token2.verify(root.public_key()));
+        String message2 = "world";
+        KeyPair keypair3 = new KeyPair(rng);
+        Token token2 = token1.append(keypair3, message2.getBytes());
+        Assert.assertEquals(Right(null), token2.verify(root.public_key()));
 
-            String message3 = "!!";
-            KeyPair keypair4 = new KeyPair(rng);
-            Token token3 = token2.append(keypair4, message3.getBytes());
-            Assert.assertEquals(Right(null), token3.verify(root.public_key()));
-        }
+        String message3 = "!!";
+        KeyPair keypair4 = new KeyPair(rng);
+        Token token3 = token2.append(keypair4, message3.getBytes());
+        Assert.assertEquals(Right(null), token3.verify(root.public_key()));
+    }
 
     public void testChangeMessages() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         byte[] seed = {0, 0, 0, 0};
@@ -84,19 +86,19 @@ public class SignatureTest extends TestCase {
         KeyPair root = new KeyPair(rng);
         KeyPair keypair2 = new KeyPair(rng);
         Token token1 = new Token(root, message1.getBytes(), keypair2);
-        Assert.assertEquals(Right(null), token1.verify(new PublicKey(root.public_key)));
+        Assert.assertEquals(Right(null), token1.verify(new PublicKey(Schema.PublicKey.Algorithm.Ed25519, root.public_key)));
 
         String message2 = "world";
         KeyPair keypair3 = new KeyPair(rng);
         Token token2 = token1.append(keypair3, message2.getBytes());
         token2.blocks.set(1, "you".getBytes());
         Assert.assertEquals(Left(new Error.FormatError.Signature.InvalidSignature()),
-                token2.verify(new PublicKey(root.public_key)));
+                token2.verify(new PublicKey(Schema.PublicKey.Algorithm.Ed25519, root.public_key)));
 
         String message3 = "!!";
         KeyPair keypair4 = new KeyPair(rng);
         Token token3 = token2.append(keypair4, message3.getBytes());
         Assert.assertEquals(Left(new Error.FormatError.Signature.InvalidSignature()),
-                token3.verify(new PublicKey(root.public_key)));
+                token3.verify(new PublicKey(Schema.PublicKey.Algorithm.Ed25519, root.public_key)));
     }
 }
