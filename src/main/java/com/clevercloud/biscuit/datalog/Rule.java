@@ -33,21 +33,21 @@ public final class Rule implements Serializable {
    public void apply(final Set<Fact> facts, final Set<Fact> new_facts, SymbolTable symbols) {
       final Set<Long> variables_set = new HashSet<>();
       for (final Predicate pred : this.body) {
-         variables_set.addAll(pred.ids().stream().filter((id) -> id instanceof ID.Variable).map((id) -> ((ID.Variable) id).value()).collect(Collectors.toSet()));
+         variables_set.addAll(pred.terms().stream().filter((id) -> id instanceof Term.Variable).map((id) -> ((Term.Variable) id).value()).collect(Collectors.toSet()));
       }
       final MatchedVariables variables = new MatchedVariables(variables_set);
 
       if(this.body.isEmpty()) {
-         final Option<Map<Long, ID>> h_opt = variables.check_expressions(this.expressions, symbols);
+         final Option<Map<Long, Term>> h_opt = variables.check_expressions(this.expressions, symbols);
          if(h_opt.isDefined()) {
-            final Map<Long, ID> h = h_opt.get();
+            final Map<Long, Term> h = h_opt.get();
             final Predicate p = this.head.clone();
-            final ListIterator<ID> idit = p.ids_iterator();
+            final ListIterator<Term> idit = p.ids_iterator();
             while (idit.hasNext()) {
                //FIXME: variables that appear in the head should appear in the body and constraints as well
-               final ID id = idit.next();
-               if (id instanceof ID.Variable) {
-                  final ID value = h.get(((ID.Variable) id).value());
+               final Term id = idit.next();
+               if (id instanceof Term.Variable) {
+                  final Term value = h.get(((Term.Variable) id).value());
                   idit.set(value);
                }
             }
@@ -56,14 +56,14 @@ public final class Rule implements Serializable {
          }
       }
 
-      for (final Map<Long, ID> h : new Combinator(variables, this.body, this.expressions, facts, symbols).combine()) {
+      for (final Map<Long, Term> h : new Combinator(variables, this.body, this.expressions, facts, symbols).combine()) {
          final Predicate p = this.head.clone();
-         final ListIterator<ID> idit = p.ids_iterator();
+         final ListIterator<Term> idit = p.ids_iterator();
          boolean unbound_variable = false;
          while (idit.hasNext()) {
-            final ID id = idit.next();
-            if (id instanceof ID.Variable) {
-               final ID value = h.get(((ID.Variable) id).value());
+            final Term id = idit.next();
+            if (id instanceof Term.Variable) {
+               final Term value = h.get(((Term.Variable) id).value());
                idit.set(value);
 
                // variables that appear in the head should appear in the body and constraints as well
@@ -84,7 +84,7 @@ public final class Rule implements Serializable {
    public boolean test(final Set<Fact> facts, SymbolTable symbols) {
       final Set<Long> variables_set = new HashSet<>();
       for (final Predicate pred : this.body) {
-         variables_set.addAll(pred.ids().stream().filter((id) -> id instanceof ID.Variable).map((id) -> ((ID.Variable) id).value()).collect(Collectors.toSet()));
+         variables_set.addAll(pred.terms().stream().filter((id) -> id instanceof Term.Variable).map((id) -> ((Term.Variable) id).value()).collect(Collectors.toSet()));
       }
       final MatchedVariables variables = new MatchedVariables(variables_set);
 

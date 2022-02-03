@@ -24,8 +24,8 @@ public final class SymbolTable implements Serializable {
       }
    }
 
-   public ID add(final String symbol) {
-      return new ID.Str(this.insert(symbol));
+   public Term add(final String symbol) {
+      return new Term.Str(this.insert(symbol));
    }
 
    public Option<Long> get(final String symbol) {
@@ -45,30 +45,30 @@ public final class SymbolTable implements Serializable {
       }
    }
 
-   public String print_id(final ID value){
+   public String print_id(final Term value){
       String _s = "";
-      if(value instanceof ID.Bool){
-         _s = Boolean.toString(((ID.Bool) value).value());
-      } else if (value instanceof ID.Bytes) {
-         _s = TokenSignature.hex(((ID.Bytes) value).value());
-      } else if (value instanceof ID.Date) {
-         Date d = Date.from(Instant.ofEpochSecond(((ID.Date) value).value()));
+      if(value instanceof Term.Bool){
+         _s = Boolean.toString(((Term.Bool) value).value());
+      } else if (value instanceof Term.Bytes) {
+         _s = TokenSignature.hex(((Term.Bytes) value).value());
+      } else if (value instanceof Term.Date) {
+         Date d = Date.from(Instant.ofEpochSecond(((Term.Date) value).value()));
          SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
          format.setTimeZone(TimeZone.getTimeZone("UTC"));
          _s  = format.format(d).toString();
-      } else if (value instanceof ID.Integer) {
-         _s = Long.toString(((ID.Integer) value).value());
-      } else if (value instanceof ID.Set) {
-         ID.Set idset = (ID.Set) value;
+      } else if (value instanceof Term.Integer) {
+         _s = Long.toString(((Term.Integer) value).value());
+      } else if (value instanceof Term.Set) {
+         Term.Set idset = (Term.Set) value;
          if (idset.value().size()>0) {
             _s = "[ ";
             _s += String.join(", ", idset.value().stream().map((id) -> print_id(id)).collect(Collectors.toList()));
             _s += " ]";
          }
-      } else if (value instanceof ID.Str) {
-         _s = "\""+print_symbol((int) ((ID.Str) value).value())+"\"";
-      } else if (value instanceof ID.Variable) {
-         _s = "$" + print_symbol((int) ((ID.Variable) value).value());
+      } else if (value instanceof Term.Str) {
+         _s = "\""+print_symbol((int) ((Term.Str) value).value())+"\"";
+      } else if (value instanceof Term.Variable) {
+         _s = "$" + print_symbol((int) ((Term.Variable) value).value());
       }
       return _s;
    }
@@ -100,17 +100,17 @@ public final class SymbolTable implements Serializable {
 
 
    public String print_predicate(final Predicate p) {
-      List<String> ids = p.ids().stream().map((i) -> {
-         if (i instanceof ID.Variable) {
-            return "$" + this.print_symbol((int) ((ID.Variable) i).value());
-         } else if (i instanceof ID.Date) {
-            return Date.from(Instant.ofEpochSecond(((ID.Date) i).value())).toString();
-         } else if (i instanceof ID.Integer) {
-            return "" + ((ID.Integer) i).value();
-         } else if (i instanceof ID.Str) {
-            return "\""+this.print_symbol((int) ((ID.Str) i).value())+"\"";
-         } else if(i instanceof ID.Bytes) {
-            return "hex:"+ Utils.byteArrayToHexString(((ID.Bytes) i).value());
+      List<String> ids = p.terms().stream().map((i) -> {
+         if (i instanceof Term.Variable) {
+            return "$" + this.print_symbol((int) ((Term.Variable) i).value());
+         } else if (i instanceof Term.Date) {
+            return Date.from(Instant.ofEpochSecond(((Term.Date) i).value())).toString();
+         } else if (i instanceof Term.Integer) {
+            return "" + ((Term.Integer) i).value();
+         } else if (i instanceof Term.Str) {
+            return "\""+this.print_symbol((int) ((Term.Str) i).value())+"\"";
+         } else if(i instanceof Term.Bytes) {
+            return "hex:"+ Utils.byteArrayToHexString(((Term.Bytes) i).value());
          } else {
             return "???";
          }

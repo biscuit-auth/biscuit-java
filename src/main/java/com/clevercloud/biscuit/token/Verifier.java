@@ -1,6 +1,5 @@
 package com.clevercloud.biscuit.token;
 
-import com.clevercloud.biscuit.datalog.ID;
 import com.clevercloud.biscuit.datalog.RunLimits;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.datalog.World;
@@ -199,7 +198,7 @@ public class Verifier {
         }
 
         queryRes.get().stream().forEach(fact -> {
-            fact.ids().stream().forEach(id -> {
+            fact.terms().stream().forEach(id -> {
                 if (id instanceof Term.Str) {
                     ids.add(((Term.Str) id).getValue());
                 }

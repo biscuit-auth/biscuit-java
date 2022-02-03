@@ -1,6 +1,5 @@
 package com.clevercloud.biscuit.token.builder;
 
-import com.clevercloud.biscuit.datalog.ID;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 
 import java.util.Arrays;
@@ -8,8 +7,8 @@ import java.util.HashSet;
 import java.util.Objects;
 
 public abstract class Term {
-    abstract public ID convert(SymbolTable symbols);
-    static public Term convert_from(ID id, SymbolTable symbols) {
+    abstract public com.clevercloud.biscuit.datalog.Term convert(SymbolTable symbols);
+    static public Term convert_from(com.clevercloud.biscuit.datalog.Term id, SymbolTable symbols) {
         return id.toTerm(symbols);
     }
 
@@ -25,8 +24,8 @@ public abstract class Term {
         }
 
         @Override
-        public ID convert(SymbolTable symbols) {
-            return new ID.Str(symbols.insert(this.value));
+        public com.clevercloud.biscuit.datalog.Term convert(SymbolTable symbols) {
+            return new com.clevercloud.biscuit.datalog.Term.Str(symbols.insert(this.value));
         }
 
             @Override
@@ -56,8 +55,8 @@ public abstract class Term {
         }
 
         @Override
-        public ID convert(SymbolTable symbols) {
-            return new ID.Variable(symbols.insert(this.value));
+        public com.clevercloud.biscuit.datalog.Term convert(SymbolTable symbols) {
+            return new com.clevercloud.biscuit.datalog.Term.Variable(symbols.insert(this.value));
         }
 
         @Override
@@ -89,8 +88,8 @@ public abstract class Term {
         }
 
         @Override
-        public ID convert(SymbolTable symbols) {
-            return new ID.Integer(this.value);
+        public com.clevercloud.biscuit.datalog.Term convert(SymbolTable symbols) {
+            return new com.clevercloud.biscuit.datalog.Term.Integer(this.value);
         }
 
         @Override
@@ -123,8 +122,8 @@ public abstract class Term {
         }
 
         @Override
-        public ID convert(SymbolTable symbols) {
-            return new ID.Bytes(this.value);
+        public com.clevercloud.biscuit.datalog.Term convert(SymbolTable symbols) {
+            return new com.clevercloud.biscuit.datalog.Term.Bytes(this.value);
         }
 
         @Override
@@ -156,8 +155,8 @@ public abstract class Term {
         }
 
         @Override
-        public ID convert(SymbolTable symbols) {
-            return new ID.Date(this.value);
+        public com.clevercloud.biscuit.datalog.Term convert(SymbolTable symbols) {
+            return new com.clevercloud.biscuit.datalog.Term.Date(this.value);
         }
 
         @Override
@@ -189,8 +188,8 @@ public abstract class Term {
         }
 
         @Override
-        public ID convert(SymbolTable symbols) {
-            return new ID.Bool(this.value);
+        public com.clevercloud.biscuit.datalog.Term convert(SymbolTable symbols) {
+            return new com.clevercloud.biscuit.datalog.Term.Bool(this.value);
         }
 
         @Override
@@ -222,14 +221,14 @@ public abstract class Term {
         }
 
         @Override
-        public ID convert(SymbolTable symbols) {
-            HashSet<ID> s = new HashSet<>();
+        public com.clevercloud.biscuit.datalog.Term convert(SymbolTable symbols) {
+            HashSet<com.clevercloud.biscuit.datalog.Term> s = new HashSet<>();
 
             for(Term t: this.value) {
                 s.add(t.convert(symbols));
             }
 
-            return new ID.Set(s);
+            return new com.clevercloud.biscuit.datalog.Term.Set(s);
         }
 
         @Override

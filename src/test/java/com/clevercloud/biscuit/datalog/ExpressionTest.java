@@ -28,8 +28,8 @@ public class ExpressionTest extends TestCase {
 
 
         Expression e = new Expression(new ArrayList<Op>(Arrays.asList(
-                new Op.Value(new ID.Integer(1)),
-                new Op.Value(new ID.Variable(2)),
+                new Op.Value(new Term.Integer(1)),
+                new Op.Value(new Term.Variable(2)),
                 new Op.Binary(Op.BinaryOp.LessThan),
                 new Op.Unary(Op.UnaryOp.Negate)
         )));
@@ -39,11 +39,11 @@ public class ExpressionTest extends TestCase {
                 e.print(symbols).get()
         );
 
-        HashMap<Long, ID> variables = new HashMap<>();
-        variables.put(2L, new ID.Integer(0));
+        HashMap<Long, Term> variables = new HashMap<>();
+        variables.put(2L, new Term.Integer(0));
 
         Assert.assertEquals(
-                new ID.Bool(true),
+                new Term.Bool(true),
                 e.evaluate(variables, symbols).get()
         );
     }

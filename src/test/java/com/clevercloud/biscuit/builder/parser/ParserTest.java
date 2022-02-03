@@ -1,6 +1,5 @@
 package com.clevercloud.biscuit.builder.parser;
 
-import com.clevercloud.biscuit.datalog.ID;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.datalog.expressions.Op;
 import com.clevercloud.biscuit.token.builder.*;
@@ -188,9 +187,9 @@ public class ParserTest extends TestCase {
         long test = s3.insert("test");
         assertEquals(
                 Arrays.asList(
-                        new Op.Value(new ID.Integer(1)),
-                        new Op.Value(new ID.Variable(test)),
-                        new Op.Value(new ID.Integer(2)),
+                        new Op.Value(new com.clevercloud.biscuit.datalog.Term.Integer(1)),
+                        new Op.Value(new com.clevercloud.biscuit.datalog.Term.Variable(test)),
+                        new Op.Value(new com.clevercloud.biscuit.datalog.Term.Integer(2)),
                         new Op.Binary(Op.BinaryOp.Add),
                         new Op.Binary(Op.BinaryOp.LessThan)
                 ),
@@ -262,9 +261,9 @@ public class ParserTest extends TestCase {
 
         assertEquals(
                 Arrays.asList(
-                        new Op.Value(new ID.Integer(1)),
-                        new Op.Value(new ID.Integer(2)),
-                        new Op.Value(new ID.Integer(3)),
+                        new Op.Value(new com.clevercloud.biscuit.datalog.Term.Integer(1)),
+                        new Op.Value(new com.clevercloud.biscuit.datalog.Term.Integer(2)),
+                        new Op.Value(new com.clevercloud.biscuit.datalog.Term.Integer(3)),
                         new Op.Binary(Op.BinaryOp.Mul),
                         new Op.Binary(Op.BinaryOp.Add)
                 ),
@@ -272,8 +271,8 @@ public class ParserTest extends TestCase {
         );
 
         HashMap variables = new HashMap();
-        Option<ID> value = ex.evaluate(variables, s);
-        assertEquals(Option.some(new ID.Integer(7)), value);
+        Option<com.clevercloud.biscuit.datalog.Term> value = ex.evaluate(variables, s);
+        assertEquals(Option.some(new com.clevercloud.biscuit.datalog.Term.Integer(7)), value);
         assertEquals("1 + 2 * 3", ex.print(s).get());
 
 
@@ -303,19 +302,19 @@ public class ParserTest extends TestCase {
 
         assertEquals(
                 Arrays.asList(
-                        new Op.Value(new ID.Integer(1)),
-                        new Op.Value(new ID.Integer(2)),
+                        new Op.Value(new com.clevercloud.biscuit.datalog.Term.Integer(1)),
+                        new Op.Value(new com.clevercloud.biscuit.datalog.Term.Integer(2)),
                         new Op.Binary(Op.BinaryOp.Add),
                         new Op.Unary(Op.UnaryOp.Parens),
-                        new Op.Value(new ID.Integer(3)),
+                        new Op.Value(new com.clevercloud.biscuit.datalog.Term.Integer(3)),
                         new Op.Binary(Op.BinaryOp.Mul)
                 ),
                 ex2.getOps()
         );
 
         HashMap variables2 = new HashMap();
-        Option<ID> value2 = ex2.evaluate(variables2, s2);
-        assertEquals(Option.some(new ID.Integer(9)), value2);
+        Option<com.clevercloud.biscuit.datalog.Term> value2 = ex2.evaluate(variables2, s2);
+        assertEquals(Option.some(new com.clevercloud.biscuit.datalog.Term.Integer(9)), value2);
         assertEquals("(1 + 2) * 3", ex2.print(s2).get());
     }
 }

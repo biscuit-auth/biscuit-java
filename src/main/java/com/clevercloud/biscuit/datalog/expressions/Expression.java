@@ -1,7 +1,7 @@
 package com.clevercloud.biscuit.datalog.expressions;
 
 import biscuit.format.schema.Schema;
-import com.clevercloud.biscuit.datalog.ID;
+import com.clevercloud.biscuit.datalog.Term;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.error.Error;
 import io.vavr.control.Either;
@@ -26,8 +26,8 @@ public class Expression {
         return ops;
     }
 
-    public Option<ID> evaluate(Map<Long, ID> variables, SymbolTable symbols) {
-        Deque<ID> stack = new ArrayDeque<ID>(16); //Default value
+    public Option<Term> evaluate(Map<Long, Term> variables, SymbolTable symbols) {
+        Deque<Term> stack = new ArrayDeque<Term>(16); //Default value
         for(Op op: ops){
             if(!op.evaluate(stack,variables, symbols)){
                 return Option.none();

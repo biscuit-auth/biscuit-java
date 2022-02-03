@@ -97,17 +97,17 @@ public final class World implements Serializable {
          if (f.predicate().name() != pred.name()) {
             return false;
          }
-         final int min_size = Math.min(f.predicate().ids().size(), pred.ids().size());
+         final int min_size = Math.min(f.predicate().terms().size(), pred.terms().size());
          for (int i = 0; i < min_size; ++i) {
-            final ID fid = f.predicate().ids().get(i);
-            final ID pid = pred.ids().get(i);
-            if ((fid instanceof ID.Integer || fid instanceof ID.Str || fid instanceof ID.Date)
+            final Term fid = f.predicate().terms().get(i);
+            final Term pid = pred.terms().get(i);
+            if ((fid instanceof Term.Integer || fid instanceof Term.Str || fid instanceof Term.Date)
                     && fid.getClass() == pid.getClass()) {
                if (!fid.equals(pid)) {
                   return false;
                }
             /* FIXME: is it still necessary?
-            } else if (!(fid instanceof ID.Symbol && pid instanceof ID.Variable)) {
+            } else if (!(fid instanceof Term.Symbol && pid instanceof Term.Variable)) {
                return false;*/
             }
          }

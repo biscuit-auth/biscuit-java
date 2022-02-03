@@ -7,8 +7,8 @@ import java.util.List;
 public class Fact {
     Predicate predicate;
 
-    public Fact(String name, List<Term> ids) {
-        this.predicate = new Predicate(name, ids);
+    public Fact(String name, List<Term> terms) {
+        this.predicate = new Predicate(name, terms);
     }
 
     public Fact(Predicate p) {
@@ -32,7 +32,7 @@ public class Fact {
         return this.predicate.name;
     }
 
-    public List<Term> ids() { return this.predicate.ids; }
+    public List<Term> terms() { return this.predicate.terms; }
 
     @Override
     public boolean equals(Object o) {

@@ -2,7 +2,6 @@ package com.clevercloud.biscuit.datalog;
 
 import biscuit.format.schema.Schema;
 import com.clevercloud.biscuit.error.Error;
-import com.clevercloud.biscuit.token.builder.Term;
 import com.google.protobuf.ByteString;
 import io.vavr.control.Either;
 import static io.vavr.API.Left;
@@ -11,43 +10,42 @@ import static io.vavr.API.Right;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Objects;
 
 
-public abstract class ID implements Serializable {
-   public abstract boolean match(final ID other);
-   public abstract Schema.IDV2 serialize();
+public abstract class Term implements Serializable {
+   public abstract boolean match(final Term other);
+   public abstract Schema.TermV2 serialize();
 
-   static public Either<Error.FormatError, ID> deserialize_enumV2(Schema.IDV2 id) {
-      if(id.hasDate()) {
-         return Date.deserializeV2(id);
-      } else if(id.hasInteger()) {
-         return Integer.deserializeV2(id);
-      } else if(id.hasString()) {
-         return Str.deserializeV2(id);
-      } else if(id.hasBytes()) {
-         return Bytes.deserializeV2(id);
-      } else if(id.hasVariable()) {
-         return Variable.deserializeV2(id);
-      } else if(id.hasBool()) {
-         return Bool.deserializeV2(id);
-      } else if(id.hasSet()) {
-         return Set.deserializeV2(id);
+   static public Either<Error.FormatError, Term> deserialize_enumV2(Schema.TermV2 term) {
+      if(term.hasDate()) {
+         return Date.deserializeV2(term);
+      } else if(term.hasInteger()) {
+         return Integer.deserializeV2(term);
+      } else if(term.hasString()) {
+         return Str.deserializeV2(term);
+      } else if(term.hasBytes()) {
+         return Bytes.deserializeV2(term);
+      } else if(term.hasVariable()) {
+         return Variable.deserializeV2(term);
+      } else if(term.hasBool()) {
+         return Bool.deserializeV2(term);
+      } else if(term.hasSet()) {
+         return Set.deserializeV2(term);
       } else {
-         return Left(new Error.FormatError.DeserializationError("invalid ID kind: id.getKind()"));
+         return Left(new Error.FormatError.DeserializationError("invalid Term kind: term.getKind()"));
       }
    }
 
-   public abstract Term toTerm(SymbolTable symbols);
+   public abstract com.clevercloud.biscuit.token.builder.Term toTerm(SymbolTable symbols);
 
-   public final static class Date extends ID implements Serializable {
+   public final static class Date extends Term implements Serializable {
       private final long value;
 
       public long value() {
          return this.value;
       }
 
-      public boolean match(final ID other) {
+      public boolean match(final Term other) {
          if (other instanceof Variable) {
             return true;
          } else {
@@ -79,32 +77,32 @@ public abstract class ID implements Serializable {
          return "@" + this.value;
       }
 
-      public Schema.IDV2 serialize() {
-         return Schema.IDV2.newBuilder()
+      public Schema.TermV2 serialize() {
+         return Schema.TermV2.newBuilder()
                  .setDate(this.value).build();
       }
 
-      static public Either<Error.FormatError, ID> deserializeV2(Schema.IDV2 id) {
-         if(!id.hasDate()) {
-            return Left(new Error.FormatError.DeserializationError("invalid ID kind, expected date"));
+      static public Either<Error.FormatError, Term> deserializeV2(Schema.TermV2 term) {
+         if(!term.hasDate()) {
+            return Left(new Error.FormatError.DeserializationError("invalid Term kind, expected date"));
          } else {
-            return Right(new Date(id.getDate()));
+            return Right(new Date(term.getDate()));
          }
       }
 
-      public Term toTerm(SymbolTable symbols) {
-         return new Term.Date(this.value);
+      public com.clevercloud.biscuit.token.builder.Term toTerm(SymbolTable symbols) {
+         return new com.clevercloud.biscuit.token.builder.Term.Date(this.value);
       }
    }
 
-   public final static class Integer extends ID implements Serializable {
+   public final static class Integer extends Term implements Serializable {
       private final long value;
 
       public long value() {
          return this.value;
       }
 
-      public boolean match(final ID other) {
+      public boolean match(final Term other) {
          if (other instanceof Variable) {
             return true;
          }
@@ -138,32 +136,32 @@ public abstract class ID implements Serializable {
          return "" + this.value;
       }
 
-      public Schema.IDV2 serialize() {
-         return Schema.IDV2.newBuilder()
+      public Schema.TermV2 serialize() {
+         return Schema.TermV2.newBuilder()
                  .setInteger(this.value).build();
       }
 
-      static public Either<Error.FormatError, ID> deserializeV2(Schema.IDV2 id) {
-         if(!id.hasInteger()) {
-            return Left(new Error.FormatError.DeserializationError("invalid ID kind, expected integer"));
+      static public Either<Error.FormatError, Term> deserializeV2(Schema.TermV2 term) {
+         if(!term.hasInteger()) {
+            return Left(new Error.FormatError.DeserializationError("invalid Term kind, expected integer"));
          } else {
-            return Right(new Integer(id.getInteger()));
+            return Right(new Integer(term.getInteger()));
          }
       }
 
-      public Term toTerm(SymbolTable symbols) {
-         return new Term.Integer(this.value);
+      public com.clevercloud.biscuit.token.builder.Term toTerm(SymbolTable symbols) {
+         return new com.clevercloud.biscuit.token.builder.Term.Integer(this.value);
       }
    }
 
-   public final static class Bytes extends ID implements Serializable {
+   public final static class Bytes extends Term implements Serializable {
       private final byte[] value;
 
       public byte[] value() {
          return this.value;
       }
 
-      public boolean match(final ID other) {
+      public boolean match(final Term other) {
          if (other instanceof Variable) {
             return true;
          }
@@ -197,32 +195,32 @@ public abstract class ID implements Serializable {
          return this.value.toString();
       }
 
-      public Schema.IDV2 serialize() {
-         return Schema.IDV2.newBuilder()
+      public Schema.TermV2 serialize() {
+         return Schema.TermV2.newBuilder()
                  .setBytes(ByteString.EMPTY.copyFrom(this.value)).build();
       }
 
-      static public Either<Error.FormatError, ID> deserializeV2(Schema.IDV2 id) {
-         if(!id.hasBytes()) {
-            return Left(new Error.FormatError.DeserializationError("invalid ID kind, expected byte array"));
+      static public Either<Error.FormatError, Term> deserializeV2(Schema.TermV2 term) {
+         if(!term.hasBytes()) {
+            return Left(new Error.FormatError.DeserializationError("invalid Term kind, expected byte array"));
          } else {
-            return Right(new Bytes(id.getBytes().toByteArray()));
+            return Right(new Bytes(term.getBytes().toByteArray()));
          }
       }
 
-      public Term toTerm(SymbolTable symbols) {
-         return new Term.Bytes(this.value);
+      public com.clevercloud.biscuit.token.builder.Term toTerm(SymbolTable symbols) {
+         return new com.clevercloud.biscuit.token.builder.Term.Bytes(this.value);
       }
    }
 
-   public final static class Str extends ID implements Serializable {
+   public final static class Str extends Term implements Serializable {
       private final long value;
 
       public long value() {
          return this.value;
       }
 
-      public boolean match(final ID other) {
+      public boolean match(final Term other) {
          if (other instanceof Variable) {
             return true;
          }
@@ -253,32 +251,32 @@ public abstract class ID implements Serializable {
          return (int) (value ^ (value >>> 32));
       }
 
-      public Schema.IDV2 serialize() {
-         return Schema.IDV2.newBuilder()
+      public Schema.TermV2 serialize() {
+         return Schema.TermV2.newBuilder()
                  .setString(this.value).build();
       }
 
-      static public Either<Error.FormatError, ID> deserializeV2(Schema.IDV2 id) {
-         if(!id.hasString()) {
-            return Left(new Error.FormatError.DeserializationError("invalid ID kind, expected string"));
+      static public Either<Error.FormatError, Term> deserializeV2(Schema.TermV2 term) {
+         if(!term.hasString()) {
+            return Left(new Error.FormatError.DeserializationError("invalid Term kind, expected string"));
          } else {
-            return Right(new Str(id.getString()));
+            return Right(new Str(term.getString()));
          }
       }
 
-      public Term toTerm(SymbolTable symbols) {
-         return new Term.Str(symbols.print_symbol((int) this.value));
+      public com.clevercloud.biscuit.token.builder.Term toTerm(SymbolTable symbols) {
+         return new com.clevercloud.biscuit.token.builder.Term.Str(symbols.print_symbol((int) this.value));
       }
    }
 
-   public final static class Variable extends ID implements Serializable {
+   public final static class Variable extends Term implements Serializable {
       private final long value;
 
       public long value() {
          return this.value;
       }
 
-      public boolean match(final ID other) {
+      public boolean match(final Term other) {
          return true;
       }
 
@@ -306,32 +304,32 @@ public abstract class ID implements Serializable {
          return this.value + "?";
       }
 
-      public Schema.IDV2 serialize() {
-         return Schema.IDV2.newBuilder()
+      public Schema.TermV2 serialize() {
+         return Schema.TermV2.newBuilder()
                  .setVariable((int) this.value).build();
       }
 
-      static public Either<Error.FormatError, ID> deserializeV2(Schema.IDV2 id) {
-         if(!id.hasVariable()) {
-            return Left(new Error.FormatError.DeserializationError("invalid ID kind, expected variable"));
+      static public Either<Error.FormatError, Term> deserializeV2(Schema.TermV2 term) {
+         if(!term.hasVariable()) {
+            return Left(new Error.FormatError.DeserializationError("invalid Term kind, expected variable"));
          } else {
-            return Right(new Variable(id.getVariable()));
+            return Right(new Variable(term.getVariable()));
          }
       }
 
-      public Term toTerm(SymbolTable symbols) {
-         return new Term.Variable(symbols.print_symbol((int) this.value));
+      public com.clevercloud.biscuit.token.builder.Term toTerm(SymbolTable symbols) {
+         return new com.clevercloud.biscuit.token.builder.Term.Variable(symbols.print_symbol((int) this.value));
       }
    }
 
-   public final static class Bool extends ID implements Serializable {
+   public final static class Bool extends Term implements Serializable {
       private final boolean value;
 
       public boolean value() {
          return this.value;
       }
 
-      public boolean match(final ID other) {
+      public boolean match(final Term other) {
          if (other instanceof Variable) {
             return true;
          }
@@ -365,32 +363,32 @@ public abstract class ID implements Serializable {
          return "" + this.value;
       }
 
-      public Schema.IDV2 serialize() {
-         return Schema.IDV2.newBuilder()
+      public Schema.TermV2 serialize() {
+         return Schema.TermV2.newBuilder()
                  .setBool(this.value).build();
       }
 
-      static public Either<Error.FormatError, ID> deserializeV2(Schema.IDV2 id) {
-         if(!id.hasBool()) {
-            return Left(new Error.FormatError.DeserializationError("invalid ID kind, expected boolean"));
+      static public Either<Error.FormatError, Term> deserializeV2(Schema.TermV2 term) {
+         if(!term.hasBool()) {
+            return Left(new Error.FormatError.DeserializationError("invalid Term kind, expected boolean"));
          } else {
-            return Right(new Bool(id.getBool()));
+            return Right(new Bool(term.getBool()));
          }
       }
 
-      public Term toTerm(SymbolTable symbols) {
-         return new Term.Bool(this.value);
+      public com.clevercloud.biscuit.token.builder.Term toTerm(SymbolTable symbols) {
+         return new com.clevercloud.biscuit.token.builder.Term.Bool(this.value);
       }
    }
 
-   public final static class Set extends ID implements Serializable {
-      private final HashSet<ID> value;
+   public final static class Set extends Term implements Serializable {
+      private final HashSet<Term> value;
 
-      public HashSet<ID> value() {
+      public HashSet<Term> value() {
          return this.value;
       }
 
-      public boolean match(final ID other) {
+      public boolean match(final Term other) {
          if (other instanceof Variable) {
             return true;
          }
@@ -400,7 +398,7 @@ public abstract class ID implements Serializable {
          return false;
       }
 
-      public Set(final HashSet<ID> value) {
+      public Set(final HashSet<Term> value) {
          this.value = value;
       }
 
@@ -425,31 +423,31 @@ public abstract class ID implements Serializable {
                  value;
       }
 
-      public Schema.IDV2 serialize() {
-         Schema.IDSet.Builder s = Schema.IDSet.newBuilder();
+      public Schema.TermV2 serialize() {
+         Schema.TermSet.Builder s = Schema.TermSet.newBuilder();
 
-         for (ID l: this.value) {
+         for (Term l: this.value) {
             s.addSet(l.serialize());
          }
 
-         return Schema.IDV2.newBuilder()
+         return Schema.TermV2.newBuilder()
                  .setSet(s).build();
       }
 
-      static public Either<Error.FormatError, ID> deserializeV2(Schema.IDV2 id) {
-         if(!id.hasSet()) {
-            return Left(new Error.FormatError.DeserializationError("invalid ID kind, expected set"));
+      static public Either<Error.FormatError, Term> deserializeV2(Schema.TermV2 term) {
+         if(!term.hasSet()) {
+            return Left(new Error.FormatError.DeserializationError("invalid Term kind, expected set"));
          } else {
-            java.util.HashSet<ID> values = new HashSet<>();
-            Schema.IDSet s = id.getSet();
+            java.util.HashSet<Term> values = new HashSet<>();
+            Schema.TermSet s = term.getSet();
 
-            for (Schema.IDV2 l: s.getSetList()) {
-               Either<Error.FormatError, ID> res = ID.deserialize_enumV2(l);
+            for (Schema.TermV2 l: s.getSetList()) {
+               Either<Error.FormatError, Term> res = Term.deserialize_enumV2(l);
                if(res.isLeft()) {
                   Error.FormatError e = res.getLeft();
                   return Left(e);
                } else {
-                  ID value = res.get();
+                  Term value = res.get();
 
                   if(value instanceof Variable) {
                      return Left(new Error.FormatError.DeserializationError("sets cannot contain variables"));
@@ -467,14 +465,14 @@ public abstract class ID implements Serializable {
          }
       }
 
-      public Term toTerm(SymbolTable symbols) {
-         HashSet<Term> s = new HashSet<>();
+      public com.clevercloud.biscuit.token.builder.Term toTerm(SymbolTable symbols) {
+         HashSet<com.clevercloud.biscuit.token.builder.Term> s = new HashSet<>();
 
-         for(ID i: this.value) {
+         for(Term i: this.value) {
             s.add(i.toTerm(symbols));
          }
 
-         return new Term.Set(s);
+         return new com.clevercloud.biscuit.token.builder.Term.Set(s);
       }
    }
 }

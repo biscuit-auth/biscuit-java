@@ -1,7 +1,7 @@
 package com.clevercloud.biscuit.datalog.expressions;
 
 import biscuit.format.schema.Schema;
-import com.clevercloud.biscuit.datalog.ID;
+import com.clevercloud.biscuit.datalog.Term;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.error.Error;
 import com.google.re2j.Matcher;
@@ -15,7 +15,7 @@ import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
 public abstract class Op {
-    public abstract boolean evaluate(Deque<ID> stack, Map<Long, ID> variables, SymbolTable symbols);
+    public abstract boolean evaluate(Deque<Term> stack, Map<Long, Term> variables, SymbolTable symbols);
 
     public abstract String print(Deque<String> stack, SymbolTable symbols);
 
@@ -23,7 +23,7 @@ public abstract class Op {
 
     static public Either<Error.FormatError, Op> deserializeV2(Schema.Op op) {
         if (op.hasValue()) {
-            return ID.deserialize_enumV2(op.getValue()).map(v -> new Op.Value(v));
+            return Term.deserialize_enumV2(op.getValue()).map(v -> new Op.Value(v));
         } else if (op.hasUnary()) {
             return Op.Unary.deserializeV2(op.getUnary());
         } else if (op.hasBinary()) {
@@ -34,21 +34,21 @@ public abstract class Op {
     }
 
     public final static class Value extends Op {
-        private final ID value;
+        private final Term value;
 
-        public Value(ID value) {
+        public Value(Term value) {
             this.value = value;
         }
 
-        public ID getValue() {
+        public Term getValue() {
             return value;
         }
 
         @Override
-        public boolean evaluate(Deque<ID> stack, Map<Long, ID> variables, SymbolTable symbols) {
-            if (value instanceof ID.Variable) {
-                ID.Variable var = (ID.Variable) value;
-                ID valueVar = variables.get(var.value());
+        public boolean evaluate(Deque<Term> stack, Map<Long, Term> variables, SymbolTable symbols) {
+            if (value instanceof Term.Variable) {
+                Term.Variable var = (Term.Variable) value;
+                Term valueVar = variables.get(var.value());
                 if (valueVar != null) {
                     stack.push(valueVar);
                     return true;
@@ -117,13 +117,13 @@ public abstract class Op {
         }
 
         @Override
-        public boolean evaluate(Deque<ID> stack, Map<Long, ID> variables, SymbolTable symbols) {
-            ID value = stack.pop();
+        public boolean evaluate(Deque<Term> stack, Map<Long, Term> variables, SymbolTable symbols) {
+            Term value = stack.pop();
             switch (this.op) {
                 case Negate:
-                    if (value instanceof ID.Bool) {
-                        ID.Bool b = (ID.Bool) value;
-                        stack.push(new ID.Bool(!b.value()));
+                    if (value instanceof Term.Bool) {
+                        Term.Bool b = (Term.Bool) value;
+                        stack.push(new Term.Bool(!b.value()));
                     } else {
                         return false;
                     }
@@ -132,17 +132,17 @@ public abstract class Op {
                     stack.push(value);
                     break;
                 case Length:
-                    if (value instanceof ID.Str) {
-                        Option<String> s = symbols.get_s((int)((ID.Str) value).value());
+                    if (value instanceof Term.Str) {
+                        Option<String> s = symbols.get_s((int)((Term.Str) value).value());
                         if(s.isEmpty()) {
                             return false;
                         } else {
-                            stack.push(new ID.Integer(s.get().length()));
+                            stack.push(new Term.Integer(s.get().length()));
                         }
-                    } else if (value instanceof ID.Bytes) {
-                        stack.push(new ID.Integer(((ID.Bytes) value).value().length));
-                    } else if (value instanceof ID.Set) {
-                        stack.push(new ID.Integer(((ID.Set) value).value().size()));
+                    } else if (value instanceof Term.Bytes) {
+                        stack.push(new Term.Integer(((Term.Bytes) value).value().length));
+                    } else if (value instanceof Term.Set) {
+                        stack.push(new Term.Integer(((Term.Set) value).value().size()));
                     } else {
                         return false;
                     }
@@ -256,191 +256,191 @@ public abstract class Op {
         }
 
         @Override
-        public boolean evaluate(Deque<ID> stack, Map<Long, ID> variables, SymbolTable symbols) {
-            ID right = stack.pop();
-            ID left = stack.pop();
+        public boolean evaluate(Deque<Term> stack, Map<Long, Term> variables, SymbolTable symbols) {
+            Term right = stack.pop();
+            Term left = stack.pop();
 
             switch (this.op) {
                 case LessThan:
-                    if (right instanceof ID.Integer && left instanceof ID.Integer) {
-                        stack.push(new ID.Bool(((ID.Integer) left).value() < ((ID.Integer) right).value()));
+                    if (right instanceof Term.Integer && left instanceof Term.Integer) {
+                        stack.push(new Term.Bool(((Term.Integer) left).value() < ((Term.Integer) right).value()));
                         return true;
                     }
-                    if (right instanceof ID.Date && left instanceof ID.Date) {
-                        stack.push(new ID.Bool(((ID.Date) left).value() < ((ID.Date) right).value()));
+                    if (right instanceof Term.Date && left instanceof Term.Date) {
+                        stack.push(new Term.Bool(((Term.Date) left).value() < ((Term.Date) right).value()));
                         return true;
                     }
                     break;
                 case GreaterThan:
-                    if (right instanceof ID.Integer && left instanceof ID.Integer) {
-                        stack.push(new ID.Bool(((ID.Integer) left).value() > ((ID.Integer) right).value()));
+                    if (right instanceof Term.Integer && left instanceof Term.Integer) {
+                        stack.push(new Term.Bool(((Term.Integer) left).value() > ((Term.Integer) right).value()));
                         return true;
                     }
-                    if (right instanceof ID.Date && left instanceof ID.Date) {
-                        stack.push(new ID.Bool(((ID.Date) left).value() > ((ID.Date) right).value()));
+                    if (right instanceof Term.Date && left instanceof Term.Date) {
+                        stack.push(new Term.Bool(((Term.Date) left).value() > ((Term.Date) right).value()));
                         return true;
                     }
                     break;
                 case LessOrEqual:
-                    if (right instanceof ID.Integer && left instanceof ID.Integer) {
-                        stack.push(new ID.Bool(((ID.Integer) left).value() <= ((ID.Integer) right).value()));
+                    if (right instanceof Term.Integer && left instanceof Term.Integer) {
+                        stack.push(new Term.Bool(((Term.Integer) left).value() <= ((Term.Integer) right).value()));
                         return true;
                     }
-                    if (right instanceof ID.Date && left instanceof ID.Date) {
-                        stack.push(new ID.Bool(((ID.Date) left).value() <= ((ID.Date) right).value()));
+                    if (right instanceof Term.Date && left instanceof Term.Date) {
+                        stack.push(new Term.Bool(((Term.Date) left).value() <= ((Term.Date) right).value()));
                         return true;
                     }
                     break;
                 case GreaterOrEqual:
-                    if (right instanceof ID.Integer && left instanceof ID.Integer) {
-                        stack.push(new ID.Bool(((ID.Integer) left).value() >= ((ID.Integer) right).value()));
+                    if (right instanceof Term.Integer && left instanceof Term.Integer) {
+                        stack.push(new Term.Bool(((Term.Integer) left).value() >= ((Term.Integer) right).value()));
                         return true;
                     }
-                    if (right instanceof ID.Date && left instanceof ID.Date) {
-                        stack.push(new ID.Bool(((ID.Date) left).value() >= ((ID.Date) right).value()));
+                    if (right instanceof Term.Date && left instanceof Term.Date) {
+                        stack.push(new Term.Bool(((Term.Date) left).value() >= ((Term.Date) right).value()));
                         return true;
                     }
                     break;
                 case Equal:
-                    if (right instanceof ID.Integer && left instanceof ID.Integer) {
-                        stack.push(new ID.Bool(((ID.Integer) left).value() == ((ID.Integer) right).value()));
+                    if (right instanceof Term.Integer && left instanceof Term.Integer) {
+                        stack.push(new Term.Bool(((Term.Integer) left).value() == ((Term.Integer) right).value()));
                         return true;
                     }
-                    if (right instanceof ID.Str && left instanceof ID.Str) {
-                        stack.push(new ID.Bool(((ID.Str) left).value() == ((ID.Str) right).value()));
+                    if (right instanceof Term.Str && left instanceof Term.Str) {
+                        stack.push(new Term.Bool(((Term.Str) left).value() == ((Term.Str) right).value()));
                         return true;
                     }
-                    if (right instanceof ID.Bytes && left instanceof ID.Bytes) {
-                        stack.push(new ID.Bool(Arrays.equals(((ID.Bytes) left).value(), (((ID.Bytes) right).value()))));
+                    if (right instanceof Term.Bytes && left instanceof Term.Bytes) {
+                        stack.push(new Term.Bool(Arrays.equals(((Term.Bytes) left).value(), (((Term.Bytes) right).value()))));
                         return true;
                     }
-                    if (right instanceof ID.Date && left instanceof ID.Date) {
-                        stack.push(new ID.Bool(((ID.Date) left).value() == ((ID.Date) right).value()));
+                    if (right instanceof Term.Date && left instanceof Term.Date) {
+                        stack.push(new Term.Bool(((Term.Date) left).value() == ((Term.Date) right).value()));
                         return true;
                     }
-                    if (right instanceof ID.Set && left instanceof ID.Set) {
-                        Set<ID> leftSet = ((ID.Set) left).value();
-                        Set<ID> rightSet = ((ID.Set) right).value();
-                        stack.push(new ID.Bool( leftSet.size() == rightSet.size() && leftSet.containsAll(rightSet)));
+                    if (right instanceof Term.Set && left instanceof Term.Set) {
+                        Set<Term> leftSet = ((Term.Set) left).value();
+                        Set<Term> rightSet = ((Term.Set) right).value();
+                        stack.push(new Term.Bool( leftSet.size() == rightSet.size() && leftSet.containsAll(rightSet)));
                         return true;
                     }
                     break;
                 case Contains:
-                    if (left instanceof ID.Set &&
-                            (right instanceof ID.Integer ||
-                                    right instanceof ID.Str ||
-                                    right instanceof ID.Bytes ||
-                                    right instanceof ID.Date ||
-                                    right instanceof ID.Bool)) {
+                    if (left instanceof Term.Set &&
+                            (right instanceof Term.Integer ||
+                                    right instanceof Term.Str ||
+                                    right instanceof Term.Bytes ||
+                                    right instanceof Term.Date ||
+                                    right instanceof Term.Bool)) {
 
-                        stack.push(new ID.Bool(((ID.Set) left).value().contains(right)));
+                        stack.push(new Term.Bool(((Term.Set) left).value().contains(right)));
                         return true;
                     }
-                    if (right instanceof ID.Set && left instanceof ID.Set) {
-                        Set<ID> leftSet = ((ID.Set) left).value();
-                        Set<ID> rightSet = ((ID.Set) right).value();
-                        stack.push(new ID.Bool(leftSet.containsAll(rightSet)));
+                    if (right instanceof Term.Set && left instanceof Term.Set) {
+                        Set<Term> leftSet = ((Term.Set) left).value();
+                        Set<Term> rightSet = ((Term.Set) right).value();
+                        stack.push(new Term.Bool(leftSet.containsAll(rightSet)));
                         return true;
                     }
                     break;
                 case Prefix:
-                    if (right instanceof ID.Str && left instanceof ID.Str) {
-                        Option<String> left_s = symbols.get_s((int)((ID.Str) left).value());
-                        Option<String> right_s = symbols.get_s((int)((ID.Str) right).value());
+                    if (right instanceof Term.Str && left instanceof Term.Str) {
+                        Option<String> left_s = symbols.get_s((int)((Term.Str) left).value());
+                        Option<String> right_s = symbols.get_s((int)((Term.Str) right).value());
                         if(left_s.isEmpty() || right_s.isEmpty()) {
                             return false;
                         }
 
-                        stack.push(new ID.Bool(left_s.get().startsWith(right_s.get())));
+                        stack.push(new Term.Bool(left_s.get().startsWith(right_s.get())));
                         return true;
                     }
                     break;
                 case Suffix:
-                    if (right instanceof ID.Str && left instanceof ID.Str) {
-                        Option<String> left_s = symbols.get_s((int)((ID.Str) left).value());
-                        Option<String> right_s = symbols.get_s((int)((ID.Str) right).value());
+                    if (right instanceof Term.Str && left instanceof Term.Str) {
+                        Option<String> left_s = symbols.get_s((int)((Term.Str) left).value());
+                        Option<String> right_s = symbols.get_s((int)((Term.Str) right).value());
                         if(left_s.isEmpty() || right_s.isEmpty()) {
                             return false;
                         }
-                        stack.push(new ID.Bool(left_s.get().endsWith(right_s.get())));
+                        stack.push(new Term.Bool(left_s.get().endsWith(right_s.get())));
                         return true;
                     }
                     break;
                 case Regex:
-                    if (right instanceof ID.Str && left instanceof ID.Str) {
-                        Option<String> left_s = symbols.get_s((int)((ID.Str) left).value());
-                        Option<String> right_s = symbols.get_s((int)((ID.Str) right).value());
+                    if (right instanceof Term.Str && left instanceof Term.Str) {
+                        Option<String> left_s = symbols.get_s((int)((Term.Str) left).value());
+                        Option<String> right_s = symbols.get_s((int)((Term.Str) right).value());
                         if(left_s.isEmpty() || right_s.isEmpty()) {
                             return false;
                         }
 
                         Pattern p = Pattern.compile(right_s.get());
                         Matcher m = p.matcher(left_s.get());
-                        stack.push(new ID.Bool(m.find()));
+                        stack.push(new Term.Bool(m.find()));
                         return true;
                     }
                     break;
                 case Add:
-                    if (right instanceof ID.Integer && left instanceof ID.Integer) {
-                        stack.push(new ID.Integer(((ID.Integer) left).value() + ((ID.Integer) right).value()));
+                    if (right instanceof Term.Integer && left instanceof Term.Integer) {
+                        stack.push(new Term.Integer(((Term.Integer) left).value() + ((Term.Integer) right).value()));
                         return true;
                     }
                     break;
                 case Sub:
-                    if (right instanceof ID.Integer && left instanceof ID.Integer) {
-                        stack.push(new ID.Integer(((ID.Integer) left).value() - ((ID.Integer) right).value()));
+                    if (right instanceof Term.Integer && left instanceof Term.Integer) {
+                        stack.push(new Term.Integer(((Term.Integer) left).value() - ((Term.Integer) right).value()));
                         return true;
                     }
                     break;
                 case Mul:
-                    if (right instanceof ID.Integer && left instanceof ID.Integer) {
-                        stack.push(new ID.Integer(((ID.Integer) left).value() * ((ID.Integer) right).value()));
+                    if (right instanceof Term.Integer && left instanceof Term.Integer) {
+                        stack.push(new Term.Integer(((Term.Integer) left).value() * ((Term.Integer) right).value()));
                         return true;
                     }
                     break;
                 case Div:
-                    if (right instanceof ID.Integer && left instanceof ID.Integer) {
-                        long rl = ((ID.Integer) right).value();
+                    if (right instanceof Term.Integer && left instanceof Term.Integer) {
+                        long rl = ((Term.Integer) right).value();
                         if (rl != 0) {
-                            stack.push(new ID.Integer(((ID.Integer) left).value() / rl));
+                            stack.push(new Term.Integer(((Term.Integer) left).value() / rl));
                             return true;
                         }
                     }
                     break;
                 case And:
-                    if (right instanceof ID.Bool && left instanceof ID.Bool) {
-                        stack.push(new ID.Bool(((ID.Bool) left).value() && ((ID.Bool) right).value()));
+                    if (right instanceof Term.Bool && left instanceof Term.Bool) {
+                        stack.push(new Term.Bool(((Term.Bool) left).value() && ((Term.Bool) right).value()));
                         return true;
                     }
                     break;
                 case Or:
-                    if (right instanceof ID.Bool && left instanceof ID.Bool) {
-                        stack.push(new ID.Bool(((ID.Bool) left).value() || ((ID.Bool) right).value()));
+                    if (right instanceof Term.Bool && left instanceof Term.Bool) {
+                        stack.push(new Term.Bool(((Term.Bool) left).value() || ((Term.Bool) right).value()));
                         return true;
                     }
                     break;
                 case Intersection:
-                    if (right instanceof ID.Set && left instanceof ID.Set) {
-                        HashSet<ID> intersec = new HashSet<ID>();
-                        HashSet<ID> _right = ((ID.Set) right).value();
-                        HashSet<ID> _left = ((ID.Set) left).value();
-                        for (ID _id : _right) {
+                    if (right instanceof Term.Set && left instanceof Term.Set) {
+                        HashSet<Term> intersec = new HashSet<Term>();
+                        HashSet<Term> _right = ((Term.Set) right).value();
+                        HashSet<Term> _left = ((Term.Set) left).value();
+                        for (Term _id : _right) {
                             if (_left.contains(_id)) {
                                 intersec.add(_id);
                             }
                         }
-                        stack.push(new ID.Set(intersec));
+                        stack.push(new Term.Set(intersec));
                         return true;
                     }
                     break;
                 case Union:
-                    if (right instanceof ID.Set && left instanceof ID.Set) {
-                        HashSet<ID> union = new HashSet<ID>();
-                        HashSet<ID> _right = ((ID.Set) right).value();
-                        HashSet<ID> _left = ((ID.Set) left).value();
+                    if (right instanceof Term.Set && left instanceof Term.Set) {
+                        HashSet<Term> union = new HashSet<Term>();
+                        HashSet<Term> _right = ((Term.Set) right).value();
+                        HashSet<Term> _left = ((Term.Set) left).value();
                         union.addAll(_right);
                         union.addAll(_left);
-                        stack.push(new ID.Set(union));
+                        stack.push(new Term.Set(union));
                         return true;
                     }
                     break;
