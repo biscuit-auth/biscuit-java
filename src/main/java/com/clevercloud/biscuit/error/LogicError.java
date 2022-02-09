@@ -170,9 +170,9 @@ public class LogicError {
         }
     }
 
-    public static class VerifierNotEmpty extends LogicError {
+    public static class AuthorizerNotEmpty extends LogicError {
 
-        public VerifierNotEmpty() {
+        public AuthorizerNotEmpty() {
 
         }
 
@@ -188,7 +188,7 @@ public class LogicError {
 
         @Override
         public String toString() {
-            return "VerifierNotEmpty";
+            return "AuthorizerNotEmpty";
         }
     }
 }

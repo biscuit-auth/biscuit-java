@@ -191,21 +191,21 @@ public class BiscuitTest extends TestCase {
         KeyPair keypair2 = new KeyPair(rng);
         Biscuit b2 = b.attenuate(rng, keypair2, block2.build()).get();
 
-        Verifier v1 = b2.verifier().get();
+        Authorizer v1 = b2.authorizer().get();
         v1.add_resource("/folder1/file1");
         v1.add_operation("read");
         v1.allow();
         Either<Error, Long> res = v1.verify();
         Assert.assertTrue(res.isRight());
 
-        Verifier v2 = b2.verifier().get();
+        Authorizer v2 = b2.authorizer().get();
         v2.add_resource("/folder2/file3");
         v2.add_operation("read");
         v2.allow();
         res = v2.verify();
         Assert.assertTrue(res.isLeft());
 
-        Verifier v3 = b2.verifier().get();
+        Authorizer v3 = b2.authorizer().get();
         v3.add_resource("/folder2/file1");
         v3.add_operation("write");
         v3.allow();
@@ -302,7 +302,7 @@ public class BiscuitTest extends TestCase {
         Block builder2 = deser2.create_block();
         Error e2 = deser2.attenuate(rng, keypair2, builder.build()).getLeft();
 
-        Verifier v = deser2.verifier().get();
+        Authorizer v = deser2.authorizer().get();
         System.out.println(v.print_world());
     }
 
@@ -362,10 +362,10 @@ public class BiscuitTest extends TestCase {
         KeyPair keypair2 = new KeyPair(rng);
         Biscuit b2 = b.attenuate(rng, keypair2, block2.build()).get();
 
-        Verifier v1 = b2.verifier().get();
+        Authorizer v1 = b2.authorizer().get();
         v1.allow();
 
-        Verifier v2 = v1.clone();
+        Authorizer v2 = v1.clone();
 
         v2.add_resource("/folder1/file1");
         v2.add_operation("read");
@@ -374,7 +374,7 @@ public class BiscuitTest extends TestCase {
         Either<Error, Long> res = v2.verify();
         Assert.assertTrue(res.isRight());
 
-        Verifier v3 = v1.clone();
+        Authorizer v3 = v1.clone();
 
         v3.add_resource("/folder2/file3");
         v3.add_operation("read");
@@ -384,7 +384,7 @@ public class BiscuitTest extends TestCase {
 
         Assert.assertTrue(res.isLeft());
 
-        Verifier v4 = v1.clone();
+        Authorizer v4 = v1.clone();
 
         v4.add_resource("/folder2/file1");
         v4.add_operation("write");
@@ -406,7 +406,7 @@ public class BiscuitTest extends TestCase {
                 e);
     }
 
-    public void testEmptyVerifier() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void testEmptyAuthorizer() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
@@ -434,7 +434,7 @@ public class BiscuitTest extends TestCase {
         KeyPair keypair2 = new KeyPair(rng);
         Biscuit b2 = b.attenuate(rng, keypair2, block2.build()).get();
 
-        Verifier v1 = new Verifier();
+        Authorizer v1 = new Authorizer();
         v1.allow();
 
         Either<Error, Long> res = v1.verify();

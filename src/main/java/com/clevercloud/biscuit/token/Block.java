@@ -63,7 +63,7 @@ public class Block {
     }
 
     /*
-    Either<LogicError, Void> check(long i, World w, SymbolTable symbols, List<Check> verifier_checks,
+    Either<LogicError, Void> check(long i, World w, SymbolTable symbols, List<Check> authorizer_checks,
                                    HashMap<String, Rule> queries, HashMap<String, HashMap<Long, Set<Fact>>> query_results) {
         World world = new World(w);
         long authority_index = symbols.get("authority").get().longValue();
@@ -103,9 +103,9 @@ public class Block {
             }
         }
 
-        for (int j = 0; j < verifier_checks.size(); j++) {
+        for (int j = 0; j < authorizer_checks.size(); j++) {
             boolean successful = false;
-            Check c = verifier_checks.get(j);
+            Check c = authorizer_checks.get(j);
 
             for(int k = 0; k < c.queries().size(); k++) {
                 Set<Fact> res = world.query_rule(c.queries().get(k));
@@ -116,7 +116,7 @@ public class Block {
             }
 
             if (!successful) {
-                errors.add(new FailedCheck.FailedVerifier(j, symbols.print_check(verifier_checks.get(j))));
+                errors.add(new FailedCheck.FailedAuthorizer(j, symbols.print_check(authorizer_checks.get(j))));
             }
         }
 

@@ -22,7 +22,6 @@ import java.security.SignatureException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 
 import static com.clevercloud.biscuit.crypto.TokenSignature.fromHex;
 import static com.clevercloud.biscuit.crypto.TokenSignature.hex;
@@ -57,7 +56,7 @@ public class SamplesV2Test extends TestCase {
         Biscuit token = deser_res.get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verifier().get();
+        Authorizer v1 = token.authorizer().get();
         v1.add_resource("file1");
         v1.add_operation("read");
         v1.allow();
@@ -164,7 +163,7 @@ public class SamplesV2Test extends TestCase {
         Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verifier().get();
+        Authorizer v1 = token.authorizer().get();
         v1.add_resource("file2");
         v1.add_operation("read");
         v1.allow();
@@ -187,7 +186,7 @@ public class SamplesV2Test extends TestCase {
         Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verifier().get();
+        Authorizer v1 = token.authorizer().get();
         v1.add_resource("file2");
         v1.add_operation("read");
         v1.allow();
@@ -210,7 +209,7 @@ public class SamplesV2Test extends TestCase {
         Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verifier().get();
+        Authorizer v1 = token.authorizer().get();
         v1.add_resource("file1");
         v1.add_operation("read");
         v1.set_time();
@@ -225,11 +224,11 @@ public class SamplesV2Test extends TestCase {
                 e);
     }
 
-    public void test10_VerifierScope() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void test10_AuthorizerScope() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test10_verifier_scope.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test10_authorizer_scope.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
@@ -237,7 +236,7 @@ public class SamplesV2Test extends TestCase {
         Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verifier().get();
+        Authorizer v1 = token.authorizer().get();
         v1.add_resource("file2");
         v1.add_operation("read");
         v1.add_check("check if right($0, $1), resource($0), operation($1)");
@@ -246,16 +245,16 @@ public class SamplesV2Test extends TestCase {
         System.out.println(res);
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
-                        new FailedCheck.FailedVerifier(0, "check if right($0, $1), resource($0), operation($1)")
+                        new FailedCheck.FailedAuthorizer(0, "check if right($0, $1), resource($0), operation($1)")
                 ))),
                 res.getLeft());
     }
 
-    public void test11_VerifierAuthorityCaveats() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void test11_AuthorizerAuthorityCaveats() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test11_verifier_authority_caveats.bc");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test11_authorizer_authority_caveats.bc");
 
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
@@ -263,7 +262,7 @@ public class SamplesV2Test extends TestCase {
         Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verifier().get();
+        Authorizer v1 = token.authorizer().get();
         v1.add_resource("file2");
         v1.add_operation("read");
         v1.add_check(check(rule(
@@ -281,12 +280,12 @@ public class SamplesV2Test extends TestCase {
         Error e = res.getLeft();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
-                        new FailedCheck.FailedVerifier(0, "check if resource($0), operation($1), right($0, $1)")
+                        new FailedCheck.FailedAuthorizer(0, "check if resource($0), operation($1), right($0, $1)")
                 ))),
                 e);
     }
 
-    public void test12_VerifierAuthorityCaveats() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void test12_AuthorizerAuthorityCaveats() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
@@ -298,13 +297,13 @@ public class SamplesV2Test extends TestCase {
         Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verifier().get();
+        Authorizer v1 = token.authorizer().get();
         v1.add_resource("file1");
         v1.add_operation("read");
         v1.allow();
         Assert.assertTrue(v1.verify(new RunLimits(500, 100, Duration.ofMillis(500))).isRight());
 
-        Verifier v2 = token.verifier().get();
+        Authorizer v2 = token.authorizer().get();
         v2.add_resource("file2");
         v2.add_operation("read");
         v2.allow();
@@ -331,7 +330,7 @@ public class SamplesV2Test extends TestCase {
         Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verifier().get();
+        Authorizer v1 = token.authorizer().get();
         v1.add_resource("file1");
         //v1.add_fact(fact("time", Arrays.asList(new Term.Date(1608542592))));
         v1.set_time();
@@ -341,7 +340,7 @@ public class SamplesV2Test extends TestCase {
         System.out.println(v1.print_world());
         Assert.assertTrue(res1.isRight());
 
-        Verifier v2 = token.verifier().get();
+        Authorizer v2 = token.authorizer().get();
         v2.add_resource("file2");
         v1.set_time();
         //v2.add_fact(fact("time", Arrays.asList(new Term.Date(1608542592))));
@@ -369,7 +368,7 @@ public class SamplesV2Test extends TestCase {
         Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verifier().get();
+        Authorizer v1 = token.authorizer().get();
         v1.add_resource("file1");
         v1.set_time();
         v1.allow();
@@ -383,7 +382,7 @@ public class SamplesV2Test extends TestCase {
                 ))),
                 e);
 
-        Verifier v2 = token.verifier().get();
+        Authorizer v2 = token.authorizer().get();
         v2.add_resource("file123.txt");
         v2.set_time();
         v2.allow();
@@ -403,7 +402,7 @@ public class SamplesV2Test extends TestCase {
         Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verifier().get();
+        Authorizer v1 = token.authorizer().get();
         ArrayList<Rule> queries = new ArrayList<>();
         queries.add(rule(
                 "test_must_be_present_authority",
@@ -437,7 +436,7 @@ public class SamplesV2Test extends TestCase {
         Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verifier().get();
+        Authorizer v1 = token.authorizer().get();
         v1.allow();
 
         Either<Error, Long> res = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
@@ -462,7 +461,7 @@ public class SamplesV2Test extends TestCase {
         Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verifier().get();
+        Authorizer v1 = token.authorizer().get();
         v1.allow();
 
         Assert.assertEquals(Right(Long.valueOf(0)), v1.verify(new RunLimits(500, 100, Duration.ofMillis(500))));
@@ -480,7 +479,7 @@ public class SamplesV2Test extends TestCase {
         Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verifier().get();
+        Authorizer v1 = token.authorizer().get();
         v1.add_operation("write");
         v1.allow();
         Either<Error, Long> result = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
@@ -500,7 +499,7 @@ public class SamplesV2Test extends TestCase {
         Biscuit token = Biscuit.from_bytes(data, root).get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verifier().get();
+        Authorizer v1 = token.authorizer().get();
         v1.add_operation("write");
         v1.allow();
         Either<Error, Long> result = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
@@ -521,7 +520,7 @@ public class SamplesV2Test extends TestCase {
         Biscuit token = res.get();
         System.out.println(token.print());
 
-        Verifier v1 = token.verifier().get();
+        Authorizer v1 = token.authorizer().get();
         v1.add_operation("read");
         v1.add_resource("file1");
         v1.allow();

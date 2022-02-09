@@ -21,7 +21,7 @@ import static io.vavr.API.Right;
 /**
  * Token verification class
  */
-public class Verifier {
+public class Authorizer {
     Biscuit token;
     List<Check> checks;
     List<List<com.clevercloud.biscuit.datalog.Check>> token_checks;
@@ -29,7 +29,7 @@ public class Verifier {
     World world;
     SymbolTable symbols;
 
-    private Verifier(Biscuit token, World w) {
+    private Authorizer(Biscuit token, World w) {
         this.token = token;
         this.world = w;
         this.symbols = new SymbolTable(this.token.symbols);
@@ -39,12 +39,12 @@ public class Verifier {
     }
 
     /**
-     * Creates an empty verifier
+     * Creates an empty authorizer
      *
      * used to apply policies when unauthenticated (no token)
-     * and to preload a verifier that is cloned for each new request
+     * and to preload a authorizer that is cloned for each new request
      */
-    public Verifier() {
+    public Authorizer() {
         this.world = new World();
         this.symbols = Biscuit.default_symbol_table();
         this.checks = new ArrayList<>();
@@ -52,8 +52,8 @@ public class Verifier {
         this.token_checks = new ArrayList<>();
     }
 
-    Verifier(Biscuit token, List<Check> checks, List<Policy> policies,
-             List<List<com.clevercloud.biscuit.datalog.Check>> token_checks, World world, SymbolTable symbols) {
+    Authorizer(Biscuit token, List<Check> checks, List<Policy> policies,
+               List<List<com.clevercloud.biscuit.datalog.Check>> token_checks, World world, SymbolTable symbols) {
         this.token = token;
         this.checks = checks;
         this.policies = policies;
@@ -63,25 +63,25 @@ public class Verifier {
     }
 
     /**
-     * Creates a verifier for a token
+     * Creates a authorizer for a token
      *
      * also checks that the token is valid for this root public key
      * @param token
      * @param root
      * @return
      */
-    static public Either<Error, Verifier> make(Biscuit token) {
-        return Right(new Verifier(token, new World()));
+    static public Either<Error, Authorizer> make(Biscuit token) {
+        return Right(new Authorizer(token, new World()));
     }
 
-    public Verifier clone() {
-        return new Verifier(this.token, new ArrayList<>(this.checks), new ArrayList<>(this.policies),
+    public Authorizer clone() {
+        return new Authorizer(this.token, new ArrayList<>(this.checks), new ArrayList<>(this.policies),
                 new ArrayList<>(this.token_checks), new World(this.world), new SymbolTable(this.symbols));
     }
 
     public Either<Error, Void> add_token(Biscuit token) {
         if (this.token != null) {
-            return Either.left(new Error.FailedLogic(new LogicError.VerifierNotEmpty()));
+            return Either.left(new Error.FailedLogic(new LogicError.AuthorizerNotEmpty()));
         }
 
         this.token = token;
@@ -346,7 +346,7 @@ public class Verifier {
             }
 
             if (!successful) {
-                errors.add(new FailedCheck.FailedVerifier(j, symbols.print_check(c)));
+                errors.add(new FailedCheck.FailedAuthorizer(j, symbols.print_check(c)));
             }
         }
 
@@ -458,7 +458,7 @@ public class Verifier {
         List<String> checks = new ArrayList<>();
 
         for (int j = 0; j < this.checks.size(); j++) {
-            checks.add("Verifier[" + j + "]: " + this.checks.get(j).toString());
+            checks.add("Authorizer[" + j + "]: " + this.checks.get(j).toString());
         }
 
         if (this.token != null) {

@@ -34,11 +34,11 @@ public class FailedCheck {
         }
     }
 
-    public static class FailedVerifier extends FailedCheck {
+    public static class FailedAuthorizer extends FailedCheck {
         final public long caveat_id;
         final public String rule;
 
-        public FailedVerifier(long caveat_id, String rule) {
+        public FailedAuthorizer(long caveat_id, String rule) {
             this.caveat_id = caveat_id;
             this.rule = rule;
         }
@@ -47,7 +47,7 @@ public class FailedCheck {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            FailedVerifier b = (FailedVerifier) o;
+            FailedAuthorizer b = (FailedAuthorizer) o;
             return caveat_id == b.caveat_id && rule.equals(b.rule);
         }
 
@@ -58,7 +58,7 @@ public class FailedCheck {
 
         @Override
         public String toString() {
-            return "FailedCaveat.FailedVerifier { caveat_id: "+caveat_id+
+            return "FailedCaveat.FailedAuthorizer { caveat_id: "+caveat_id+
                     ", rule: "+rule+" }";
         }
     }

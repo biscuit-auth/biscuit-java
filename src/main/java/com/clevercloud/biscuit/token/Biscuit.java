@@ -200,13 +200,13 @@ public class Biscuit {
     }
 
     /**
-     * Creates a verifier for this token
+     * Creates a authorizer for this token
      *
      * This function checks that the root key is the one we expect
      * @return
      */
-    public Either<Error, Verifier> verifier() {
-        return Verifier.make(this);
+    public Either<Error, Authorizer> authorizer() {
+        return Authorizer.make(this);
     }
 
     /**
@@ -281,7 +281,7 @@ public class Biscuit {
     }
 
     Either<Error, HashMap<String, Set<Fact>>> check(SymbolTable symbols, List<Fact> ambient_facts, List<Rule> ambient_rules,
-                                                    List<Check> verifier_checks, HashMap<String, Rule> queries){
+                                                    List<Check> authorizer_checks, HashMap<String, Rule> queries){
         Either<Error, World> wres = this.generate_world();
 
         if (wres.isLeft()) {
@@ -319,9 +319,9 @@ public class Biscuit {
             }
         }
 
-        for (int j = 0; j < verifier_checks.size(); j++) {
+        for (int j = 0; j < authorizer_checks.size(); j++) {
             boolean successful = false;
-            Check c = verifier_checks.get(j);
+            Check c = authorizer_checks.get(j);
 
             for(int k = 0; k < c.queries().size(); k++) {
                 Set<Fact> res = world.query_rule(c.queries().get(k), symbols);
@@ -332,7 +332,7 @@ public class Biscuit {
             }
 
             if (!successful) {
-                errors.add(new FailedCheck.FailedVerifier(j + 1, symbols.print_check(verifier_checks.get(j))));
+                errors.add(new FailedCheck.FailedAuthorizer(j + 1, symbols.print_check(authorizer_checks.get(j))));
             }
         }
 
