@@ -415,7 +415,7 @@ public class SamplesV2Test extends TestCase {
                 "test_must_be_present",
                 Arrays.asList(var("0")),
                 Arrays.asList(
-                        pred("mst_be_present", Arrays.asList(var("0")))
+                        pred("must_be_present", Arrays.asList(var("0")))
                 )
         ));
         v1.add_check(new Check(queries));
@@ -523,6 +523,34 @@ public class SamplesV2Test extends TestCase {
         Authorizer v1 = token.authorizer().get();
         v1.add_operation("read");
         v1.add_resource("file1");
+        v1.allow();
+        Either<Error, Long> result = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
+        System.out.println("result: "+result);
+        Assert.assertEquals(Right(Long.valueOf(0)),result);
+    }
+
+    public void test21_parsing() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
+
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test21_parsing.bc");
+
+        byte[] data = new byte[inputStream.available()];
+        inputStream.read(data);
+
+        Either<Error,Biscuit> res = Biscuit.from_bytes(data, root);
+        Biscuit token = res.get();
+        System.out.println(token.print());
+
+        Authorizer v1 = token.authorizer().get();
+
+        v1.add_check(check(rule(
+                "check1",
+                Arrays.asList(s("test")),
+                Arrays.asList(
+                        pred("ns::fact_123", Arrays.asList(s("hello é	😁")))
+                )
+        )));
         v1.allow();
         Either<Error, Long> result = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println("result: "+result);
