@@ -58,22 +58,12 @@ public class SamplesV2Test extends TestCase {
 
         Authorizer v1 = token.authorizer().get();
         v1.add_resource("file1");
-        v1.add_operation("read");
         v1.allow();
         Either<Error, Long> res = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
-        if (res.isLeft()) {
-            System.out.println("error: " + res.getLeft());
-        }
-        Assert.assertTrue(res.isRight());
 
-        byte[] serialized = token.serialize().get();
-        Assert.assertEquals(data.length, serialized.length);
-        System.out.println(hex(data));
-        System.out.println(hex(serialized));
-
-        for (int i = 0; i < data.length; i++) {
-            Assert.assertEquals(data[i], serialized[i]);
-        }
+        Error e = res.getLeft();
+        System.out.println("got error: " + e);
+        Assert.assertEquals(new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(new FailedCheck.FailedBlock(1,0,"check if resource($0), operation(\"read\"), right($0, \"read\")")))), e);
     }
 
     public void test2_DifferentRootKey() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
