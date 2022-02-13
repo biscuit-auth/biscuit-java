@@ -285,7 +285,7 @@ public class SerializedBiscuit {
             if (sgr.verify(signature)) {
                 current_key = next_key;
             } else {
-                return Left(new Error.FormatError.Signature.InvalidSignature());
+                return Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"));
             }
         }
 
@@ -307,7 +307,7 @@ public class SerializedBiscuit {
             if (sgr.verify(signature)) {
                 current_key = next_key;
             } else {
-                return Left(new Error.FormatError.Signature.InvalidSignature());
+                return Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"));
             }
         }
 
@@ -324,7 +324,7 @@ public class SerializedBiscuit {
             } else {
                 //System.out.println("public keys are not equal");
 
-                return Left(new Error.FormatError.Signature.InvalidSignature());
+                return Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"));
             }
         } else {
             //System.out.println("checking final signature");

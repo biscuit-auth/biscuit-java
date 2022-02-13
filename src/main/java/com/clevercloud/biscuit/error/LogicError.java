@@ -3,11 +3,24 @@ package com.clevercloud.biscuit.error;
 import java.util.List;
 import java.util.Objects;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import io.vavr.control.Option;
 
 public class LogicError {
     public Option<List<FailedCheck>> failed_checks() {
         return Option.none();
+    }
+    public JsonElement toJson() {
+        return new JsonObject();
+    }
+
+    private static JsonElement jsonWrapper(JsonElement e) {
+        JsonObject root = new JsonObject();
+        root.add("FailedLogic", e);
+        return root;
     }
 
     public static class InvalidAuthorityFact extends LogicError {
@@ -34,6 +47,12 @@ public class LogicError {
         public String toString() {
             return "LogicError.InvalidAuthorityFact{ error: "+ e + " }";
         }
+
+        @Override
+        public JsonElement toJson() {
+            return LogicError.jsonWrapper(new JsonPrimitive("InvalidAuthorityFact"));
+        }
+
     }
 
     public static class InvalidAmbientFact extends LogicError {
@@ -59,6 +78,15 @@ public class LogicError {
         @Override
         public String toString() {
             return "LogicError.InvalidAmbientFact{ error: "+ e + " }";
+        }
+
+        @Override
+        public JsonElement toJson() {
+            JsonObject child = new JsonObject();
+            child.addProperty("error", this.e);
+            JsonObject root = new JsonObject();
+            root.add("InvalidAmbientFact", child);
+            return LogicError.jsonWrapper(root);
         }
     }
 
@@ -88,6 +116,18 @@ public class LogicError {
         public String toString() {
             return "LogicError.InvalidBlockFact{ id: "+id+", error: "+  e + " }";
         }
+
+        @Override
+        public JsonElement toJson() {
+            JsonObject child = new JsonObject();
+            child.addProperty("id",this.id);
+            child.addProperty("error", this.e);
+            JsonObject root = new JsonObject();
+            root.add("InvalidBlockFact", child);
+            return LogicError.jsonWrapper(root);
+        }
+
+
     }
     public static class FailedChecks extends LogicError {
         final public List<FailedCheck> errors;
@@ -123,7 +163,7 @@ public class LogicError {
 
         @Override
         public String toString() {
-            return "LogicError.FailedChecks{ errors: " + errors + " }";
+            return "FailedChecks(" + errors +")";
         }
     }
 

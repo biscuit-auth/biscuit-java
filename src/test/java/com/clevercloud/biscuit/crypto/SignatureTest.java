@@ -92,13 +92,13 @@ public class SignatureTest extends TestCase {
         KeyPair keypair3 = new KeyPair(rng);
         Token token2 = token1.append(keypair3, message2.getBytes());
         token2.blocks.set(1, "you".getBytes());
-        Assert.assertEquals(Left(new Error.FormatError.Signature.InvalidSignature()),
+        Assert.assertEquals(Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied")),
                 token2.verify(new PublicKey(Schema.PublicKey.Algorithm.Ed25519, root.public_key)));
 
         String message3 = "!!";
         KeyPair keypair4 = new KeyPair(rng);
         Token token3 = token2.append(keypair4, message3.getBytes());
-        Assert.assertEquals(Left(new Error.FormatError.Signature.InvalidSignature()),
+        Assert.assertEquals(Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied")),
                 token3.verify(new PublicKey(Schema.PublicKey.Algorithm.Ed25519, root.public_key)));
     }
 }

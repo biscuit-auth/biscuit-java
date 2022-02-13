@@ -113,7 +113,7 @@ public class TokenSignature {
         if (res.ctEquals(RistrettoElement.IDENTITY) == 1) {
             return Right(null);
         } else {
-            return Left(new Error.FormatError.Signature.InvalidSignature());
+            return Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"));
         }
     }
 

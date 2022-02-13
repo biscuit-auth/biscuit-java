@@ -44,6 +44,7 @@ public class SamplesV2Test extends TestCase {
 
     public void test1_Basic() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
+        // TODO Out of sync
 
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/test1_basic.bc");
@@ -78,7 +79,7 @@ public class SamplesV2Test extends TestCase {
         Either<Error, Biscuit> token = Biscuit.from_bytes(data, root);
         Error e = token.getLeft();
         System.out.println("got error: " + e);
-        Assert.assertEquals(new Error.FormatError.Signature.InvalidSignature(), e);
+        Assert.assertEquals(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"), e);
     }
 
     public void test3_InvalidSignatureFormat() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
@@ -109,7 +110,7 @@ public class SamplesV2Test extends TestCase {
 
         Error e = Biscuit.from_bytes(data, root).getLeft();
         System.out.println("got error: " + e);
-        Assert.assertEquals(new Error.FormatError.Signature.InvalidSignature(), e);
+        Assert.assertEquals(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"), e);
     }
 
     public void test5_InvalidSignature() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
@@ -123,7 +124,7 @@ public class SamplesV2Test extends TestCase {
 
         Error e = Biscuit.from_bytes(data, root).getLeft();
         System.out.println("got error: " + e);
-        Assert.assertEquals(new Error.FormatError.Signature.InvalidSignature(), e);
+        Assert.assertEquals(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"), e);
     }
 
     public void test6_reordered_blocks() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
@@ -137,7 +138,7 @@ public class SamplesV2Test extends TestCase {
 
         Either<Error, Biscuit> deser =  Biscuit.from_bytes(data, root);
         Error e = deser.getLeft();
-        assertEquals(e, new Error.FormatError.Signature.InvalidSignature());
+        assertEquals(e, new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"));
 
     }
 

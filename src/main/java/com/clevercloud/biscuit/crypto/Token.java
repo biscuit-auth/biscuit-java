@@ -90,7 +90,7 @@ class Token {
                 current_key = next_key;
             } else {
                 System.out.println("signature not verified");
-                return Left(new Error.FormatError.Signature.InvalidSignature());
+                return Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"));
             }
         }
 
@@ -100,7 +100,7 @@ class Token {
             System.out.println("current key and next public key not equal:");
             System.out.println("current: "+current_key.toHex());
             System.out.println("next: "+this.next.public_key().toHex());
-            return Left(new Error.FormatError.Signature.InvalidSignature());
+            return Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"));
         }
     }
 }

@@ -290,7 +290,7 @@ public class BiscuitTest extends TestCase {
         Error e = Biscuit.from_bytes(sealed, invalid_key.public_key()).getLeft();
         System.out.println(e);
         Assert.assertEquals(
-                new Error.FormatError.Signature.InvalidSignature(),
+                new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"),
                 e);
 
         System.out.println("deserializing the sealed token with a valid key");
