@@ -156,7 +156,7 @@ public class BiscuitTest extends TestCase {
         System.out.println(res2.getLeft());
 
         Assert.assertEquals(
-                new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
+                new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0),Arrays.asList(
                         new FailedCheck.FailedBlock(1, 0, "check if resource($resource), operation(\"read\"), right($resource, \"read\")"),
                         new FailedCheck.FailedBlock(2, 0, "check if resource(\"file1\")")
                 ))),
@@ -192,24 +192,24 @@ public class BiscuitTest extends TestCase {
         Biscuit b2 = b.attenuate(rng, keypair2, block2.build()).get();
 
         Authorizer v1 = b2.authorizer().get();
-        v1.add_resource("/folder1/file1");
-        v1.add_operation("read");
+        v1.add_fact("resource(\"/folder1/file1\")");
+        v1.add_fact("operation(\"read\")");
         v1.allow();
-        Either<Error, Long> res = v1.verify();
+        Either<Error, Long> res = v1.authorize();
         Assert.assertTrue(res.isRight());
 
         Authorizer v2 = b2.authorizer().get();
-        v2.add_resource("/folder2/file3");
-        v2.add_operation("read");
+        v2.add_fact("resource(\"/folder2/file3\")");
+        v2.add_fact("operation(\"read\")");
         v2.allow();
-        res = v2.verify();
+        res = v2.authorize();
         Assert.assertTrue(res.isLeft());
 
         Authorizer v3 = b2.authorizer().get();
-        v3.add_resource("/folder2/file1");
-        v3.add_operation("write");
+        v3.add_fact("resource(\"/folder2/file1\")");
+        v3.add_fact("operation(\"write\")");
         v3.allow();
-        res = v3.verify();
+        res = v3.authorize();
 
         Error e = res.getLeft();
         Assert.assertTrue(res.isLeft());
@@ -219,7 +219,7 @@ public class BiscuitTest extends TestCase {
             System.out.println(f.toString());
         }
         Assert.assertEquals(
-                new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
+                new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0),Arrays.asList(
                         new FailedCheck.FailedBlock(1, 0, "check if resource($resource), $resource.starts_with(\"/folder1/\")"),
                         new FailedCheck.FailedBlock(1, 1, "check if resource($resource), operation(\"read\"), right($resource, \"read\")")
                 ))),
@@ -367,29 +367,29 @@ public class BiscuitTest extends TestCase {
 
         Authorizer v2 = v1.clone();
 
-        v2.add_resource("/folder1/file1");
-        v2.add_operation("read");
+        v2.add_fact("resource(\"/folder1/file1\")");
+        v2.add_fact("operation(\"read\")");
 
 
-        Either<Error, Long> res = v2.verify();
+        Either<Error, Long> res = v2.authorize();
         Assert.assertTrue(res.isRight());
 
         Authorizer v3 = v1.clone();
 
-        v3.add_resource("/folder2/file3");
-        v3.add_operation("read");
+        v3.add_fact("resource(\"/folder2/file3\")");
+        v3.add_fact("operation(\"read\")");
 
-        res = v3.verify();
+        res = v3.authorize();
         System.out.println(v3.print_world());
 
         Assert.assertTrue(res.isLeft());
 
         Authorizer v4 = v1.clone();
 
-        v4.add_resource("/folder2/file1");
-        v4.add_operation("write");
+        v4.add_fact("resource(\"/folder2/file1\")");
+        v4.add_fact("operation(\"write\")");
 
-        res = v4.verify();
+        res = v4.authorize();
 
         Error e = res.getLeft();
         Assert.assertTrue(res.isLeft());
@@ -399,7 +399,7 @@ public class BiscuitTest extends TestCase {
             System.out.println(f.toString());
         }
         Assert.assertEquals(
-                new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
+                new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0),Arrays.asList(
                         new FailedCheck.FailedBlock(1, 0, "check if resource($resource), $resource.starts_with(\"/folder1/\")"),
                         new FailedCheck.FailedBlock(1, 1, "check if resource($resource), operation(\"read\"), right($resource, \"read\")")
                 ))),
@@ -437,15 +437,15 @@ public class BiscuitTest extends TestCase {
         Authorizer v1 = new Authorizer();
         v1.allow();
 
-        Either<Error, Long> res = v1.verify();
+        Either<Error, Long> res = v1.authorize();
         Assert.assertTrue(res.isRight());
 
         v1.add_token(b2).get();
 
-        v1.add_resource("/folder2/file1");
-        v1.add_operation("write");
+        v1.add_fact("resource(\"/folder2/file1\")");
+        v1.add_fact("operation(\"write\")");
 
-        res = v1.verify();
+        res = v1.authorize();
 
         Error e = res.getLeft();
         Assert.assertTrue(res.isLeft());

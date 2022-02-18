@@ -366,7 +366,7 @@ public class Biscuit {
         if(errors.isEmpty()) {
             return Right(query_results);
         } else {
-            return Left(new Error.FailedLogic(new LogicError.FailedChecks(errors)));
+            return Left(new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0),errors)));
         }
     }
 

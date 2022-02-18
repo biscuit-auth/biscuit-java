@@ -36,8 +36,13 @@ public class Block {
         this.checks = new ArrayList<>();
     }
 
-    public void add_fact(com.clevercloud.biscuit.token.builder.Fact f) {
+    public Either<Error,Void> add_fact(com.clevercloud.biscuit.token.builder.Fact f) {
+        Either<Error,Void> res = f.validate();
+        if(res.isLeft()){
+            return res;
+        }
         this.facts.add(f.convert(this.symbols));
+        return Either.right(null);
     }
 
     public Either<Error, Void> add_fact(String s) {

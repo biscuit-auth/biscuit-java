@@ -9,6 +9,7 @@ import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.builder.*;
 import io.vavr.Tuple2;
 import io.vavr.control.Either;
+import io.vavr.control.Option;
 
 import java.time.Instant;
 import java.util.*;
@@ -40,7 +41,7 @@ public class Authorizer {
 
     /**
      * Creates an empty authorizer
-     *
+     * <p>
      * used to apply policies when unauthenticated (no token)
      * and to preload a authorizer that is cloned for each new request
      */
@@ -64,8 +65,9 @@ public class Authorizer {
 
     /**
      * Creates a authorizer for a token
-     *
+     * <p>
      * also checks that the token is valid for this root public key
+     *
      * @param token
      * @param root
      * @return
@@ -90,6 +92,7 @@ public class Authorizer {
     }
 
     public void add_fact(Fact fact) {
+        fact.validate();
         world.add_fact(fact.convert(symbols));
     }
 
@@ -147,39 +150,9 @@ public class Authorizer {
         return Either.right(null);
     }
 
-    public void add_resource(String resource) {
-        world.add_fact(fact("resource", Arrays.asList(string(resource))).convert(symbols));
-    }
-
-    public void add_operation(String operation) {
-        world.add_fact(fact("operation", Arrays.asList(s(operation))).convert(symbols));
-    }
-
     public void set_time() {
 
         world.add_fact(fact("time", Arrays.asList(date(new Date()))).convert(symbols));
-    }
-
-    public void revocation_check(List<Long> ids) {
-        ArrayList<Rule> q = new ArrayList<>();
-
-        q.add(constrained_rule(
-                "revocation_check",
-                Arrays.asList((var("id"))),
-                Arrays.asList(pred("revocation_id", Arrays.asList(var("id")))),
-                Arrays.asList(
-                        new Expression.Unary(
-                                Expression.Op.Negate,
-                                new Expression.Binary(
-                                        Expression.Op.Contains,
-                                        new Expression.Value(var("id")),
-                                        new Expression.Value(new Term.Set(new HashSet(ids)))
-                                )
-                        )
-                )
-        ));
-
-        this.checks.add(new Check(q));
     }
 
     public Either<Error, List<String>> get_revocation_ids() {
@@ -295,19 +268,34 @@ public class Authorizer {
         return query(t._2, limits);
     }
 
-    public Either<Error, Long> verify() {
-            return this.verify(new RunLimits());
+    public Either<Error, Long> authorize() {
+        return this.authorize(new RunLimits());
     }
 
-    public Either<Error, Long> verify(RunLimits limits) {
+    public Either<Error, Long> authorize(RunLimits limits) {
         Instant timeLimit = Instant.now().plus(limits.maxTime);
         List<com.clevercloud.biscuit.datalog.Check> authority_checks = new ArrayList<>();
+        Option<Either<Integer, Integer>> policy_result = Option.none();
         if (token != null) {
             for (com.clevercloud.biscuit.datalog.Fact fact : token.authority.facts) {
                 com.clevercloud.biscuit.datalog.Fact converted_fact = Fact.convert_from(fact, token.symbols).convert(this.symbols);
                 world.add_fact(converted_fact);
             }
 
+            /*let mut revocation_ids = token.revocation_identifiers();
+            let revocation_id_sym = self.symbols.get("revocation_id").unwrap();
+            for (i, id) in revocation_ids.drain(..).enumerate() {
+                self.world.facts.insert(datalog::Fact::new(
+                        revocation_id_sym,
+                    &[datalog::Term::Integer(i as i64), datalog::Term::Bytes(id)],
+                ));
+            }*/
+            List<byte[]> revocation_ids = token.revocation_ids;
+            Long revocation_id_sym = this.symbols.get("revocation_id").get();
+            for (int i = 0; i < revocation_ids.size(); i++) {
+                List<com.clevercloud.biscuit.datalog.Term> terms = Arrays.asList(new com.clevercloud.biscuit.datalog.Term.Integer(i), new com.clevercloud.biscuit.datalog.Term.Bytes(revocation_ids.get(i)));
+                this.world.facts().add(new com.clevercloud.biscuit.datalog.Fact(revocation_id_sym.longValue(), terms));
+            }
             for (com.clevercloud.biscuit.datalog.Rule rule : token.authority.rules) {
                 com.clevercloud.biscuit.datalog.Rule converted_rule = Rule.convert_from(rule, token.symbols).convert(this.symbols);
                 world.add_privileged_rule(converted_rule);
@@ -421,31 +409,40 @@ public class Authorizer {
                 }
             }
         }
-        if (errors.isEmpty()) {
-            for (int i = 0; i < this.policies.size(); i++) {
-                com.clevercloud.biscuit.datalog.Check c = this.policies.get(i).convert(symbols);
-                boolean successful = false;
+        policies_test:
+        for (int i = 0; i < this.policies.size(); i++) {
+            com.clevercloud.biscuit.datalog.Check c = this.policies.get(i).convert(symbols);
 
-                for (int k = 0; k < c.queries().size(); k++) {
-                    boolean res = world.test_rule(c.queries().get(k), symbols);
+            for (int k = 0; k < c.queries().size(); k++) {
+                boolean res = world.test_rule(c.queries().get(k), symbols);
 
-                    if (Instant.now().compareTo(timeLimit) >= 0) {
-                        return Left(new Error.Timeout());
+                if (Instant.now().compareTo(timeLimit) >= 0) {
+                    return Left(new Error.Timeout());
+                }
+
+                if (res) {
+                    if (this.policies.get(i).kind == Policy.Kind.Allow) {
+                        policy_result = Option.some(Right(Integer.valueOf(i)));
+                    } else {
+                        policy_result = Option.some(Left(Integer.valueOf(i)));
                     }
-
-                    if (res) {
-                        if (this.policies.get(i).kind == Policy.Kind.Deny) {
-                            return Left(new Error.FailedLogic(new LogicError.Denied(i)));
-                        } else {
-                            return Right(Long.valueOf(i));
-                        }
-                    }
+                    break policies_test;
                 }
             }
-
-            return Left(new Error.FailedLogic(new LogicError.NoMatchingPolicy()));
+        }
+        if (policy_result.isDefined()) {
+            Either<Integer, Integer> e = policy_result.get();
+            if (e.isRight()) {
+                if (errors.isEmpty()) {
+                    return Either.right(Long.valueOf(e.get().longValue()));
+                } else {
+                    return Either.left(new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(e.get().intValue()), errors)));
+                }
+            } else {
+                return Either.left(new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Deny(e.getLeft().intValue()), errors)));
+            }
         } else {
-            return Left(new Error.FailedLogic(new LogicError.FailedChecks(errors)));
+            return Either.left(new Error.FailedLogic(new LogicError.NoMatchingPolicy(errors)));
         }
     }
 

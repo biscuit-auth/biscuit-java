@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import static com.clevercloud.biscuit.crypto.TokenSignature.fromHex;
-import static com.clevercloud.biscuit.crypto.TokenSignature.hex;
 import static com.clevercloud.biscuit.token.builder.Utils.*;
 import static io.vavr.API.Right;
 
@@ -58,13 +57,13 @@ public class SamplesV2Test extends TestCase {
         System.out.println(token.print());
 
         Authorizer v1 = token.authorizer().get();
-        v1.add_resource("file1");
+        v1.add_fact("resource(\"file1\")");
         v1.allow();
-        Either<Error, Long> res = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
+        Either<Error, Long> res = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
 
         Error e = res.getLeft();
         System.out.println("got error: " + e);
-        Assert.assertEquals(new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(new FailedCheck.FailedBlock(1,0,"check if resource($0), operation(\"read\"), right($0, \"read\")")))), e);
+        Assert.assertEquals(new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(new FailedCheck.FailedBlock(1, 0, "check if resource($0), operation(\"read\"), right($0, \"read\")")))), e);
     }
 
     public void test2_DifferentRootKey() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
@@ -94,7 +93,7 @@ public class SamplesV2Test extends TestCase {
         try {
             Error e = Biscuit.from_bytes(data, root).getLeft();
             fail();
-        } catch(SignatureException e) {
+        } catch (SignatureException e) {
             System.out.println("got error: " + e);
         }
     }
@@ -136,7 +135,7 @@ public class SamplesV2Test extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Either<Error, Biscuit> deser =  Biscuit.from_bytes(data, root);
+        Either<Error, Biscuit> deser = Biscuit.from_bytes(data, root);
         Error e = deser.getLeft();
         assertEquals(e, new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"));
 
@@ -155,12 +154,12 @@ public class SamplesV2Test extends TestCase {
         System.out.println(token.print());
 
         Authorizer v1 = token.authorizer().get();
-        v1.add_resource("file2");
-        v1.add_operation("read");
+        v1.add_fact("resource(\"file2\")");
+        v1.add_fact("operation(\"read\")");
         v1.allow();
-        Either<Error, Long> res = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
+        Either<Error, Long> res = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
 
-        Assert.assertEquals(new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
+        Assert.assertEquals(new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                 new FailedCheck.FailedBlock(1, 0, "check if resource($0), operation(\"read\"), right($0, \"read\")")
         ))), res.getLeft());
     }
@@ -178,12 +177,12 @@ public class SamplesV2Test extends TestCase {
         System.out.println(token.print());
 
         Authorizer v1 = token.authorizer().get();
-        v1.add_resource("file2");
-        v1.add_operation("read");
+        v1.add_fact("resource(\"file2\")");
+        v1.add_fact("operation(\"read\")");
         v1.allow();
-        Either<Error, Long> res = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
+        Either<Error, Long> res = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
 
-        Assert.assertEquals(new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
+        Assert.assertEquals(new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                 new FailedCheck.FailedBlock(1, 0, "check if resource($0), operation(\"read\"), right($0, \"read\")")
         ))), res.getLeft());
     }
@@ -201,15 +200,15 @@ public class SamplesV2Test extends TestCase {
         System.out.println(token.print());
 
         Authorizer v1 = token.authorizer().get();
-        v1.add_resource("file1");
-        v1.add_operation("read");
+        v1.add_fact("resource(\"file1\")");
+        v1.add_fact("operation(\"read\")");
         v1.set_time();
         v1.allow();
         System.out.println(v1.print_world());
 
-        Error e = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500))).getLeft();
+        Error e = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500))).getLeft();
         Assert.assertEquals(
-                new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
+                new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                         new FailedCheck.FailedBlock(1, 1, "check if time($date), $date <= 2018-12-20T00:00:00Z")
                 ))),
                 e);
@@ -228,14 +227,14 @@ public class SamplesV2Test extends TestCase {
         System.out.println(token.print());
 
         Authorizer v1 = token.authorizer().get();
-        v1.add_resource("file2");
-        v1.add_operation("read");
+        v1.add_fact("resource(\"file2\")");
+        v1.add_fact("operation(\"read\")");
         v1.add_check("check if right($0, $1), resource($0), operation($1)");
         v1.allow();
-        Either<Error, Long> res = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
+        Either<Error, Long> res = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println(res);
         Assert.assertEquals(
-                new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
+                new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                         new FailedCheck.FailedAuthorizer(0, "check if right($0, $1), resource($0), operation($1)")
                 ))),
                 res.getLeft());
@@ -254,8 +253,8 @@ public class SamplesV2Test extends TestCase {
         System.out.println(token.print());
 
         Authorizer v1 = token.authorizer().get();
-        v1.add_resource("file2");
-        v1.add_operation("read");
+        v1.add_fact("resource(\"file2\")");
+        v1.add_fact("operation(\"read\")");
         v1.add_check(check(rule(
                 "caveat1",
                 Arrays.asList(var("0")),
@@ -266,11 +265,11 @@ public class SamplesV2Test extends TestCase {
                 )
         )));
         v1.allow();
-        Either<Error, Long> res = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
+        Either<Error, Long> res = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
-                new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
+                new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                         new FailedCheck.FailedAuthorizer(0, "check if resource($0), operation($1), right($0, $1)")
                 ))),
                 e);
@@ -289,21 +288,21 @@ public class SamplesV2Test extends TestCase {
         System.out.println(token.print());
 
         Authorizer v1 = token.authorizer().get();
-        v1.add_resource("file1");
-        v1.add_operation("read");
+        v1.add_fact("resource(\"file1\")");
+        v1.add_fact("operation(\"read\")");
         v1.allow();
-        Assert.assertTrue(v1.verify(new RunLimits(500, 100, Duration.ofMillis(500))).isRight());
+        Assert.assertTrue(v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500))).isRight());
 
         Authorizer v2 = token.authorizer().get();
-        v2.add_resource("file2");
-        v2.add_operation("read");
+        v2.add_fact("resource(\"file2\")");
+        v2.add_fact("operation(\"read\")");
         v2.allow();
 
-        Either<Error, Long> res = v2.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
+        Either<Error, Long> res = v2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
-                new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
+                new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                         new FailedCheck.FailedBlock(0, 0, "check if resource(\"file1\")")
                 ))),
                 e);
@@ -322,26 +321,26 @@ public class SamplesV2Test extends TestCase {
         System.out.println(token.print());
 
         Authorizer v1 = token.authorizer().get();
-        v1.add_resource("file1");
+        v1.add_fact("resource(\"file1\")");
         //v1.add_fact(fact("time", Arrays.asList(new Term.Date(1608542592))));
         v1.set_time();
         v1.allow();
-        Either<Error, Long> res1 = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
+        Either<Error, Long> res1 = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println(res1);
         System.out.println(v1.print_world());
         Assert.assertTrue(res1.isRight());
 
         Authorizer v2 = token.authorizer().get();
-        v2.add_resource("file2");
+        v2.add_fact("resource(\"file2");
         v1.set_time();
         //v2.add_fact(fact("time", Arrays.asList(new Term.Date(1608542592))));
         v2.allow();
 
-        Either<Error, Long> res = v2.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
+        Either<Error, Long> res = v2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
-                new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
+                new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                         new FailedCheck.FailedBlock(1, 0, "check if valid_date($0), resource($0)")
                 ))),
                 e);
@@ -360,24 +359,24 @@ public class SamplesV2Test extends TestCase {
         System.out.println(token.print());
 
         Authorizer v1 = token.authorizer().get();
-        v1.add_resource("file1");
+        v1.add_fact("resource(\"file1\")");
         v1.set_time();
         v1.allow();
 
-        Either<Error, Long> res = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
+        Either<Error, Long> res = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
-                new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
+                new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                         new FailedCheck.FailedBlock(0, 0, "check if resource($0), $0.matches(\"file[0-9]+.txt\")")
                 ))),
                 e);
 
         Authorizer v2 = token.authorizer().get();
-        v2.add_resource("file123.txt");
+        v2.add_fact("resource(\"file123.txt\")");
         v2.set_time();
         v2.allow();
-        Assert.assertTrue(v2.verify(new RunLimits(500, 100, Duration.ofMillis(500))).isRight());
+        Assert.assertTrue(v2.authorize(new RunLimits(500, 100, Duration.ofMillis(500))).isRight());
 
     }
 
@@ -412,7 +411,7 @@ public class SamplesV2Test extends TestCase {
         v1.add_check(new Check(queries));
         v1.allow();
 
-        Assert.assertTrue(v1.verify(new RunLimits(500, 100, Duration.ofMillis(500))).isRight());
+        Assert.assertTrue(v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500))).isRight());
     }
 
     public void test16_CaveatHeadName() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
@@ -430,11 +429,11 @@ public class SamplesV2Test extends TestCase {
         Authorizer v1 = token.authorizer().get();
         v1.allow();
 
-        Either<Error, Long> res = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
+        Either<Error, Long> res = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println(res);
         Error e = res.getLeft();
         Assert.assertEquals(
-                new Error.FailedLogic(new LogicError.FailedChecks(Arrays.asList(
+                new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                         new FailedCheck.FailedBlock(0, 0, "check if resource(\"hello\")")
                 ))),
                 e);
@@ -455,7 +454,7 @@ public class SamplesV2Test extends TestCase {
         Authorizer v1 = token.authorizer().get();
         v1.allow();
 
-        Assert.assertEquals(Right(Long.valueOf(0)), v1.verify(new RunLimits(500, 100, Duration.ofMillis(500))));
+        Assert.assertEquals(Right(Long.valueOf(0)), v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500))));
     }
 
     public void test18_Unbound_Variables() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
@@ -471,10 +470,10 @@ public class SamplesV2Test extends TestCase {
         System.out.println(token.print());
 
         Authorizer v1 = token.authorizer().get();
-        v1.add_operation("write");
+        v1.add_fact("operation(\"write\")");
         v1.allow();
-        Either<Error, Long> result = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
-        System.out.println("result: "+result);
+        Either<Error, Long> result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
+        System.out.println("result: " + result);
         Assert.assertTrue(result.isLeft());
     }
 
@@ -491,10 +490,10 @@ public class SamplesV2Test extends TestCase {
         System.out.println(token.print());
 
         Authorizer v1 = token.authorizer().get();
-        v1.add_operation("write");
+        v1.add_fact("operation(\"write\")");
         v1.allow();
-        Either<Error, Long> result = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
-        System.out.println("result: "+result);
+        Either<Error, Long> result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
+        System.out.println("result: " + result);
         Assert.assertTrue(result.isLeft());
     }
 
@@ -507,17 +506,17 @@ public class SamplesV2Test extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Either<Error,Biscuit> res = Biscuit.from_bytes(data, root);
+        Either<Error, Biscuit> res = Biscuit.from_bytes(data, root);
         Biscuit token = res.get();
         System.out.println(token.print());
 
         Authorizer v1 = token.authorizer().get();
-        v1.add_operation("read");
-        v1.add_resource("file1");
+        v1.add_fact("operation(\"read\")");
+        v1.add_fact("resource(\"file1\")");
         v1.allow();
-        Either<Error, Long> result = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
-        System.out.println("result: "+result);
-        Assert.assertEquals(Right(Long.valueOf(0)),result);
+        Either<Error, Long> result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
+        System.out.println("result: " + result);
+        Assert.assertEquals(Right(Long.valueOf(0)), result);
     }
 
     public void test21_parsing() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
@@ -529,7 +528,7 @@ public class SamplesV2Test extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Either<Error,Biscuit> res = Biscuit.from_bytes(data, root);
+        Either<Error, Biscuit> res = Biscuit.from_bytes(data, root);
         Biscuit token = res.get();
         System.out.println(token.print());
 
@@ -543,8 +542,8 @@ public class SamplesV2Test extends TestCase {
                 )
         )));
         v1.allow();
-        Either<Error, Long> result = v1.verify(new RunLimits(500, 100, Duration.ofMillis(500)));
-        System.out.println("result: "+result);
-        Assert.assertEquals(Right(Long.valueOf(0)),result);
+        Either<Error, Long> result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
+        System.out.println("result: " + result);
+        Assert.assertEquals(Right(Long.valueOf(0)), result);
     }
 }

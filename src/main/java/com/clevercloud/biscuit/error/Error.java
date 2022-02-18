@@ -446,6 +446,26 @@ public class Error {
 
     }
 
+    public static class Language extends Error {
+        final public FailedCheck.LanguageError langError;
+        public Language(FailedCheck.LanguageError langError){
+            this.langError = langError;
+        }
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            return true;
+        }
+
+        @Override
+        public JsonElement toJson(){
+            JsonObject jo = new JsonObject();
+            jo.add("Language", langError.toJson());
+            return jo;
+        }
+    }
+
     public static class TooManyFacts extends Error {
         @Override
         public boolean equals(Object o) {

@@ -5,6 +5,7 @@ import com.clevercloud.biscuit.error.Error;
 import io.vavr.control.Either;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 
 import static io.vavr.API.Left;
@@ -23,6 +24,10 @@ public final class Fact implements Serializable {
 
    public Fact(final Predicate predicate) {
       this.predicate = predicate;
+   }
+
+   public Fact(final long name, final List<Term> terms){
+      this.predicate = new Predicate(name, terms);
    }
 
    @Override
