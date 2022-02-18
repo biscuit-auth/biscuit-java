@@ -21,6 +21,10 @@ public final class KeyPair {
     private static final int ED25519_SEED_SIZE = 32;
     public static final EdDSANamedCurveSpec ed25519 = EdDSANamedCurveTable.getByName(EdDSANamedCurveTable.ED_25519);
 
+    public KeyPair() {
+        new KeyPair(new SecureRandom());
+    }
+
     public KeyPair(final SecureRandom rng) {
         byte[] b = new byte[32];
         rng.nextBytes(b);

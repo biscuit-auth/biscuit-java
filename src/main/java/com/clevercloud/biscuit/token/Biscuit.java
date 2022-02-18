@@ -31,6 +31,17 @@ public class Biscuit {
     final Option<SerializedBiscuit> container;
     final List<byte[]> revocation_ids;
 
+    /**
+     * Creates a token builder
+     *
+     * this function uses the default symbol table
+     *
+     * @param root root private key
+     * @return
+     */
+    public static com.clevercloud.biscuit.token.builder.Biscuit builder(final KeyPair root) {
+        return new com.clevercloud.biscuit.token.builder.Biscuit(new SecureRandom(), root, default_symbol_table());
+    }
 
     /**
      * Creates a token builder
@@ -376,6 +387,17 @@ public class Biscuit {
      */
     public com.clevercloud.biscuit.token.builder.Block create_block() {
         return new com.clevercloud.biscuit.token.builder.Block(1+this.blocks.size(), new SymbolTable(this.symbols));
+    }
+
+    /**
+     * Generates a new token from an existing one and a new block
+     * @param block new block (should be generated from a Block builder)
+     * @return
+     */
+    public Either<Error, Biscuit> attenuate(com.clevercloud.biscuit.token.builder.Block block) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        SecureRandom rng = new SecureRandom();
+        KeyPair keypair = new KeyPair(rng);
+        return attenuate(rng, keypair, block.build());
     }
 
     /**
