@@ -22,7 +22,7 @@ public final class KeyPair {
     public static final EdDSANamedCurveSpec ed25519 = EdDSANamedCurveTable.getByName(EdDSANamedCurveTable.ED_25519);
 
     public KeyPair() {
-        new KeyPair(new SecureRandom());
+        this(new SecureRandom());
     }
 
     public KeyPair(final SecureRandom rng) {
