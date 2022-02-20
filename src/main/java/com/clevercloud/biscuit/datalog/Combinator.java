@@ -14,7 +14,7 @@ public final class Combinator implements Serializable {
    private final Predicate pred;
    private final Iterator<Fact> fit;
    private Combinator current_it;
-   private SymbolTable symbols;
+   private final SymbolTable symbols;
 
    public Option<MatchedVariables> next() {
       while(true) {

@@ -57,7 +57,7 @@ public class ParserTest extends TestCase {
     public void testConstraint() {
     }
 
-    public void testFact() {
+    public void testFact() throws com.clevercloud.biscuit.error.Error.Language {
         Either<Error, Tuple2<String, Fact>> res = Parser.fact("right( \"file1\", \"read\" )");
         assertEquals(Either.right(new Tuple2<String, Fact>("",
                 fact("right", Arrays.asList(string("file1"), s("read"))))),

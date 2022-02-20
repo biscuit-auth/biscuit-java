@@ -197,7 +197,7 @@ public abstract class Term implements Serializable {
 
       public Schema.TermV2 serialize() {
          return Schema.TermV2.newBuilder()
-                 .setBytes(ByteString.EMPTY.copyFrom(this.value)).build();
+                 .setBytes(ByteString.copyFrom(this.value)).build();
       }
 
       static public Either<Error.FormatError, Term> deserializeV2(Schema.TermV2 term) {
@@ -241,9 +241,7 @@ public abstract class Term implements Serializable {
 
          Str s = (Str) o;
 
-         if (value != s.value) return false;
-
-         return true;
+         return value == s.value;
       }
 
       @Override

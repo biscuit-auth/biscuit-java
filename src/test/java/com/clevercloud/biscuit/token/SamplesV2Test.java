@@ -9,6 +9,7 @@ import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.builder.Check;
 import com.clevercloud.biscuit.token.builder.Rule;
 import io.vavr.control.Either;
+import io.vavr.control.Try;
 import org.junit.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -41,7 +42,7 @@ public class SamplesV2Test extends TestCase {
     static byte[] rootData = fromHex("acdd6d5b53bfee478bf689f8e012fe7988bf755e3d7c5152947abc149bc20189");
 
 
-    public void test1_Basic() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void test1_Basic() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
         // TODO Out of sync
 
@@ -52,16 +53,14 @@ public class SamplesV2Test extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Either<Error, Biscuit> deser_res = Biscuit.from_bytes(data, root);
-        Biscuit token = deser_res.get();
+        Biscuit token = Biscuit.from_bytes(data, root);
         System.out.println(token.print());
 
-        Authorizer v1 = token.authorizer().get();
+        Authorizer v1 = token.authorizer();
         v1.add_fact("resource(\"file1\")");
         v1.allow();
-        Either<Error, Long> res = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
 
-        Error e = res.getLeft();
+        Error e = (Error) Try.of(() -> v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))).getCause();
         System.out.println("got error: " + e);
         Assert.assertEquals(new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(new FailedCheck.FailedBlock(1, 0, "check if resource($0), operation(\"read\"), right($0, \"read\")")))), e);
     }
@@ -75,8 +74,7 @@ public class SamplesV2Test extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Either<Error, Biscuit> token = Biscuit.from_bytes(data, root);
-        Error e = token.getLeft();
+        Error e = (Error) Try.of(() -> Biscuit.from_bytes(data, root)).getCause();
         System.out.println("got error: " + e);
         Assert.assertEquals(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"), e);
     }
@@ -91,10 +89,12 @@ public class SamplesV2Test extends TestCase {
         inputStream.read(data);
 
         try {
-            Error e = Biscuit.from_bytes(data, root).getLeft();
+            Biscuit.from_bytes(data, root);
             fail();
         } catch (SignatureException e) {
             System.out.println("got error: " + e);
+        } catch (Error e) {
+            fail();
         }
     }
 
@@ -107,7 +107,7 @@ public class SamplesV2Test extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Error e = Biscuit.from_bytes(data, root).getLeft();
+        Error e = (Error) Try.of(() -> Biscuit.from_bytes(data, root)).getCause();
         System.out.println("got error: " + e);
         Assert.assertEquals(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"), e);
     }
@@ -121,7 +121,7 @@ public class SamplesV2Test extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Error e = Biscuit.from_bytes(data, root).getLeft();
+        Error e = (Error) Try.of(() -> Biscuit.from_bytes(data, root)).getCause();
         System.out.println("got error: " + e);
         Assert.assertEquals(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"), e);
     }
@@ -135,13 +135,12 @@ public class SamplesV2Test extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Either<Error, Biscuit> deser = Biscuit.from_bytes(data, root);
-        Error e = deser.getLeft();
+        Error e = (Error) Try.of(() -> Biscuit.from_bytes(data, root)).getCause();
         assertEquals(e, new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"));
 
     }
 
-    public void test7_scoped_rules() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void test7_scoped_rules() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
@@ -150,21 +149,20 @@ public class SamplesV2Test extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data, root).get();
+        Biscuit token = Biscuit.from_bytes(data, root);
         System.out.println(token.print());
 
-        Authorizer v1 = token.authorizer().get();
+        Authorizer v1 = token.authorizer();
         v1.add_fact("resource(\"file2\")");
         v1.add_fact("operation(\"read\")");
         v1.allow();
-        Either<Error, Long> res = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
-
+        Error e = (Error) Try.of(() -> v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))).getCause();
         Assert.assertEquals(new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                 new FailedCheck.FailedBlock(1, 0, "check if resource($0), operation(\"read\"), right($0, \"read\")")
-        ))), res.getLeft());
+        ))), e);
     }
 
-    public void test8_scoped_checks() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void test8_scoped_checks() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
@@ -173,21 +171,21 @@ public class SamplesV2Test extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data, root).get();
+        Biscuit token = Biscuit.from_bytes(data, root);
         System.out.println(token.print());
 
-        Authorizer v1 = token.authorizer().get();
+        Authorizer v1 = token.authorizer();
         v1.add_fact("resource(\"file2\")");
         v1.add_fact("operation(\"read\")");
         v1.allow();
-        Either<Error, Long> res = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
+        Error e = (Error) Try.of(() -> v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))).getCause();
 
         Assert.assertEquals(new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                 new FailedCheck.FailedBlock(1, 0, "check if resource($0), operation(\"read\"), right($0, \"read\")")
-        ))), res.getLeft());
+        ))), e);
     }
 
-    public void test9_ExpiredToken() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void test9_ExpiredToken() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
@@ -196,17 +194,17 @@ public class SamplesV2Test extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data, root).get();
+        Biscuit token = Biscuit.from_bytes(data, root);
         System.out.println(token.print());
 
-        Authorizer v1 = token.authorizer().get();
+        Authorizer v1 = token.authorizer();
         v1.add_fact("resource(\"file1\")");
         v1.add_fact("operation(\"read\")");
         v1.set_time();
         v1.allow();
         System.out.println(v1.print_world());
 
-        Error e = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500))).getLeft();
+        Error e = (Error) Try.of(() -> v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))).getCause();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                         new FailedCheck.FailedBlock(1, 1, "check if time($date), $date <= 2018-12-20T00:00:00Z")
@@ -214,7 +212,7 @@ public class SamplesV2Test extends TestCase {
                 e);
     }
 
-    public void test10_AuthorizerScope() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void test10_AuthorizerScope() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
@@ -223,24 +221,25 @@ public class SamplesV2Test extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data, root).get();
+        Biscuit token = Biscuit.from_bytes(data, root);
         System.out.println(token.print());
 
-        Authorizer v1 = token.authorizer().get();
+        Authorizer v1 = token.authorizer();
         v1.add_fact("resource(\"file2\")");
         v1.add_fact("operation(\"read\")");
         v1.add_check("check if right($0, $1), resource($0), operation($1)");
         v1.allow();
-        Either<Error, Long> res = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
-        System.out.println(res);
+        Error e = (Error) Try.of(() -> v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))).getCause();
+
+        System.out.println(e);
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                         new FailedCheck.FailedAuthorizer(0, "check if right($0, $1), resource($0), operation($1)")
                 ))),
-                res.getLeft());
+                e);
     }
 
-    public void test11_AuthorizerAuthorityCaveats() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void test11_AuthorizerAuthorityCaveats() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
@@ -249,10 +248,10 @@ public class SamplesV2Test extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data, root).get();
+        Biscuit token = Biscuit.from_bytes(data, root);
         System.out.println(token.print());
 
-        Authorizer v1 = token.authorizer().get();
+        Authorizer v1 = token.authorizer();
         v1.add_fact("resource(\"file2\")");
         v1.add_fact("operation(\"read\")");
         v1.add_check(check(rule(
@@ -265,9 +264,7 @@ public class SamplesV2Test extends TestCase {
                 )
         )));
         v1.allow();
-        Either<Error, Long> res = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
-        System.out.println(res);
-        Error e = res.getLeft();
+        Error e = (Error) Try.of(() -> v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))).getCause();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                         new FailedCheck.FailedAuthorizer(0, "check if resource($0), operation($1), right($0, $1)")
@@ -275,7 +272,7 @@ public class SamplesV2Test extends TestCase {
                 e);
     }
 
-    public void test12_AuthorizerAuthorityCaveats() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void test12_AuthorizerAuthorityCaveats() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
@@ -284,23 +281,21 @@ public class SamplesV2Test extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data, root).get();
+        Biscuit token = Biscuit.from_bytes(data, root);
         System.out.println(token.print());
 
-        Authorizer v1 = token.authorizer().get();
+        Authorizer v1 = token.authorizer();
         v1.add_fact("resource(\"file1\")");
         v1.add_fact("operation(\"read\")");
         v1.allow();
-        Assert.assertTrue(v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500))).isRight());
+        v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
 
-        Authorizer v2 = token.authorizer().get();
+        Authorizer v2 = token.authorizer();
         v2.add_fact("resource(\"file2\")");
         v2.add_fact("operation(\"read\")");
         v2.allow();
 
-        Either<Error, Long> res = v2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
-        System.out.println(res);
-        Error e = res.getLeft();
+        Error e = (Error) Try.of(() -> v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))).getCause();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                         new FailedCheck.FailedBlock(0, 0, "check if resource(\"file1\")")
@@ -308,7 +303,7 @@ public class SamplesV2Test extends TestCase {
                 e);
     }
 
-    public void test13_BlockRules() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void test13_BlockRules() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
@@ -317,28 +312,24 @@ public class SamplesV2Test extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data, root).get();
+        Biscuit token = Biscuit.from_bytes(data, root);
         System.out.println(token.print());
 
-        Authorizer v1 = token.authorizer().get();
+        Authorizer v1 = token.authorizer();
         v1.add_fact("resource(\"file1\")");
         //v1.add_fact(fact("time", Arrays.asList(new Term.Date(1608542592))));
         v1.set_time();
         v1.allow();
-        Either<Error, Long> res1 = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
-        System.out.println(res1);
+        v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println(v1.print_world());
-        Assert.assertTrue(res1.isRight());
 
-        Authorizer v2 = token.authorizer().get();
+        Authorizer v2 = token.authorizer();
         v2.add_fact("resource(\"file2");
         v1.set_time();
         //v2.add_fact(fact("time", Arrays.asList(new Term.Date(1608542592))));
         v2.allow();
 
-        Either<Error, Long> res = v2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
-        System.out.println(res);
-        Error e = res.getLeft();
+        Error e = (Error) Try.of(() -> v2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))).getCause();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                         new FailedCheck.FailedBlock(1, 0, "check if valid_date($0), resource($0)")
@@ -346,7 +337,7 @@ public class SamplesV2Test extends TestCase {
                 e);
     }
 
-    public void test14_RegexConstraint() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void test14_RegexConstraint() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
@@ -355,32 +346,29 @@ public class SamplesV2Test extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data, root).get();
+        Biscuit token = Biscuit.from_bytes(data, root);
         System.out.println(token.print());
 
-        Authorizer v1 = token.authorizer().get();
+        Authorizer v1 = token.authorizer();
         v1.add_fact("resource(\"file1\")");
         v1.set_time();
         v1.allow();
 
-        Either<Error, Long> res = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
-        System.out.println(res);
-        Error e = res.getLeft();
+        Error e = (Error) Try.of(() -> v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))).getCause();
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                         new FailedCheck.FailedBlock(0, 0, "check if resource($0), $0.matches(\"file[0-9]+.txt\")")
                 ))),
                 e);
 
-        Authorizer v2 = token.authorizer().get();
+        Authorizer v2 = token.authorizer();
         v2.add_fact("resource(\"file123.txt\")");
         v2.set_time();
         v2.allow();
-        Assert.assertTrue(v2.authorize(new RunLimits(500, 100, Duration.ofMillis(500))).isRight());
-
+        v2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
     }
 
-    public void test15_MultiQueriesCaveats() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void test15_MultiQueriesCaveats() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
@@ -389,10 +377,10 @@ public class SamplesV2Test extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data, root).get();
+        Biscuit token = Biscuit.from_bytes(data, root);
         System.out.println(token.print());
 
-        Authorizer v1 = token.authorizer().get();
+        Authorizer v1 = token.authorizer();
         ArrayList<Rule> queries = new ArrayList<>();
         queries.add(rule(
                 "test_must_be_present_authority",
@@ -411,10 +399,10 @@ public class SamplesV2Test extends TestCase {
         v1.add_check(new Check(queries));
         v1.allow();
 
-        Assert.assertTrue(v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500))).isRight());
+        v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
     }
 
-    public void test16_CaveatHeadName() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void test16_CaveatHeadName() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
@@ -423,15 +411,14 @@ public class SamplesV2Test extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data, root).get();
+        Biscuit token = Biscuit.from_bytes(data, root);
         System.out.println(token.print());
 
-        Authorizer v1 = token.authorizer().get();
+        Authorizer v1 = token.authorizer();
         v1.allow();
 
-        Either<Error, Long> res = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
-        System.out.println(res);
-        Error e = res.getLeft();
+        Error e = (Error) Try.of(() -> v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))).getCause();
+
         Assert.assertEquals(
                 new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                         new FailedCheck.FailedBlock(0, 0, "check if resource(\"hello\")")
@@ -439,7 +426,7 @@ public class SamplesV2Test extends TestCase {
                 e);
     }
 
-    public void test17_Expressions() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void test17_Expressions() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
@@ -448,16 +435,16 @@ public class SamplesV2Test extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data, root).get();
+        Biscuit token = Biscuit.from_bytes(data, root);
         System.out.println(token.print());
 
-        Authorizer v1 = token.authorizer().get();
+        Authorizer v1 = token.authorizer();
         v1.allow();
 
-        Assert.assertEquals(Right(Long.valueOf(0)), v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500))));
+        Assert.assertEquals(Long.valueOf(0), v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500))));
     }
 
-    public void test18_Unbound_Variables() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void test18_Unbound_Variables() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
@@ -466,18 +453,17 @@ public class SamplesV2Test extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data, root).get();
+        Biscuit token = Biscuit.from_bytes(data, root);
         System.out.println(token.print());
 
-        Authorizer v1 = token.authorizer().get();
+        Authorizer v1 = token.authorizer();
         v1.add_fact("operation(\"write\")");
         v1.allow();
-        Either<Error, Long> result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
-        System.out.println("result: " + result);
-        Assert.assertTrue(result.isLeft());
+        Error e = (Error) Try.of(() -> v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))).getCause();
+        System.out.println("result: " + e);
     }
 
-    public void test19_generating_ambient_from_variables() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void test19_generating_ambient_from_variables() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
@@ -486,18 +472,17 @@ public class SamplesV2Test extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Biscuit token = Biscuit.from_bytes(data, root).get();
+        Biscuit token = Biscuit.from_bytes(data, root);
         System.out.println(token.print());
 
-        Authorizer v1 = token.authorizer().get();
+        Authorizer v1 = token.authorizer();
         v1.add_fact("operation(\"write\")");
         v1.allow();
-        Either<Error, Long> result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
-        System.out.println("result: " + result);
-        Assert.assertTrue(result.isLeft());
+        Error e = (Error) Try.of(() -> v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))).getCause();
+        System.out.println("result: " + e);
     }
 
-    public void test20_sealed_token() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void test20_sealed_token() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
@@ -506,20 +491,20 @@ public class SamplesV2Test extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Either<Error, Biscuit> res = Biscuit.from_bytes(data, root);
-        Biscuit token = res.get();
+        Biscuit res = Biscuit.from_bytes(data, root);
+        Biscuit token = res;
         System.out.println(token.print());
 
-        Authorizer v1 = token.authorizer().get();
+        Authorizer v1 = token.authorizer();
         v1.add_fact("operation(\"read\")");
         v1.add_fact("resource(\"file1\")");
         v1.allow();
-        Either<Error, Long> result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
+        Long result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println("result: " + result);
-        Assert.assertEquals(Right(Long.valueOf(0)), result);
+        Assert.assertEquals(Long.valueOf(0), result);
     }
 
-    public void test21_parsing() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void test21_parsing() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
@@ -528,11 +513,10 @@ public class SamplesV2Test extends TestCase {
         byte[] data = new byte[inputStream.available()];
         inputStream.read(data);
 
-        Either<Error, Biscuit> res = Biscuit.from_bytes(data, root);
-        Biscuit token = res.get();
+        Biscuit token = Biscuit.from_bytes(data, root);
         System.out.println(token.print());
 
-        Authorizer v1 = token.authorizer().get();
+        Authorizer v1 = token.authorizer();
 
         v1.add_check(check(rule(
                 "check1",
@@ -542,8 +526,8 @@ public class SamplesV2Test extends TestCase {
                 )
         )));
         v1.allow();
-        Either<Error, Long> result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
+        Long result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println("result: " + result);
-        Assert.assertEquals(Right(Long.valueOf(0)), result);
+        Assert.assertEquals(Long.valueOf(0), result);
     }
 }

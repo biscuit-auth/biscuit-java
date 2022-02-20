@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Predicate {
+public class Predicate implements Cloneable {
     String name;
     List<Term> terms;
 
@@ -66,5 +66,14 @@ public class Predicate {
         int result = name != null ? name.hashCode() : 0;
         result = 31 * result + (terms != null ? terms.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public Predicate clone(){
+        String name = this.name;
+        List<Term> terms = new ArrayList<Term>(this.terms.size());
+        terms.addAll(this.terms);
+        Predicate p = new Predicate(name, terms);
+        return p;
     }
 }

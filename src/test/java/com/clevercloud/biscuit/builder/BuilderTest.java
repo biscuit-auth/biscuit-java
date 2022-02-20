@@ -2,6 +2,7 @@ package com.clevercloud.biscuit.builder;
 
 import com.clevercloud.biscuit.crypto.KeyPair;
 import com.clevercloud.biscuit.datalog.SymbolTable;
+import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.token.Biscuit;
 import com.clevercloud.biscuit.token.builder.Block;
 import com.clevercloud.biscuit.token.builder.Expression;
@@ -27,7 +28,7 @@ public class BuilderTest extends TestCase {
         return new TestSuite(com.clevercloud.biscuit.builder.BuilderTest.class);
     }
 
-    public void testBuild() {
+    public void testBuild() throws Error.Language, Error.SymbolTableOverlap, Error.FormatError {
         SecureRandom rng = new SecureRandom();
         KeyPair root = new KeyPair(rng);
         SymbolTable symbols = Biscuit.default_symbol_table();
@@ -61,7 +62,7 @@ public class BuilderTest extends TestCase {
                                 )))))
                 )
         ));
-        Biscuit rootBiscuit = Biscuit.make(rng, root, symbols, authority_builder.build()).get();
+        Biscuit rootBiscuit = Biscuit.make(rng, root, symbols, authority_builder.build());
 
         System.out.println(rootBiscuit.print());
 

@@ -72,8 +72,8 @@ public class Authorizer {
      * @param root
      * @return
      */
-    static public Either<Error, Authorizer> make(Biscuit token) {
-        return Right(new Authorizer(token, new World()));
+    static public Authorizer make(Biscuit token) {
+        return new Authorizer(token, new World());
     }
 
     public Authorizer clone() {
@@ -81,81 +81,77 @@ public class Authorizer {
                 new ArrayList<>(this.token_checks), new World(this.world), new SymbolTable(this.symbols));
     }
 
-    public Either<Error, Void> add_token(Biscuit token) {
+    public Authorizer add_token(Biscuit token) throws Error.FailedLogic {
         if (this.token != null) {
-            return Either.left(new Error.FailedLogic(new LogicError.AuthorizerNotEmpty()));
+            throw new Error.FailedLogic(new LogicError.AuthorizerNotEmpty());
         }
 
         this.token = token;
 
-        return Right(null);
+        return this;
     }
 
-    public void add_fact(Fact fact) {
-        fact.validate();
+    public Authorizer add_fact(Fact fact) {
         world.add_fact(fact.convert(symbols));
+        return this;
     }
 
-    public Either<Error, Void> add_fact(String s) {
+    public Authorizer add_fact(String s) throws Error.Parser {
         Either<com.clevercloud.biscuit.token.builder.parser.Error, Tuple2<String, Fact>> res =
                 com.clevercloud.biscuit.token.builder.parser.Parser.fact(s);
 
         if (res.isLeft()) {
-            return Either.left(new Error.Parser(res.getLeft()));
+            throw new Error.Parser(res.getLeft());
         }
 
         Tuple2<String, com.clevercloud.biscuit.token.builder.Fact> t = res.get();
 
-        add_fact(t._2);
-
-        return Either.right(null);
+        return this.add_fact(t._2);
     }
 
-    public void add_rule(Rule rule) {
+    public Authorizer add_rule(Rule rule) {
         world.add_privileged_rule(rule.convert(symbols));
+        return this;
     }
 
-    public Either<Error, Void> add_rule(String s) {
+    public Authorizer add_rule(String s) throws Error.Parser {
         Either<com.clevercloud.biscuit.token.builder.parser.Error, Tuple2<String, com.clevercloud.biscuit.token.builder.Rule>> res =
                 com.clevercloud.biscuit.token.builder.parser.Parser.rule(s);
 
         if (res.isLeft()) {
-            return Either.left(new Error.Parser(res.getLeft()));
+            throw new Error.Parser(res.getLeft());
         }
 
         Tuple2<String, com.clevercloud.biscuit.token.builder.Rule> t = res.get();
 
-        add_rule(t._2);
-
-        return Either.right(null);
+        return add_rule(t._2);
     }
 
-    public void add_check(Check check) {
+    public Authorizer add_check(Check check) {
         this.checks.add(check);
         world.add_check(check.convert(symbols));
+        return this;
     }
 
-    public Either<Error, Void> add_check(String s) {
+    public Authorizer add_check(String s) throws Error.Parser {
         Either<com.clevercloud.biscuit.token.builder.parser.Error, Tuple2<String, com.clevercloud.biscuit.token.builder.Check>> res =
                 com.clevercloud.biscuit.token.builder.parser.Parser.check(s);
 
         if (res.isLeft()) {
-            return Either.left(new Error.Parser(res.getLeft()));
+            throw new Error.Parser(res.getLeft());
         }
 
         Tuple2<String, com.clevercloud.biscuit.token.builder.Check> t = res.get();
 
-        add_check(t._2);
-
-        return Either.right(null);
+        return add_check(t._2);
     }
 
-    public void set_time() {
-
+    public Authorizer set_time() throws Error.Language {
         world.add_fact(fact("time", Arrays.asList(date(new Date()))).convert(symbols));
+        return this;
     }
 
-    public Either<Error, List<String>> get_revocation_ids() {
+    public List<String> get_revocation_ids() throws Error.TooManyFacts, Error.TooManyIterations, Error.Timeout {
         ArrayList<String> ids = new ArrayList<>();
 
         final Rule getRevocationIds = rule(
@@ -164,13 +160,7 @@ public class Authorizer {
                 Arrays.asList(pred("revocation_id", Arrays.asList(var("id"))))
         );
 
-        Either<Error, Set<Fact>> queryRes = this.query(getRevocationIds);
-        if (queryRes.isLeft()) {
-            Error e = queryRes.getLeft();
-            return Left(e);
-        }
-
-        queryRes.get().stream().forEach(fact -> {
+        this.query(getRevocationIds).stream().forEach(fact -> {
             fact.terms().stream().forEach(id -> {
                 if (id instanceof Term.Str) {
                     ids.add(((Term.Str) id).getValue());
@@ -178,10 +168,10 @@ public class Authorizer {
             });
         });
 
-        return Right(ids);
+        return ids;
     }
 
-    public void allow() {
+    public Authorizer allow() {
         ArrayList<Rule> q = new ArrayList<>();
 
         q.add(constrained_rule(
@@ -192,9 +182,10 @@ public class Authorizer {
         ));
 
         this.policies.add(new Policy(q, Policy.Kind.Allow));
+        return this;
     }
 
-    public void deny() {
+    public Authorizer deny() {
         ArrayList<Rule> q = new ArrayList<>();
 
         q.add(constrained_rule(
@@ -205,32 +196,33 @@ public class Authorizer {
         ));
 
         this.policies.add(new Policy(q, Policy.Kind.Deny));
+        return this;
     }
 
-    public Either<Error, Void> add_policy(String s) {
+    public Authorizer add_policy(String s) throws Error.Parser {
         Either<com.clevercloud.biscuit.token.builder.parser.Error, Tuple2<String, com.clevercloud.biscuit.token.Policy>> res =
                 com.clevercloud.biscuit.token.builder.parser.Parser.policy(s);
 
         if (res.isLeft()) {
-            return Either.left(new Error.Parser(res.getLeft()));
+            throw new Error.Parser(res.getLeft());
         }
 
         Tuple2<String, com.clevercloud.biscuit.token.Policy> t = res.get();
 
         this.policies.add(t._2);
-        return Either.right(null);
+        return this;
     }
 
-    public Either<Error, Set<Fact>> query(Rule query) {
+    public Set<Fact> query(Rule query) throws Error.TooManyFacts, Error.TooManyIterations, Error.Timeout {
         return this.query(query, new RunLimits());
     }
 
-    public Either<Error, Set<Fact>> query(String s) {
+    public Set<Fact> query(String s) throws Error.Parser, Error.TooManyFacts, Error.TooManyIterations, Error.Timeout {
         Either<com.clevercloud.biscuit.token.builder.parser.Error, Tuple2<String, com.clevercloud.biscuit.token.builder.Rule>> res =
                 com.clevercloud.biscuit.token.builder.parser.Parser.rule(s);
 
         if (res.isLeft()) {
-            return Either.left(new Error.Parser(res.getLeft()));
+            throw new Error.Parser(res.getLeft());
         }
 
         Tuple2<String, com.clevercloud.biscuit.token.builder.Rule> t = res.get();
@@ -238,12 +230,8 @@ public class Authorizer {
         return query(t._2);
     }
 
-    public Either<Error, Set<Fact>> query(Rule query, RunLimits limits) {
-        Either<Error, Void> runRes = world.run(limits, symbols);
-        if (runRes.isLeft()) {
-            Error e = runRes.getLeft();
-            return Left(e);
-        }
+    public Set<Fact> query(Rule query, RunLimits limits) throws Error.TooManyFacts, Error.TooManyIterations, Error.Timeout {
+        world.run(limits, symbols);
 
         Set<com.clevercloud.biscuit.datalog.Fact> facts = world.query_rule(query.convert(symbols), symbols);
         Set<Fact> s = new HashSet();
@@ -252,15 +240,15 @@ public class Authorizer {
             s.add(Fact.convert_from(f, symbols));
         }
 
-        return Right(s);
+        return s;
     }
 
-    public Either<Error, Set<Fact>> query(String s, RunLimits limits) {
+    public Set<Fact> query(String s, RunLimits limits) throws Error.Parser, Error.TooManyFacts, Error.TooManyIterations, Error.Timeout {
         Either<com.clevercloud.biscuit.token.builder.parser.Error, Tuple2<String, com.clevercloud.biscuit.token.builder.Rule>> res =
                 com.clevercloud.biscuit.token.builder.parser.Parser.rule(s);
 
         if (res.isLeft()) {
-            return Either.left(new Error.Parser(res.getLeft()));
+            throw new Error.Parser(res.getLeft());
         }
 
         Tuple2<String, com.clevercloud.biscuit.token.builder.Rule> t = res.get();
@@ -268,11 +256,11 @@ public class Authorizer {
         return query(t._2, limits);
     }
 
-    public Either<Error, Long> authorize() {
+    public Long authorize() throws Error.Timeout, Error.FailedLogic, Error.TooManyFacts, Error.TooManyIterations {
         return this.authorize(new RunLimits());
     }
 
-    public Either<Error, Long> authorize(RunLimits limits) {
+    public Long authorize(RunLimits limits) throws Error.Timeout, Error.FailedLogic, Error.TooManyFacts, Error.TooManyIterations {
         Instant timeLimit = Instant.now().plus(limits.maxTime);
         List<com.clevercloud.biscuit.datalog.Check> authority_checks = new ArrayList<>();
         Option<Either<Integer, Integer>> policy_result = Option.none();
@@ -308,11 +296,7 @@ public class Authorizer {
         }
         token_checks.add(authority_checks);
 
-        Either<Error, Void> runRes = world.run(limits, symbols);
-        if (runRes.isLeft()) {
-            Error e = runRes.getLeft();
-            return Left(e);
-        }
+        world.run(limits, symbols);
 
         ArrayList<FailedCheck> errors = new ArrayList<>();
 
@@ -324,7 +308,7 @@ public class Authorizer {
                 boolean res = world.test_rule(c.queries().get(k), symbols);
 
                 if (Instant.now().compareTo(timeLimit) >= 0) {
-                    return Left(new Error.Timeout());
+                    throw new Error.Timeout();
                 }
 
                 if (res) {
@@ -346,7 +330,7 @@ public class Authorizer {
                 boolean res = world.test_rule(c.queries().get(k), symbols);
 
                 if (Instant.now().compareTo(timeLimit) >= 0) {
-                    return Left(new Error.Timeout());
+                    throw new Error.Timeout();
                 }
 
                 if (res) {
@@ -380,11 +364,7 @@ public class Authorizer {
                 }
                 token_checks.add(block_checks);
 
-                runRes = world.run(limits, symbols);
-                if (runRes.isLeft()) {
-                    Error e = runRes.getLeft();
-                    return Left(e);
-                }
+                world.run(limits, symbols);
 
                 for (int j = 0; j < block_checks.size(); j++) {
                     boolean successful = false;
@@ -394,7 +374,7 @@ public class Authorizer {
                         boolean res = world.test_rule(c.queries().get(k), symbols);
 
                         if (Instant.now().compareTo(timeLimit) >= 0) {
-                            return Left(new Error.Timeout());
+                            throw new Error.Timeout();
                         }
 
                         if (res) {
@@ -417,7 +397,7 @@ public class Authorizer {
                 boolean res = world.test_rule(c.queries().get(k), symbols);
 
                 if (Instant.now().compareTo(timeLimit) >= 0) {
-                    return Left(new Error.Timeout());
+                    throw new Error.Timeout();
                 }
 
                 if (res) {
@@ -434,15 +414,15 @@ public class Authorizer {
             Either<Integer, Integer> e = policy_result.get();
             if (e.isRight()) {
                 if (errors.isEmpty()) {
-                    return Either.right(Long.valueOf(e.get().longValue()));
+                    return Long.valueOf(e.get().longValue());
                 } else {
-                    return Either.left(new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(e.get().intValue()), errors)));
+                    throw new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(e.get().intValue()), errors));
                 }
             } else {
-                return Either.left(new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Deny(e.getLeft().intValue()), errors)));
+                throw new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Deny(e.getLeft().intValue()), errors));
             }
         } else {
-            return Either.left(new Error.FailedLogic(new LogicError.NoMatchingPolicy(errors)));
+            throw new Error.FailedLogic(new LogicError.NoMatchingPolicy(errors));
         }
     }
 

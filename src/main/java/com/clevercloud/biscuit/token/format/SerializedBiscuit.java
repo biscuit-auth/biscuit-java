@@ -38,7 +38,7 @@ public class SerializedBiscuit {
      * @param slice
      * @return
      */
-    static public Either<Error, SerializedBiscuit> from_bytes(byte[] slice, PublicKey root) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    static public SerializedBiscuit from_bytes(byte[] slice, PublicKey root) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         try {
             //System.out.println("will parse protobuf");
             Schema.Biscuit data = Schema.Biscuit.parseFrom(slice);
@@ -72,7 +72,7 @@ public class SerializedBiscuit {
             }
 
             if(secretKey.isEmpty() && signature.isEmpty()) {
-                return Left(new Error.FormatError.DeserializationError("empty proof"));
+                throw new Error.FormatError.DeserializationError("empty proof");
             }
             Proof proof = new Proof(secretKey, signature);
 
@@ -84,12 +84,12 @@ public class SerializedBiscuit {
             if(res.isLeft()) {
                 Error e = res.getLeft();
                 //System.out.println("verification error: "+e.toString());
-                return Left(e);
+                throw e;
             } else {
-                return Right(b);
+                return b;
             }
         } catch(InvalidProtocolBufferException e) {
-            return Left(new Error.FormatError.DeserializationError(e.toString()));
+            throw new Error.FormatError.DeserializationError(e.toString());
         }
     }
 
@@ -101,7 +101,7 @@ public class SerializedBiscuit {
      * @throws SignatureException
      * @throws InvalidKeyException
      */
-    static public Either<Error, SerializedBiscuit> unsafe_deserialize(byte[] slice) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    static public Either<Error, SerializedBiscuit> unsafe_deserialize(byte[] slice) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error.FormatError.DeserializationError {
         try {
             Schema.Biscuit data = Schema.Biscuit.parseFrom(slice);
 
@@ -131,14 +131,14 @@ public class SerializedBiscuit {
             }
 
             if(secretKey.isEmpty() && signature.isEmpty()) {
-                return Left(new Error.FormatError.DeserializationError("empty proof"));
+                throw new Error.FormatError.DeserializationError("empty proof");
             }
             Proof proof = new Proof(secretKey, signature);
 
             SerializedBiscuit b = new SerializedBiscuit(authority, blocks, proof);
             return Right(b);
         } catch(InvalidProtocolBufferException e) {
-            return Left(new Error.FormatError.DeserializationError(e.toString()));
+            throw new Error.FormatError.DeserializationError(e.toString());
         }
     }
 
@@ -147,7 +147,7 @@ public class SerializedBiscuit {
      * Serializes a SerializedBiscuit to a byte array
      * @return
      */
-    public Either<Error, byte[]> serialize() {
+    public byte[] serialize() throws Error.FormatError.SerializationError {
         Schema.Biscuit.Builder biscuitBuilder = Schema.Biscuit.newBuilder();
         Schema.SignedBlock.Builder authorityBuilder = Schema.SignedBlock.newBuilder();
         {
@@ -189,9 +189,9 @@ public class SerializedBiscuit {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             biscuit.writeTo(stream);
             byte[] data = stream.toByteArray();
-            return Right(data);
+            return data;
         } catch(IOException e) {
-            return Left(new Error.FormatError.SerializationError(e.toString()));
+            throw new Error.FormatError.SerializationError(e.toString());
         }
 
     }

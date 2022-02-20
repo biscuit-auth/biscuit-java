@@ -3,11 +3,12 @@ package com.clevercloud.biscuit.token.builder.parser;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-public class Error {
+public class Error extends Exception {
     String input;
     String message;
 
     public Error(String input, String message) {
+        super(message);
         this.input = input;
         this.message = message;
     }

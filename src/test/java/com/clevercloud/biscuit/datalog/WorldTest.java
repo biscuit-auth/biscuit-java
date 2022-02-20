@@ -2,6 +2,7 @@ package com.clevercloud.biscuit.datalog;
 
 import com.clevercloud.biscuit.datalog.expressions.Expression;
 import com.clevercloud.biscuit.datalog.expressions.Op;
+import com.clevercloud.biscuit.error.Error;
 import org.junit.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -20,7 +21,7 @@ public class WorldTest extends TestCase {
       return new TestSuite(WorldTest.class);
    }
 
-   public void testFamily() {
+   public void testFamily() throws Error.Timeout, Error.TooManyFacts, Error.TooManyIterations {
       final World w = new World();
       final SymbolTable syms = new SymbolTable();
       final Term a = syms.add("A");

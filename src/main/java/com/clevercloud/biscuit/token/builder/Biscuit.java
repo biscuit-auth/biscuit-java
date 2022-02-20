@@ -38,76 +38,76 @@ public class Biscuit {
         this.checks = new ArrayList<>();
     }
 
-    public void add_authority_fact(com.clevercloud.biscuit.token.builder.Fact f) {
+    public Biscuit add_authority_fact(com.clevercloud.biscuit.token.builder.Fact f) {
         this.facts.add(f.convert(this.symbols));
+        return this;
     }
 
-    public Either<Error, Void> add_authority_fact(String s) {
+    public Biscuit add_authority_fact(String s) throws Error.Parser {
         Either<com.clevercloud.biscuit.token.builder.parser.Error, Tuple2<String, com.clevercloud.biscuit.token.builder.Fact>> res =
                 com.clevercloud.biscuit.token.builder.parser.Parser.fact(s);
 
         if (res.isLeft()) {
-            return Either.left(new Error.Parser(res.getLeft()));
+            throw new Error.Parser(res.getLeft());
         }
 
         Tuple2<String, com.clevercloud.biscuit.token.builder.Fact> t = res.get();
 
-        add_authority_fact(t._2);
-
-        return Either.right(null);
+        return add_authority_fact(t._2);
     }
 
-    public void add_authority_rule(com.clevercloud.biscuit.token.builder.Rule rule) {
+    public Biscuit add_authority_rule(com.clevercloud.biscuit.token.builder.Rule rule) {
         this.rules.add(rule.convert(this.symbols));
+        return this;
     }
 
-    public Either<Error, Void> add_authority_rule(String s) {
+    public Biscuit add_authority_rule(String s) throws Error.Parser {
         Either<com.clevercloud.biscuit.token.builder.parser.Error, Tuple2<String, com.clevercloud.biscuit.token.builder.Rule>> res =
                 com.clevercloud.biscuit.token.builder.parser.Parser.rule(s);
 
         if (res.isLeft()) {
-            return Either.left(new Error.Parser(res.getLeft()));
+            throw new Error.Parser(res.getLeft());
         }
 
         Tuple2<String, com.clevercloud.biscuit.token.builder.Rule> t = res.get();
 
-        add_authority_rule(t._2);
 
-        return Either.right(null);
+
+        return add_authority_rule(t._2);
     }
 
-    public void add_authority_check(com.clevercloud.biscuit.token.builder.Check c) {
+    public Biscuit add_authority_check(com.clevercloud.biscuit.token.builder.Check c) {
         this.checks.add(c.convert(this.symbols));
+        return this;
     }
 
-    public Either<Error, Void> add_authority_check(String s) {
+    public Biscuit add_authority_check(String s) throws Error.Parser {
         Either<com.clevercloud.biscuit.token.builder.parser.Error, Tuple2<String, com.clevercloud.biscuit.token.builder.Check>> res =
                 com.clevercloud.biscuit.token.builder.parser.Parser.check(s);
 
         if (res.isLeft()) {
-            return Either.left(new Error.Parser(res.getLeft()));
+            throw new Error.Parser(res.getLeft());
         }
 
         Tuple2<String, com.clevercloud.biscuit.token.builder.Check> t = res.get();
 
-        add_authority_check(t._2);
-
-        return Either.right(null);
+        return add_authority_check(t._2);
     }
 
-    public  void set_context(String context) {
+    public Biscuit set_context(String context) {
         this.context = context;
+        return this;
     }
 
-    public Either<Error, com.clevercloud.biscuit.token.Biscuit> build() {
+    public com.clevercloud.biscuit.token.Biscuit build() throws Error {
         SymbolTable base_symbols = new SymbolTable();
         SymbolTable symbols = new SymbolTable();
 
-        for(int i = 0; i < this.symbol_start; i++) {
+        for (int i = 0; i < this.symbol_start; i++) {
             base_symbols.add(this.symbols.symbols.get(i));
         }
 
-        for(int i = this.symbol_start; i < this.symbols.symbols.size(); i++) {
+        for (int i = this.symbol_start; i < this.symbols.symbols.size(); i++) {
             symbols.add(this.symbols.symbols.get(i));
         }
 
@@ -115,7 +115,7 @@ public class Biscuit {
         return com.clevercloud.biscuit.token.Biscuit.make(this.rng, this.root, base_symbols, authority_block);
     }
 
-    public void add_right(String resource, String right) {
-            this.add_authority_fact(fact("right", Arrays.asList(string(resource), s(right))));
+    public Biscuit add_right(String resource, String right) throws Error.Language {
+        return this.add_authority_fact(fact("right", Arrays.asList(string(resource), s(right))));
     }
 }

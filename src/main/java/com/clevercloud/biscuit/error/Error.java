@@ -8,7 +8,7 @@ import io.vavr.control.Option;
 import java.util.List;
 import java.util.Objects;
 
-public class Error {
+public class Error extends Exception {
     public Option<List<FailedCheck>> failed_checks() {
         return Option.none();
     }
@@ -38,8 +38,7 @@ public class Error {
                 @Override
                 public boolean equals(Object o) {
                     if (this == o) return true;
-                    if (o == null || getClass() != o.getClass()) return false;
-                    return true;
+                    return o != null && getClass() == o.getClass();
                 }
 
                 @Override
@@ -59,8 +58,7 @@ public class Error {
                 @Override
                 public boolean equals(Object o) {
                     if (this == o) return true;
-                    if (o == null || getClass() != o.getClass()) return false;
-                    return true;
+                    return o != null && getClass() == o.getClass();
                 }
                 @Override
                 public JsonElement toJson() {
@@ -79,8 +77,7 @@ public class Error {
             @Override
             public boolean equals(Object o) {
                 if (this == o) return true;
-                if (o == null || getClass() != o.getClass()) return false;
-                return true;
+                return o != null && getClass() == o.getClass();
             }
             @Override
             public JsonElement toJson() {
@@ -95,8 +92,7 @@ public class Error {
             @Override
             public boolean equals(Object o) {
                 if (this == o) return true;
-                if (o == null || getClass() != o.getClass()) return false;
-                return true;
+                return o != null && getClass() == o.getClass();
             }
             @Override
             public JsonElement toJson() {
@@ -111,8 +107,7 @@ public class Error {
             @Override
             public boolean equals(Object o) {
                 if (this == o) return true;
-                if (o == null || getClass() != o.getClass()) return false;
-                return true;
+                return o != null && getClass() == o.getClass();
             }
             @Override
             public JsonElement toJson() {
@@ -374,8 +369,7 @@ public class Error {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            return true;
+            return o != null && getClass() == o.getClass();
         }
 
         @Override
@@ -387,8 +381,7 @@ public class Error {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            return true;
+            return o != null && getClass() == o.getClass();
         }
         @Override
         public JsonElement toJson(){
@@ -399,8 +392,7 @@ public class Error {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            return true;
+            return o != null && getClass() == o.getClass();
         }
         @Override
         public JsonElement toJson(){
@@ -454,8 +446,7 @@ public class Error {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            return true;
+            return o != null && getClass() == o.getClass();
         }
 
         @Override
@@ -470,8 +461,7 @@ public class Error {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            return true;
+            return o != null && getClass() == o.getClass();
         }
         @Override
         public JsonElement toJson(){
@@ -483,8 +473,7 @@ public class Error {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            return true;
+            return o != null && getClass() == o.getClass();
         }
         @Override
         public JsonElement toJson(){
@@ -496,8 +485,7 @@ public class Error {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            return true;
+            return o != null && getClass() == o.getClass();
         }
         @Override
         public JsonElement toJson(){

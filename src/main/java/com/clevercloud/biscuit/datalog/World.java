@@ -38,11 +38,11 @@ public final class World implements Serializable {
       this.rules.clear();
    }
 
-   public Either<Error, Void> run(final SymbolTable symbols) {
-      return this.run(new RunLimits(), symbols);
+   public void run(final SymbolTable symbols) throws Error.TooManyFacts, Error.TooManyIterations, Error.Timeout {
+      this.run(new RunLimits(), symbols);
    }
 
-   public Either<Error, Void> run(RunLimits limits, final SymbolTable symbols) {
+   public void run(RunLimits limits, final SymbolTable symbols) throws Error.TooManyFacts, Error.TooManyIterations, Error.Timeout {
       int iterations = 0;
       Instant limit = Instant.now().plus(limits.maxTime);
 
@@ -53,7 +53,7 @@ public final class World implements Serializable {
             rule.apply(this.facts, new_facts, symbols);
 
             if(Instant.now().compareTo(limit) >= 0) {
-               return Left(new Error.Timeout());
+               throw new Error.Timeout();
             }
          }
 
@@ -61,23 +61,23 @@ public final class World implements Serializable {
             rule.apply(this.facts, new_facts, symbols);
 
             if(Instant.now().compareTo(limit) >= 0) {
-               return Left(new Error.Timeout());
+               throw new Error.Timeout();
             }
          }
 
          final int len = this.facts.size();
          this.facts.addAll(new_facts);
          if (this.facts.size() == len) {
-            return Right(null);
+            return ;
          }
 
          if (this.facts.size() >= limits.maxFacts) {
-            return Left(new Error.TooManyFacts());
+            throw new Error.TooManyFacts();
          }
 
          iterations += 1;
          if(iterations >= limits.maxIterations) {
-            return Left(new Error.TooManyIterations());
+            throw new Error.TooManyIterations();
          }
       }
    }

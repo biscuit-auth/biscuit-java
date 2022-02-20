@@ -55,7 +55,7 @@ public final class SymbolTable implements Serializable {
          Date d = Date.from(Instant.ofEpochSecond(((Term.Date) value).value()));
          SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
          format.setTimeZone(TimeZone.getTimeZone("UTC"));
-         _s  = format.format(d).toString();
+         _s  = format.format(d);
       } else if (value instanceof Term.Integer) {
          _s = Long.toString(((Term.Integer) value).value());
       } else if (value instanceof Term.Set) {
