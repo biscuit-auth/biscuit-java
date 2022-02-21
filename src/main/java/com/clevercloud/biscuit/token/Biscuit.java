@@ -269,7 +269,7 @@ public class Biscuit {
         }
 
         for (Rule rule : this.authority.rules) {
-            world.add_privileged_rule(rule);
+            world.add_rule(rule);
         }
 
         for (int i = 0; i < this.blocks.size(); i++) {
@@ -310,7 +310,7 @@ public class Biscuit {
         }
 
         for (Rule rule : ambient_rules) {
-            world.add_privileged_rule(rule);
+            world.add_rule(rule);
         }
 
         world.run(symbols);

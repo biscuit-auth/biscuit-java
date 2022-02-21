@@ -61,7 +61,13 @@ public class Parser {
             return Either.left(new Error(s, "the string was not entirely parsed, remaining: "+body._1));
         }
 
-        return Either.right(new Tuple2<>(body._1, new Rule(head, body._2, body._3)));
+        Rule rule = new Rule(head, body._2, body._3);
+        Either<String,Rule> valid = rule.validate_variables();
+        if(valid.isLeft()){
+            return Either.left(new Error(s, valid.getLeft()));
+        }
+
+        return Either.right(new Tuple2<>(body._1, rule));
     }
 
     public static Either<Error, Tuple2<String, Check>> check(String s) {

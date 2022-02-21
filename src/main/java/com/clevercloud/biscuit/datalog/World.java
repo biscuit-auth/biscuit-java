@@ -17,8 +17,6 @@ import static io.vavr.API.Right;
 public final class World implements Serializable {
    private final Set<Fact> facts;
    private final List<Rule> rules;
-   private final List<Rule> privileged_rules;
-   private final List<Check> checks;
 
    public void add_fact(final Fact fact) {
       this.facts.add(fact);
@@ -27,12 +25,6 @@ public final class World implements Serializable {
    public void add_rule(final Rule rule) {
       this.rules.add(rule);
    }
-
-   public void add_privileged_rule(final Rule rule) {
-      this.privileged_rules.add(rule);
-   }
-
-   public void add_check(Check check) { this.checks.add(check); }
 
    public void clearRules() {
       this.rules.clear();
@@ -48,14 +40,6 @@ public final class World implements Serializable {
 
       while(true) {
          final Set<Fact> new_facts = new HashSet<>();
-
-         for (final Rule rule : this.privileged_rules) {
-            rule.apply(this.facts, new_facts, symbols);
-
-            if(Instant.now().compareTo(limit) >= 0) {
-               throw new Error.Timeout();
-            }
-         }
 
          for (final Rule rule : this.rules) {
             rule.apply(this.facts, new_facts, symbols);
@@ -86,11 +70,7 @@ public final class World implements Serializable {
       return this.facts;
    }
 
-   public List<Rule> privileged_rules() { return this.privileged_rules; }
-
    public List<Rule> rules() { return this.rules; }
-
-   public List<Check> checks() { return this.checks; }
 
    public final Set<Fact> query(final Predicate pred) {
       return this.facts.stream().filter((f) -> {
@@ -128,22 +108,16 @@ public final class World implements Serializable {
    public World() {
       this.facts = new HashSet<>();
       this.rules = new ArrayList<>();
-      this.privileged_rules = new ArrayList<>();
-      this.checks = new ArrayList<>();
    }
 
-   public World(Set<Fact> facts, List<Rule> privileged_rules,  List<Rule> rules) {
+   public World(Set<Fact> facts,  List<Rule> rules) {
       this.facts = facts;
-      this.privileged_rules = privileged_rules;
       this.rules = rules;
-      this.checks = new ArrayList<>();
    }
 
-   public World(Set<Fact> facts, List<Rule> privileged_rules, List<Rule> rules, List<Check> checks) {
+   public World(Set<Fact> facts, List<Rule> rules, List<Check> checks) {
       this.facts = facts;
-      this.privileged_rules = privileged_rules;
       this.rules = rules;
-      this.checks = checks;
    }
 
    public World(World w) {
@@ -151,18 +125,12 @@ public final class World implements Serializable {
       for(Fact fact: w.facts) {
          this.facts.add(fact);
       }
-      this.privileged_rules = new ArrayList<>();
-      for(Rule rule: w.privileged_rules) {
-         this.privileged_rules.add(rule);
-      }
+
       this.rules = new ArrayList<>();
       for(Rule rule: w.rules) {
          this.rules.add(rule);
       }
-      this.checks = new ArrayList<>();
-      for(Check check : w.checks) {
-         this.checks.add(check);
-      }
+
    }
 
    public String print(SymbolTable symbol_table) {
@@ -173,21 +141,13 @@ public final class World implements Serializable {
          s.append("\n\t\t\t");
          s.append(symbol_table.print_fact(f));
       }
-      s.append("\n\t\t]\n\t\tprivileged rules: [");
-      for(Rule r: this.privileged_rules) {
-         s.append("\n\t\t\t");
-         s.append(symbol_table.print_rule(r));
-      }
+
       s.append("\n\t\t]\n\t\trules: [");
       for(Rule r: this.rules) {
          s.append("\n\t\t\t");
          s.append(symbol_table.print_rule(r));
       }
-      s.append("\n\t\t]\n\t\tchecks: [");
-      for(Check c: this.checks) {
-         s.append("\n\t\t\t");
-         s.append(symbol_table.print_check(c));
-      }
+
       s.append("\n\t\t]\n\t}");
 
       return s.toString();

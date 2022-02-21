@@ -132,7 +132,7 @@ public abstract class Expression {
     }
 
     public final static class Value extends Expression {
-        private final Term value;
+        public final Term value;
 
         public Value(Term value) {
             this.value = value;

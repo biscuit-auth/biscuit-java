@@ -38,12 +38,13 @@ public class Biscuit {
         this.checks = new ArrayList<>();
     }
 
-    public Biscuit add_authority_fact(com.clevercloud.biscuit.token.builder.Fact f) {
+    public Biscuit add_authority_fact(com.clevercloud.biscuit.token.builder.Fact f) throws Error.Language {
+        f.validate();
         this.facts.add(f.convert(this.symbols));
         return this;
     }
 
-    public Biscuit add_authority_fact(String s) throws Error.Parser {
+    public Biscuit add_authority_fact(String s) throws Error.Parser, Error.Language {
         Either<com.clevercloud.biscuit.token.builder.parser.Error, Tuple2<String, com.clevercloud.biscuit.token.builder.Fact>> res =
                 com.clevercloud.biscuit.token.builder.parser.Parser.fact(s);
 

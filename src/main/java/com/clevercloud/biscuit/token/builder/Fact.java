@@ -73,7 +73,7 @@ public class Fact implements Cloneable{
                         if(t instanceof Term.Variable){
                             Option<Term> term = _variables.getOrDefault(((Term.Variable) t).value, Option.none());
                             return term.map(_t -> Stream.of(_t)).getOrElse(Stream.empty());
-                        } else return Stream.empty();
+                        } else return Stream.of(t);
                     }).collect(Collectors.toList());
                 });
         return this;
@@ -91,7 +91,9 @@ public class Fact implements Cloneable{
 
     @Override
     public String toString() {
-        return "fact(" + predicate + ")";
+        Fact f = this.clone();
+        f.apply_variables();
+        return "fact(" + f.predicate + ")";
     }
 
     public String name() {

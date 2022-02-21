@@ -110,7 +110,7 @@ public class Authorizer {
     }
 
     public Authorizer add_rule(Rule rule) {
-        world.add_privileged_rule(rule.convert(symbols));
+        world.add_rule(rule.convert(symbols));
         return this;
     }
 
@@ -129,7 +129,6 @@ public class Authorizer {
 
     public Authorizer add_check(Check check) {
         this.checks.add(check);
-        world.add_check(check.convert(symbols));
         return this;
     }
 
@@ -256,11 +255,11 @@ public class Authorizer {
         return query(t._2, limits);
     }
 
-    public Long authorize() throws Error.Timeout, Error.FailedLogic, Error.TooManyFacts, Error.TooManyIterations {
+    public Long authorize() throws Error.Timeout, Error.FailedLogic, Error.TooManyFacts, Error.TooManyIterations, LogicError.InvalidBlockRule {
         return this.authorize(new RunLimits());
     }
 
-    public Long authorize(RunLimits limits) throws Error.Timeout, Error.FailedLogic, Error.TooManyFacts, Error.TooManyIterations {
+    public Long authorize(RunLimits limits) throws Error.Timeout, Error.FailedLogic, Error.TooManyFacts, Error.TooManyIterations, LogicError.InvalidBlockRule {
         Instant timeLimit = Instant.now().plus(limits.maxTime);
         List<com.clevercloud.biscuit.datalog.Check> authority_checks = new ArrayList<>();
         Option<Either<Integer, Integer>> policy_result = Option.none();
@@ -270,14 +269,6 @@ public class Authorizer {
                 world.add_fact(converted_fact);
             }
 
-            /*let mut revocation_ids = token.revocation_identifiers();
-            let revocation_id_sym = self.symbols.get("revocation_id").unwrap();
-            for (i, id) in revocation_ids.drain(..).enumerate() {
-                self.world.facts.insert(datalog::Fact::new(
-                        revocation_id_sym,
-                    &[datalog::Term::Integer(i as i64), datalog::Term::Bytes(id)],
-                ));
-            }*/
             List<byte[]> revocation_ids = token.revocation_ids;
             Long revocation_id_sym = this.symbols.get("revocation_id").get();
             for (int i = 0; i < revocation_ids.size(); i++) {
@@ -285,8 +276,13 @@ public class Authorizer {
                 this.world.facts().add(new com.clevercloud.biscuit.datalog.Fact(revocation_id_sym.longValue(), terms));
             }
             for (com.clevercloud.biscuit.datalog.Rule rule : token.authority.rules) {
-                com.clevercloud.biscuit.datalog.Rule converted_rule = Rule.convert_from(rule, token.symbols).convert(this.symbols);
-                world.add_privileged_rule(converted_rule);
+                com.clevercloud.biscuit.token.builder.Rule _rule = Rule.convert_from(rule, token.symbols);
+                com.clevercloud.biscuit.datalog.Rule converted_rule = _rule.convert(this.symbols);
+
+                Either<String,Rule> res = _rule.validate_variables();
+                if(res.isLeft()){
+                    throw new LogicError.InvalidBlockRule(0, token.symbols.print_rule(converted_rule));
+                }
             }
 
             for (com.clevercloud.biscuit.datalog.Check check : token.authority.checks) {
@@ -429,8 +425,6 @@ public class Authorizer {
     public String print_world() {
         final List<String> facts = this.world.facts().stream().map((f) -> this.symbols.print_fact(f)).collect(Collectors.toList());
         final List<String> rules = this.world.rules().stream().map((r) -> this.symbols.print_rule(r)).collect(Collectors.toList());
-        final List<String> privileged_rules = this.world.privileged_rules().stream().map((r) -> this.symbols.print_rule(r)).collect(Collectors.toList());
-
 
         List<String> checks = new ArrayList<>();
 
@@ -455,8 +449,6 @@ public class Authorizer {
         StringBuilder b = new StringBuilder();
         b.append("World {\n\tfacts: [\n\t\t");
         b.append(String.join(",\n\t\t", facts));
-        b.append("\n\t],\n\tprivileged rules: [\n\t\t");
-        b.append(String.join(",\n\t\t", privileged_rules));
         b.append("\n\t],\n\trules: [\n\t\t");
         b.append(String.join(",\n\t\t", rules));
         b.append("\n\t],\n\tchecks: [\n\t\t");

@@ -131,15 +131,12 @@ public final class SymbolTable implements Serializable {
    public String print_world(final World w) {
       final List<String> facts = w.facts().stream().map((f) -> this.print_fact(f)).collect(Collectors.toList());
       final List<String> rules = w.rules().stream().map((r) -> this.print_rule(r)).collect(Collectors.toList());
-      final List<String> checksStr = w.checks().stream().map((c) -> this.print_check(c)).collect(Collectors.toList());
 
       StringBuilder b = new StringBuilder();
       b.append("World {\n\tfacts: [\n\t\t");
       b.append(String.join(",\n\t\t", facts));
       b.append("\n\t],\n\trules: [\n\t\t");
       b.append(String.join(",\n\t\t", rules));
-      b.append("\n\t],\n\tchecks: [\n\t\t");
-      b.append(String.join(",\n\t\t", checksStr));
       b.append("\n\t]\n}");
 
       return b.toString();

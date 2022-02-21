@@ -6,7 +6,7 @@ import java.util.Objects;
 import com.google.gson.*;
 import io.vavr.control.Option;
 
-public class LogicError {
+public class LogicError extends Exception{
     public Option<List<FailedCheck>> failed_checks() {
         return Option.none();
     }
@@ -126,6 +126,47 @@ public class LogicError {
 
 
     }
+
+    public static class InvalidBlockRule extends LogicError {
+        final public long id;
+        final public String e;
+
+        public InvalidBlockRule(long id, String e) {
+            this.id = id;
+            this.e = e;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            InvalidBlockRule other = (InvalidBlockRule) o;
+            return id == other.id && e.equals(other.e);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, e);
+        }
+
+        @Override
+        public String toString() {
+            return "LogicError.InvalidBlockRule{ id: "+id+", error: "+  e + " }";
+        }
+
+        @Override
+        public JsonElement toJson() {
+            JsonObject child = new JsonObject();
+            child.addProperty("id",this.id);
+            child.addProperty("error", this.e);
+            JsonObject root = new JsonObject();
+            root.add("InvalidBlockRule", child);
+            return LogicError.jsonWrapper(root);
+        }
+
+
+    }
+
     public static class Unauthorized extends LogicError {
         final public List<FailedCheck> errors;
         final public MatchedPolicy policy;
