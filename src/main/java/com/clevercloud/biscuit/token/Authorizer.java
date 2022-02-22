@@ -255,11 +255,11 @@ public class Authorizer {
         return query(t._2, limits);
     }
 
-    public Long authorize() throws Error.Timeout, Error.FailedLogic, Error.TooManyFacts, Error.TooManyIterations, LogicError.InvalidBlockRule {
+    public Long authorize() throws Error.Timeout, Error.FailedLogic, Error.TooManyFacts, Error.TooManyIterations {
         return this.authorize(new RunLimits());
     }
 
-    public Long authorize(RunLimits limits) throws Error.Timeout, Error.FailedLogic, Error.TooManyFacts, Error.TooManyIterations, LogicError.InvalidBlockRule {
+    public Long authorize(RunLimits limits) throws Error.Timeout, Error.FailedLogic, Error.TooManyFacts, Error.TooManyIterations {
         Instant timeLimit = Instant.now().plus(limits.maxTime);
         List<com.clevercloud.biscuit.datalog.Check> authority_checks = new ArrayList<>();
         Option<Either<Integer, Integer>> policy_result = Option.none();
@@ -281,7 +281,7 @@ public class Authorizer {
 
                 Either<String,Rule> res = _rule.validate_variables();
                 if(res.isLeft()){
-                    throw new LogicError.InvalidBlockRule(0, token.symbols.print_rule(converted_rule));
+                    throw new Error.FailedLogic(new LogicError.InvalidBlockRule(0, token.symbols.print_rule(converted_rule)));
                 }
             }
 

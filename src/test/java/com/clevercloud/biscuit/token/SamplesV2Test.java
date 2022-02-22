@@ -272,7 +272,7 @@ public class SamplesV2Test extends TestCase {
                 e);
     }
 
-    public void test12_AuthorizerAuthorityCaveats() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, LogicError.InvalidBlockRule {
+    public void test12_AuthorizerAuthorityCaveats() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
@@ -303,7 +303,7 @@ public class SamplesV2Test extends TestCase {
                 e);
     }
 
-    public void test13_BlockRules() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, LogicError.InvalidBlockRule {
+    public void test13_BlockRules() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
@@ -337,7 +337,7 @@ public class SamplesV2Test extends TestCase {
                 e);
     }
 
-    public void test14_RegexConstraint() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, LogicError.InvalidBlockRule {
+    public void test14_RegexConstraint() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
@@ -368,7 +368,7 @@ public class SamplesV2Test extends TestCase {
         v2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
     }
 
-    public void test15_MultiQueriesCaveats() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, LogicError.InvalidBlockRule {
+    public void test15_MultiQueriesCaveats() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
@@ -426,7 +426,7 @@ public class SamplesV2Test extends TestCase {
                 e);
     }
 
-    public void test17_Expressions() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, LogicError.InvalidBlockRule {
+    public void test17_Expressions() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
@@ -482,7 +482,7 @@ public class SamplesV2Test extends TestCase {
         System.out.println("result: " + e);
     }
 
-    public void test20_sealed_token() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, LogicError.InvalidBlockRule {
+    public void test20_sealed_token() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =
@@ -504,7 +504,7 @@ public class SamplesV2Test extends TestCase {
         Assert.assertEquals(Long.valueOf(0), result);
     }
 
-    public void test21_parsing() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, LogicError.InvalidBlockRule {
+    public void test21_parsing() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
         InputStream inputStream =

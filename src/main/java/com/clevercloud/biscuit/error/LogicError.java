@@ -6,7 +6,7 @@ import java.util.Objects;
 import com.google.gson.*;
 import io.vavr.control.Option;
 
-public class LogicError extends Exception{
+public class LogicError {
     public Option<List<FailedCheck>> failed_checks() {
         return Option.none();
     }

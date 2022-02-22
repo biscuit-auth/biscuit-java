@@ -164,7 +164,7 @@ public class BiscuitTest extends TestCase {
         }
     }
 
-    public void testFolders() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, LogicError.InvalidBlockRule {
+    public void testFolders() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
@@ -341,7 +341,7 @@ public class BiscuitTest extends TestCase {
         Biscuit.from_b64(attenuated2B64, root.public_key());
     }
 
-    public void testReset() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, LogicError.InvalidBlockRule {
+    public void testReset() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
@@ -409,7 +409,7 @@ public class BiscuitTest extends TestCase {
                 e);
     }
 
-    public void testEmptyAuthorizer() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, LogicError.InvalidBlockRule {
+    public void testEmptyAuthorizer() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
