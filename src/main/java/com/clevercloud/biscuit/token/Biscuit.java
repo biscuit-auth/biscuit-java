@@ -216,7 +216,7 @@ public class Biscuit {
      *
      * @return
      */
-    public Authorizer authorizer() {
+    public Authorizer authorizer() throws Error.FailedLogic {
         return Authorizer.make(this);
     }
 

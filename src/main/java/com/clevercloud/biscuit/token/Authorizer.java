@@ -30,13 +30,14 @@ public class Authorizer {
     World world;
     SymbolTable symbols;
 
-    private Authorizer(Biscuit token, World w) {
+    private Authorizer(Biscuit token, World w) throws Error.FailedLogic {
         this.token = token;
         this.world = w;
         this.symbols = new SymbolTable(this.token.symbols);
         this.checks = new ArrayList<>();
         this.policies = new ArrayList<>();
         this.token_checks = this.token.checks();
+        update_on_token();
     }
 
     /**
@@ -53,7 +54,7 @@ public class Authorizer {
         this.token_checks = new ArrayList<>();
     }
 
-    Authorizer(Biscuit token, List<Check> checks, List<Policy> policies,
+    private Authorizer(Biscuit token, List<Check> checks, List<Policy> policies,
                List<List<com.clevercloud.biscuit.datalog.Check>> token_checks, World world, SymbolTable symbols) {
         this.token = token;
         this.checks = checks;
@@ -72,7 +73,7 @@ public class Authorizer {
      * @param root
      * @return
      */
-    static public Authorizer make(Biscuit token) {
+    static public Authorizer make(Biscuit token) throws Error.FailedLogic {
         return new Authorizer(token, new World());
     }
 
@@ -81,13 +82,38 @@ public class Authorizer {
                 new ArrayList<>(this.token_checks), new World(this.world), new SymbolTable(this.symbols));
     }
 
+    public void update_on_token() throws Error.FailedLogic {
+        if (token != null) {
+            for (com.clevercloud.biscuit.datalog.Fact fact : token.authority.facts) {
+                com.clevercloud.biscuit.datalog.Fact converted_fact = Fact.convert_from(fact, token.symbols).convert(this.symbols);
+                world.add_fact(converted_fact);
+            }
+
+            List<byte[]> revocation_ids = token.revocation_ids;
+            Long revocation_id_sym = this.symbols.get("revocation_id").get();
+            for (int i = 0; i < revocation_ids.size(); i++) {
+                List<com.clevercloud.biscuit.datalog.Term> terms = Arrays.asList(new com.clevercloud.biscuit.datalog.Term.Integer(i), new com.clevercloud.biscuit.datalog.Term.Bytes(revocation_ids.get(i)));
+                this.world.facts().add(new com.clevercloud.biscuit.datalog.Fact(revocation_id_sym.longValue(), terms));
+            }
+            for (com.clevercloud.biscuit.datalog.Rule rule : token.authority.rules) {
+                com.clevercloud.biscuit.token.builder.Rule _rule = Rule.convert_from(rule, token.symbols);
+                com.clevercloud.biscuit.datalog.Rule converted_rule = _rule.convert(this.symbols);
+
+                Either<String,Rule> res = _rule.validate_variables();
+                if(res.isLeft()){
+                    throw new Error.FailedLogic(new LogicError.InvalidBlockRule(0, token.symbols.print_rule(converted_rule)));
+                }
+            }
+        }
+    }
+
     public Authorizer add_token(Biscuit token) throws Error.FailedLogic {
         if (this.token != null) {
             throw new Error.FailedLogic(new LogicError.AuthorizerNotEmpty());
         }
 
         this.token = token;
-
+        update_on_token();
         return this;
     }
 
