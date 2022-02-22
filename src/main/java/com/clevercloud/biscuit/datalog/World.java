@@ -1,7 +1,6 @@
 package com.clevercloud.biscuit.datalog;
 
 import com.clevercloud.biscuit.error.Error;
-import io.vavr.control.Either;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -10,9 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static io.vavr.API.Left;
-import static io.vavr.API.Right;
 
 public final class World implements Serializable {
    private final Set<Fact> facts;
@@ -101,8 +97,8 @@ public final class World implements Serializable {
       return new_facts;
    }
 
-   public final boolean test_rule(final Rule rule, SymbolTable symbols) {
-      return rule.test(this.facts, symbols);
+   public final boolean query_match(final Rule rule, SymbolTable symbols) {
+      return rule.find_match(this.facts, symbols);
    }
 
    public World() {

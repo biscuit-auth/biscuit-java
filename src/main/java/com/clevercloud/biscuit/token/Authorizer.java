@@ -261,8 +261,9 @@ public class Authorizer {
 
     public Long authorize(RunLimits limits) throws Error.Timeout, Error.FailedLogic, Error.TooManyFacts, Error.TooManyIterations {
         Instant timeLimit = Instant.now().plus(limits.maxTime);
-        List<com.clevercloud.biscuit.datalog.Check> authority_checks = new ArrayList<>();
+        List<FailedCheck> errors = new LinkedList<>();
         Option<Either<Integer, Integer>> policy_result = Option.none();
+
         if (token != null) {
             for (com.clevercloud.biscuit.datalog.Fact fact : token.authority.facts) {
                 com.clevercloud.biscuit.datalog.Fact converted_fact = Fact.convert_from(fact, token.symbols).convert(this.symbols);
@@ -284,24 +285,17 @@ public class Authorizer {
                     throw new Error.FailedLogic(new LogicError.InvalidBlockRule(0, token.symbols.print_rule(converted_rule)));
                 }
             }
-
-            for (com.clevercloud.biscuit.datalog.Check check : token.authority.checks) {
-                com.clevercloud.biscuit.datalog.Check converted_check = Check.convert_from(check, token.symbols).convert(this.symbols);
-                authority_checks.add(converted_check);
-            }
         }
-        token_checks.add(authority_checks);
 
         world.run(limits, symbols);
+        world.clearRules();
 
-        ArrayList<FailedCheck> errors = new ArrayList<>();
-
-        for (int j = 0; j < this.checks.size(); j++) {
-            com.clevercloud.biscuit.datalog.Check c = this.checks.get(j).convert(symbols);
+        for (int i = 0; i < this.checks.size(); i++) {
+            com.clevercloud.biscuit.datalog.Check c = this.checks.get(i).convert(symbols);
             boolean successful = false;
 
-            for (int k = 0; k < c.queries().size(); k++) {
-                boolean res = world.test_rule(c.queries().get(k), symbols);
+            for (int j = 0; j < c.queries().size(); j++) {
+                boolean res = world.query_match(c.queries().get(j), symbols);
 
                 if (Instant.now().compareTo(timeLimit) >= 0) {
                     throw new Error.Timeout();
@@ -314,83 +308,44 @@ public class Authorizer {
             }
 
             if (!successful) {
-                errors.add(new FailedCheck.FailedAuthorizer(j, symbols.print_check(c)));
+                errors.add(new FailedCheck.FailedAuthorizer(i, symbols.print_check(c)));
             }
         }
 
-        for (int j = 0; j < authority_checks.size(); j++) {
-            boolean successful = false;
-            com.clevercloud.biscuit.datalog.Check c = authority_checks.get(j);
-
-            for (int k = 0; k < c.queries().size(); k++) {
-                boolean res = world.test_rule(c.queries().get(k), symbols);
-
-                if (Instant.now().compareTo(timeLimit) >= 0) {
-                    throw new Error.Timeout();
-                }
-
-                if (res) {
-                    successful = true;
-                    break;
-                }
-            }
-
-            if (!successful) {
-                errors.add(new FailedCheck.FailedBlock(0, j, symbols.print_check(authority_checks.get(j))));
-            }
-        }
         if (token != null) {
-            for (int i = 0; i < token.blocks.size(); i++) {
-                Block b = token.blocks.get(i);
 
-                for (com.clevercloud.biscuit.datalog.Fact fact : b.facts) {
-                    com.clevercloud.biscuit.datalog.Fact converted_fact = Fact.convert_from(fact, token.symbols).convert(this.symbols);
-                    world.add_fact(converted_fact);
-                }
+            for (int j = 0; j < token.authority.checks.size(); j++) {
+                boolean successful = false;
 
-                for (com.clevercloud.biscuit.datalog.Rule rule : b.rules) {
-                    com.clevercloud.biscuit.datalog.Rule converted_rule = Rule.convert_from(rule, token.symbols).convert(this.symbols);
-                    world.add_rule(converted_rule);
-                }
+                Check c = Check.convert_from(token.authority.checks.get(j), symbols);
+                com.clevercloud.biscuit.datalog.Check check = c.convert(symbols);
 
-                List<com.clevercloud.biscuit.datalog.Check> block_checks = new ArrayList<>();
-                for (com.clevercloud.biscuit.datalog.Check check : b.checks) {
-                    com.clevercloud.biscuit.datalog.Check converted_check = Check.convert_from(check, token.symbols).convert(this.symbols);
-                    block_checks.add(converted_check);
-                }
-                token_checks.add(block_checks);
+                for (int k = 0; k < check.queries().size(); k++) {
+                    boolean res = world.query_match(check.queries().get(k), symbols);
 
-                world.run(limits, symbols);
-
-                for (int j = 0; j < block_checks.size(); j++) {
-                    boolean successful = false;
-                    com.clevercloud.biscuit.datalog.Check c = block_checks.get(j);
-
-                    for (int k = 0; k < c.queries().size(); k++) {
-                        boolean res = world.test_rule(c.queries().get(k), symbols);
-
-                        if (Instant.now().compareTo(timeLimit) >= 0) {
-                            throw new Error.Timeout();
-                        }
-
-                        if (res) {
-                            successful = true;
-                            break;
-                        }
+                    if (Instant.now().compareTo(timeLimit) >= 0) {
+                        throw new Error.Timeout();
                     }
 
-                    if (!successful) {
-                        errors.add(new FailedCheck.FailedBlock(i + 1, j, symbols.print_check(block_checks.get(j))));
+                    if (res) {
+                        successful = true;
+                        break;
                     }
+                }
+
+                if (!successful) {
+                    errors.add(new FailedCheck.FailedBlock(0, j, symbols.print_check(check)));
                 }
             }
         }
+
         policies_test:
         for (int i = 0; i < this.policies.size(); i++) {
-            com.clevercloud.biscuit.datalog.Check c = this.policies.get(i).convert(symbols);
+            Policy policy = this.policies.get(i);
 
-            for (int k = 0; k < c.queries().size(); k++) {
-                boolean res = world.test_rule(c.queries().get(k), symbols);
+            for (int j = 0; j < policy.queries.size(); j++) {
+                Rule query = policy.queries.get(j);
+                boolean res = world.query_match(query.convert(symbols), symbols);
 
                 if (Instant.now().compareTo(timeLimit) >= 0) {
                     throw new Error.Timeout();
@@ -406,6 +361,55 @@ public class Authorizer {
                 }
             }
         }
+
+        if (token != null) {
+            for (int i = 0; i < token.blocks.size(); i++) {
+                Block b = token.blocks.get(i);
+
+                for (com.clevercloud.biscuit.datalog.Fact fact : b.facts) {
+                    com.clevercloud.biscuit.datalog.Fact converted_fact = Fact.convert_from(fact, token.symbols).convert(this.symbols);
+                    world.add_fact(converted_fact);
+                }
+
+                for (com.clevercloud.biscuit.datalog.Rule rule : b.rules) {
+                    com.clevercloud.biscuit.token.builder.Rule _rule = Rule.convert_from(rule, token.symbols);
+                    com.clevercloud.biscuit.datalog.Rule converted_rule = _rule.convert(this.symbols);
+
+                    Either<String,Rule> res = _rule.validate_variables();
+                    if(res.isLeft()){
+                        throw new Error.FailedLogic(new LogicError.InvalidBlockRule(0, token.symbols.print_rule(converted_rule)));
+                    }
+                    world.add_rule(converted_rule);
+                }
+
+                world.run(limits, symbols);
+
+                for (int j = 0; j < b.checks.size(); j++) {
+                    boolean successful = false;
+
+                    Check c = Check.convert_from(b.checks.get(j),symbols);
+                    com.clevercloud.biscuit.datalog.Check check = c.convert(symbols);
+
+                    for (int k = 0; k < check.queries().size(); k++) {
+                        boolean res = world.query_match(check.queries().get(k), symbols);
+
+                        if (Instant.now().compareTo(timeLimit) >= 0) {
+                            throw new Error.Timeout();
+                        }
+
+                        if (res) {
+                            successful = true;
+                            break;
+                        }
+                    }
+
+                    if (!successful) {
+                        errors.add(new FailedCheck.FailedBlock(i + 1, j, symbols.print_check(check)));
+                    }
+                }
+            }
+        }
+
         if (policy_result.isDefined()) {
             Either<Integer, Integer> e = policy_result.get();
             if (e.isRight()) {

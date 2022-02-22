@@ -81,7 +81,7 @@ public final class Rule implements Serializable {
 
 
    // do not produce new facts, only find one matching set of facts
-   public boolean test(final Set<Fact> facts, SymbolTable symbols) {
+   public boolean find_match(final Set<Fact> facts, SymbolTable symbols) {
       final Set<Long> variables_set = new HashSet<>();
       for (final Predicate pred : this.body) {
          variables_set.addAll(pred.terms().stream().filter((id) -> id instanceof Term.Variable).map((id) -> ((Term.Variable) id).value()).collect(Collectors.toSet()));

@@ -12,7 +12,6 @@ import com.clevercloud.biscuit.token.format.SignedBlock;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 
-import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
 import java.security.InvalidKeyException;
