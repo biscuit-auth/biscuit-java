@@ -370,7 +370,7 @@ public class Biscuit {
             }
         }
 
-        HashMap<String, Set<Fact>> query_results = new HashMap();
+        HashMap<String, Set<Fact>> query_results = new HashMap<>();
         for (String name : queries.keySet()) {
             Set<Fact> res = world.query_rule(queries.get(name), symbols);
             query_results.put(name, res);
@@ -443,8 +443,8 @@ public class Biscuit {
     }
 
     public List<List<com.clevercloud.biscuit.datalog.Check>> checks() {
-        ArrayList<List<com.clevercloud.biscuit.datalog.Check>> l = new ArrayList();
-        l.add(new ArrayList(this.authority.checks));
+        ArrayList<List<com.clevercloud.biscuit.datalog.Check>> l = new ArrayList<>();
+        l.add(new ArrayList<>(this.authority.checks));
 
         for (Block b : this.blocks) {
             l.add(new ArrayList<>(b.checks));
@@ -460,7 +460,7 @@ public class Biscuit {
     }
 
     public List<Option<String>> context() {
-        ArrayList res = new ArrayList();
+        ArrayList<Option<String>> res = new ArrayList<>();
         if (this.authority.context.isEmpty()) {
             res.add(Option.none());
         } else {

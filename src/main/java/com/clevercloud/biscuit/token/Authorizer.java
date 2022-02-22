@@ -233,7 +233,7 @@ public class Authorizer {
         world.run(limits, symbols);
 
         Set<com.clevercloud.biscuit.datalog.Fact> facts = world.query_rule(query.convert(symbols), symbols);
-        Set<Fact> s = new HashSet();
+        Set<Fact> s = new HashSet<>();
 
         for (com.clevercloud.biscuit.datalog.Fact f : facts) {
             s.add(Fact.convert_from(f, symbols));
