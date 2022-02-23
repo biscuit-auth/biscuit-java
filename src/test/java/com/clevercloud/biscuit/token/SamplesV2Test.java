@@ -9,10 +9,10 @@ import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.builder.Check;
 import com.clevercloud.biscuit.token.builder.Rule;
 import io.vavr.control.Try;
-import org.junit.Assert;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,20 +28,13 @@ import static com.clevercloud.biscuit.token.builder.Utils.*;
 import static io.vavr.API.Right;
 
 
-public class SamplesV2Test extends TestCase {
-
-    public SamplesV2Test(String testName) {
-        super(testName);
-    }
-
-    public static Test suite() {
-        return new TestSuite(SamplesV2Test.class);
-    }
+public class SamplesV2Test {
 
     static byte[] rootData = fromHex("acdd6d5b53bfee478bf689f8e012fe7988bf755e3d7c5152947abc149bc20189");
 
 
-    public void test1_Basic() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+    @Test
+    public void test1_Basic() throws IOException,NoSuchAlgorithmException,SignatureException,InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
         // TODO Out of sync
 
@@ -61,9 +54,10 @@ public class SamplesV2Test extends TestCase {
 
         Error e = (Error) Try.of(() -> v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))).getCause();
         System.out.println("got error: " + e);
-        Assert.assertEquals(new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(new FailedCheck.FailedBlock(1, 0, "check if resource($0), operation(\"read\"), right($0, \"read\")")))), e);
+        assertEquals(new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(new FailedCheck.FailedBlock(1, 0, "check if resource($0), operation(\"read\"), right($0, \"read\")")))), e);
     }
 
+    @Test
     public void test2_DifferentRootKey() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
@@ -75,9 +69,10 @@ public class SamplesV2Test extends TestCase {
 
         Error e = (Error) Try.of(() -> Biscuit.from_bytes(data, root)).getCause();
         System.out.println("got error: " + e);
-        Assert.assertEquals(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"), e);
+        assertEquals(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"), e);
     }
 
+    @Test
     public void test3_InvalidSignatureFormat() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
@@ -97,6 +92,7 @@ public class SamplesV2Test extends TestCase {
         }
     }
 
+    @Test
     public void test4_random_block() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
@@ -108,9 +104,10 @@ public class SamplesV2Test extends TestCase {
 
         Error e = (Error) Try.of(() -> Biscuit.from_bytes(data, root)).getCause();
         System.out.println("got error: " + e);
-        Assert.assertEquals(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"), e);
+        assertEquals(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"), e);
     }
 
+    @Test
     public void test5_InvalidSignature() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
@@ -122,9 +119,10 @@ public class SamplesV2Test extends TestCase {
 
         Error e = (Error) Try.of(() -> Biscuit.from_bytes(data, root)).getCause();
         System.out.println("got error: " + e);
-        Assert.assertEquals(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"), e);
+        assertEquals(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"), e);
     }
 
+    @Test
     public void test6_reordered_blocks() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
@@ -139,6 +137,7 @@ public class SamplesV2Test extends TestCase {
 
     }
 
+    @Test
     public void test7_scoped_rules() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
@@ -156,11 +155,12 @@ public class SamplesV2Test extends TestCase {
         v1.add_fact("operation(\"read\")");
         v1.allow();
         Error e = (Error) Try.of(() -> v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))).getCause();
-        Assert.assertEquals(new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
+        assertEquals(new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                 new FailedCheck.FailedBlock(1, 0, "check if resource($0), operation(\"read\"), right($0, \"read\")")
         ))), e);
     }
 
+    @Test
     public void test8_scoped_checks() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
@@ -179,11 +179,12 @@ public class SamplesV2Test extends TestCase {
         v1.allow();
         Error e = (Error) Try.of(() -> v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))).getCause();
 
-        Assert.assertEquals(new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
+        assertEquals(new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                 new FailedCheck.FailedBlock(1, 0, "check if resource($0), operation(\"read\"), right($0, \"read\")")
         ))), e);
     }
 
+    @Test
     public void test9_ExpiredToken() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
@@ -204,13 +205,14 @@ public class SamplesV2Test extends TestCase {
         System.out.println(v1.print_world());
 
         Error e = (Error) Try.of(() -> v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))).getCause();
-        Assert.assertEquals(
+        assertEquals(
                 new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                         new FailedCheck.FailedBlock(1, 1, "check if time($date), $date <= 2018-12-20T00:00:00Z")
                 ))),
                 e);
     }
 
+    @Test
     public void test10_AuthorizerScope() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
@@ -231,13 +233,14 @@ public class SamplesV2Test extends TestCase {
         Error e = (Error) Try.of(() -> v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))).getCause();
 
         System.out.println(e);
-        Assert.assertEquals(
+        assertEquals(
                 new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                         new FailedCheck.FailedAuthorizer(0, "check if right($0, $1), resource($0), operation($1)")
                 ))),
                 e);
     }
 
+    @Test
     public void test11_AuthorizerAuthorityCaveats() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
@@ -264,13 +267,14 @@ public class SamplesV2Test extends TestCase {
         )));
         v1.allow();
         Error e = (Error) Try.of(() -> v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))).getCause();
-        Assert.assertEquals(
+        assertEquals(
                 new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                         new FailedCheck.FailedAuthorizer(0, "check if resource($0), operation($1), right($0, $1)")
                 ))),
                 e);
     }
 
+    @Test
     public void test12_AuthorizerAuthorityCaveats() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
@@ -295,13 +299,14 @@ public class SamplesV2Test extends TestCase {
         v2.allow();
 
         Error e = (Error) Try.of(() -> v2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))).getCause();
-        Assert.assertEquals(
+        assertEquals(
                 new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                         new FailedCheck.FailedBlock(0, 0, "check if resource(\"file1\")")
                 ))),
                 e);
     }
 
+    @Test
     public void test13_BlockRules() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
@@ -329,13 +334,14 @@ public class SamplesV2Test extends TestCase {
         v2.allow();
 
         Error e = (Error) Try.of(() -> v2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))).getCause();
-        Assert.assertEquals(
+        assertEquals(
                 new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                         new FailedCheck.FailedBlock(1, 0, "check if valid_date($0), resource($0)")
                 ))),
                 e);
     }
 
+    @Test
     public void test14_RegexConstraint() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
@@ -354,7 +360,7 @@ public class SamplesV2Test extends TestCase {
         v1.allow();
 
         Error e = (Error) Try.of(() -> v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))).getCause();
-        Assert.assertEquals(
+        assertEquals(
                 new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                         new FailedCheck.FailedBlock(0, 0, "check if resource($0), $0.matches(\"file[0-9]+.txt\")")
                 ))),
@@ -367,6 +373,7 @@ public class SamplesV2Test extends TestCase {
         v2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
     }
 
+    @Test
     public void test15_MultiQueriesCaveats() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
@@ -401,6 +408,7 @@ public class SamplesV2Test extends TestCase {
         v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
     }
 
+    @Test
     public void test16_CaveatHeadName() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
@@ -418,13 +426,14 @@ public class SamplesV2Test extends TestCase {
 
         Error e = (Error) Try.of(() -> v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))).getCause();
 
-        Assert.assertEquals(
+        assertEquals(
                 new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                         new FailedCheck.FailedBlock(0, 0, "check if resource(\"hello\")")
                 ))),
                 e);
     }
 
+    @Test
     public void test17_Expressions() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
@@ -440,9 +449,10 @@ public class SamplesV2Test extends TestCase {
         Authorizer v1 = token.authorizer();
         v1.allow();
 
-        Assert.assertEquals(Long.valueOf(0), v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500))));
+        assertEquals(Long.valueOf(0), v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500))));
     }
 
+    @Test
     public void test18_Unbound_Variables() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
@@ -462,6 +472,7 @@ public class SamplesV2Test extends TestCase {
         System.out.println("result: " + e);
     }
 
+    @Test
     public void test19_generating_ambient_from_variables() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
@@ -481,6 +492,7 @@ public class SamplesV2Test extends TestCase {
         System.out.println("result: " + e);
     }
 
+    @Test
     public void test20_sealed_token() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
@@ -500,9 +512,10 @@ public class SamplesV2Test extends TestCase {
         v1.allow();
         Long result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println("result: " + result);
-        Assert.assertEquals(Long.valueOf(0), result);
+        assertEquals(Long.valueOf(0), result);
     }
 
+    @Test
     public void test21_parsing() throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         PublicKey root = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, rootData);
 
@@ -527,6 +540,6 @@ public class SamplesV2Test extends TestCase {
         v1.allow();
         Long result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println("result: " + result);
-        Assert.assertEquals(Long.valueOf(0), result);
+        assertEquals(Long.valueOf(0), result);
     }
 }

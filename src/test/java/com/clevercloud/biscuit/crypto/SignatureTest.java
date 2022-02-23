@@ -1,10 +1,6 @@
 package com.clevercloud.biscuit.crypto;
 
 import biscuit.format.schema.Schema;
-import org.junit.Assert;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -14,20 +10,17 @@ import java.security.SignatureException;
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.clevercloud.biscuit.error.Error;
 
 /**
  * @serial exclude
  */
-public class SignatureTest extends TestCase {
-    public SignatureTest(String testName) {
-        super(testName);
-    }
+public class SignatureTest {
 
-    public static Test suite() {
-        return new TestSuite(SignatureTest.class);
-    }
-
+    @Test
     public void testSerialize() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         byte[] seed = {1, 2, 3, 4};
         SecureRandom rng = new SecureRandom(seed);
@@ -52,6 +45,7 @@ public class SignatureTest extends TestCase {
         assertEquals(pubkey.toHex(), deserializedPublicKey.toHex());
     }
 
+    @Test
     public void testThreeMessages() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
@@ -65,19 +59,20 @@ public class SignatureTest extends TestCase {
         System.out.println("keypair2 public: " + keypair2.public_key().toHex());
 
         Token token1 = new Token(root, message1.getBytes(), keypair2);
-        Assert.assertEquals(Right(null), token1.verify(root.public_key()));
+        assertEquals(Right(null), token1.verify(root.public_key()));
 
         String message2 = "world";
         KeyPair keypair3 = new KeyPair(rng);
         Token token2 = token1.append(keypair3, message2.getBytes());
-        Assert.assertEquals(Right(null), token2.verify(root.public_key()));
+        assertEquals(Right(null), token2.verify(root.public_key()));
 
         String message3 = "!!";
         KeyPair keypair4 = new KeyPair(rng);
         Token token3 = token2.append(keypair4, message3.getBytes());
-        Assert.assertEquals(Right(null), token3.verify(root.public_key()));
+        assertEquals(Right(null), token3.verify(root.public_key()));
     }
 
+    @Test
     public void testChangeMessages() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
@@ -86,19 +81,19 @@ public class SignatureTest extends TestCase {
         KeyPair root = new KeyPair(rng);
         KeyPair keypair2 = new KeyPair(rng);
         Token token1 = new Token(root, message1.getBytes(), keypair2);
-        Assert.assertEquals(Right(null), token1.verify(new PublicKey(Schema.PublicKey.Algorithm.Ed25519, root.public_key)));
+        assertEquals(Right(null), token1.verify(new PublicKey(Schema.PublicKey.Algorithm.Ed25519, root.public_key)));
 
         String message2 = "world";
         KeyPair keypair3 = new KeyPair(rng);
         Token token2 = token1.append(keypair3, message2.getBytes());
         token2.blocks.set(1, "you".getBytes());
-        Assert.assertEquals(Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied")),
+        assertEquals(Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied")),
                 token2.verify(new PublicKey(Schema.PublicKey.Algorithm.Ed25519, root.public_key)));
 
         String message3 = "!!";
         KeyPair keypair4 = new KeyPair(rng);
         Token token3 = token2.append(keypair4, message3.getBytes());
-        Assert.assertEquals(Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied")),
+        assertEquals(Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied")),
                 token3.verify(new PublicKey(Schema.PublicKey.Algorithm.Ed25519, root.public_key)));
     }
 }

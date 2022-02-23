@@ -3,24 +3,17 @@ package com.clevercloud.biscuit.datalog;
 import com.clevercloud.biscuit.datalog.expressions.Expression;
 import com.clevercloud.biscuit.datalog.expressions.Op;
 import com.clevercloud.biscuit.error.Error;
-import org.junit.Assert;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class WorldTest extends TestCase {
-   public WorldTest(String testName) {
-      super(testName);
-   }
+public class WorldTest {
 
-   public static Test suite() {
-      return new TestSuite(WorldTest.class);
-   }
-
+   @Test
    public void testFamily() throws Error.Timeout, Error.TooManyFacts, Error.TooManyIterations {
       final World w = new World();
       final SymbolTable syms = new SymbolTable();
@@ -83,7 +76,7 @@ public class WorldTest extends TestCase {
               new Fact(new Predicate(grandparent, Arrays.asList(a, c))),
               new Fact(new Predicate(grandparent, Arrays.asList(b, d))),
               new Fact(new Predicate(grandparent, Arrays.asList(b, e)))));
-      Assert.assertEquals(expected, res);
+      assertEquals(expected, res);
 
       w.add_rule(new Rule(new Predicate(sibling,
               Arrays.asList(new Term.Variable(syms.insert("sibling1")), new Term.Variable(syms.insert("sibling2")))), Arrays.asList(
@@ -99,6 +92,7 @@ public class WorldTest extends TestCase {
                       .stream().map((f) -> syms.print_fact(f)).collect(Collectors.toSet())) + "]");
    }
 
+   @Test
    public void testNumbers() {
       final World w = new World();
       final SymbolTable syms = new SymbolTable();
@@ -138,7 +132,7 @@ public class WorldTest extends TestCase {
          System.out.println("\t" + syms.print_fact(f));
       }
       Set<Fact> expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(join, Arrays.asList(abc, aaa))), new Fact(new Predicate(join, Arrays.asList(abc, bbb))), new Fact(new Predicate(join, Arrays.asList(def, ccc)))));
-      Assert.assertEquals(expected, res);
+      assertEquals(expected, res);
 
       res = w.query_rule(new Rule(new Predicate(join,
               Arrays.asList(new Term.Variable(syms.insert("left")), new Term.Variable(syms.insert("right")))),
@@ -158,7 +152,7 @@ public class WorldTest extends TestCase {
          System.out.println("\t" + syms.print_fact(f));
       }
       expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(join, Arrays.asList(abc, aaa))), new Fact(new Predicate(join, Arrays.asList(abc, bbb)))));
-      Assert.assertEquals(expected, res);
+      assertEquals(expected, res);
    }
 
    private final Set<Fact> testSuffix(final World w, SymbolTable syms, final long suff, final long route, final String suffix) {
@@ -178,6 +172,7 @@ public class WorldTest extends TestCase {
       ), syms);
    }
 
+   @Test
    public void testStr() {
       final World w = new World();
       final SymbolTable syms = new SymbolTable();
@@ -199,7 +194,7 @@ public class WorldTest extends TestCase {
          System.out.println("\t" + syms.print_fact(f));
       }
       Set<Fact> expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(suff, Arrays.asList(app_2, syms.add("test.fr"))))));
-      Assert.assertEquals(expected, res);
+      assertEquals(expected, res);
 
       res = testSuffix(w, syms, suff, route, "example.com");
       for (final Fact f : res) {
@@ -212,9 +207,10 @@ public class WorldTest extends TestCase {
               new Fact(new Predicate(suff,
                       Arrays.asList(app_0, syms.add("www.example.com")))),
               new Fact(new Predicate(suff, Arrays.asList(app_1, syms.add("mx.example.com"))))));
-      Assert.assertEquals(expected, res);
+      assertEquals(expected, res);
    }
 
+   @Test
    public void testDate() {
       final World w = new World();
       final SymbolTable syms = new SymbolTable();
@@ -263,7 +259,7 @@ public class WorldTest extends TestCase {
          System.out.println("\t" + syms.print_fact(f));
       }
       Set<Fact> expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(before, Arrays.asList(new Term.Date(t1.getEpochSecond()), abc)))));
-      Assert.assertEquals(expected, res);
+      assertEquals(expected, res);
 
       final Rule r2 = new Rule(new Predicate(
               after,
@@ -291,9 +287,10 @@ public class WorldTest extends TestCase {
          System.out.println("\t" + syms.print_fact(f));
       }
       expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(after, Arrays.asList(new Term.Date(t3.getEpochSecond()), def)))));
-      Assert.assertEquals(expected, res);
+      assertEquals(expected, res);
    }
 
+   @Test
    public void testSet() {
       final World w = new World();
       final SymbolTable syms = new SymbolTable();
@@ -329,7 +326,7 @@ public class WorldTest extends TestCase {
          System.out.println("\t" + syms.print_fact(f));
       }
       Set<Fact> expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(int_set, Arrays.asList(abc, syms.add("test"))))));
-      Assert.assertEquals(expected, res);
+      assertEquals(expected, res);
 
       final long abc_sym_id = syms.insert("abc");
       final long ghi_sym_id = syms.insert("ghi");
@@ -354,7 +351,7 @@ public class WorldTest extends TestCase {
          System.out.println("\t" + syms.print_fact(f));
       }
       expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(symbol_set, Arrays.asList(def, new Term.Integer(2), syms.add("hello"))))));
-      Assert.assertEquals(expected, res);
+      assertEquals(expected, res);
 
       final Rule r3 = new Rule(
               new Predicate(string_set, Arrays.asList(new Term.Variable(syms.insert("sym")), new Term.Variable(syms.insert("int")), new Term.Variable(syms.insert("str")))),
@@ -373,9 +370,10 @@ public class WorldTest extends TestCase {
          System.out.println("\t" + syms.print_fact(f));
       }
       expected = new HashSet<>(Arrays.asList(new Fact(new Predicate(string_set, Arrays.asList(abc, new Term.Integer(0), syms.add("test"))))));
-      Assert.assertEquals(expected, res);
+      assertEquals(expected, res);
    }
 
+   @Test
    public void testResource() {
       final World w = new World();
       final SymbolTable syms = new SymbolTable();
@@ -408,7 +406,7 @@ public class WorldTest extends TestCase {
       for (final Fact f : res) {
          System.out.println("\t" + syms.print_fact(f));
       }
-      Assert.assertTrue(res.isEmpty());
+      assertTrue(res.isEmpty());
 
       final long caveat2 = syms.insert("caveat2");
       final long var0_id = syms.insert("var0");
@@ -428,6 +426,6 @@ public class WorldTest extends TestCase {
       for (final Fact f : res) {
          System.out.println("\t" + syms.print_fact(f));
       }
-      Assert.assertTrue(res.isEmpty());
+      assertTrue(res.isEmpty());
    }
 }

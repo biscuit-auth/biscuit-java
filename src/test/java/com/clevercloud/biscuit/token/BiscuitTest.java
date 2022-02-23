@@ -7,12 +7,11 @@ import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.error.FailedCheck;
 import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.builder.Block;
-import io.vavr.control.Either;
+
 import io.vavr.control.Try;
-import org.junit.Assert;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -24,15 +23,9 @@ import java.util.*;
 import static com.clevercloud.biscuit.crypto.TokenSignature.hex;
 import static com.clevercloud.biscuit.token.builder.Utils.*;
 
-public class BiscuitTest extends TestCase {
-    public BiscuitTest(String testName) {
-        super(testName);
-    }
+public class BiscuitTest {
 
-    public static Test suite() {
-        return new TestSuite(BiscuitTest.class);
-    }
-
+    @Test
     public void testBasic() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, CloneNotSupportedException, Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
@@ -152,10 +145,10 @@ public class BiscuitTest extends TestCase {
         try {
             final_token.check(check_symbols2, ambient_facts2,
                     new ArrayList<>(), new ArrayList<>(), new HashMap<>());
-            Assert.fail();
+            fail();
         } catch (Error e) {
             System.out.println(e);
-            Assert.assertEquals(
+            assertEquals(
                     new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                             new FailedCheck.FailedBlock(1, 0, "check if resource($resource), operation(\"read\"), right($resource, \"read\")"),
                             new FailedCheck.FailedBlock(2, 0, "check if resource(\"file1\")")
@@ -164,6 +157,7 @@ public class BiscuitTest extends TestCase {
         }
     }
 
+    @Test
     public void testFolders() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
@@ -204,7 +198,7 @@ public class BiscuitTest extends TestCase {
         v2.allow();
         try {
             v2.authorize();
-            Assert.fail();
+            fail();
         } catch (Error e2) {
             // Empty
         }
@@ -215,13 +209,13 @@ public class BiscuitTest extends TestCase {
         v3.allow();
         try {
             v3.authorize();
-            Assert.fail();
+            fail();
         } catch (Error e) {
             System.out.println(v3.print_world());
             for (FailedCheck f : e.failed_checks().get()) {
                 System.out.println(f.toString());
             }
-            Assert.assertEquals(
+            assertEquals(
                     new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                             new FailedCheck.FailedBlock(1, 0, "check if resource($resource), $resource.starts_with(\"/folder1/\")"),
                             new FailedCheck.FailedBlock(1, 1, "check if resource($resource), operation(\"read\"), right($resource, \"read\")")
@@ -230,6 +224,7 @@ public class BiscuitTest extends TestCase {
         }
     }
 
+    @Test
     public void testSealedTokens() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
@@ -293,10 +288,10 @@ public class BiscuitTest extends TestCase {
         KeyPair invalid_key = new KeyPair(rng);
         try {
             Biscuit.from_bytes(sealed, invalid_key.public_key());
-            Assert.fail();
+            fail();
         } catch (Error e) {
             System.out.println(e);
-            Assert.assertEquals(
+            assertEquals(
                     new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"),
                     e);
         }
@@ -313,6 +308,7 @@ public class BiscuitTest extends TestCase {
         System.out.println(v.print_world());
     }
 
+    @Test
     public void testMultipleAttenuation() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         SecureRandom rng = new SecureRandom();
         KeyPair root = new KeyPair(rng);
@@ -341,6 +337,7 @@ public class BiscuitTest extends TestCase {
         Biscuit.from_b64url(attenuated2B64, root.public_key());
     }
 
+    @Test
     public void testReset() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
@@ -385,10 +382,10 @@ public class BiscuitTest extends TestCase {
         v3.add_fact("resource(\"/folder2/file3\")");
         v3.add_fact("operation(\"read\")");
 
-        Try res = Try.of(() -> v3.authorize());
+        Try<Long> res = Try.of(() -> v3.authorize());
         System.out.println(v3.print_world());
 
-        Assert.assertTrue(res.isFailure());
+        assertTrue(res.isFailure());
 
         Authorizer v4 = v1.clone();
 
@@ -401,7 +398,7 @@ public class BiscuitTest extends TestCase {
         for (FailedCheck f : e.failed_checks().get()) {
             System.out.println(f.toString());
         }
-        Assert.assertEquals(
+        assertEquals(
                 new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                         new FailedCheck.FailedBlock(1, 0, "check if resource($resource), $resource.starts_with(\"/folder1/\")"),
                         new FailedCheck.FailedBlock(1, 1, "check if resource($resource), operation(\"read\"), right($resource, \"read\")")
@@ -409,6 +406,7 @@ public class BiscuitTest extends TestCase {
                 e);
     }
 
+    @Test
     public void testEmptyAuthorizer() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
@@ -447,6 +445,6 @@ public class BiscuitTest extends TestCase {
         v1.add_fact("resource(\"/folder2/file1\")");
         v1.add_fact("operation(\"write\")");
 
-        Assert.assertTrue(Try.of(()-> v1.authorize()).isFailure());
+        assertTrue(Try.of(()-> v1.authorize()).isFailure());
     }
 }

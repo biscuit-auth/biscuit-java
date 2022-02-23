@@ -2,24 +2,16 @@ package com.clevercloud.biscuit.datalog;
 
 import com.clevercloud.biscuit.datalog.expressions.Expression;
 import com.clevercloud.biscuit.datalog.expressions.Op;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class ExpressionTest extends TestCase {
-    public ExpressionTest(String testName) {
-        super(testName);
-    }
+public class ExpressionTest {
 
-    public static Test suite() {
-        return new TestSuite(ExpressionTest.class);
-    }
-
+    @Test
     public void testNegate() {
         SymbolTable symbols = new SymbolTable();
         symbols.add("a");
@@ -34,7 +26,7 @@ public class ExpressionTest extends TestCase {
                 new Op.Unary(Op.UnaryOp.Negate)
         )));
 
-        Assert.assertEquals(
+        assertEquals(
                 "! 1 < $var",
                 e.print(symbols).get()
         );
@@ -42,7 +34,7 @@ public class ExpressionTest extends TestCase {
         HashMap<Long, Term> variables = new HashMap<>();
         variables.put(2L, new Term.Integer(0));
 
-        Assert.assertEquals(
+        assertEquals(
                 new Term.Bool(true),
                 e.evaluate(variables, symbols).get()
         );

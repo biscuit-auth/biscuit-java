@@ -7,9 +7,8 @@ import com.clevercloud.biscuit.token.Biscuit;
 import com.clevercloud.biscuit.token.builder.Block;
 import com.clevercloud.biscuit.token.builder.Expression;
 import com.clevercloud.biscuit.token.builder.Term;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -19,15 +18,9 @@ import java.util.HashSet;
 
 import static com.clevercloud.biscuit.token.builder.Utils.*;
 
-public class BuilderTest extends TestCase {
-    public BuilderTest(String testName) {
-        super(testName);
-    }
+public class BuilderTest {
 
-    public static Test suite() {
-        return new TestSuite(com.clevercloud.biscuit.builder.BuilderTest.class);
-    }
-
+    @Test
     public void testBuild() throws Error.Language, Error.SymbolTableOverlap, Error.FormatError {
         SecureRandom rng = new SecureRandom();
         KeyPair root = new KeyPair(rng);
