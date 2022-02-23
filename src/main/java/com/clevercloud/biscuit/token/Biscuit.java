@@ -286,7 +286,7 @@ public class Biscuit {
         List<RevocationIdentifier> revocation_ids = this.revocation_identifiers();
         long rev = symbols.get("revocation_id").get();
         for (int i = 0; i < revocation_ids.size(); i++) {
-            byte[] id = revocation_ids.get(i);
+            byte[] id = revocation_ids.get(i).getBytes();
             world.add_fact(new Fact(new Predicate(rev, Arrays.asList(new Term.Integer(i), new Term.Bytes(id)))));
         }
 
