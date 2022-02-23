@@ -120,7 +120,25 @@ public class Biscuit {
      * @param data
      * @return
      */
+    @Deprecated
     static public Biscuit from_b64(String data, PublicKey root) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+        return Biscuit.from_bytes(Base64.getUrlDecoder().decode(data), root);
+    }
+
+    /**
+     * Deserializes a Biscuit token from a base64 url (RFC4648_URLSAFE) string
+     * <p>
+     * This checks the signature, but does not verify that the first key is the root key,
+     * to allow appending blocks without knowing about the root key.
+     * <p>
+     * The root key check is performed in the verify method
+     * <p>
+     * This method uses the default symbol table
+     *
+     * @param data
+     * @return Biscuit
+     */
+    static public Biscuit from_b64url(String data, PublicKey root) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         return Biscuit.from_bytes(Base64.getUrlDecoder().decode(data), root);
     }
 
@@ -237,7 +255,17 @@ public class Biscuit {
      *
      * @return
      */
+    @Deprecated
     public String serialize_b64() throws Error.FormatError.SerializationError {
+        return Base64.getUrlEncoder().encodeToString(serialize());
+    }
+
+    /**
+     * Serializes a token to base 64 url String using RFC4648_URLSAFE
+     * @return String
+     * @throws Error.FormatError.SerializationError
+     */
+    public String serialize_b64url() throws Error.FormatError.SerializationError {
         return Base64.getUrlEncoder().encodeToString(serialize());
     }
 

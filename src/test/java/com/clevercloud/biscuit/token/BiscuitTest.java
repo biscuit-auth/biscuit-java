@@ -330,15 +330,15 @@ public class BiscuitTest extends TestCase {
                 Arrays.asList(s("topic"), s("tenant"), s("namespace"), s("topic"), s("produce"))
         ));
 
-        String attenuatedB64 = biscuit.attenuate(rng, new KeyPair(rng), builder.build()).serialize_b64();
+        String attenuatedB64 = biscuit.attenuate(rng, new KeyPair(rng), builder.build()).serialize_b64url();
 
         System.out.println("attenuated: " + attenuatedB64);
 
-        Biscuit.from_b64(attenuatedB64, root.public_key());
-        String attenuated2B64 = biscuit.attenuate(rng, new KeyPair(rng), builder.build()).serialize_b64();
+        Biscuit.from_b64url(attenuatedB64, root.public_key());
+        String attenuated2B64 = biscuit.attenuate(rng, new KeyPair(rng), builder.build()).serialize_b64url();
 
         System.out.println("attenuated2: " + attenuated2B64);
-        Biscuit.from_b64(attenuated2B64, root.public_key());
+        Biscuit.from_b64url(attenuated2B64, root.public_key());
     }
 
     public void testReset() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
