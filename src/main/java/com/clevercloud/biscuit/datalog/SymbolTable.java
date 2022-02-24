@@ -3,6 +3,8 @@ package com.clevercloud.biscuit.datalog;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -12,6 +14,10 @@ import com.clevercloud.biscuit.token.builder.Utils;
 import io.vavr.control.Option;
 
 public final class SymbolTable implements Serializable {
+   private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ssxxx");
+   private String fromEpochIsoDate(long epochSec) {
+      return Instant.ofEpochSecond(epochSec).atOffset(ZoneOffset.ofTotalSeconds(0)).format(dateTimeFormatter);
+   }
    public final List<String> symbols;
 
    public long insert(final String symbol) {
@@ -52,10 +58,7 @@ public final class SymbolTable implements Serializable {
       } else if (value instanceof Term.Bytes) {
          _s = TokenSignature.hex(((Term.Bytes) value).value());
       } else if (value instanceof Term.Date) {
-         Date d = Date.from(Instant.ofEpochSecond(((Term.Date) value).value()));
-         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
-         format.setTimeZone(TimeZone.getTimeZone("UTC"));
-         _s  = format.format(d);
+         _s  = fromEpochIsoDate(((Term.Date) value).value());
       } else if (value instanceof Term.Integer) {
          _s = Long.toString(((Term.Integer) value).value());
       } else if (value instanceof Term.Set) {
@@ -104,7 +107,7 @@ public final class SymbolTable implements Serializable {
          if (i instanceof Term.Variable) {
             return "$" + this.print_symbol((int) ((Term.Variable) i).value());
          } else if (i instanceof Term.Date) {
-            return Date.from(Instant.ofEpochSecond(((Term.Date) i).value())).toString();
+            return fromEpochIsoDate(((Term.Date) i).value());
          } else if (i instanceof Term.Integer) {
             return "" + ((Term.Integer) i).value();
          } else if (i instanceof Term.Str) {

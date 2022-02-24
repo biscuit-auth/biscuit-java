@@ -46,7 +46,7 @@ public class FailedCheck {
             jo.addProperty("rule", rule);
             JsonObject block = new JsonObject();
             block.add("Block", jo);
-            return jo;
+            return block;
         }
     }
 

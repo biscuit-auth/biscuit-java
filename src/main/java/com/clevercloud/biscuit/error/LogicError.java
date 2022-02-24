@@ -14,12 +14,6 @@ public class LogicError {
         return new JsonObject();
     }
 
-    private static JsonElement jsonWrapper(JsonElement e) {
-        JsonObject root = new JsonObject();
-        root.add("FailedLogic", e);
-        return root;
-    }
-
     public static class InvalidAuthorityFact extends LogicError {
         final public String e;
 
@@ -47,7 +41,7 @@ public class LogicError {
 
         @Override
         public JsonElement toJson() {
-            return LogicError.jsonWrapper(new JsonPrimitive("InvalidAuthorityFact"));
+            return new JsonPrimitive("InvalidAuthorityFact");
         }
 
     }
@@ -83,7 +77,7 @@ public class LogicError {
             child.addProperty("error", this.e);
             JsonObject root = new JsonObject();
             root.add("InvalidAmbientFact", child);
-            return LogicError.jsonWrapper(root);
+            return root;
         }
     }
 
@@ -121,7 +115,7 @@ public class LogicError {
             child.addProperty("error", this.e);
             JsonObject root = new JsonObject();
             root.add("InvalidBlockFact", child);
-            return LogicError.jsonWrapper(root);
+            return root;
         }
 
 
@@ -156,12 +150,12 @@ public class LogicError {
 
         @Override
         public JsonElement toJson() {
-            JsonObject child = new JsonObject();
-            child.addProperty("id",this.id);
-            child.addProperty("error", this.e);
+            JsonArray child = new JsonArray();
+            child.add(this.id);
+            child.add(this.e);
             JsonObject root = new JsonObject();
             root.add("InvalidBlockRule", child);
-            return LogicError.jsonWrapper(root);
+            return root;
         }
 
 

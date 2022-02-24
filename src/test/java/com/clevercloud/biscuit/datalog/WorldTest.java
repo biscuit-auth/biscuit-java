@@ -215,7 +215,7 @@ public class WorldTest {
       final World w = new World();
       final SymbolTable syms = new SymbolTable();
 
-      final Instant t1 = new Date().toInstant();
+      final Instant t1 = Instant.now();
       System.out.println("t1 = " + t1);
       final Instant t2 = t1.plusSeconds(10);
       System.out.println("t2 = " + t2);

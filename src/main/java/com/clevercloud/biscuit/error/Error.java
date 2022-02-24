@@ -293,6 +293,42 @@ public class Error extends Exception {
                 return FormatError.jsonWrapper(jo);
             }
         }
+
+        public static class InvalidSignatureSize extends FormatError {
+            final public int size;
+
+            public InvalidSignatureSize(int size) {
+                this.size = size;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+
+                InvalidSignatureSize iss = (InvalidSignatureSize) o;
+
+                return size == iss.size;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(size);
+            }
+
+            @Override
+            public String toString() {
+                return "InvalidSignatureSize{" +
+                        "size=" + size +
+                        '}';
+            }
+            @Override
+            public JsonElement toJson() {
+                JsonObject jo = new JsonObject();
+                jo.add("InvalidSignatureSize", new JsonPrimitive(size));
+                return FormatError.jsonWrapper(jo);
+            }
+        }
     }
     public static class InvalidAuthorityIndex extends Error {
         final public long index;

@@ -46,15 +46,15 @@ public class SerializedBiscuit {
 
             SignedBlock authority = new SignedBlock(
                     data.getAuthority().getBlock().toByteArray(),
-                    new PublicKey(data.getAuthority().getNextKey().getAlgorithm(),data.getAuthority().getNextKey().getKey().toByteArray()),
+                    new PublicKey(data.getAuthority().getNextKey().getAlgorithm(), data.getAuthority().getNextKey().getKey().toByteArray()),
                     data.getAuthority().getSignature().toByteArray()
             );
 
             ArrayList<SignedBlock> blocks = new ArrayList<>();
-            for(Schema.SignedBlock block: data.getBlocksList()) {
+            for (Schema.SignedBlock block : data.getBlocksList()) {
                 blocks.add(new SignedBlock(
                         block.getBlock().toByteArray(),
-                        new PublicKey(block.getNextKey().getAlgorithm(),block.getNextKey().getKey().toByteArray()),
+                        new PublicKey(block.getNextKey().getAlgorithm(), block.getNextKey().getKey().toByteArray()),
                         block.getSignature().toByteArray()
                 ));
             }
@@ -71,7 +71,7 @@ public class SerializedBiscuit {
                 signature = Option.some(data.getProof().getFinalSignature().toByteArray());
             }
 
-            if(secretKey.isEmpty() && signature.isEmpty()) {
+            if (secretKey.isEmpty() && signature.isEmpty()) {
                 throw new Error.FormatError.DeserializationError("empty proof");
             }
             Proof proof = new Proof(secretKey, signature);
@@ -81,20 +81,21 @@ public class SerializedBiscuit {
             SerializedBiscuit b = new SerializedBiscuit(authority, blocks, proof);
 
             Either<Error, Void> res = b.verify(root);
-            if(res.isLeft()) {
+            if (res.isLeft()) {
                 Error e = res.getLeft();
                 //System.out.println("verification error: "+e.toString());
                 throw e;
             } else {
                 return b;
             }
-        } catch(InvalidProtocolBufferException e) {
+        } catch (InvalidProtocolBufferException e) {
             throw new Error.FormatError.DeserializationError(e.toString());
         }
     }
 
     /**
      * Warning: this deserializes without verifying the signature
+     *
      * @param slice
      * @return
      * @throws NoSuchAlgorithmException
@@ -107,15 +108,15 @@ public class SerializedBiscuit {
 
             SignedBlock authority = new SignedBlock(
                     data.getAuthority().getBlock().toByteArray(),
-                    new PublicKey(data.getAuthority().getNextKey().getAlgorithm(),data.getAuthority().getNextKey().getKey().toByteArray()),
+                    new PublicKey(data.getAuthority().getNextKey().getAlgorithm(), data.getAuthority().getNextKey().getKey().toByteArray()),
                     data.getAuthority().getSignature().toByteArray()
             );
 
             ArrayList<SignedBlock> blocks = new ArrayList<>();
-            for(Schema.SignedBlock block: data.getBlocksList()) {
+            for (Schema.SignedBlock block : data.getBlocksList()) {
                 blocks.add(new SignedBlock(
                         block.getBlock().toByteArray(),
-                        new PublicKey(block.getNextKey().getAlgorithm(),block.getNextKey().getKey().toByteArray()),
+                        new PublicKey(block.getNextKey().getAlgorithm(), block.getNextKey().getKey().toByteArray()),
                         block.getSignature().toByteArray()
                 ));
             }
@@ -130,14 +131,14 @@ public class SerializedBiscuit {
                 signature = Option.some(data.getProof().getFinalSignature().toByteArray());
             }
 
-            if(secretKey.isEmpty() && signature.isEmpty()) {
+            if (secretKey.isEmpty() && signature.isEmpty()) {
                 throw new Error.FormatError.DeserializationError("empty proof");
             }
             Proof proof = new Proof(secretKey, signature);
 
             SerializedBiscuit b = new SerializedBiscuit(authority, blocks, proof);
             return Right(b);
-        } catch(InvalidProtocolBufferException e) {
+        } catch (InvalidProtocolBufferException e) {
             throw new Error.FormatError.DeserializationError(e.toString());
         }
     }
@@ -145,6 +146,7 @@ public class SerializedBiscuit {
 
     /**
      * Serializes a SerializedBiscuit to a byte array
+     *
      * @return
      */
     public byte[] serialize() throws Error.FormatError.SerializationError {
@@ -161,8 +163,8 @@ public class SerializedBiscuit {
         }
         biscuitBuilder.setAuthority(authorityBuilder.build());
 
-        for(SignedBlock block: this.blocks) {
-             Schema.SignedBlock.Builder blockBuilder = Schema.SignedBlock.newBuilder();
+        for (SignedBlock block : this.blocks) {
+            Schema.SignedBlock.Builder blockBuilder = Schema.SignedBlock.newBuilder();
             Schema.PublicKey.Builder publicKey = Schema.PublicKey.newBuilder();
             publicKey.setKey(ByteString.copyFrom(block.key.toBytes()));
             publicKey.setAlgorithm(block.key.algorithm);
@@ -174,7 +176,7 @@ public class SerializedBiscuit {
         }
 
         Schema.Proof.Builder proofBuilder = Schema.Proof.newBuilder();
-        if(!this.proof.secretKey.isEmpty()) {
+        if (!this.proof.secretKey.isEmpty()) {
             proofBuilder.setNextSecret(ByteString.copyFrom(this.proof.secretKey.get().toBytes()));
         } else {
             proofBuilder.setFinalSignature(ByteString.copyFrom(this.proof.signature.get()));
@@ -190,14 +192,14 @@ public class SerializedBiscuit {
             biscuit.writeTo(stream);
             byte[] data = stream.toByteArray();
             return data;
-        } catch(IOException e) {
+        } catch (IOException e) {
             throw new Error.FormatError.SerializationError(e.toString());
         }
 
     }
 
     static public Either<Error.FormatError, SerializedBiscuit> make(final KeyPair root,
-                                                             final Block authority, final KeyPair next) {
+                                                                    final Block authority, final KeyPair next) {
         Schema.Block b = authority.serialize();
         try {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -219,14 +221,14 @@ public class SerializedBiscuit {
             Proof proof = new Proof(next);
 
             return Right(new SerializedBiscuit(signedBlock, new ArrayList<>(), proof));
-        } catch(IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
+        } catch (IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
             return Left(new Error.FormatError.SerializationError(e.toString()));
         }
     }
 
     public Either<Error.FormatError, SerializedBiscuit> append(final KeyPair next,
                                                                final Block newBlock) {
-        if(this.proof.secretKey.isEmpty()) {
+        if (this.proof.secretKey.isEmpty()) {
             return Left(new Error.FormatError.SerializationError("the token is sealed"));
         }
 
@@ -251,7 +253,7 @@ public class SerializedBiscuit {
             SignedBlock signedBlock = new SignedBlock(block, next_key, signature);
 
             ArrayList<SignedBlock> blocks = new ArrayList<>();
-            for(SignedBlock bl: this.blocks) {
+            for (SignedBlock bl : this.blocks) {
                 blocks.add(bl);
             }
             blocks.add(signedBlock);
@@ -259,7 +261,7 @@ public class SerializedBiscuit {
             Proof proof = new Proof(next);
 
             return Right(new SerializedBiscuit(this.authority, blocks, proof));
-        } catch(IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
+        } catch (IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
             return Left(new Error.FormatError.SerializationError(e.toString()));
         }
     }
@@ -271,6 +273,9 @@ public class SerializedBiscuit {
             byte[] block = this.authority.block;
             PublicKey next_key = this.authority.key;
             byte[] signature = this.authority.signature;
+            if(signature.length != 64){
+                return Either.left(new Error.FormatError.Signature.InvalidSignatureSize(signature.length));
+            }
             algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
             algo_buf.flip();
 
@@ -289,10 +294,13 @@ public class SerializedBiscuit {
             }
         }
 
-        for(SignedBlock b: this.blocks) {
+        for (SignedBlock b : this.blocks) {
             byte[] block = b.block;
             PublicKey next_key = b.key;
             byte[] signature = b.signature;
+            if(signature.length != 64){
+                return Either.left(new Error.FormatError.Signature.InvalidSignatureSize(signature.length));
+            }
             algo_buf.clear();
             algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
             algo_buf.flip();
@@ -313,11 +321,11 @@ public class SerializedBiscuit {
 
         //System.out.println("signatures verified, checking proof");
 
-        if(!this.proof.secretKey.isEmpty()) {
+        if (!this.proof.secretKey.isEmpty()) {
             //System.out.println("checking secret key");
             //System.out.println("current key: "+current_key.toHex());
             //System.out.println("key from proof: "+this.proof.secretKey.get().public_key().toHex());
-            if(this.proof.secretKey.get().public_key().equals(current_key)) {
+            if (this.proof.secretKey.get().public_key().equals(current_key)) {
                 //System.out.println("public keys are equal");
 
                 return Right(null);
@@ -332,7 +340,7 @@ public class SerializedBiscuit {
             byte[] finalSignature = this.proof.signature.get();
 
             SignedBlock b;
-            if(this.blocks.isEmpty()) {
+            if (this.blocks.isEmpty()) {
                 b = this.authority;
             } else {
                 b = this.blocks.get(this.blocks.size() - 1);
@@ -360,15 +368,16 @@ public class SerializedBiscuit {
             }
 
         }
+
     }
 
     public Either<Error, Void> seal() throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {
-        if(this.proof.secretKey.isEmpty()) {
+        if (this.proof.secretKey.isEmpty()) {
             return Left(new Error.Sealed());
         }
 
         SignedBlock block;
-        if(this.blocks.isEmpty()) {
+        if (this.blocks.isEmpty()) {
             block = this.authority;
         } else {
             block = this.blocks.get(this.blocks.size() - 1);
@@ -398,7 +407,7 @@ public class SerializedBiscuit {
         ArrayList<byte[]> l = new ArrayList<>();
         l.add(this.authority.signature);
 
-        for(SignedBlock block: this.blocks) {
+        for (SignedBlock block : this.blocks) {
             l.add(block.signature);
         }
         return l;
