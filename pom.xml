@@ -61,6 +61,10 @@
             <organization>Clever Cloud</organization>
             <organizationUrl>https://clever-cloud.com</organizationUrl>
         </developer>
+        <developer>
+            <name>Cédric CORBIÈRE</name>
+            <email>corbic@gmail.com</email>
+        </developer>
     </developers>
 
     <scm>
