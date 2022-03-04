@@ -12,7 +12,7 @@ public class Policy {
         Deny,
     }
 
-    private List<Rule> queries;
+    public final List<Rule> queries;
     public Kind kind;
 
     public Policy(List<Rule> queries, Kind kind) {

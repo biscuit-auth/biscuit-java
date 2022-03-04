@@ -1,53 +1,52 @@
 package com.clevercloud.biscuit.token.builder;
 
-import com.clevercloud.biscuit.datalog.ID;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Predicate {
+public class Predicate implements Cloneable {
     String name;
-    List<Term> ids;
+    List<Term> terms;
 
-    public Predicate(String name, List<Term> ids) {
+    public Predicate(String name, List<Term> terms) {
         this.name = name;
-        this.ids = ids;
+        this.terms = terms;
     }
 
     public String getName() {
         return name;
     }
 
-    public List<Term> getIds() {
-        return ids;
+    public List<Term> getTerms() {
+        return terms;
     }
 
     public com.clevercloud.biscuit.datalog.Predicate convert(SymbolTable symbols) {
         long name = symbols.insert(this.name);
-        ArrayList<ID> ids = new ArrayList<ID>();
+        ArrayList<com.clevercloud.biscuit.datalog.Term> terms = new ArrayList<>();
 
-        for(Term a: this.ids) {
-            ids.add(a.convert(symbols));
+        for(Term a: this.terms) {
+            terms.add(a.convert(symbols));
         }
 
-        return new com.clevercloud.biscuit.datalog.Predicate(name, ids);
+        return new com.clevercloud.biscuit.datalog.Predicate(name, terms);
     }
 
     public static Predicate convert_from(com.clevercloud.biscuit.datalog.Predicate p, SymbolTable symbols) {
         String name = symbols.print_symbol((int) p.name());
-        List<Term> ids = new ArrayList<>();
-        for(com.clevercloud.biscuit.datalog.ID i: p.ids()) {
-            ids.add(i.toTerm(symbols));
+        List<Term> terms = new ArrayList<>();
+        for(com.clevercloud.biscuit.datalog.Term t: p.terms()) {
+            terms.add(t.toTerm(symbols));
         }
 
-        return new Predicate(name, ids);
+        return new Predicate(name, terms);
     }
 
     @Override
     public String toString() {
-        final List<String> i = ids.stream().map((id) -> id.toString()).collect(Collectors.toList());
+        final List<String> i = terms.stream().map((id) -> id.toString()).collect(Collectors.toList());
         return ""+name+"("+String.join(", ", i)+")";
     }
 
@@ -59,13 +58,22 @@ public class Predicate {
         Predicate predicate = (Predicate) o;
 
         if (name != null ? !name.equals(predicate.name) : predicate.name != null) return false;
-        return ids != null ? ids.equals(predicate.ids) : predicate.ids == null;
+        return terms != null ? terms.equals(predicate.terms) : predicate.terms == null;
     }
 
     @Override
     public int hashCode() {
         int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (ids != null ? ids.hashCode() : 0);
+        result = 31 * result + (terms != null ? terms.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public Predicate clone(){
+        String name = this.name;
+        List<Term> terms = new ArrayList<Term>(this.terms.size());
+        terms.addAll(this.terms);
+        Predicate p = new Predicate(name, terms);
+        return p;
     }
 }

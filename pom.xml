@@ -1,9 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.clever-cloud</groupId>
     <artifactId>biscuit-java</artifactId>
     <packaging>jar</packaging>
-    <version>1.2.0-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <name>biscuit-java</name>
     <url>https://github.com/clevercloud/biscuit-java</url>
 
@@ -21,15 +22,17 @@
         <maven-antrun.version>1.8</maven-antrun.version>
         <nexus-staging-maven.version>1.6.7</nexus-staging-maven.version>
         <build-helper-maven.version>3.0.0</build-helper-maven.version>
+        <maven-compiler-plugin.version>3.10.0</maven-compiler-plugin.version>
 
         <!-- dependencies -->
         <protobuf-java.version>3.16.1</protobuf-java.version>
-        <curve25519-elisabetch.version>0.1.0</curve25519-elisabetch.version>
+        <net.i2p.crypto.eddsa.version>0.3.0</net.i2p.crypto.eddsa.version>
         <vavr.version>0.10.3</vavr.version>
         <re2j.version>1.6</re2j.version>
+        <gson.version>2.8.9</gson.version>
 
         <!-- test dependencies -->
-        <junit.version>4.13.1</junit.version>
+        <junit.version>5.8.2</junit.version>
     </properties>
 
     <licenses>
@@ -57,6 +60,10 @@
             <email>alexandre.duval@clever-cloud.com</email>
             <organization>Clever Cloud</organization>
             <organizationUrl>https://clever-cloud.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Cédric CORBIÈRE</name>
+            <email>corbic@gmail.com</email>
         </developer>
     </developers>
 
@@ -105,6 +112,17 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <compilerArgs>
+                        <arg>-verbose</arg>
+                        <arg>-Xlint:all,-options,-path</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
@@ -155,7 +173,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <target>
-                                <mkdir dir="${project.build.directory}/generated-sources" />
+                                <mkdir dir="${project.build.directory}/generated-sources"/>
                                 <exec executable="protoc" failonerror="true">
                                     <arg value="-I"/>
                                     <arg value="${project.basedir}"/>
@@ -190,6 +208,15 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
+            </plugin>
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.22.2</version>
+            </plugin>
+
         </plugins>
     </build>
 
@@ -200,9 +227,9 @@
             <version>${protobuf-java.version}</version>
         </dependency>
         <dependency>
-            <groupId>cafe.cryptography</groupId>
-            <artifactId>curve25519-elisabeth</artifactId>
-            <version>${curve25519-elisabetch.version}</version>
+            <groupId>net.i2p.crypto</groupId>
+            <artifactId>eddsa</artifactId>
+            <version>${net.i2p.crypto.eddsa.version}</version>
         </dependency>
         <dependency>
             <groupId>io.vavr</groupId>
@@ -214,13 +241,26 @@
             <artifactId>re2j</artifactId>
             <version>${re2j.version}</version>
         </dependency>
-
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${gson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
-
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>

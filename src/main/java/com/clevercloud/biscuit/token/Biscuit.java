@@ -5,17 +5,19 @@ import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.datalog.*;
 import com.clevercloud.biscuit.error.FailedCheck;
 import com.clevercloud.biscuit.error.LogicError;
-import com.clevercloud.biscuit.token.format.SealedBiscuit;
 import com.clevercloud.biscuit.token.format.SerializedBiscuit;
 import com.clevercloud.biscuit.error.Error;
 
+import com.clevercloud.biscuit.token.format.SignedBlock;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
-import static io.vavr.API.Left;
+
 import static io.vavr.API.Right;
 
-import java.security.MessageDigest;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.SignatureException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,13 +31,24 @@ public class Biscuit {
     final Option<SerializedBiscuit> container;
     final List<byte[]> revocation_ids;
 
+    /**
+     * Creates a token builder
+     * <p>
+     * this function uses the default symbol table
+     *
+     * @param root root private key
+     * @return
+     */
+    public static com.clevercloud.biscuit.token.builder.Biscuit builder(final KeyPair root) {
+        return new com.clevercloud.biscuit.token.builder.Biscuit(new SecureRandom(), root, default_symbol_table());
+    }
 
     /**
      * Creates a token builder
-     *
+     * <p>
      * this function uses the default symbol table
      *
-     * @param rng random number generator
+     * @param rng  random number generator
      * @param root root private key
      * @return
      */
@@ -46,8 +59,8 @@ public class Biscuit {
     /**
      * Creates a token builder
      *
-     * @param rng random number generator
-     * @param root root private key
+     * @param rng     random number generator
+     * @param root    root private key
      * @param symbols symbol table
      * @return
      */
@@ -57,33 +70,32 @@ public class Biscuit {
 
     /**
      * Creates a token
-     * @param rng random number generator
-     * @param root root private key
+     *
+     * @param rng       random number generator
+     * @param root      root private key
      * @param authority authority block
      * @return
      */
-    static public Either<Error, Biscuit> make(final SecureRandom rng, final KeyPair root, final SymbolTable symbols, final Block authority) {
-        if(!Collections.disjoint(symbols.symbols, authority.symbols.symbols)) {
-            return Left(new Error.SymbolTableOverlap());
-        }
-
-        if(authority.index != 0) {
-            return Left(new Error.InvalidAuthorityIndex(authority.index));
+    static public Biscuit make(final SecureRandom rng, final KeyPair root, final SymbolTable symbols, final Block authority) throws Error.SymbolTableOverlap, Error.FormatError {
+        if (!Collections.disjoint(symbols.symbols, authority.symbols.symbols)) {
+            throw new Error.SymbolTableOverlap();
         }
 
         symbols.symbols.addAll(authority.symbols.symbols);
         ArrayList<Block> blocks = new ArrayList<>();
 
-        Either<Error.FormatError, SerializedBiscuit> container = SerializedBiscuit.make(rng, root, authority);
-        if(container.isLeft()) {
+        KeyPair next = new KeyPair(rng);
+
+        Either<Error.FormatError, SerializedBiscuit> container = SerializedBiscuit.make(root, authority, next);
+        if (container.isLeft()) {
             Error.FormatError e = container.getLeft();
-            return Left(e);
+            throw e;
         } else {
             SerializedBiscuit s = container.get();
             List<byte[]> revocation_ids = s.revocation_identifiers();
 
             Option<SerializedBiscuit> c = Option.some(s);
-            return Right(new Biscuit(authority, blocks, symbols, c, revocation_ids));
+            return new Biscuit(authority, blocks, symbols, c, revocation_ids);
         }
     }
 
@@ -97,216 +109,200 @@ public class Biscuit {
 
     /**
      * Deserializes a Biscuit token from a hex string
-     *
+     * <p>
      * This checks the signature, but does not verify that the first key is the root key,
      * to allow appending blocks without knowing about the root key.
-     *
+     * <p>
      * The root key check is performed in the verify method
-     *
+     * <p>
      * This method uses the default symbol table
+     *
      * @param data
      * @return
      */
-    static public Either<Error, Biscuit> from_b64(String data)  {
-        return Biscuit.from_bytes(Base64.getUrlDecoder().decode(data));
+    @Deprecated
+    static public Biscuit from_b64(String data, PublicKey root) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+        return Biscuit.from_bytes(Base64.getUrlDecoder().decode(data), root);
+    }
+
+    /**
+     * Deserializes a Biscuit token from a base64 url (RFC4648_URLSAFE) string
+     * <p>
+     * This checks the signature, but does not verify that the first key is the root key,
+     * to allow appending blocks without knowing about the root key.
+     * <p>
+     * The root key check is performed in the verify method
+     * <p>
+     * This method uses the default symbol table
+     *
+     * @param data
+     * @return Biscuit
+     */
+    static public Biscuit from_b64url(String data, PublicKey root) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+        return Biscuit.from_bytes(Base64.getUrlDecoder().decode(data), root);
     }
 
     /**
      * Deserializes a Biscuit token from a byte array
-     *
+     * <p>
      * This checks the signature, but does not verify that the first key is the root key,
      * to allow appending blocks without knowing about the root key.
-     *
+     * <p>
      * The root key check is performed in the verify method
-     *
+     * <p>
      * This method uses the default symbol table
+     *
      * @param data
      * @return
      */
-    static public Either<Error, Biscuit> from_bytes(byte[] data)  {
-        return Biscuit.from_bytes_with_symbols(data, default_symbol_table());
+    static public Biscuit from_bytes(byte[] data, PublicKey root) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+        return Biscuit.from_bytes_with_symbols(data, root, default_symbol_table());
     }
 
     /**
      * Deserializes a Biscuit token from a byte array
-     *
+     * <p>
      * This checks the signature, but does not verify that the first key is the root key,
      * to allow appending blocks without knowing about the root key.
-     *
+     * <p>
      * The root key check is performed in the verify method
+     *
      * @param data
      * @return
      */
-    static public Either<Error, Biscuit> from_bytes_with_symbols(byte[] data, SymbolTable symbols)  {
-        Either<Error, SerializedBiscuit> res = SerializedBiscuit.from_bytes(data);
-        if(res.isLeft()) {
-            Error e = res.getLeft();
-            return Left(e);
-        }
+    static public Biscuit from_bytes_with_symbols(byte[] data, PublicKey root, SymbolTable symbols) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+        //System.out.println("will deserialize and verify token");
+        SerializedBiscuit ser = SerializedBiscuit.from_bytes(data, root);
+        //System.out.println("deserialized token, will populate Biscuit structure");
 
-        SerializedBiscuit ser = res.get();
-        Either<Error.FormatError, Block> authRes = Block.from_bytes(ser.authority);
-        if(authRes.isLeft()){
+        return Biscuit.from_serialize_biscuit(ser, symbols);
+    }
+
+    /**
+     * Fills a Biscuit structure from a deserialized token
+     *
+     * @return
+     */
+    static Biscuit from_serialize_biscuit(SerializedBiscuit ser, SymbolTable symbols) throws Error {
+        Either<Error.FormatError, Block> authRes = Block.from_bytes(ser.authority.block);
+        if (authRes.isLeft()) {
             Error e = authRes.getLeft();
-            return Left(e);
+            throw e;
         }
         Block authority = authRes.get();
 
         ArrayList<Block> blocks = new ArrayList<>();
-        for(byte[] bdata: ser.blocks) {
-            Either<Error.FormatError, Block> blockRes = Block.from_bytes(bdata);
-            if(blockRes.isLeft()) {
+        for (SignedBlock bdata : ser.blocks) {
+            Either<Error.FormatError, Block> blockRes = Block.from_bytes(bdata.block);
+            if (blockRes.isLeft()) {
                 Error e = blockRes.getLeft();
-                return Left(e);
+                throw e;
             }
             blocks.add(blockRes.get());
         }
 
-        for(String s: authority.symbols.symbols) {
+        for (String s : authority.symbols.symbols) {
             symbols.add(s);
         }
 
-        for(Block b: blocks) {
-            for(String s: b.symbols.symbols) {
+        for (Block b : blocks) {
+            for (String s : b.symbols.symbols) {
                 symbols.add(s);
             }
         }
 
         List<byte[]> revocation_ids = ser.revocation_identifiers();
 
-        return Right(new Biscuit(authority, blocks, symbols, Option.some(ser), revocation_ids));
+        return new Biscuit(authority, blocks, symbols, Option.some(ser), revocation_ids);
+    }
+
+    static Biscuit unsafe_from_bytes(byte[] data, SymbolTable symbols) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+        Either<Error, SerializedBiscuit> res = SerializedBiscuit.unsafe_deserialize(data);
+        if (res.isLeft()) {
+            Error e = res.getLeft();
+            throw e;
+        }
+
+        SerializedBiscuit ser = res.get();
+        return Biscuit.from_serialize_biscuit(ser, symbols);
     }
 
     /**
-     * Creates a verifier for this token
-     *
+     * Creates a authorizer for this token
+     * <p>
      * This function checks that the root key is the one we expect
-     * @param root root public key
+     *
      * @return
      */
-    public Either<Error, Verifier> verify(PublicKey root) {
-        return Verifier.make(this, Option.some(root));
-    }
-
-    public Either<Error, Verifier> verify_sealed() {
-        return Verifier.make(this, Option.none());
+    public Authorizer authorizer() throws Error.FailedLogic {
+        return Authorizer.make(this);
     }
 
     /**
      * Serializes a token to a byte array
+     *
      * @return
      */
-    public Either<Error, byte[]> serialize() {
-        if(this.container.isEmpty()) {
-            return Left(new Error.FormatError.SerializationError("no internal container"));
+    public byte[] serialize() throws Error.FormatError.SerializationError {
+        if (this.container.isEmpty()) {
+            throw new Error.FormatError.SerializationError("no internal container");
         }
         return this.container.get().serialize();
     }
 
     /**
      * Serializes a token to a base 64 String
+     *
      * @return
      */
-    public Either<Error, String> serialize_b64() {
-        return serialize().map(Base64.getUrlEncoder()::encodeToString);
-    }
-
-    public static Either<Error, Biscuit> from_sealed(byte[] data, byte[] secret)  {
-        //FIXME: needs a version of from_sealed with custom symbol table support
-        SymbolTable symbols = default_symbol_table();
-
-        Either<Error, SealedBiscuit> res = SealedBiscuit.from_bytes(data, secret);
-        if(res.isLeft()) {
-            Error e = res.getLeft();
-            return Left(e);
-        }
-
-        SealedBiscuit ser = res.get();
-        Either<Error.FormatError, Block> authRes = Block.from_bytes(ser.authority);
-        if(authRes.isLeft()){
-            Error e = authRes.getLeft();
-            return Left(e);
-        }
-        Block authority = authRes.get();
-
-        ArrayList<Block> blocks = new ArrayList<>();
-        for(byte[] bdata: ser.blocks) {
-            Either<Error.FormatError, Block> blockRes = Block.from_bytes(bdata);
-            if(blockRes.isLeft()) {
-                Error e = blockRes.getLeft();
-                return Left(e);
-            }
-            blocks.add(blockRes.get());
-        }
-
-        for(String s: authority.symbols.symbols) {
-            symbols.add(s);
-        }
-
-        for(Block b: blocks) {
-            for(String s: b.symbols.symbols) {
-                symbols.add(s);
-            }
-        }
-
-        List<byte[]> revocation_ids = ser.revocation_identifiers();
-
-        return Right(new Biscuit(authority, blocks, symbols, Option.none(), revocation_ids));
-    }
-
-    public Either<Error.FormatError, byte[]> seal(byte[] secret) {
-        Either<Error.FormatError, SealedBiscuit> res = SealedBiscuit.make(authority, blocks, secret);
-        if(res.isLeft()) {
-            Error.FormatError e = res.getLeft();
-            return Left(e);
-        }
-
-        SealedBiscuit b = res.get();
-        return b.serialize();
-    }
-
-    public boolean is_sealed() {
-        return this.container.isEmpty();
+    @Deprecated
+    public String serialize_b64() throws Error.FormatError.SerializationError {
+        return Base64.getUrlEncoder().encodeToString(serialize());
     }
 
     /**
-     * Verifies that a token is valid for a root public key
-     * @param public_key
-     * @return
+     * Serializes a token to base 64 url String using RFC4648_URLSAFE
+     * @return String
+     * @throws Error.FormatError.SerializationError
      */
-    public Either<Error, Void> check_root_key(PublicKey public_key) {
+    public String serialize_b64url() throws Error.FormatError.SerializationError {
+        return Base64.getUrlEncoder().encodeToString(serialize());
+    }
+
+    public byte[] seal() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         if (this.container.isEmpty()) {
-            return Left(new Error.Sealed());
-        } else {
-            return this.container.get().check_root_key(public_key);
+            throw new Error.FormatError.SerializationError("no internal container");
         }
+
+        SerializedBiscuit ser = this.container.get();
+        Either<Error, Void> res = ser.seal();
+        if (res.isLeft()) {
+            throw res.getLeft();
+        }
+
+        return ser.serialize();
+    }
+
+    public boolean is_sealed() {
+        return this.container.isEmpty() ||
+                this.container.get().proof.secretKey.isEmpty();
     }
 
     Either<Error, World> generate_world() {
         World world = new World();
-        long authority_index = symbols.get("authority").get();
-        long ambient_index = symbols.get("ambient").get();
 
-        for(Fact fact: this.authority.facts) {
+        for (Fact fact : this.authority.facts) {
             world.add_fact(fact);
         }
 
-        for(Rule rule: this.authority.rules) {
-            world.add_privileged_rule(rule);
+        for (Rule rule : this.authority.rules) {
+            world.add_rule(rule);
         }
 
-        for(int i = 0; i < this.blocks.size(); i++) {
+        for (int i = 0; i < this.blocks.size(); i++) {
             Block b = this.blocks.get(i);
-            if (b.index != i + 1) {
-                return Left(new Error.InvalidBlockIndex(1 + this.blocks.size(), this.blocks.get(i).index));
-            }
 
             for (Fact fact : b.facts) {
-                if (fact.predicate().ids().get(0).equals(new ID.Symbol(authority_index)) ||
-                        fact.predicate().ids().get(0).equals(new ID.Symbol(ambient_index))) {
-                    return Left(new Error.FailedLogic(new LogicError.InvalidBlockFact(i, symbols.print_fact(fact))));
-                }
-
                 world.add_fact(fact);
             }
 
@@ -317,47 +313,42 @@ public class Biscuit {
 
         List<RevocationIdentifier> revocation_ids = this.revocation_identifiers();
         long rev = symbols.get("revocation_id").get();
-        for(int i = 0; i < revocation_ids.size(); i++) {
+        for (int i = 0; i < revocation_ids.size(); i++) {
             byte[] id = revocation_ids.get(i).getBytes();
-            world.add_fact(new Fact(new Predicate(rev, Arrays.asList(new ID.Integer(i), new ID.Bytes(id)))));
+            world.add_fact(new Fact(new Predicate(rev, Arrays.asList(new Term.Integer(i), new Term.Bytes(id)))));
         }
 
         return Right(world);
     }
 
-    Either<Error, HashMap<String, Set<Fact>>> check(SymbolTable symbols, List<Fact> ambient_facts, List<Rule> ambient_rules,
-                                                    List<Check> verifier_checks, HashMap<String, Rule> queries){
+    HashMap<String, Set<Fact>> check(SymbolTable symbols, List<Fact> ambient_facts, List<Rule> ambient_rules,
+                                     List<Check> authorizer_checks, HashMap<String, Rule> queries) throws Error {
         Either<Error, World> wres = this.generate_world();
 
         if (wres.isLeft()) {
             Error e = wres.getLeft();
-            return Left(e);
+            throw e;
         }
 
         World world = wres.get();
 
-        for(Fact fact: ambient_facts) {
+        for (Fact fact : ambient_facts) {
             world.add_fact(fact);
         }
 
-        for(Rule rule: ambient_rules) {
-            world.add_privileged_rule(rule);
+        for (Rule rule : ambient_rules) {
+            world.add_rule(rule);
         }
 
-        HashSet<Long> restricted_symbols = new HashSet<>();
-        restricted_symbols.add(symbols.get("authority").get());
-        restricted_symbols.add(symbols.get("ambient").get());
-        //System.out.println("world after adding ambient rules:\n"+symbols.print_world(world));
-        world.run(restricted_symbols);
-        //System.out.println("world after running rules:\n"+symbols.print_world(world));
+        world.run(symbols);
 
         ArrayList<FailedCheck> errors = new ArrayList<>();
         for (int j = 0; j < this.authority.checks.size(); j++) {
             boolean successful = false;
             Check c = this.authority.checks.get(j);
 
-            for(int k = 0; k < c.queries().size(); k++) {
-                Set<Fact> res = world.query_rule(c.queries().get(k));
+            for (int k = 0; k < c.queries().size(); k++) {
+                Set<Fact> res = world.query_rule(c.queries().get(k), symbols);
                 if (!res.isEmpty()) {
                     successful = true;
                     break;
@@ -369,12 +360,12 @@ public class Biscuit {
             }
         }
 
-        for (int j = 0; j < verifier_checks.size(); j++) {
+        for (int j = 0; j < authorizer_checks.size(); j++) {
             boolean successful = false;
-            Check c = verifier_checks.get(j);
+            Check c = authorizer_checks.get(j);
 
-            for(int k = 0; k < c.queries().size(); k++) {
-                Set<Fact> res = world.query_rule(c.queries().get(k));
+            for (int k = 0; k < c.queries().size(); k++) {
+                Set<Fact> res = world.query_rule(c.queries().get(k), symbols);
                 if (!res.isEmpty()) {
                     successful = true;
                     break;
@@ -382,19 +373,19 @@ public class Biscuit {
             }
 
             if (!successful) {
-                errors.add(new FailedCheck.FailedVerifier(j, symbols.print_check(verifier_checks.get(j))));
+                errors.add(new FailedCheck.FailedAuthorizer(j + 1, symbols.print_check(authorizer_checks.get(j))));
             }
         }
 
-        for(int i = 0; i < this.blocks.size(); i++) {
+        for (int i = 0; i < this.blocks.size(); i++) {
             Block b = this.blocks.get(i);
 
             for (int j = 0; j < b.checks.size(); j++) {
                 boolean successful = false;
                 Check c = b.checks.get(j);
 
-                for(int k = 0; k < c.queries().size(); k++) {
-                    Set<Fact> res = world.query_rule(c.queries().get(k));
+                for (int k = 0; k < c.queries().size(); k++) {
+                    Set<Fact> res = world.query_rule(c.queries().get(k), symbols);
                     if (!res.isEmpty()) {
                         successful = true;
                         break;
@@ -402,84 +393,88 @@ public class Biscuit {
                 }
 
                 if (!successful) {
-                    errors.add(new FailedCheck.FailedBlock(b.index, j, symbols.print_check(b.checks.get(j))));
+                    errors.add(new FailedCheck.FailedBlock(i + 1, j, symbols.print_check(b.checks.get(j))));
                 }
             }
         }
 
-        HashMap<String, Set<Fact>> query_results = new HashMap();
-        for(String name: queries.keySet()) {
-            Set<Fact> res = world.query_rule(queries.get(name));
+        HashMap<String, Set<Fact>> query_results = new HashMap<>();
+        for (String name : queries.keySet()) {
+            Set<Fact> res = world.query_rule(queries.get(name), symbols);
             query_results.put(name, res);
         }
 
-        if(errors.isEmpty()) {
-            return Right(query_results);
+        if (errors.isEmpty()) {
+            return query_results;
         } else {
-            return Left(new Error.FailedLogic(new LogicError.FailedChecks(errors)));
+            throw new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), errors));
         }
     }
 
     /**
      * Creates a Block builder
+     *
      * @return
      */
     public com.clevercloud.biscuit.token.builder.Block create_block() {
-        return new com.clevercloud.biscuit.token.builder.Block(1+this.blocks.size(), new SymbolTable(this.symbols));
+        return new com.clevercloud.biscuit.token.builder.Block(1 + this.blocks.size(), new SymbolTable(this.symbols));
     }
 
     /**
      * Generates a new token from an existing one and a new block
-     * @param rng random number generator
-     * @param keypair ephemeral key pair
+     *
      * @param block new block (should be generated from a Block builder)
      * @return
      */
-    public Either<Error, Biscuit> attenuate(final SecureRandom rng, final KeyPair keypair, Block block) {
-        Either<Error, Biscuit> e = this.copy();
+    public Biscuit attenuate(com.clevercloud.biscuit.token.builder.Block block) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+        SecureRandom rng = new SecureRandom();
+        KeyPair keypair = new KeyPair(rng);
+        return attenuate(rng, keypair, block.build());
+    }
 
-        if (e.isLeft()) {
-            return Left(e.getLeft());
+    /**
+     * Generates a new token from an existing one and a new block
+     *
+     * @param rng     random number generator
+     * @param keypair ephemeral key pair
+     * @param block   new block (should be generated from a Block builder)
+     * @return
+     */
+    public Biscuit attenuate(final SecureRandom rng, final KeyPair keypair, Block block) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+        Biscuit copiedBiscuit = this.copy();
+
+        if (!Collections.disjoint(copiedBiscuit.symbols.symbols, block.symbols.symbols)) {
+            throw new Error.SymbolTableOverlap();
         }
 
-        Biscuit copiedBiscuit = e.get();
-
-        if(!Collections.disjoint(copiedBiscuit.symbols.symbols, block.symbols.symbols)) {
-            return Left(new Error.SymbolTableOverlap());
-        }
-
-        if(block.index != 1 + this.blocks.size()) {
-            return Left(new Error.InvalidBlockIndex(1 + copiedBiscuit.blocks.size(), block.index));
-        }
-
-        Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.container.get().append(rng, keypair, block);
-        if(containerRes.isLeft()) {
+        Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.container.get().append(keypair, block);
+        if (containerRes.isLeft()) {
             Error.FormatError error = containerRes.getLeft();
-            return Left(error);
+            throw error;
         }
         SerializedBiscuit container = containerRes.get();
 
         SymbolTable symbols = new SymbolTable(copiedBiscuit.symbols);
-        for(String s: block.symbols.symbols) {
+        for (String s : block.symbols.symbols) {
             symbols.add(s);
         }
 
         ArrayList<Block> blocks = new ArrayList<>();
-        for(Block b: copiedBiscuit.blocks) {
+        for (Block b : copiedBiscuit.blocks) {
             blocks.add(b);
         }
         blocks.add(block);
 
         List<byte[]> revocation_ids = container.revocation_identifiers();
 
-        return Right(new Biscuit(copiedBiscuit.authority, blocks, symbols, Option.some(container), revocation_ids));
+        return new Biscuit(copiedBiscuit.authority, blocks, symbols, Option.some(container), revocation_ids);
     }
 
     public List<List<com.clevercloud.biscuit.datalog.Check>> checks() {
-        ArrayList<List<com.clevercloud.biscuit.datalog.Check>> l = new ArrayList();
-        l.add(new ArrayList(this.authority.checks));
+        ArrayList<List<com.clevercloud.biscuit.datalog.Check>> l = new ArrayList<>();
+        l.add(new ArrayList<>(this.authority.checks));
 
-        for(Block b: this.blocks) {
+        for (Block b : this.blocks) {
             l.add(new ArrayList<>(b.checks));
         }
 
@@ -493,15 +488,15 @@ public class Biscuit {
     }
 
     public List<Option<String>> context() {
-        ArrayList res = new ArrayList();
-        if(this.authority.context.isEmpty()) {
+        ArrayList<Option<String>> res = new ArrayList<>();
+        if (this.authority.context.isEmpty()) {
             res.add(Option.none());
         } else {
             res.add(Option.some(this.authority.context));
         }
 
-        for(Block b: this.blocks) {
-            if(b.context.isEmpty()) {
+        for (Block b : this.blocks) {
+            if (b.context.isEmpty()) {
                 res.add(Option.none());
             } else {
                 res.add(Option.some(b.context));
@@ -521,7 +516,7 @@ public class Biscuit {
         s.append("\n\tauthority: ");
         s.append(this.authority.print(this.symbols));
         s.append("\n\tblocks: [\n");
-        for(Block b: this.blocks) {
+        for (Block b : this.blocks) {
             s.append("\t\t");
             s.append(b.print(this.symbols));
             s.append("\n");
@@ -547,13 +542,13 @@ public class Biscuit {
         return syms;
     }
 
-    public Either<Error, Biscuit> copy() {
-        return this
-                .serialize()
-                .map(Biscuit::from_bytes)
-                .flatMap(e -> {
-                    Either<Error, Biscuit> y = Either.narrow(e);
-                    return y;
-                });
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+
+
+    public Biscuit copy() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+        return Biscuit.unsafe_from_bytes(this.serialize(), this.symbols);
     }
 }

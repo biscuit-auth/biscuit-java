@@ -24,8 +24,8 @@ public class Parser {
         } else {
             Tuple2<String, Predicate> t = res.get();
 
-            if(!t._1.isEmpty()) {
-                return Either.left(new Error(s, "the string was not entirely parsed, remaining: "+t._1));
+            if (!t._1.isEmpty()) {
+                return Either.left(new Error(s, "the string was not entirely parsed, remaining: " + t._1));
             }
 
             return Either.right(new Tuple2<>(t._1, new Fact(t._2)));
@@ -57,16 +57,22 @@ public class Parser {
 
         Tuple3<String, List<Predicate>, List<Expression>> body = bodyRes.get();
 
-        if(!body._1.isEmpty()) {
-            return Either.left(new Error(s, "the string was not entirely parsed, remaining: "+body._1));
+        if (!body._1.isEmpty()) {
+            return Either.left(new Error(s, "the string was not entirely parsed, remaining: " + body._1));
         }
 
-        return Either.right(new Tuple2<>(body._1, new Rule(head, body._2, body._3)));
+        Rule rule = new Rule(head, body._2, body._3);
+        Either<String, Rule> valid = rule.validate_variables();
+        if (valid.isLeft()) {
+            return Either.left(new Error(s, valid.getLeft()));
+        }
+
+        return Either.right(new Tuple2<>(body._1, rule));
     }
 
     public static Either<Error, Tuple2<String, Check>> check(String s) {
         String prefix = "check if";
-        if(!s.startsWith(prefix)) {
+        if (!s.startsWith(prefix)) {
             return Either.left(new Error(s, "missing check prefix"));
         }
 
@@ -80,8 +86,8 @@ public class Parser {
 
         Tuple2<String, List<Rule>> t = bodyRes.get();
 
-        if(!t._1.isEmpty()) {
-            return Either.left(new Error(s, "the string was not entirely parsed, remaining: "+t._1));
+        if (!t._1.isEmpty()) {
+            return Either.left(new Error(s, "the string was not entirely parsed, remaining: " + t._1));
         }
 
         return Either.right(new Tuple2<>(t._1, new Check(t._2)));
@@ -92,9 +98,9 @@ public class Parser {
 
         String allow = "allow if";
         String deny = "deny if";
-        if(s.startsWith(allow)) {
+        if (s.startsWith(allow)) {
             s = s.substring(allow.length());
-        } else if(s.startsWith(deny)) {
+        } else if (s.startsWith(deny)) {
             p = Policy.Kind.Deny;
             s = s.substring(deny.length());
         } else {
@@ -109,8 +115,8 @@ public class Parser {
 
         Tuple2<String, List<Rule>> t = bodyRes.get();
 
-        if(!t._1.isEmpty()) {
-            return Either.left(new Error(s, "the string was not entirely parsed, remaining: "+t._1));
+        if (!t._1.isEmpty()) {
+            return Either.left(new Error(s, "the string was not entirely parsed, remaining: " + t._1));
         }
 
         return Either.right(new Tuple2<>(t._1, new Policy(t._2, p)));
@@ -129,14 +135,14 @@ public class Parser {
         queries.add(new Rule(new Predicate("query", new ArrayList<>()), body._2, body._3));
 
         int i = 0;
-        while(true) {
-            if(s.length() == 0) {
+        while (true) {
+            if (s.length() == 0) {
                 break;
             }
 
             s = space(s);
 
-            if(!s.startsWith("or")) {
+            if (!s.startsWith("or")) {
                 break;
             }
             s = s.substring(2);
@@ -159,17 +165,17 @@ public class Parser {
         List<Predicate> predicates = new ArrayList<Predicate>();
         List<Expression> expressions = new ArrayList<>();
 
-        while(true) {
+        while (true) {
             s = space(s);
 
             Either<Error, Tuple2<String, Predicate>> res = predicate(s);
-            if(res.isRight()) {
+            if (res.isRight()) {
                 Tuple2<String, Predicate> t = res.get();
                 s = t._1;
                 predicates.add(t._2);
             } else {
                 Either<Error, Tuple2<String, Expression>> res2 = expression(s);
-                if(res2.isRight()) {
+                if (res2.isRight()) {
                     Tuple2<String, Expression> t2 = res2.get();
                     s = t2._1;
                     expressions.add(t2._2);
@@ -180,7 +186,7 @@ public class Parser {
 
             s = space(s);
 
-            if(s.length() ==0 || s.charAt(0) != ',') {
+            if (s.length() == 0 || s.charAt(0) != ',') {
                 break;
             } else {
                 s = s.substring(1);
@@ -193,18 +199,18 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<String, Predicate>> predicate(String s) {
-        Tuple2<String, String> tn = take_while(s, (c) -> Character.isAlphabetic(c) || c == '_');
+        Tuple2<String, String> tn = take_while(s, (c) -> Character.isAlphabetic(c) || Character.isDigit(c) || c == '_' || c == ':');
         String name = tn._1;
         s = tn._2;
 
         s = space(s);
-        if(s.length() ==  0 || s.charAt(0) != '(') {
+        if (s.length() == 0 || s.charAt(0) != '(') {
             return Either.left(new Error(s, "opening parens not found"));
         }
         s = s.substring(1);
 
         List<Term> terms = new ArrayList<Term>();
-        while(true) {
+        while (true) {
 
             s = space(s);
 
@@ -219,7 +225,7 @@ public class Parser {
 
             s = space(s);
 
-            if(s.length() == 0 ||s.charAt(0) != ',') {
+            if (s.length() == 0 || s.charAt(0) != ',') {
                 break;
             } else {
                 s = s.substring(1);
@@ -241,13 +247,13 @@ public class Parser {
         s = tn._2;
 
         s = space(s);
-        if(s.length() ==  0 || s.charAt(0) != '(') {
+        if (s.length() == 0 || s.charAt(0) != '(') {
             return Either.left(new Error(s, "opening parens not found"));
         }
         s = s.substring(1);
 
         List<Term> terms = new ArrayList<Term>();
-        while(true) {
+        while (true) {
 
             s = space(s);
 
@@ -262,7 +268,7 @@ public class Parser {
 
             s = space(s);
 
-            if(s.length() == 0 ||s.charAt(0) != ',') {
+            if (s.length() == 0 || s.charAt(0) != ',') {
                 break;
             } else {
                 s = s.substring(1);
@@ -287,44 +293,39 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<String, Term>> term(String s) {
-        Either<Error, Tuple2<String, Term.Symbol>> res1 = symbol(s);
-        if(res1.isRight()) {
-            Tuple2<String, Term.Symbol> t = res1.get();
-            return Either.right(new Tuple2<String, Term>(t._1, t._2));
-        }
 
         Either<Error, Tuple2<String, Term.Variable>> res5 = variable(s);
-        if(res5.isRight()) {
+        if (res5.isRight()) {
             Tuple2<String, Term.Variable> t = res5.get();
             return Either.right(new Tuple2<String, Term>(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Str>> res2 = string(s);
-        if(res2.isRight()) {
+        if (res2.isRight()) {
             Tuple2<String, Term.Str> t = res2.get();
             return Either.right(new Tuple2<String, Term>(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Set>> res7 = set(s);
-        if(res7.isRight()) {
+        if (res7.isRight()) {
             Tuple2<String, Term.Set> t = res7.get();
             return Either.right(new Tuple2<String, Term>(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Bool>> res6 = bool(s);
-        if(res6.isRight()) {
+        if (res6.isRight()) {
             Tuple2<String, Term.Bool> t = res6.get();
             return Either.right(new Tuple2<>(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Date>> res4 = date(s);
-        if(res4.isRight()) {
+        if (res4.isRight()) {
             Tuple2<String, Term.Date> t = res4.get();
             return Either.right(new Tuple2<String, Term>(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Integer>> res3 = integer(s);
-        if(res3.isRight()) {
+        if (res3.isRight()) {
             Tuple2<String, Term.Integer> t = res3.get();
             return Either.right(new Tuple2<String, Term>(t._1, t._2));
         }
@@ -333,42 +334,36 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<String, Term>> fact_term(String s) {
-        if(s.length() > 0 && s.charAt(0) == '$') {
+        if (s.length() > 0 && s.charAt(0) == '$') {
             return Either.left(new Error(s, "variables are not allowed in facts"));
         }
 
-        Either<Error, Tuple2<String, Term.Symbol>> res1 = symbol(s);
-        if(res1.isRight()) {
-            Tuple2<String, Term.Symbol> t = res1.get();
-            return Either.right(new Tuple2<String, Term>(t._1, t._2));
-        }
-
         Either<Error, Tuple2<String, Term.Str>> res2 = string(s);
-        if(res2.isRight()) {
+        if (res2.isRight()) {
             Tuple2<String, Term.Str> t = res2.get();
             return Either.right(new Tuple2<String, Term>(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Set>> res7 = set(s);
-        if(res7.isRight()) {
+        if (res7.isRight()) {
             Tuple2<String, Term.Set> t = res7.get();
             return Either.right(new Tuple2<String, Term>(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Bool>> res6 = bool(s);
-        if(res6.isRight()) {
+        if (res6.isRight()) {
             Tuple2<String, Term.Bool> t = res6.get();
             return Either.right(new Tuple2<>(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Date>> res4 = date(s);
-        if(res4.isRight()) {
+        if (res4.isRight()) {
             Tuple2<String, Term.Date> t = res4.get();
             return Either.right(new Tuple2<String, Term>(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Integer>> res3 = integer(s);
-        if(res3.isRight()) {
+        if (res3.isRight()) {
             Tuple2<String, Term.Integer> t = res3.get();
             return Either.right(new Tuple2<String, Term>(t._1, t._2));
         }
@@ -377,21 +372,8 @@ public class Parser {
         return Either.left(new Error(s, "unrecognized value"));
     }
 
-    public static Either<Error, Tuple2<String, Term.Symbol>> symbol(String s) {
-        if(s.charAt(0) !='#') {
-            return Either.left(new Error(s, "not a symbol"));
-        }
-
-        Tuple2<String, String> t = take_while(s.substring(1),
-                (c) -> Character.isAlphabetic(c) || Character.isDigit(c) || c == '_');
-        String name = t._1;
-        String remaining = t._2;
-
-        return Either.right(new Tuple2<String, Term.Symbol>(remaining, (Term.Symbol) s(name)));
-    }
-
     public static Either<Error, Tuple2<String, Term.Str>> string(String s) {
-        if(s.charAt(0) !='"') {
+        if (s.charAt(0) != '"') {
             return Either.left(new Error(s, "not a string"));
         }
 
@@ -399,34 +381,34 @@ public class Parser {
         for (int i = 1; i < s.length(); i++) {
             char c = s.charAt(i);
 
-            if(c == '\\' && s.charAt(i+1) == '"') {
+            if (c == '\\' && s.charAt(i + 1) == '"') {
                 i += 1;
                 continue;
             }
 
             if (c == '"') {
-                index = i-1;
+                index = i - 1;
                 break;
             }
         }
 
-        if(index == s.length()) {
+        if (index == s.length()) {
             return Either.left(new Error(s, "end of string not found"));
         }
 
-        if (s.charAt(index+1) != '"'){
+        if (s.charAt(index + 1) != '"') {
             return Either.left(new Error(s, "ending double quote not found"));
         }
 
-        String string = s.substring(1, index+1);
-        String remaining = s.substring(index+2);
+        String string = s.substring(1, index + 1);
+        String remaining = s.substring(index + 2);
 
         return Either.right(new Tuple2<String, Term.Str>(remaining, (Term.Str) Utils.string(string)));
     }
 
     public static Either<Error, Tuple2<String, Term.Integer>> integer(String s) {
         int index = 0;
-        if(s.charAt(0) == '-') {
+        if (s.charAt(0) == '-') {
             index += 1;
         }
 
@@ -434,7 +416,7 @@ public class Parser {
         for (int i = index; i < s.length(); i++) {
             char c = s.charAt(i);
 
-            if(!Character.isDigit(c)) {
+            if (!Character.isDigit(c)) {
                 index2 = i;
                 break;
             }
@@ -464,21 +446,21 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<String, Term.Variable>> variable(String s) {
-        if(s.charAt(0) !='$') {
+        if (s.charAt(0) != '$') {
             return Either.left(new Error(s, "not a variable"));
         }
 
-        Tuple2<String, String> t = take_while(s.substring(1), (c) -> Character.isAlphabetic(c)|| Character.isDigit(c) || c == '_');
+        Tuple2<String, String> t = take_while(s.substring(1), (c) -> Character.isAlphabetic(c) || Character.isDigit(c) || c == '_');
 
         return Either.right(new Tuple2<String, Term.Variable>(t._2, (Term.Variable) var(t._1)));
     }
 
     public static Either<Error, Tuple2<String, Term.Bool>> bool(String s) {
         boolean b;
-        if(s.startsWith("true")) {
+        if (s.startsWith("true")) {
             b = true;
             s = s.substring(4);
-        } else if(s.startsWith("false")) {
+        } else if (s.startsWith("false")) {
             b = false;
             s = s.substring(5);
         } else {
@@ -489,14 +471,14 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<String, Term.Set>> set(String s) {
-        if(s.length() ==  0 || s.charAt(0) !='[') {
+        if (s.length() == 0 || s.charAt(0) != '[') {
             return Either.left(new Error(s, "not a set"));
         }
 
         s = s.substring(1);
 
         HashSet<Term> terms = new HashSet<Term>();
-        while(true) {
+        while (true) {
 
             s = space(s);
 
@@ -516,7 +498,7 @@ public class Parser {
 
             s = space(s);
 
-            if(s.length() == 0 ||s.charAt(0) != ',') {
+            if (s.length() == 0 || s.charAt(0) != ',') {
                 break;
             } else {
                 s = s.substring(1);
@@ -542,7 +524,7 @@ public class Parser {
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
 
-            if(c != ' ' && c != '\t' && c != '\r' && c != '\n') {
+            if (c != ' ' && c != '\t' && c != '\r' && c != '\n') {
                 break;
             }
             index += 1;
@@ -556,7 +538,7 @@ public class Parser {
         for (int i = 0; i < s.length(); i++) {
             Character c = s.charAt(i);
 
-            if(!f.apply(c)) {
+            if (!f.apply(c)) {
                 index = i;
                 break;
             }

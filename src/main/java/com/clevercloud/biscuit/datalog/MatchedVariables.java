@@ -7,11 +7,11 @@ import java.io.Serializable;
 import java.util.*;
 
 public final class MatchedVariables implements Serializable {
-   private final Map<Long, Optional<ID>> variables;
+   private final Map<Long, Optional<Term>> variables;
 
-   public boolean insert(final long key, final ID value) {
+   public boolean insert(final long key, final Term value) {
       if (this.variables.containsKey(key)) {
-         final Optional<ID> val = this.variables.get(key);
+         final Optional<Term> val = this.variables.get(key);
          if (val.isPresent()) {
             return val.get().equals(value);
          } else {
@@ -27,9 +27,9 @@ public final class MatchedVariables implements Serializable {
       return this.variables.values().stream().allMatch((v) -> v.isPresent());
    }
 
-   public Optional<Map<Long, ID>> complete() {
-      final Map<Long, ID> variables = new HashMap<>();
-      for (final Map.Entry<Long, Optional<ID>> entry : this.variables.entrySet()) {
+   public Optional<Map<Long, Term>> complete() {
+      final Map<Long, Term> variables = new HashMap<>();
+      for (final Map.Entry<Long, Optional<Term>> entry : this.variables.entrySet()) {
          if (entry.getValue().isPresent()) {
             variables.put(entry.getKey(), entry.getValue().get());
          } else {
@@ -41,7 +41,7 @@ public final class MatchedVariables implements Serializable {
 
    public MatchedVariables clone() {
       final MatchedVariables other = new MatchedVariables(this.variables.keySet());
-      for (final Map.Entry<Long, Optional<ID>> entry : this.variables.entrySet()) {
+      for (final Map.Entry<Long, Optional<Term>> entry : this.variables.entrySet()) {
          if (entry.getValue().isPresent()) {
             other.variables.put(entry.getKey(), entry.getValue());
          }
@@ -56,19 +56,19 @@ public final class MatchedVariables implements Serializable {
       }
    }
 
-   public Option<Map<Long, ID>> check_expressions(List<Expression> expressions) {
-      final Optional<Map<Long, ID>> vars = this.complete();
+   public Option<Map<Long, Term>> check_expressions(List<Expression> expressions, SymbolTable symbols) {
+      final Optional<Map<Long, Term>> vars = this.complete();
       if (vars.isPresent()) {
-         Map<Long, ID> variables = vars.get();
+         Map<Long, Term> variables = vars.get();
 
          for(Expression e: expressions) {
-            Option<ID> res = e.evaluate(variables);
+            Option<Term> res = e.evaluate(variables, symbols);
 
             if(res.isEmpty()) {
                return Option.none();
             }
 
-            if(!res.get().equals(new ID.Bool(true))) {
+            if(!res.get().equals(new Term.Bool(true))) {
                return Option.none();
             }
          }

@@ -47,6 +47,7 @@ World {
     "right(#authority, \"file1\", #write)",
     "right(#authority, \"file2\", #read)",
 ]
+  privileged rules: []
   rules: []
   checks: [
     "Block[1][0]: check if resource(#ambient, $0), operation(#ambient, #read), right(#authority, $0, #read)",
@@ -347,6 +348,7 @@ World {
     "revocation_id(1, hex:e1ad30e387ff5b866bf631ac3c572256730cba0612d88054a863aa8c0702dbd6)",
     "time(#ambient, 2020-12-21T09:23:12+00:00)",
 ]
+  privileged rules: []
   rules: []
   checks: [
     "Block[1][0]: check if resource(#ambient, \"file1\")",
@@ -400,11 +402,14 @@ World {
     "resource(#ambient, \"file1\")",
     "revocation_id(0, hex:20262f14cd4d28aa7e95ec93e94c28faf9aac1e7b720fb47f177aea577b18691)",
     "revocation_id(1, hex:9065c0f8a4abad0c01877a2a9427e948688fbe296069eeef021179d5b936e260)",
+    "right(#authority, \"file1\", #read)",
+    "right(#authority, \"file1\", #write)",
 ]
-  rules: [
+  privileged rules: [
     "right(#authority, $1, #read) <- resource(#ambient, $1), owner(#ambient, $0, $1)",
     "right(#authority, $1, #write) <- resource(#ambient, $1), owner(#ambient, $0, $1)",
 ]
+  rules: []
   checks: [
     "Block[1][0]: check if right(#authority, $0, $1), resource(#ambient, $0), operation(#ambient, $1)",
     "Block[1][1]: check if resource(#ambient, $0), owner(#ambient, #alice, $0)",
@@ -413,7 +418,7 @@ World {
     "allow if true",
 ]
 }
-validation: `Ok(())`
+validation: `Ok(0)`
 
 ------------------------------
 
@@ -446,6 +451,7 @@ World {
     "revocation_id(0, hex:ea25b30574845105fb8def0856560d07182bf5ab14fd4d32040431a69d788534)",
     "right(#authority, \"file1\", #read)",
 ]
+  privileged rules: []
   rules: []
   checks: [
     "Verifier[0]: check if right(#authority, $0, $1), resource(#ambient, $0), operation(#ambient, $1)",
@@ -486,6 +492,7 @@ World {
     "resource(#ambient, \"file1\")",
     "revocation_id(0, hex:a5b6e79d15461ee3c304802c00dfa4237c3702f6dd8a1dd148a7b4dfba18ef40)",
 ]
+  privileged rules: []
   rules: []
   checks: [
     "Block[0][0]: check if resource(#ambient, \"file1\")",
@@ -494,7 +501,7 @@ World {
     "allow if true",
 ]
 }
-validation for "file1": `Ok(())`
+validation for "file1": `Ok(0)`
 verifier world:
 World {
   facts: [
@@ -502,6 +509,7 @@ World {
     "resource(#ambient, \"file2\")",
     "revocation_id(0, hex:a5b6e79d15461ee3c304802c00dfa4237c3702f6dd8a1dd148a7b4dfba18ef40)",
 ]
+  privileged rules: []
   rules: []
   checks: [
     "Block[0][0]: check if resource(#ambient, \"file1\")",
@@ -557,7 +565,9 @@ World {
     "right(#authority, \"file1\", #read)",
     "right(#authority, \"file2\", #read)",
     "time(#ambient, 2020-12-21T09:23:12+00:00)",
+    "valid_date(\"file1\")",
 ]
+  privileged rules: []
   rules: [
     "valid_date(\"file1\") <- time(#ambient, $0), resource(#ambient, \"file1\"), $0 <= 2030-12-31T12:59:59+00:00",
     "valid_date($1) <- time(#ambient, $0), resource(#ambient, $1), $0 <= 1999-12-31T12:59:59+00:00, ![\"file1\"].contains($1)",
@@ -569,7 +579,7 @@ World {
     "allow if true",
 ]
 }
-validation for "file1": `Ok(())`
+validation for "file1": `Ok(0)`
 verifier world:
 World {
   facts: [
@@ -580,6 +590,7 @@ World {
     "right(#authority, \"file2\", #read)",
     "time(#ambient, 2020-12-21T09:23:12+00:00)",
 ]
+  privileged rules: []
   rules: [
     "valid_date(\"file1\") <- time(#ambient, $0), resource(#ambient, \"file1\"), $0 <= 2030-12-31T12:59:59+00:00",
     "valid_date($1) <- time(#ambient, $0), resource(#ambient, $1), $0 <= 1999-12-31T12:59:59+00:00, ![\"file1\"].contains($1)",
@@ -622,6 +633,7 @@ World {
     "resource(#ambient, \"file1\")",
     "revocation_id(0, hex:a3a87a95f62fe215a0a83d462b8bb0e8b030d7d4d933706d19c3461a85bd3e83)",
 ]
+  privileged rules: []
   rules: []
   checks: [
     "Block[0][0]: check if resource(#ambient, $0), $0.matches(\"file[0-9]+.txt\")",
@@ -637,6 +649,7 @@ World {
     "resource(#ambient, \"file123.txt\")",
     "revocation_id(0, hex:a3a87a95f62fe215a0a83d462b8bb0e8b030d7d4d933706d19c3461a85bd3e83)",
 ]
+  privileged rules: []
   rules: []
   checks: [
     "Block[0][0]: check if resource(#ambient, $0), $0.matches(\"file[0-9]+.txt\")",
@@ -645,7 +658,7 @@ World {
     "allow if true",
 ]
 }
-validation for "file123.txt": `Ok(())`
+validation for "file123.txt": `Ok(0)`
 
 ------------------------------
 
@@ -676,6 +689,7 @@ World {
     "must_be_present(#authority, \"hello\")",
     "revocation_id(0, hex:1ded979c6661e34b09cedf85c778ab0f0304e7c0ca44382348e76147cb1fa3f3)",
 ]
+  privileged rules: []
   rules: []
   checks: [
     "Verifier[0]: check if must_be_present(#authority, $0) or must_be_present($0)",
@@ -684,7 +698,7 @@ World {
     "allow if true",
 ]
 }
-validation: `Ok(())`
+validation: `Ok(0)`
 
 ------------------------------
 
@@ -721,6 +735,7 @@ World {
     "revocation_id(0, hex:8f03890eeaa997cd03da71115168e41425b2be82731026225b0c5b87163e4d8e)",
     "revocation_id(1, hex:94fff36a9fa4d4149ab1488bf4aa84ed0bab0075cc7d051270367fb9c9688795)",
 ]
+  privileged rules: []
   rules: []
   checks: [
     "Block[0][0]: check if resource(#ambient, #hello)",
@@ -744,7 +759,6 @@ biscuit: Biscuit {
             rules: []
             checks: [
                 check if true,
-                check if !false,
                 check if !false,
                 check if false or true,
                 check if 1 < 2,
@@ -782,43 +796,129 @@ biscuit: Biscuit {
 verifier world:
 World {
   facts: [
-    "revocation_id(0, hex:d3258e24583d1482da74b2a4864074428659ebd7f5c35d42d97ce33b3f32f59d)",
+    "revocation_id(0, hex:28f62066e45ad00c448433083a283d48a14b05cc07adf533d90b216998ae2648)",
 ]
+  privileged rules: []
   rules: []
   checks: [
     "Block[0][0]: check if true",
     "Block[0][1]: check if !false",
-    "Block[0][2]: check if !false",
-    "Block[0][3]: check if false or true",
-    "Block[0][4]: check if 1 < 2",
-    "Block[0][5]: check if 2 > 1",
-    "Block[0][6]: check if 1 <= 2",
-    "Block[0][7]: check if 1 <= 1",
-    "Block[0][8]: check if 2 >= 1",
-    "Block[0][9]: check if 2 >= 2",
-    "Block[0][10]: check if 3 == 3",
-    "Block[0][11]: check if 1 + 2 * 3 - 4 / 2 == 5",
-    "Block[0][12]: check if \"hello world\".starts_with(\"hello\") && \"hello world\".ends_with(\"world\")",
-    "Block[0][13]: check if \"aaabde\".matches(\"a*c?.e\")",
-    "Block[0][14]: check if \"abcD12\" == \"abcD12\"",
-    "Block[0][15]: check if 2019-12-04T09:46:41+00:00 < 2020-12-04T09:46:41+00:00",
-    "Block[0][16]: check if 2020-12-04T09:46:41+00:00 > 2019-12-04T09:46:41+00:00",
-    "Block[0][17]: check if 2019-12-04T09:46:41+00:00 <= 2020-12-04T09:46:41+00:00",
-    "Block[0][18]: check if 2020-12-04T09:46:41+00:00 >= 2020-12-04T09:46:41+00:00",
-    "Block[0][19]: check if 2020-12-04T09:46:41+00:00 >= 2019-12-04T09:46:41+00:00",
-    "Block[0][20]: check if 2020-12-04T09:46:41+00:00 >= 2020-12-04T09:46:41+00:00",
-    "Block[0][21]: check if 2020-12-04T09:46:41+00:00 == 2020-12-04T09:46:41+00:00",
-    "Block[0][22]: check if #abc == #abc",
-    "Block[0][23]: check if hex:12ab == hex:12ab",
-    "Block[0][24]: check if [1, 2].contains(2)",
-    "Block[0][25]: check if [2019-12-04T09:46:41+00:00, 2020-12-04T09:46:41+00:00].contains(2020-12-04T09:46:41+00:00)",
-    "Block[0][26]: check if [false, true].contains(true)",
-    "Block[0][27]: check if [\"abc\", \"def\"].contains(\"abc\")",
-    "Block[0][28]: check if [hex:12ab, hex:34de].contains(hex:34de)",
-    "Block[0][29]: check if [#hello, #world].contains(#hello)",
+    "Block[0][2]: check if false or true",
+    "Block[0][3]: check if 1 < 2",
+    "Block[0][4]: check if 2 > 1",
+    "Block[0][5]: check if 1 <= 2",
+    "Block[0][6]: check if 1 <= 1",
+    "Block[0][7]: check if 2 >= 1",
+    "Block[0][8]: check if 2 >= 2",
+    "Block[0][9]: check if 3 == 3",
+    "Block[0][10]: check if 1 + 2 * 3 - 4 / 2 == 5",
+    "Block[0][11]: check if \"hello world\".starts_with(\"hello\") && \"hello world\".ends_with(\"world\")",
+    "Block[0][12]: check if \"aaabde\".matches(\"a*c?.e\")",
+    "Block[0][13]: check if \"abcD12\" == \"abcD12\"",
+    "Block[0][14]: check if 2019-12-04T09:46:41+00:00 < 2020-12-04T09:46:41+00:00",
+    "Block[0][15]: check if 2020-12-04T09:46:41+00:00 > 2019-12-04T09:46:41+00:00",
+    "Block[0][16]: check if 2019-12-04T09:46:41+00:00 <= 2020-12-04T09:46:41+00:00",
+    "Block[0][17]: check if 2020-12-04T09:46:41+00:00 >= 2020-12-04T09:46:41+00:00",
+    "Block[0][18]: check if 2020-12-04T09:46:41+00:00 >= 2019-12-04T09:46:41+00:00",
+    "Block[0][19]: check if 2020-12-04T09:46:41+00:00 >= 2020-12-04T09:46:41+00:00",
+    "Block[0][20]: check if 2020-12-04T09:46:41+00:00 == 2020-12-04T09:46:41+00:00",
+    "Block[0][21]: check if #abc == #abc",
+    "Block[0][22]: check if hex:12ab == hex:12ab",
+    "Block[0][23]: check if [1, 2].contains(2)",
+    "Block[0][24]: check if [2019-12-04T09:46:41+00:00, 2020-12-04T09:46:41+00:00].contains(2020-12-04T09:46:41+00:00)",
+    "Block[0][25]: check if [false, true].contains(true)",
+    "Block[0][26]: check if [\"abc\", \"def\"].contains(\"abc\")",
+    "Block[0][27]: check if [hex:12ab, hex:34de].contains(hex:34de)",
+    "Block[0][28]: check if [#hello, #world].contains(#hello)",
 ]
   policies: [
     "allow if true",
 ]
 }
-validation: `Ok(())`
+validation: `Ok(0)`
+
+------------------------------
+
+## invalid block rule with unbound_variables: test18_unbound_variables_in_rule.bc
+biscuit2 (1 check):
+```
+Biscuit {
+    symbols: ["authority", "ambient", "resource", "operation", "right", "current_time", "revocation_id", "check1", "test", "read", "unbound", "any1", "any2"]
+    authority: Block[0] {
+            symbols: ["check1", "test", "read"]
+            version: 1
+            context: ""
+            facts: []
+            rules: []
+            checks: [
+                check if operation(#ambient, #read)
+            ]
+        }
+    blocks: [
+        Block[1] {
+            symbols: ["unbound", "any1", "any2"]
+            version: 1
+            context: ""
+            facts: []
+            rules: [
+                operation($unbound, #read) <- operation($any1, $any2)
+            ]
+            checks: []
+        }
+    ]
+}
+```
+
+validation: `Err(FailedLogic(InvalidBlockRule(0, "operation($unbound, #read) <- operation($any1, $any2)")))`
+
+------------------------------
+
+## invalid block rule generating an #authority or #ambient symbol with a variable: test19_generating_ambient_from_variables.bc
+biscuit2 (1 check):
+```
+Biscuit {
+    symbols: ["authority", "ambient", "resource", "operation", "right", "current_time", "revocation_id", "check1", "test", "read", "any"]
+    authority: Block[0] {
+            symbols: ["check1", "test", "read"]
+            version: 1
+            context: ""
+            facts: []
+            rules: []
+            checks: [
+                check if operation(#ambient, #read)
+            ]
+        }
+    blocks: [
+        Block[1] {
+            symbols: ["any"]
+            version: 1
+            context: ""
+            facts: []
+            rules: [
+                operation($ambient, #read) <- operation($ambient, $any)
+            ]
+            checks: []
+        }
+    ]
+}
+```
+
+verifier world:
+World {
+  facts: [
+    "operation(#ambient, #write)",
+    "revocation_id(0, hex:4bfc06061aaef82c0ae7b04c9e0842235815eb1247e3601f6e762fbfbf5b8227)",
+    "revocation_id(1, hex:b8b5c6fe921a9ea1bbfd6563cc8ca659cbdd5d40f27a193858ccab4bea942b50)",
+]
+  privileged rules: []
+  rules: [
+    "operation($ambient, #read) <- operation($ambient, $any)",
+]
+  checks: [
+    "Block[0][0]: check if operation(#ambient, #read)",
+]
+  policies: [
+    "allow if true",
+]
+}
+validation: `Err(FailedLogic(FailedChecks([Block(FailedBlockCheck { block_id: 0, check_id: 0, rule: "check if operation(#ambient, #read)" })])))`

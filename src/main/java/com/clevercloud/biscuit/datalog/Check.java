@@ -37,8 +37,8 @@ public class Check {
         return super.toString();
     }
 
-    public Schema.CheckV1 serialize() {
-        Schema.CheckV1.Builder b = Schema.CheckV1.newBuilder();
+    public Schema.CheckV2 serialize() {
+        Schema.CheckV2.Builder b = Schema.CheckV2.newBuilder();
 
         for(int i = 0; i < this.queries.size(); i++) {
             b.addQueries(this.queries.get(i).serialize());
@@ -47,27 +47,11 @@ public class Check {
         return b.build();
     }
 
-    static public Either<Error.FormatError, Check> deserializeV0(Schema.CaveatV0 caveat) {
+    static public Either<Error.FormatError, Check> deserializeV2(Schema.CheckV2 check) {
         ArrayList<Rule> queries = new ArrayList<>();
 
-        for (Schema.RuleV0 query: caveat.getQueriesList()) {
-            Either<Error.FormatError, Rule> res = Rule.deserializeV0(query);
-            if(res.isLeft()) {
-                Error.FormatError e = res.getLeft();
-                return Left(e);
-            } else {
-                queries.add(res.get());
-            }
-        }
-
-        return Right(new Check(queries));
-    }
-
-    static public Either<Error.FormatError, Check> deserializeV1(Schema.CheckV1 check) {
-        ArrayList<Rule> queries = new ArrayList<>();
-
-        for (Schema.RuleV1 query: check.getQueriesList()) {
-            Either<Error.FormatError, Rule> res = Rule.deserializeV1(query);
+        for (Schema.RuleV2 query: check.getQueriesList()) {
+            Either<Error.FormatError, Rule> res = Rule.deserializeV2(query);
             if(res.isLeft()) {
                 Error.FormatError e = res.getLeft();
                 return Left(e);

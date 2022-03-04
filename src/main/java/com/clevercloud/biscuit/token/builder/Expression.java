@@ -1,6 +1,5 @@
 package com.clevercloud.biscuit.token.builder;
 
-import com.clevercloud.biscuit.datalog.ID;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.datalog.expressions.Op;
 
@@ -43,8 +42,8 @@ public abstract class Expression {
                 }
             } else if (op instanceof com.clevercloud.biscuit.datalog.expressions.Op.Binary) {
                 com.clevercloud.biscuit.datalog.expressions.Op.Binary v = (com.clevercloud.biscuit.datalog.expressions.Op.Binary) op;
-                Expression e1 = stack.pop();
                 Expression e2 = stack.pop();
+                Expression e1 = stack.pop();
 
                 switch (v.getOp()) {
                     case LessThan:
@@ -133,7 +132,7 @@ public abstract class Expression {
     }
 
     public final static class Value extends Expression {
-        private final Term value;
+        public final Term value;
 
         public Value(Term value) {
             this.value = value;

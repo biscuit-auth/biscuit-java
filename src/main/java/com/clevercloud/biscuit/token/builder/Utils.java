@@ -1,12 +1,14 @@
 package com.clevercloud.biscuit.token.builder;
 
+import com.clevercloud.biscuit.error.Error;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
 public class Utils {
-    public static com.clevercloud.biscuit.token.builder.Fact fact(String name, List<Term> ids) {
+    public static com.clevercloud.biscuit.token.builder.Fact fact(String name, List<Term> ids) throws Error.Language {
         return new com.clevercloud.biscuit.token.builder.Fact(name, ids);
     }
 
@@ -38,7 +40,7 @@ public class Utils {
     }
 
     public static Term s(String str) {
-        return new Term.Symbol(str);
+        return new Term.Str(str);
     }
 
     public static Term date(Date d) {

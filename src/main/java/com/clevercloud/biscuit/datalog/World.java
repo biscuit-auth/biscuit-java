@@ -1,7 +1,6 @@
 package com.clevercloud.biscuit.datalog;
 
 import com.clevercloud.biscuit.error.Error;
-import io.vavr.control.Either;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -11,14 +10,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.vavr.API.Left;
-import static io.vavr.API.Right;
-
 public final class World implements Serializable {
    private final Set<Fact> facts;
    private final List<Rule> rules;
-   private final List<Rule> privileged_rules;
-   private final List<Check> checks;
 
    public void add_fact(final Fact fact) {
       this.facts.add(fact);
@@ -28,56 +22,42 @@ public final class World implements Serializable {
       this.rules.add(rule);
    }
 
-   public void add_privileged_rule(final Rule rule) {
-      this.privileged_rules.add(rule);
-   }
-
-   public void add_check(Check check) { this.checks.add(check); }
-
    public void clearRules() {
       this.rules.clear();
    }
 
-   public Either<Error, Void> run(final Set<Long> restricted_symbols) {
-      return this.run(new RunLimits(), restricted_symbols);
+   public void run(final SymbolTable symbols) throws Error.TooManyFacts, Error.TooManyIterations, Error.Timeout {
+      this.run(new RunLimits(), symbols);
    }
 
-   public Either<Error, Void> run(RunLimits limits, final Set<Long> restricted_symbols) {
+   public void run(RunLimits limits, final SymbolTable symbols) throws Error.TooManyFacts, Error.TooManyIterations, Error.Timeout {
       int iterations = 0;
       Instant limit = Instant.now().plus(limits.maxTime);
 
       while(true) {
          final Set<Fact> new_facts = new HashSet<>();
 
-         for (final Rule rule : this.privileged_rules) {
-            rule.apply(this.facts, new_facts, new HashSet<>());
-
-            if(Instant.now().compareTo(limit) >= 0) {
-               return Left(new Error.Timeout());
-            }
-         }
-
          for (final Rule rule : this.rules) {
-            rule.apply(this.facts, new_facts, restricted_symbols);
+            rule.apply(this.facts, new_facts, symbols);
 
             if(Instant.now().compareTo(limit) >= 0) {
-               return Left(new Error.Timeout());
+               throw new Error.Timeout();
             }
          }
 
          final int len = this.facts.size();
          this.facts.addAll(new_facts);
          if (this.facts.size() == len) {
-            return Right(null);
+            return ;
          }
 
          if (this.facts.size() >= limits.maxFacts) {
-            return Left(new Error.TooManyFacts());
+            throw new Error.TooManyFacts();
          }
 
          iterations += 1;
          if(iterations >= limits.maxIterations) {
-            return Left(new Error.TooManyIterations());
+            throw new Error.TooManyIterations();
          }
       }
    }
@@ -86,63 +66,54 @@ public final class World implements Serializable {
       return this.facts;
    }
 
-   public List<Rule> privileged_rules() { return this.privileged_rules; }
-
    public List<Rule> rules() { return this.rules; }
-
-   public List<Check> checks() { return this.checks; }
 
    public final Set<Fact> query(final Predicate pred) {
       return this.facts.stream().filter((f) -> {
          if (f.predicate().name() != pred.name()) {
             return false;
          }
-         final int min_size = Math.min(f.predicate().ids().size(), pred.ids().size());
+         final int min_size = Math.min(f.predicate().terms().size(), pred.terms().size());
          for (int i = 0; i < min_size; ++i) {
-            final ID fid = f.predicate().ids().get(i);
-            final ID pid = pred.ids().get(i);
-            if ((fid instanceof ID.Symbol || fid instanceof ID.Integer || fid instanceof ID.Str || fid instanceof ID.Date)
+            final Term fid = f.predicate().terms().get(i);
+            final Term pid = pred.terms().get(i);
+            if ((fid instanceof Term.Integer || fid instanceof Term.Str || fid instanceof Term.Date)
                     && fid.getClass() == pid.getClass()) {
                if (!fid.equals(pid)) {
                   return false;
                }
-            } else if (!(fid instanceof ID.Symbol && pid instanceof ID.Variable)) {
-               return false;
+            /* FIXME: is it still necessary?
+            } else if (!(fid instanceof Term.Symbol && pid instanceof Term.Variable)) {
+               return false;*/
             }
          }
          return true;
       }).collect(Collectors.toSet());
    }
 
-   public final Set<Fact> query_rule(final Rule rule) {
+   public final Set<Fact> query_rule(final Rule rule, SymbolTable symbols) {
       final Set<Fact> new_facts = new HashSet<>();
-      rule.apply(this.facts, new_facts, new HashSet<>());
+      rule.apply(this.facts, new_facts, symbols);
       return new_facts;
    }
 
-   public final boolean test_rule(final Rule rule) {
-      return rule.test(this.facts);
+   public final boolean query_match(final Rule rule, SymbolTable symbols) {
+      return rule.find_match(this.facts, symbols);
    }
 
    public World() {
       this.facts = new HashSet<>();
       this.rules = new ArrayList<>();
-      this.privileged_rules = new ArrayList<>();
-      this.checks = new ArrayList<>();
    }
 
-   public World(Set<Fact> facts, List<Rule> privileged_rules,  List<Rule> rules) {
+   public World(Set<Fact> facts,  List<Rule> rules) {
       this.facts = facts;
-      this.privileged_rules = privileged_rules;
       this.rules = rules;
-      this.checks = new ArrayList<>();
    }
 
-   public World(Set<Fact> facts, List<Rule> privileged_rules, List<Rule> rules, List<Check> checks) {
+   public World(Set<Fact> facts, List<Rule> rules, List<Check> checks) {
       this.facts = facts;
-      this.privileged_rules = privileged_rules;
       this.rules = rules;
-      this.checks = checks;
    }
 
    public World(World w) {
@@ -150,18 +121,12 @@ public final class World implements Serializable {
       for(Fact fact: w.facts) {
          this.facts.add(fact);
       }
-      this.privileged_rules = new ArrayList<>();
-      for(Rule rule: w.privileged_rules) {
-         this.privileged_rules.add(rule);
-      }
+
       this.rules = new ArrayList<>();
       for(Rule rule: w.rules) {
          this.rules.add(rule);
       }
-      this.checks = new ArrayList<>();
-      for(Check check : w.checks) {
-         this.checks.add(check);
-      }
+
    }
 
    public String print(SymbolTable symbol_table) {
@@ -172,21 +137,13 @@ public final class World implements Serializable {
          s.append("\n\t\t\t");
          s.append(symbol_table.print_fact(f));
       }
-      s.append("\n\t\t]\n\t\tprivileged rules: [");
-      for(Rule r: this.privileged_rules) {
-         s.append("\n\t\t\t");
-         s.append(symbol_table.print_rule(r));
-      }
+
       s.append("\n\t\t]\n\t\trules: [");
       for(Rule r: this.rules) {
          s.append("\n\t\t\t");
          s.append(symbol_table.print_rule(r));
       }
-      s.append("\n\t\t]\n\t\tchecks: [");
-      for(Check c: this.checks) {
-         s.append("\n\t\t\t");
-         s.append(symbol_table.print_check(c));
-      }
+
       s.append("\n\t\t]\n\t}");
 
       return s.toString();

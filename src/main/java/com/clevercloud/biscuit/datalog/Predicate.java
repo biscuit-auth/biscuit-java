@@ -16,29 +16,29 @@ import static io.vavr.API.Right;
 
 public final class Predicate implements Serializable {
    private final long name;
-   private final List<ID> ids;
+   private final List<Term> terms;
 
    public long name() {
       return this.name;
    }
 
-   public final List<ID> ids() {
-      return this.ids;
+   public final List<Term> terms() {
+      return this.terms;
    }
 
-   public final ListIterator<ID> ids_iterator() {
-      return this.ids.listIterator();
+   public final ListIterator<Term> ids_iterator() {
+      return this.terms.listIterator();
    }
 
    public boolean match(final Predicate rule_predicate) {
       if (this.name != rule_predicate.name) {
          return false;
       }
-      if (this.ids.size() != rule_predicate.ids.size()) {
+      if (this.terms.size() != rule_predicate.terms.size()) {
          return false;
       }
-      for (int i = 0; i < this.ids.size(); ++i) {
-         if (!this.ids.get(i).match(rule_predicate.ids.get(i))) {
+      for (int i = 0; i < this.terms.size(); ++i) {
+         if (!this.terms.get(i).match(rule_predicate.terms.get(i))) {
             return false;
          }
       }
@@ -46,14 +46,14 @@ public final class Predicate implements Serializable {
    }
 
    public Predicate clone() {
-      final List<ID> ids = new ArrayList<>();
-      ids.addAll(this.ids);
-      return new Predicate(this.name, ids);
+      final List<Term> terms = new ArrayList<>();
+      terms.addAll(this.terms);
+      return new Predicate(this.name, terms);
    }
 
-   public Predicate(final long name, final List<ID> ids) {
+   public Predicate(final long name, final List<Term> terms) {
       this.name = name;
-      this.ids = ids;
+      this.terms = terms;
    }
 
    @Override
@@ -62,57 +62,42 @@ public final class Predicate implements Serializable {
       if (o == null || getClass() != o.getClass()) return false;
       Predicate predicate = (Predicate) o;
       return name == predicate.name &&
-            Objects.equals(ids, predicate.ids);
+            Objects.equals(terms, predicate.terms);
    }
 
    @Override
    public int hashCode() {
-      return Objects.hash(name, ids);
+      return Objects.hash(name, terms);
    }
 
    @Override
    public String toString() {
-      return this.name + "(" + String.join(", ", this.ids.stream().map((i) -> (i == null) ? "(null)" : i.toString()).collect(Collectors.toList())) + ")";
+      return this.name + "(" + String.join(", ", this.terms.stream().map((i) -> (i == null) ? "(null)" : i.toString()).collect(Collectors.toList())) + ")";
    }
 
-   public Schema.PredicateV1 serialize() {
-      Schema.PredicateV1.Builder builder = Schema.PredicateV1.newBuilder()
+   public Schema.PredicateV2 serialize() {
+      Schema.PredicateV2.Builder builder = Schema.PredicateV2.newBuilder()
               .setName(this.name);
 
-      for (int i = 0; i < this.ids.size(); i++) {
-         builder.addIds(this.ids.get(i).serialize());
+      for (int i = 0; i < this.terms.size(); i++) {
+         builder.addTerms(this.terms.get(i).serialize());
       }
 
       return builder.build();
    }
 
-   static public Either<Error.FormatError, Predicate> deserializeV0(Schema.PredicateV0 predicate) {
-      ArrayList<ID> ids = new ArrayList<>();
-      for (Schema.IDV0 id: predicate.getIdsList()) {
-         Either<Error.FormatError, ID> res = ID.deserialize_enumV0(id);
+   static public Either<Error.FormatError, Predicate> deserializeV2(Schema.PredicateV2 predicate) {
+      ArrayList<Term> terms = new ArrayList<>();
+      for (Schema.TermV2 id: predicate.getTermsList()) {
+         Either<Error.FormatError, Term> res = Term.deserialize_enumV2(id);
          if(res.isLeft()) {
             Error.FormatError e = res.getLeft();
             return Left(e);
          } else {
-            ids.add(res.get());
+            terms.add(res.get());
          }
       }
 
-      return Right(new Predicate(predicate.getName(), ids));
-   }
-
-   static public Either<Error.FormatError, Predicate> deserializeV1(Schema.PredicateV1 predicate) {
-      ArrayList<ID> ids = new ArrayList<>();
-      for (Schema.IDV1 id: predicate.getIdsList()) {
-         Either<Error.FormatError, ID> res = ID.deserialize_enumV1(id);
-         if(res.isLeft()) {
-            Error.FormatError e = res.getLeft();
-            return Left(e);
-         } else {
-            ids.add(res.get());
-         }
-      }
-
-      return Right(new Predicate(predicate.getName(), ids));
+      return Right(new Predicate(predicate.getName(), terms));
    }
 }

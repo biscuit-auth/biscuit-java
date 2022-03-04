@@ -1,7 +1,7 @@
 package com.clevercloud.biscuit.datalog.expressions;
 
 import biscuit.format.schema.Schema;
-import com.clevercloud.biscuit.datalog.ID;
+import com.clevercloud.biscuit.datalog.Term;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.error.Error;
 import io.vavr.control.Either;
@@ -26,10 +26,10 @@ public class Expression {
         return ops;
     }
 
-    public Option<ID> evaluate(Map<Long, ID> variables) {
-        Deque<ID> stack = new ArrayDeque<ID>(16); //Default value
+    public Option<Term> evaluate(Map<Long, Term> variables, SymbolTable symbols) {
+        Deque<Term> stack = new ArrayDeque<Term>(16); //Default value
         for(Op op: ops){
-            if(!op.evaluate(stack,variables)){
+            if(!op.evaluate(stack,variables, symbols)){
                 return Option.none();
             }
         }
@@ -52,8 +52,8 @@ public class Expression {
         }
     }
 
-    public Schema.ExpressionV1 serialize() {
-        Schema.ExpressionV1.Builder b = Schema.ExpressionV1.newBuilder();
+    public Schema.ExpressionV2 serialize() {
+        Schema.ExpressionV2.Builder b = Schema.ExpressionV2.newBuilder();
 
         for(Op op: this.ops) {
             b.addOps(op.serialize());
@@ -62,11 +62,11 @@ public class Expression {
         return b.build();
     }
 
-    static public Either<Error.FormatError, Expression> deserializeV1(Schema.ExpressionV1 e) {
+    static public Either<Error.FormatError, Expression> deserializeV2(Schema.ExpressionV2 e) {
         ArrayList<Op> ops = new ArrayList<>();
 
         for(Schema.Op op: e.getOpsList()) {
-            Either<Error.FormatError, Op> res = Op.deserializeV1(op);
+            Either<Error.FormatError, Op> res = Op.deserializeV2(op);
 
             if(res.isLeft()) {
                 Error.FormatError err = res.getLeft();

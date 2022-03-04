@@ -1,10 +1,14 @@
 package com.clevercloud.biscuit.token.builder.parser;
 
-public class Error {
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+public class Error extends Exception {
     String input;
     String message;
 
     public Error(String input, String message) {
+        super(message);
         this.input = input;
         this.message = message;
     }
@@ -15,6 +19,13 @@ public class Error {
                 "input='" + input + '\'' +
                 ", message='" + message + '\'' +
                 '}';
+    }
+
+    public JsonElement toJson(){
+        JsonObject jo = new JsonObject();
+        jo.addProperty("input",this.input);
+        jo.addProperty("message", this.message);
+        return jo;
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.clevercloud.biscuit.datalog;
 
 import biscuit.format.schema.Schema;
-import com.clevercloud.biscuit.datalog.constraints.Constraint;
 import com.clevercloud.biscuit.datalog.expressions.Expression;
 import com.clevercloud.biscuit.error.Error;
 import io.vavr.control.Either;
@@ -31,24 +30,24 @@ public final class Rule implements Serializable {
       return this.expressions;
    }
 
-   public void apply(final Set<Fact> facts, final Set<Fact> new_facts, final Set<Long> restricted_symbols) {
+   public void apply(final Set<Fact> facts, final Set<Fact> new_facts, SymbolTable symbols) {
       final Set<Long> variables_set = new HashSet<>();
       for (final Predicate pred : this.body) {
-         variables_set.addAll(pred.ids().stream().filter((id) -> id instanceof ID.Variable).map((id) -> ((ID.Variable) id).value()).collect(Collectors.toSet()));
+         variables_set.addAll(pred.terms().stream().filter((id) -> id instanceof Term.Variable).map((id) -> ((Term.Variable) id).value()).collect(Collectors.toSet()));
       }
       final MatchedVariables variables = new MatchedVariables(variables_set);
 
       if(this.body.isEmpty()) {
-         final Option<Map<Long, ID>> h_opt = variables.check_expressions(this.expressions);
+         final Option<Map<Long, Term>> h_opt = variables.check_expressions(this.expressions, symbols);
          if(h_opt.isDefined()) {
-            final Map<Long, ID> h = h_opt.get();
+            final Map<Long, Term> h = h_opt.get();
             final Predicate p = this.head.clone();
-            final ListIterator<ID> idit = p.ids_iterator();
+            final ListIterator<Term> idit = p.ids_iterator();
             while (idit.hasNext()) {
                //FIXME: variables that appear in the head should appear in the body and constraints as well
-               final ID id = idit.next();
-               if (id instanceof ID.Variable) {
-                  final ID value = h.get(((ID.Variable) id).value());
+               final Term id = idit.next();
+               if (id instanceof Term.Variable) {
+                  final Term value = h.get(((Term.Variable) id).value());
                   idit.set(value);
                }
             }
@@ -57,14 +56,14 @@ public final class Rule implements Serializable {
          }
       }
 
-      for (final Map<Long, ID> h : new Combinator(variables, this.body, this.expressions, facts).combine()) {
+      for (final Map<Long, Term> h : new Combinator(variables, this.body, this.expressions, facts, symbols).combine()) {
          final Predicate p = this.head.clone();
-         final ListIterator<ID> idit = p.ids_iterator();
+         final ListIterator<Term> idit = p.ids_iterator();
          boolean unbound_variable = false;
          while (idit.hasNext()) {
-            final ID id = idit.next();
-            if (id instanceof ID.Variable) {
-               final ID value = h.get(((ID.Variable) id).value());
+            final Term id = idit.next();
+            if (id instanceof Term.Variable) {
+               final Term value = h.get(((Term.Variable) id).value());
                idit.set(value);
 
                // variables that appear in the head should appear in the body and constraints as well
@@ -74,14 +73,6 @@ public final class Rule implements Serializable {
             }
          }
 
-         // if the generated fact has #authority or #ambient as first element and we're n ot in a privileged rule
-         // do not generate it
-         ID first = p.ids().get(0);
-         if(first != null && first instanceof ID.Symbol) {
-            if( restricted_symbols.contains(((ID.Symbol) first).value()) ) {
-               continue;
-            }
-         }
          if (!unbound_variable) {
             new_facts.add(new Fact(p));
          }
@@ -90,18 +81,18 @@ public final class Rule implements Serializable {
 
 
    // do not produce new facts, only find one matching set of facts
-   public boolean test(final Set<Fact> facts) {
+   public boolean find_match(final Set<Fact> facts, SymbolTable symbols) {
       final Set<Long> variables_set = new HashSet<>();
       for (final Predicate pred : this.body) {
-         variables_set.addAll(pred.ids().stream().filter((id) -> id instanceof ID.Variable).map((id) -> ((ID.Variable) id).value()).collect(Collectors.toSet()));
+         variables_set.addAll(pred.terms().stream().filter((id) -> id instanceof Term.Variable).map((id) -> ((Term.Variable) id).value()).collect(Collectors.toSet()));
       }
       final MatchedVariables variables = new MatchedVariables(variables_set);
 
       if(this.body.isEmpty()) {
-         return variables.check_expressions(this.expressions).isDefined();
+         return variables.check_expressions(this.expressions, symbols).isDefined();
       }
 
-      Combinator c = new Combinator(variables, this.body, this.expressions, facts);
+      Combinator c = new Combinator(variables, this.body, this.expressions, facts, symbols);
 
       return c.next().isDefined();
    }
@@ -112,8 +103,8 @@ public final class Rule implements Serializable {
       this.expressions = expressions;
    }
 
-   public Schema.RuleV1 serialize() {
-      Schema.RuleV1.Builder b = Schema.RuleV1.newBuilder()
+   public Schema.RuleV2 serialize() {
+      Schema.RuleV2.Builder b = Schema.RuleV2.newBuilder()
               .setHead(this.head.serialize());
 
       for (int i = 0; i < this.body.size(); i++) {
@@ -127,10 +118,10 @@ public final class Rule implements Serializable {
       return b.build();
    }
 
-   static public Either<Error.FormatError, Rule> deserializeV0(Schema.RuleV0 rule) {
+   static public Either<Error.FormatError, Rule> deserializeV2(Schema.RuleV2 rule) {
       ArrayList<Predicate> body = new ArrayList<>();
-      for (Schema.PredicateV0 predicate: rule.getBodyList()) {
-         Either<Error.FormatError, Predicate> res = Predicate.deserializeV0(predicate);
+      for (Schema.PredicateV2 predicate: rule.getBodyList()) {
+         Either<Error.FormatError, Predicate> res = Predicate.deserializeV2(predicate);
          if(res.isLeft()) {
             Error.FormatError e = res.getLeft();
             return Left(e);
@@ -140,8 +131,8 @@ public final class Rule implements Serializable {
       }
 
       ArrayList<Expression> expressions = new ArrayList<>();
-      for (Schema.ConstraintV0 constraint: rule.getConstraintsList()) {
-         Either<Error.FormatError, Expression> res = Constraint.deserializeV0(constraint);
+      for (Schema.ExpressionV2 expression: rule.getExpressionsList()) {
+         Either<Error.FormatError, Expression> res = Expression.deserializeV2(expression);
          if(res.isLeft()) {
             Error.FormatError e = res.getLeft();
             return Left(e);
@@ -150,39 +141,7 @@ public final class Rule implements Serializable {
          }
       }
 
-      Either<Error.FormatError, Predicate> res = Predicate.deserializeV0(rule.getHead());
-      if(res.isLeft()) {
-         Error.FormatError e = res.getLeft();
-         return Left(e);
-      } else {
-         return Right(new Rule(res.get(), body, expressions));
-      }
-   }
-
-   static public Either<Error.FormatError, Rule> deserializeV1(Schema.RuleV1 rule) {
-      ArrayList<Predicate> body = new ArrayList<>();
-      for (Schema.PredicateV1 predicate: rule.getBodyList()) {
-         Either<Error.FormatError, Predicate> res = Predicate.deserializeV1(predicate);
-         if(res.isLeft()) {
-            Error.FormatError e = res.getLeft();
-            return Left(e);
-         } else {
-            body.add(res.get());
-         }
-      }
-
-      ArrayList<Expression> expressions = new ArrayList<>();
-      for (Schema.ExpressionV1 expression: rule.getExpressionsList()) {
-         Either<Error.FormatError, Expression> res = Expression.deserializeV1(expression);
-         if(res.isLeft()) {
-            Error.FormatError e = res.getLeft();
-            return Left(e);
-         } else {
-            expressions.add(res.get());
-         }
-      }
-
-      Either<Error.FormatError, Predicate> res = Predicate.deserializeV1(rule.getHead());
+      Either<Error.FormatError, Predicate> res = Predicate.deserializeV2(rule.getHead());
       if(res.isLeft()) {
          Error.FormatError e = res.getLeft();
          return Left(e);
