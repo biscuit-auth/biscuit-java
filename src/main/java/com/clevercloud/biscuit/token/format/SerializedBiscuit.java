@@ -97,12 +97,10 @@ public class SerializedBiscuit {
      * Warning: this deserializes without verifying the signature
      *
      * @param slice
-     * @return
-     * @throws NoSuchAlgorithmException
-     * @throws SignatureException
-     * @throws InvalidKeyException
+     * @return SerializedBiscuit
+     * @throws Error.FormatError.DeserializationError
      */
-    static public Either<Error, SerializedBiscuit> unsafe_deserialize(byte[] slice) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error.FormatError.DeserializationError {
+    static public SerializedBiscuit unsafe_deserialize(byte[] slice) throws Error.FormatError.DeserializationError {
         try {
             Schema.Biscuit data = Schema.Biscuit.parseFrom(slice);
 
@@ -136,8 +134,7 @@ public class SerializedBiscuit {
             }
             Proof proof = new Proof(secretKey, signature);
 
-            SerializedBiscuit b = new SerializedBiscuit(authority, blocks, proof);
-            return Right(b);
+            return new SerializedBiscuit(authority, blocks, proof);
         } catch (InvalidProtocolBufferException e) {
             throw new Error.FormatError.DeserializationError(e.toString());
         }

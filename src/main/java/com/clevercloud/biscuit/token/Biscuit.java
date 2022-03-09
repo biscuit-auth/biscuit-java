@@ -143,6 +143,21 @@ public class Biscuit {
     }
 
     /**
+     * Deserializes a Biscuit token from a base64 url (RFC4648_URLSAFE) string
+     * <p>
+     * This does NOT checks the signature and does not verify that the first key is the root key,
+     * to allow appending blocks without knowing about the root key.
+     * <p>
+     * This method uses the default symbol table
+     *
+     * @param data
+     * @return Biscuit
+     */
+    static public Biscuit from_b64url(String data) throws Error {
+        return Biscuit.from_bytes(Base64.getUrlDecoder().decode(data));
+    }
+
+    /**
      * Deserializes a Biscuit token from a byte array
      * <p>
      * This checks the signature, but does not verify that the first key is the root key,
@@ -162,6 +177,21 @@ public class Biscuit {
     /**
      * Deserializes a Biscuit token from a byte array
      * <p>
+     * This does NOT checks the signature and does not verify that the first key is the root key,
+     * to allow appending blocks without knowing about the root key.
+     * <p>
+     * This method uses the default symbol table
+     *
+     * @param data
+     * @return Biscuit
+     */
+    static public Biscuit from_bytes(byte[] data) throws Error {
+        return Biscuit.from_bytes_with_symbols(data, default_symbol_table());
+    }
+
+    /**
+     * Deserializes a Biscuit token from a byte array
+     * <p>
      * This checks the signature, but does not verify that the first key is the root key,
      * to allow appending blocks without knowing about the root key.
      * <p>
@@ -175,6 +205,21 @@ public class Biscuit {
         SerializedBiscuit ser = SerializedBiscuit.from_bytes(data, root);
         //System.out.println("deserialized token, will populate Biscuit structure");
 
+        return Biscuit.from_serialize_biscuit(ser, symbols);
+    }
+
+    /**
+     * Deserializes a Biscuit token from a byte array
+     * <p>
+     * This does NOT checks the signature and does not verify that the first key is the root key,
+     * to allow appending blocks without knowing about the root key.
+     * <p>
+     *
+     * @param data
+     * @return biscuit
+     */
+    static public Biscuit from_bytes_with_symbols(byte[] data, SymbolTable symbols) throws Error {
+        SerializedBiscuit ser = SerializedBiscuit.unsafe_deserialize(data);
         return Biscuit.from_serialize_biscuit(ser, symbols);
     }
 
@@ -216,14 +261,8 @@ public class Biscuit {
         return new Biscuit(authority, blocks, symbols, Option.some(ser), revocation_ids);
     }
 
-    static Biscuit unsafe_from_bytes(byte[] data, SymbolTable symbols) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
-        Either<Error, SerializedBiscuit> res = SerializedBiscuit.unsafe_deserialize(data);
-        if (res.isLeft()) {
-            Error e = res.getLeft();
-            throw e;
-        }
-
-        SerializedBiscuit ser = res.get();
+    static Biscuit unsafe_from_bytes(byte[] data, SymbolTable symbols) throws Error {
+        SerializedBiscuit ser = SerializedBiscuit.unsafe_deserialize(data);
         return Biscuit.from_serialize_biscuit(ser, symbols);
     }
 
