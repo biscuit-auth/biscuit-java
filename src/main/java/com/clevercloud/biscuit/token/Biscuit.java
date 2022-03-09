@@ -216,17 +216,6 @@ public class Biscuit {
         return new Biscuit(authority, blocks, symbols, Option.some(ser), revocation_ids);
     }
 
-    static Biscuit unsafe_from_bytes(byte[] data, SymbolTable symbols) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
-        Either<Error, SerializedBiscuit> res = SerializedBiscuit.unsafe_deserialize(data);
-        if (res.isLeft()) {
-            Error e = res.getLeft();
-            throw e;
-        }
-
-        SerializedBiscuit ser = res.get();
-        return Biscuit.from_serialize_biscuit(ser, symbols);
-    }
-
     /**
      * Creates a authorizer for this token
      * <p>
@@ -547,8 +536,7 @@ public class Biscuit {
         return super.clone();
     }
 
-
-    public Biscuit copy() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
-        return Biscuit.unsafe_from_bytes(this.serialize(), this.symbols);
+    public Biscuit copy() throws Error {
+        return Biscuit.from_serialize_biscuit(this.container.get(), this.symbols);
     }
 }
