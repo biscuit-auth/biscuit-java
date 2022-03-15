@@ -277,6 +277,7 @@ public class Biscuit extends UnverifiedBiscuit {
 
     /**
      * Serializes a token to base 64 url String using RFC4648_URLSAFE
+     *
      * @return String
      * @throws Error.FormatError.SerializationError
      */
@@ -309,7 +310,7 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param block new block (should be generated from a Block builder)
      * @return
      */
-    public Biscuit attenuate(com.clevercloud.biscuit.token.builder.Block block) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+    public Biscuit attenuate(com.clevercloud.biscuit.token.builder.Block block) throws Error {
         SecureRandom rng = new SecureRandom();
         KeyPair keypair = new KeyPair(rng);
         return attenuate(rng, keypair, block.build());
@@ -323,7 +324,7 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param block   new block (should be generated from a Block builder)
      * @return
      */
-    public Biscuit attenuate(final SecureRandom rng, final KeyPair keypair, Block block) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+    public Biscuit attenuate(final SecureRandom rng, final KeyPair keypair, Block block) throws Error {
         Biscuit copiedBiscuit = this.copy();
 
         if (!Collections.disjoint(copiedBiscuit.symbols.symbols, block.symbols.symbols)) {
