@@ -285,25 +285,6 @@ public class Biscuit extends UnverifiedBiscuit {
         return Base64.getUrlEncoder().encodeToString(serialize());
     }
 
-    public byte[] seal() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
-        if (this.container.isEmpty()) {
-            throw new Error.FormatError.SerializationError("no internal container");
-        }
-
-        SerializedBiscuit ser = this.container.get();
-        Either<Error, Void> res = ser.seal();
-        if (res.isLeft()) {
-            throw res.getLeft();
-        }
-
-        return ser.serialize();
-    }
-
-    public boolean is_sealed() {
-        return this.container.isEmpty() ||
-                this.container.get().proof.secretKey.isEmpty();
-    }
-
     /**
      * Generates a new token from an existing one and a new block
      *
