@@ -1,10 +1,11 @@
 package com.clevercloud.biscuit.token;
 
 import biscuit.format.schema.Schema;
+import com.clevercloud.biscuit.datalog.Check;
+import com.clevercloud.biscuit.datalog.Fact;
+import com.clevercloud.biscuit.datalog.Rule;
+import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.error.Error;
-import com.clevercloud.biscuit.datalog.*;
-import com.clevercloud.biscuit.error.FailedCheck;
-import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.format.SerializedBiscuit;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.vavr.control.Either;
@@ -12,9 +13,7 @@ import io.vavr.control.Either;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
