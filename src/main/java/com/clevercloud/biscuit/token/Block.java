@@ -1,10 +1,7 @@
 package com.clevercloud.biscuit.token;
 
 import biscuit.format.schema.Schema;
-import com.clevercloud.biscuit.datalog.Check;
-import com.clevercloud.biscuit.datalog.Fact;
-import com.clevercloud.biscuit.datalog.Rule;
-import com.clevercloud.biscuit.datalog.SymbolTable;
+import com.clevercloud.biscuit.datalog.*;
 import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.token.format.SerializedBiscuit;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -22,6 +19,7 @@ import static io.vavr.API.Right;
  * Represents a token's block with its checks
  */
 public class Block {
+    final ExecutionScope executionScope;
     final SymbolTable symbols;
     final String context;
     final List<Fact> facts;
@@ -32,10 +30,19 @@ public class Block {
     /**
      * creates a new block
      *
-     * @param index
      * @param base_symbols
      */
     public Block(SymbolTable base_symbols) {
+        this(new ExecutionScope(), base_symbols);
+    }
+
+    /**
+     * creates a new block
+     *
+     * @param base_symbols
+     */
+    public Block(ExecutionScope executionScope, SymbolTable base_symbols) {
+        this.executionScope = executionScope;
         this.symbols = base_symbols;
         this.context = "";
         this.facts = new ArrayList<>();
@@ -53,6 +60,18 @@ public class Block {
      * @param checks
      */
     public Block(SymbolTable base_symbols, String context, List<Fact> facts, List<Rule> rules, List<Check> checks) {
+        this(new ExecutionScope(), base_symbols, context, facts, rules, checks);
+    }
+    /**
+     * creates a new block
+     *
+     * @param index
+     * @param base_symbols
+     * @param facts
+     * @param checks
+     */
+    public Block(ExecutionScope executionScope, SymbolTable base_symbols, String context, List<Fact> facts, List<Rule> rules, List<Check> checks) {
+        this.executionScope = executionScope;
         this.symbols = base_symbols;
         this.context = context;
         this.facts = facts;
@@ -141,6 +160,8 @@ public class Block {
         StringBuilder s = new StringBuilder();
 
         s.append("Block");
+        s.append("\texecutionScope: ");
+        s.append(this.executionScope);
         s.append(" {\n\t\tsymbols: ");
         s.append(this.symbols.symbols);
         s.append("\n\t\tcontext: ");
@@ -193,6 +214,7 @@ public class Block {
             b.addChecksV2(this.checks.get(i).serialize());
         }
 
+        b.setExecutionScope(this.executionScope.serialize());
         b.setVersion(SerializedBiscuit.MAX_SCHEMA_VERSION);
         return b.build();
     }
@@ -250,7 +272,10 @@ public class Block {
                     checks.add(res.get());
                 }
             }
-            return Right(new Block(symbols, b.getContext(), facts, rules, checks));
+
+            ExecutionScope executionScope = ExecutionScope.deserialize(b.getExecutionScope());
+
+            return Right(new Block(executionScope, symbols, b.getContext(), facts, rules, checks));
         } else {
             return Left(new Error.FormatError.Version(SerializedBiscuit.MAX_SCHEMA_VERSION, version));
         }
