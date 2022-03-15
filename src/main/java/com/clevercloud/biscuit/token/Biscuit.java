@@ -175,7 +175,7 @@ public class Biscuit {
         SerializedBiscuit ser = SerializedBiscuit.from_bytes(data, root);
         //System.out.println("deserialized token, will populate Biscuit structure");
 
-        return Biscuit.from_serialize_biscuit(ser, symbols);
+        return Biscuit.from_serialized_biscuit(ser, symbols);
     }
 
     /**
@@ -183,7 +183,46 @@ public class Biscuit {
      *
      * @return
      */
+    @Deprecated
     static Biscuit from_serialize_biscuit(SerializedBiscuit ser, SymbolTable symbols) throws Error {
+        Either<Error.FormatError, Block> authRes = Block.from_bytes(ser.authority.block);
+        if (authRes.isLeft()) {
+            Error e = authRes.getLeft();
+            throw e;
+        }
+        Block authority = authRes.get();
+
+        ArrayList<Block> blocks = new ArrayList<>();
+        for (SignedBlock bdata : ser.blocks) {
+            Either<Error.FormatError, Block> blockRes = Block.from_bytes(bdata.block);
+            if (blockRes.isLeft()) {
+                Error e = blockRes.getLeft();
+                throw e;
+            }
+            blocks.add(blockRes.get());
+        }
+
+        for (String s : authority.symbols.symbols) {
+            symbols.add(s);
+        }
+
+        for (Block b : blocks) {
+            for (String s : b.symbols.symbols) {
+                symbols.add(s);
+            }
+        }
+
+        List<byte[]> revocation_ids = ser.revocation_identifiers();
+
+        return new Biscuit(authority, blocks, symbols, Option.some(ser), revocation_ids);
+    }
+
+    /**
+     * Fills a Biscuit structure from a deserialized token
+     *
+     * @return
+     */
+    static Biscuit from_serialized_biscuit(SerializedBiscuit ser, SymbolTable symbols) throws Error {
         Either<Error.FormatError, Block> authRes = Block.from_bytes(ser.authority.block);
         if (authRes.isLeft()) {
             Error e = authRes.getLeft();

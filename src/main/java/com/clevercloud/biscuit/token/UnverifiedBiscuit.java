@@ -236,6 +236,6 @@ public class UnverifiedBiscuit {
     public Biscuit verify(PublicKey publicKey) throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         SerializedBiscuit serializedBiscuit = this.container.get();
         serializedBiscuit.verify(publicKey);
-        return Biscuit.from_serialize_biscuit(serializedBiscuit, this.symbols);
+        return Biscuit.from_serialized_biscuit(serializedBiscuit, this.symbols);
     }
 }
