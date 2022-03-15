@@ -40,6 +40,17 @@ message Block {
   repeated FactV2 facts_v2 = 4;
   repeated RuleV2 rules_v2 = 5;
   repeated CheckV2 checks_v2 = 6;
+  required ExecutionScope executionScope = 7;
+}
+
+message ExecutionScope {
+  optional Scope scope = 1;
+
+  enum Scope {
+    AUTHORITY = 0;
+    PREVIOUS = 1;
+    UNSAFE_ALL = 2;
+  }
 }
 
 message FactV2 {
