@@ -2,8 +2,10 @@ package com.clevercloud.biscuit.token;
 
 import com.clevercloud.biscuit.crypto.KeyPair;
 import com.clevercloud.biscuit.crypto.PublicKey;
-import com.clevercloud.biscuit.datalog.SymbolTable;
+import com.clevercloud.biscuit.datalog.*;
 import com.clevercloud.biscuit.error.Error;
+import com.clevercloud.biscuit.error.FailedCheck;
+import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.format.SerializedBiscuit;
 import com.clevercloud.biscuit.token.format.SignedBlock;
 import io.vavr.control.Either;
@@ -13,11 +15,10 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.SignatureException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static io.vavr.API.Right;
 
 /**
  * UnverifiedBiscuit auth token. UnverifiedBiscuit means it's deserialized without checking signatures.
@@ -197,6 +198,157 @@ public class UnverifiedBiscuit {
                 .collect(Collectors.toList());
     }
 
+    public List<List<com.clevercloud.biscuit.datalog.Check>> checks() {
+        ArrayList<List<com.clevercloud.biscuit.datalog.Check>> l = new ArrayList<>();
+        l.add(new ArrayList<>(this.authority.checks));
+
+        for (Block b : this.blocks) {
+            l.add(new ArrayList<>(b.checks));
+        }
+
+        return l;
+    }
+
+    Either<Error, World> generate_world() {
+        World world = new World();
+
+        for (Fact fact : this.authority.facts) {
+            world.add_fact(fact);
+        }
+
+        for (Rule rule : this.authority.rules) {
+            world.add_rule(rule);
+        }
+
+        for (Block b : this.blocks) {
+            for (Fact fact : b.facts) {
+                world.add_fact(fact);
+            }
+
+            for (Rule rule : b.rules) {
+                world.add_rule(rule);
+            }
+        }
+
+        List<RevocationIdentifier> revocation_ids = this.revocation_identifiers();
+        long rev = symbols.get("revocation_id").get();
+        for (int i = 0; i < revocation_ids.size(); i++) {
+            byte[] id = revocation_ids.get(i).getBytes();
+            world.add_fact(new Fact(new Predicate(rev, Arrays.asList(new Term.Integer(i), new Term.Bytes(id)))));
+        }
+
+        return Right(world);
+    }
+
+    public List<Option<String>> context() {
+        ArrayList<Option<String>> res = new ArrayList<>();
+        if (this.authority.context.isEmpty()) {
+            res.add(Option.none());
+        } else {
+            res.add(Option.some(this.authority.context));
+        }
+
+        for (Block b : this.blocks) {
+            if (b.context.isEmpty()) {
+                res.add(Option.none());
+            } else {
+                res.add(Option.some(b.context));
+            }
+        }
+
+        return res;
+    }
+
+    HashMap<String, Set<Fact>> check(SymbolTable symbols, List<Fact> ambient_facts, List<Rule> ambient_rules,
+                                     List<Check> authorizer_checks, HashMap<String, Rule> queries) throws Error {
+        Either<Error, World> wres = this.generate_world();
+
+        if (wres.isLeft()) {
+            Error e = wres.getLeft();
+            throw e;
+        }
+
+        World world = wres.get();
+
+        for (Fact fact : ambient_facts) {
+            world.add_fact(fact);
+        }
+
+        for (Rule rule : ambient_rules) {
+            world.add_rule(rule);
+        }
+
+        world.run(symbols);
+
+        ArrayList<FailedCheck> errors = new ArrayList<>();
+        for (int j = 0; j < this.authority.checks.size(); j++) {
+            boolean successful = false;
+            Check c = this.authority.checks.get(j);
+
+            for (int k = 0; k < c.queries().size(); k++) {
+                Set<Fact> res = world.query_rule(c.queries().get(k), symbols);
+                if (!res.isEmpty()) {
+                    successful = true;
+                    break;
+                }
+            }
+
+            if (!successful) {
+                errors.add(new FailedCheck.FailedBlock(0, j, symbols.print_check(this.authority.checks.get(j))));
+            }
+        }
+
+        for (int j = 0; j < authorizer_checks.size(); j++) {
+            boolean successful = false;
+            Check c = authorizer_checks.get(j);
+
+            for (int k = 0; k < c.queries().size(); k++) {
+                Set<Fact> res = world.query_rule(c.queries().get(k), symbols);
+                if (!res.isEmpty()) {
+                    successful = true;
+                    break;
+                }
+            }
+
+            if (!successful) {
+                errors.add(new FailedCheck.FailedAuthorizer(j + 1, symbols.print_check(authorizer_checks.get(j))));
+            }
+        }
+
+        for (int i = 0; i < this.blocks.size(); i++) {
+            Block b = this.blocks.get(i);
+
+            for (int j = 0; j < b.checks.size(); j++) {
+                boolean successful = false;
+                Check c = b.checks.get(j);
+
+                for (int k = 0; k < c.queries().size(); k++) {
+                    Set<Fact> res = world.query_rule(c.queries().get(k), symbols);
+                    if (!res.isEmpty()) {
+                        successful = true;
+                        break;
+                    }
+                }
+
+                if (!successful) {
+                    errors.add(new FailedCheck.FailedBlock(i + 1, j, symbols.print_check(b.checks.get(j))));
+                }
+            }
+        }
+
+        HashMap<String, Set<Fact>> query_results = new HashMap<>();
+        for (String name : queries.keySet()) {
+            Set<Fact> res = world.query_rule(queries.get(name), symbols);
+            query_results.put(name, res);
+        }
+
+        if (errors.isEmpty()) {
+            return query_results;
+        } else {
+            throw new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), errors));
+        }
+    }
+
     /**
      * Prints a token's content
      */
@@ -221,7 +373,16 @@ public class UnverifiedBiscuit {
      * Default symbols list
      */
     static public SymbolTable default_symbol_table() {
-        return Biscuit.default_symbol_table();
+        SymbolTable syms = new SymbolTable();
+        syms.insert("authority");
+        syms.insert("ambient");
+        syms.insert("resource");
+        syms.insert("operation");
+        syms.insert("right");
+        syms.insert("current_time");
+        syms.insert("revocation_id");
+
+        return syms;
     }
 
     @Override
