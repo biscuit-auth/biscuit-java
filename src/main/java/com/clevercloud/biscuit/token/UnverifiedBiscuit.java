@@ -27,14 +27,14 @@ public class UnverifiedBiscuit {
     final Block authority;
     final List<Block> blocks;
     final SymbolTable symbols;
-    final Option<SerializedBiscuit> container;
+    final SerializedBiscuit serializedBiscuit;
     final List<byte[]> revocation_ids;
 
-    UnverifiedBiscuit(Block authority, List<Block> blocks, SymbolTable symbols, Option<SerializedBiscuit> container, List<byte[]> revocation_ids) {
+    UnverifiedBiscuit(Block authority, List<Block> blocks, SymbolTable symbols, SerializedBiscuit serializedBiscuit, List<byte[]> revocation_ids) {
         this.authority = authority;
         this.blocks = blocks;
         this.symbols = symbols;
-        this.container = container;
+        this.serializedBiscuit = serializedBiscuit;
         this.revocation_ids = revocation_ids;
     }
 
@@ -108,7 +108,7 @@ public class UnverifiedBiscuit {
 
         List<byte[]> revocation_ids = ser.revocation_identifiers();
 
-        return new UnverifiedBiscuit(authority, blocks, symbols, Option.some(ser), revocation_ids);
+        return new UnverifiedBiscuit(authority, blocks, symbols, ser, revocation_ids);
     }
 
     /**
@@ -117,10 +117,7 @@ public class UnverifiedBiscuit {
      * @return
      */
     public byte[] serialize() throws Error.FormatError.SerializationError {
-        if (this.container.isEmpty()) {
-            throw new Error.FormatError.SerializationError("no internal container");
-        }
-        return this.container.get().serialize();
+        return this.serializedBiscuit.serialize();
     }
 
     /**
@@ -169,7 +166,7 @@ public class UnverifiedBiscuit {
             throw new Error.SymbolTableOverlap();
         }
 
-        Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.container.get().append(keypair, block);
+        Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.serializedBiscuit.append(keypair, block);
         if (containerRes.isLeft()) {
             Error.FormatError error = containerRes.getLeft();
             throw error;
@@ -189,7 +186,7 @@ public class UnverifiedBiscuit {
 
         List<byte[]> revocation_ids = container.revocation_identifiers();
 
-        return new UnverifiedBiscuit(copiedBiscuit.authority, blocks, symbols, Option.some(container), revocation_ids);
+        return new UnverifiedBiscuit(copiedBiscuit.authority, blocks, symbols, container, revocation_ids);
     }
 
     public List<RevocationIdentifier> revocation_identifiers() {
@@ -395,7 +392,7 @@ public class UnverifiedBiscuit {
     }
 
     public Biscuit verify(PublicKey publicKey) throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        SerializedBiscuit serializedBiscuit = this.container.get();
+        SerializedBiscuit serializedBiscuit = this.serializedBiscuit;
         serializedBiscuit.verify(publicKey);
         return Biscuit.from_serialized_biscuit(serializedBiscuit, this.symbols);
     }

@@ -86,12 +86,12 @@ public class Biscuit extends UnverifiedBiscuit {
             List<byte[]> revocation_ids = s.revocation_identifiers();
 
             Option<SerializedBiscuit> c = Option.some(s);
-            return new Biscuit(authority, blocks, symbols, c, revocation_ids);
+            return new Biscuit(authority, blocks, symbols, s, revocation_ids);
         }
     }
 
-    Biscuit(Block authority, List<Block> blocks, SymbolTable symbols, Option<SerializedBiscuit> container, List<byte[]> revocation_ids) {
-        super(authority, blocks, symbols, container, revocation_ids);
+    Biscuit(Block authority, List<Block> blocks, SymbolTable symbols, SerializedBiscuit serializedBiscuit, List<byte[]> revocation_ids) {
+        super(authority, blocks, symbols, serializedBiscuit, revocation_ids);
     }
 
     /**
@@ -201,7 +201,7 @@ public class Biscuit extends UnverifiedBiscuit {
 
         List<byte[]> revocation_ids = ser.revocation_identifiers();
 
-        return new Biscuit(authority, blocks, symbols, Option.some(ser), revocation_ids);
+        return new Biscuit(authority, blocks, symbols, ser, revocation_ids);
     }
 
     /**
@@ -239,7 +239,7 @@ public class Biscuit extends UnverifiedBiscuit {
 
         List<byte[]> revocation_ids = ser.revocation_identifiers();
 
-        return new Biscuit(authority, blocks, symbols, Option.some(ser), revocation_ids);
+        return new Biscuit(authority, blocks, symbols, ser, revocation_ids);
     }
 
     /**
@@ -259,10 +259,7 @@ public class Biscuit extends UnverifiedBiscuit {
      * @return
      */
     public byte[] serialize() throws Error.FormatError.SerializationError {
-        if (this.container.isEmpty()) {
-            throw new Error.FormatError.SerializationError("no internal container");
-        }
-        return this.container.get().serialize();
+        return this.serializedBiscuit.serialize();
     }
 
     /**
@@ -312,7 +309,7 @@ public class Biscuit extends UnverifiedBiscuit {
             throw new Error.SymbolTableOverlap();
         }
 
-        Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.container.get().append(keypair, block);
+        Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.serializedBiscuit.append(keypair, block);
         if (containerRes.isLeft()) {
             Error.FormatError error = containerRes.getLeft();
             throw error;
@@ -332,7 +329,7 @@ public class Biscuit extends UnverifiedBiscuit {
 
         List<byte[]> revocation_ids = container.revocation_identifiers();
 
-        return new Biscuit(copiedBiscuit.authority, blocks, symbols, Option.some(container), revocation_ids);
+        return new Biscuit(copiedBiscuit.authority, blocks, symbols, container, revocation_ids);
     }
 
     /**
@@ -356,6 +353,6 @@ public class Biscuit extends UnverifiedBiscuit {
     }
 
     public Biscuit copy() throws Error {
-        return Biscuit.from_serialize_biscuit(this.container.get(), this.symbols);
+        return Biscuit.from_serialize_biscuit(this.serializedBiscuit, this.symbols);
     }
 }
