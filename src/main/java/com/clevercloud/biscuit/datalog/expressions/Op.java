@@ -342,6 +342,17 @@ public abstract class Op {
                         stack.push(new Term.Bool(leftSet.containsAll(rightSet)));
                         return true;
                     }
+                    if (left instanceof Term.Str && right instanceof Term.Str) {
+                        Option<String> left_s = symbols.get_s((int)((Term.Str) left).value());
+                        Option<String> right_s = symbols.get_s((int)((Term.Str) right).value());
+
+                        if (left_s.isEmpty() || right_s.isEmpty()) {
+                            return false;
+                        } else {
+                            stack.push(new Term.Bool(left_s.get().contains(right_s.get())));
+                            return true;
+                        }
+                    }
                     break;
                 case Prefix:
                     if (right instanceof Term.Str && left instanceof Term.Str) {
