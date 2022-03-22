@@ -13,17 +13,32 @@ import com.clevercloud.biscuit.token.builder.Utils;
 import io.vavr.control.Option;
 
 public final class SymbolTable implements Serializable {
+   private final static short DEFAULT_SYMBOLS_OFFSET = 1024;
+
    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_INSTANT;
    private String fromEpochIsoDate(long epochSec) {
       return Instant.ofEpochSecond(epochSec).atOffset(ZoneOffset.ofTotalSeconds(0)).format(dateTimeFormatter);
    }
+
+   /**
+    * Due to https://github.com/biscuit-auth/biscuit/blob/master/SPECIFICATIONS.md#symbol-table,
+    * We need two symbols tables:
+    * * one for the defaults symbols indexed from 0 et 1023 in <code>defaultSymbols</code> list
+    * * one for the usages symbols indexed from 1024 in <code>symbols</code> list
+    */
+   public final List<String> defaultSymbols;
    public final List<String> symbols;
 
    public long insert(final String symbol) {
-      int index = this.symbols.indexOf(symbol);
+      int index = this.defaultSymbols.indexOf(symbol);
       if (index == -1) {
-         this.symbols.add(symbol);
-         return this.symbols.size() - 1;
+         index = this.symbols.indexOf(symbol);
+         if (index == -1) {
+            this.symbols.add(symbol);
+            return this.symbols.size() - 1 + DEFAULT_SYMBOLS_OFFSET;
+         } else {
+            return index + DEFAULT_SYMBOLS_OFFSET;
+         }
       } else {
          return index;
       }
@@ -34,17 +49,26 @@ public final class SymbolTable implements Serializable {
    }
 
    public Option<Long> get(final String symbol) {
-      long index = this.symbols.indexOf(symbol);
+      // looking for symbol in default symbols
+      long index = this.defaultSymbols.indexOf(symbol);
       if (index == -1) {
-         return Option.none();
+         // looking for symbol in usages defined symbols
+         index = this.symbols.indexOf(symbol);
+         if (index == -1) {
+            return Option.none();
+         } else {
+            return Option.some(index + DEFAULT_SYMBOLS_OFFSET);
+         }
       } else {
          return Option.some(index);
       }
    }
 
    public Option<String> get_s(int i) {
-      if (i >=0 && i < this.symbols.size()) {
-         return Option.some(this.symbols.get(i));
+      if (i >= 0 && i < this.defaultSymbols.size() && i < DEFAULT_SYMBOLS_OFFSET) {
+         return Option.some(this.defaultSymbols.get(i));
+      } else if (i >= DEFAULT_SYMBOLS_OFFSET && i < this.symbols.size() + DEFAULT_SYMBOLS_OFFSET) {
+         return Option.some(this.symbols.get(i - DEFAULT_SYMBOLS_OFFSET));
       } else {
          return Option.none();
       }
@@ -145,20 +169,57 @@ public final class SymbolTable implements Serializable {
    }
 
    public String print_symbol(int i) {
-      if (i >=0 && i < this.symbols.size()) {
-         return this.symbols.get(i);
-      } else {
-         return "<"+i+"?>";
-      }
+      return get_s(i).getOrElse("<"+i+"?>");
    }
 
    public SymbolTable() {
+      this.defaultSymbols = new ArrayList<>();
       this.symbols = new ArrayList<>();
+      initDefaultSymbols();
    }
+
    public SymbolTable(SymbolTable s) {
+      this.defaultSymbols = new ArrayList<>();
       this.symbols = new ArrayList<>();
-      for(String symbol: s.symbols) {
-         this.symbols.add(symbol);
-      }
+      defaultSymbols.addAll(s.defaultSymbols);
+      symbols.addAll(s.symbols);
+   }
+
+   private void initDefaultSymbols() {
+      this.defaultSymbols.add("read");
+      this.defaultSymbols.add("write");
+      this.defaultSymbols.add("resource");
+      this.defaultSymbols.add("operation");
+      this.defaultSymbols.add("right");
+      this.defaultSymbols.add("time");
+      this.defaultSymbols.add("role");
+      this.defaultSymbols.add("owner");
+      this.defaultSymbols.add("tenant");
+      this.defaultSymbols.add("namespace");
+      this.defaultSymbols.add("user");
+      this.defaultSymbols.add("team");
+      this.defaultSymbols.add("service");
+      this.defaultSymbols.add("admin");
+      this.defaultSymbols.add("email");
+      this.defaultSymbols.add("group");
+      this.defaultSymbols.add("member");
+      this.defaultSymbols.add("ip_address");
+      this.defaultSymbols.add("client");
+      this.defaultSymbols.add("client_ip");
+      this.defaultSymbols.add("domain");
+      this.defaultSymbols.add("path");
+      this.defaultSymbols.add("version");
+      this.defaultSymbols.add("cluster");
+      this.defaultSymbols.add("node");
+      this.defaultSymbols.add("hostname");
+      this.defaultSymbols.add("nonce");
+      this.defaultSymbols.add("query");
+   }
+
+   public List<String> getAllSymbols() {
+      ArrayList<String> allSymbols = new ArrayList<>();
+      allSymbols.addAll(defaultSymbols);
+      allSymbols.addAll(symbols);
+      return allSymbols;
    }
 }

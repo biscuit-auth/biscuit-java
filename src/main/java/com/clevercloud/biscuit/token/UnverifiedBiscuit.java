@@ -345,7 +345,7 @@ public class UnverifiedBiscuit {
     public String print() {
         StringBuilder s = new StringBuilder();
         s.append("UnverifiedBiscuit {\n\tsymbols: ");
-        s.append(this.symbols.symbols);
+        s.append(this.symbols.getAllSymbols());
         s.append("\n\tauthority: ");
         s.append(this.authority.print(this.symbols));
         s.append("\n\tblocks: [\n");
@@ -363,36 +363,7 @@ public class UnverifiedBiscuit {
      * Default symbols list
      */
     static public SymbolTable default_symbol_table() {
-        SymbolTable syms = new SymbolTable();
-        syms.insert("read");
-        syms.insert("write");
-        syms.insert("resource");
-        syms.insert("operation");
-        syms.insert("right");
-        syms.insert("time");
-        syms.insert("role");
-        syms.insert("owner");
-        syms.insert("tenant");
-        syms.insert("namespace");
-        syms.insert("user");
-        syms.insert("team");
-        syms.insert("service");
-        syms.insert("admin");
-        syms.insert("email");
-        syms.insert("group");
-        syms.insert("member");
-        syms.insert("ip_address");
-        syms.insert("client");
-        syms.insert("client_ip");
-        syms.insert("domain");
-        syms.insert("path");
-        syms.insert("version");
-        syms.insert("cluster");
-        syms.insert("node");
-        syms.insert("hostname");
-        syms.insert("nonce");
-        syms.insert("query");
-        return syms;
+        return new SymbolTable();
     }
 
     @Override
