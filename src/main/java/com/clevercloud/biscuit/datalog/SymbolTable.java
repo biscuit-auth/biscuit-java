@@ -1,7 +1,6 @@
 package com.clevercloud.biscuit.datalog;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -14,7 +13,7 @@ import com.clevercloud.biscuit.token.builder.Utils;
 import io.vavr.control.Option;
 
 public final class SymbolTable implements Serializable {
-   private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ssxxx");
+   private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_INSTANT;
    private String fromEpochIsoDate(long epochSec) {
       return Instant.ofEpochSecond(epochSec).atOffset(ZoneOffset.ofTotalSeconds(0)).format(dateTimeFormatter);
    }
