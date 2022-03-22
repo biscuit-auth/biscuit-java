@@ -13,7 +13,7 @@ import com.clevercloud.biscuit.token.builder.Utils;
 import io.vavr.control.Option;
 
 public final class SymbolTable implements Serializable {
-   private final static short DEFAULT_SYMBOLS_OFFSET = 1024;
+   public final static short DEFAULT_SYMBOLS_OFFSET = 1024;
 
    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_INSTANT;
    private String fromEpochIsoDate(long epochSec) {
