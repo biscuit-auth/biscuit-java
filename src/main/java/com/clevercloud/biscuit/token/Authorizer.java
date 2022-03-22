@@ -88,13 +88,6 @@ public class Authorizer {
                 com.clevercloud.biscuit.datalog.Fact converted_fact = Fact.convert_from(fact, token.symbols).convert(this.symbols);
                 world.add_fact(converted_fact);
             }
-
-            List<byte[]> revocation_ids = token.revocation_ids;
-            Long revocation_id_sym = this.symbols.get("revocation_id").get();
-            for (int i = 0; i < revocation_ids.size(); i++) {
-                List<com.clevercloud.biscuit.datalog.Term> terms = Arrays.asList(new com.clevercloud.biscuit.datalog.Term.Integer(i), new com.clevercloud.biscuit.datalog.Term.Bytes(revocation_ids.get(i)));
-                this.world.facts().add(new com.clevercloud.biscuit.datalog.Fact(revocation_id_sym.longValue(), terms));
-            }
             for (com.clevercloud.biscuit.datalog.Rule rule : token.authority.rules) {
                 com.clevercloud.biscuit.token.builder.Rule _rule = Rule.convert_from(rule, token.symbols);
                 com.clevercloud.biscuit.datalog.Rule converted_rule = _rule.convert(this.symbols);
@@ -294,13 +287,6 @@ public class Authorizer {
             for (com.clevercloud.biscuit.datalog.Fact fact : token.authority.facts) {
                 com.clevercloud.biscuit.datalog.Fact converted_fact = Fact.convert_from(fact, token.symbols).convert(this.symbols);
                 world.add_fact(converted_fact);
-            }
-
-            List<byte[]> revocation_ids = token.revocation_ids;
-            Long revocation_id_sym = this.symbols.get("revocation_id").get();
-            for (int i = 0; i < revocation_ids.size(); i++) {
-                List<com.clevercloud.biscuit.datalog.Term> terms = Arrays.asList(new com.clevercloud.biscuit.datalog.Term.Integer(i), new com.clevercloud.biscuit.datalog.Term.Bytes(revocation_ids.get(i)));
-                this.world.facts().add(new com.clevercloud.biscuit.datalog.Fact(revocation_id_sym.longValue(), terms));
             }
             for (com.clevercloud.biscuit.datalog.Rule rule : token.authority.rules) {
                 com.clevercloud.biscuit.token.builder.Rule _rule = Rule.convert_from(rule, token.symbols);
