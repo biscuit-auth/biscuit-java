@@ -26,7 +26,36 @@ public final class SymbolTable implements Serializable {
     * * one for the defaults symbols indexed from 0 et 1023 in <code>defaultSymbols</code> list
     * * one for the usages symbols indexed from 1024 in <code>symbols</code> list
     */
-   public final List<String> defaultSymbols;
+   public final static List<String> defaultSymbols = List.of(
+           "read",
+           "write",
+           "resource",
+           "operation",
+           "right",
+           "time",
+           "role",
+           "owner",
+           "tenant",
+           "namespace",
+           "user",
+           "team",
+           "service",
+           "admin",
+           "email",
+           "group",
+           "member",
+           "ip_address",
+           "client",
+           "client_ip",
+           "domain",
+           "path",
+           "version",
+           "cluster",
+           "node",
+           "hostname",
+           "nonce",
+           "query"
+   );
    public final List<String> symbols;
 
    public long insert(final String symbol) {
@@ -173,47 +202,12 @@ public final class SymbolTable implements Serializable {
    }
 
    public SymbolTable() {
-      this.defaultSymbols = new ArrayList<>();
       this.symbols = new ArrayList<>();
-      initDefaultSymbols();
    }
 
    public SymbolTable(SymbolTable s) {
-      this.defaultSymbols = new ArrayList<>();
       this.symbols = new ArrayList<>();
-      defaultSymbols.addAll(s.defaultSymbols);
       symbols.addAll(s.symbols);
-   }
-
-   private void initDefaultSymbols() {
-      this.defaultSymbols.add("read");
-      this.defaultSymbols.add("write");
-      this.defaultSymbols.add("resource");
-      this.defaultSymbols.add("operation");
-      this.defaultSymbols.add("right");
-      this.defaultSymbols.add("time");
-      this.defaultSymbols.add("role");
-      this.defaultSymbols.add("owner");
-      this.defaultSymbols.add("tenant");
-      this.defaultSymbols.add("namespace");
-      this.defaultSymbols.add("user");
-      this.defaultSymbols.add("team");
-      this.defaultSymbols.add("service");
-      this.defaultSymbols.add("admin");
-      this.defaultSymbols.add("email");
-      this.defaultSymbols.add("group");
-      this.defaultSymbols.add("member");
-      this.defaultSymbols.add("ip_address");
-      this.defaultSymbols.add("client");
-      this.defaultSymbols.add("client_ip");
-      this.defaultSymbols.add("domain");
-      this.defaultSymbols.add("path");
-      this.defaultSymbols.add("version");
-      this.defaultSymbols.add("cluster");
-      this.defaultSymbols.add("node");
-      this.defaultSymbols.add("hostname");
-      this.defaultSymbols.add("nonce");
-      this.defaultSymbols.add("query");
    }
 
    public List<String> getAllSymbols() {
