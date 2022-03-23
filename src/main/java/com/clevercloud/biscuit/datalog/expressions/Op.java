@@ -342,6 +342,17 @@ public abstract class Op {
                         stack.push(new Term.Bool(leftSet.containsAll(rightSet)));
                         return true;
                     }
+                    if (left instanceof Term.Str && right instanceof Term.Str) {
+                        Option<String> left_s = symbols.get_s((int)((Term.Str) left).value());
+                        Option<String> right_s = symbols.get_s((int)((Term.Str) right).value());
+
+                        if (left_s.isEmpty() || right_s.isEmpty()) {
+                            return false;
+                        } else {
+                            stack.push(new Term.Bool(left_s.get().contains(right_s.get())));
+                            return true;
+                        }
+                    }
                     break;
                 case Prefix:
                     if (right instanceof Term.Str && left instanceof Term.Str) {
@@ -383,6 +394,18 @@ public abstract class Op {
                 case Add:
                     if (right instanceof Term.Integer && left instanceof Term.Integer) {
                         stack.push(new Term.Integer(((Term.Integer) left).value() + ((Term.Integer) right).value()));
+                        return true;
+                    }
+                    if (right instanceof Term.Str && left instanceof Term.Str) {
+                        Option<String> left_s = symbols.get_s((int)((Term.Str) left).value());
+                        Option<String> right_s = symbols.get_s((int)((Term.Str) right).value());
+
+                        if(left_s.isEmpty() || right_s.isEmpty()) {
+                            return false;
+                        }
+                        String concatenation = left_s.get() + right_s.get();
+                        symbols.add(concatenation);
+                        stack.push(new Term.Str(symbols.get(concatenation).get()));
                         return true;
                     }
                     break;

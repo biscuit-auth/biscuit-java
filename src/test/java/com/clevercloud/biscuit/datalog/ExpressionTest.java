@@ -39,4 +39,78 @@ public class ExpressionTest {
                 e.evaluate(variables, symbols).get()
         );
     }
+
+    @Test
+    public void testAddsStr() {
+        SymbolTable symbols = new SymbolTable();
+        symbols.add("a");
+        symbols.add("b");
+        symbols.add("ab");
+
+
+        Expression e = new Expression(new ArrayList<Op>(Arrays.asList(
+                new Op.Value(new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET)),
+                new Op.Value(new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET + 1)),
+                new Op.Binary(Op.BinaryOp.Add)
+        )));
+
+        assertEquals(
+                "\"a\" + \"b\"",
+                e.print(symbols).get()
+        );
+
+        assertEquals(
+                new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET + 2),
+                e.evaluate(new HashMap<>(), symbols).get()
+        );
+    }
+
+    @Test
+    public void testContainsStr() {
+        SymbolTable symbols = new SymbolTable();
+        symbols.add("ab");
+        symbols.add("b");
+
+
+        Expression e = new Expression(new ArrayList<Op>(Arrays.asList(
+                new Op.Value(new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET)),
+                new Op.Value(new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET + 1)),
+                new Op.Binary(Op.BinaryOp.Contains)
+        )));
+
+        assertEquals(
+                "\"ab\".contains(\"b\")",
+                e.print(symbols).get()
+        );
+
+        assertEquals(
+                new Term.Bool(true),
+                e.evaluate(new HashMap<>(), symbols).get()
+        );
+    }
+
+    @Test
+    public void testNegativeContainsStr() {
+        SymbolTable symbols = new SymbolTable();
+        symbols.add("ab");
+        symbols.add("b");
+
+
+        Expression e = new Expression(new ArrayList<Op>(Arrays.asList(
+                new Op.Value(new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET)),
+                new Op.Value(new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET + 1)),
+                new Op.Binary(Op.BinaryOp.Contains),
+                new Op.Unary(Op.UnaryOp.Negate)
+        )));
+
+        assertEquals(
+                "! \"ab\".contains(\"b\")",
+                e.print(symbols).get()
+        );
+
+        assertEquals(
+                new Term.Bool(false),
+                e.evaluate(new HashMap<>(), symbols).get()
+        );
+    }
 }
