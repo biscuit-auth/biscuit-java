@@ -27,9 +27,14 @@ public class Expression {
     }
 
     public Option<Term> evaluate(Map<Long, Term> variables, SymbolTable symbols) {
+        /*
+         Create a SymbolTable from original one to keep previous SymbolTable state after a rule or check execution,
+         to avoid filling it up too much with concatenated strings (BinaryOp.Adds on String)
+         */
+        SymbolTable tmpSymbols = new SymbolTable(symbols);
         Deque<Term> stack = new ArrayDeque<Term>(16); //Default value
         for(Op op: ops){
-            if(!op.evaluate(stack,variables, symbols)){
+            if(!op.evaluate(stack,variables, tmpSymbols)){
                 return Option.none();
             }
         }
