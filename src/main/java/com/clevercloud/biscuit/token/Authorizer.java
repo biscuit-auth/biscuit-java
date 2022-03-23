@@ -378,9 +378,11 @@ public class Authorizer {
             for (int i = 0; i < token.blocks.size(); i++) {
                 Block b = token.blocks.get(i);
 
+                World blockWorld = new World(world);
+
                 for (com.clevercloud.biscuit.datalog.Fact fact : b.facts) {
                     com.clevercloud.biscuit.datalog.Fact converted_fact = Fact.convert_from(fact, token.symbols).convert(this.symbols);
-                    world.add_fact(converted_fact);
+                    blockWorld.add_fact(converted_fact);
                 }
 
                 for (com.clevercloud.biscuit.datalog.Rule rule : b.rules) {
@@ -391,10 +393,10 @@ public class Authorizer {
                     if(res.isLeft()){
                         throw new Error.FailedLogic(new LogicError.InvalidBlockRule(0, token.symbols.print_rule(converted_rule)));
                     }
-                    world.add_rule(converted_rule);
+                    blockWorld.add_rule(converted_rule);
                 }
 
-                world.run(limits, symbols);
+                blockWorld.run(limits, symbols);
 
                 for (int j = 0; j < b.checks.size(); j++) {
                     boolean successful = false;
@@ -403,7 +405,7 @@ public class Authorizer {
                     com.clevercloud.biscuit.datalog.Check check = c.convert(symbols);
 
                     for (int k = 0; k < check.queries().size(); k++) {
-                        boolean res = world.query_match(check.queries().get(k), symbols);
+                        boolean res = blockWorld.query_match(check.queries().get(k), symbols);
 
                         if (Instant.now().compareTo(timeLimit) >= 0) {
                             throw new Error.Timeout();
