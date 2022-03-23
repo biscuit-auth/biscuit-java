@@ -1,5 +1,6 @@
 package com.clevercloud.biscuit.token;
 
+import com.clevercloud.biscuit.datalog.AuthorizedWorld;
 import com.clevercloud.biscuit.datalog.RunLimits;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.datalog.World;
@@ -274,11 +275,11 @@ public class Authorizer {
         return query(t._2, limits);
     }
 
-    public Long authorize() throws Error.Timeout, Error.FailedLogic, Error.TooManyFacts, Error.TooManyIterations {
+    public AuthorizedWorld authorize() throws Error.Timeout, Error.FailedLogic, Error.TooManyFacts, Error.TooManyIterations {
         return this.authorize(new RunLimits());
     }
 
-    public Long authorize(RunLimits limits) throws Error.Timeout, Error.FailedLogic, Error.TooManyFacts, Error.TooManyIterations {
+    public AuthorizedWorld authorize(RunLimits limits) throws Error.Timeout, Error.FailedLogic, Error.TooManyFacts, Error.TooManyIterations {
         Instant timeLimit = Instant.now().plus(limits.maxTime);
         List<FailedCheck> errors = new LinkedList<>();
         Option<Either<Integer, Integer>> policy_result = Option.none();
@@ -301,6 +302,7 @@ public class Authorizer {
 
         world.run(limits, symbols);
         world.clearRules();
+        AuthorizedWorld authorizedWorld = new AuthorizedWorld(world.facts());
 
         for (int i = 0; i < this.checks.size(); i++) {
             com.clevercloud.biscuit.datalog.Check c = this.checks.get(i).convert(symbols);
@@ -397,6 +399,8 @@ public class Authorizer {
                 }
 
                 blockWorld.run(limits, symbols);
+                authorizedWorld.add_facts(blockWorld.facts());
+                blockWorld.clearRules();
 
                 for (int j = 0; j < b.checks.size(); j++) {
                     boolean successful = false;
@@ -428,7 +432,7 @@ public class Authorizer {
             Either<Integer, Integer> e = policy_result.get();
             if (e.isRight()) {
                 if (errors.isEmpty()) {
-                    return Long.valueOf(e.get().longValue());
+                    return authorizedWorld;
                 } else {
                     throw new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(e.get().intValue()), errors));
                 }
