@@ -227,13 +227,6 @@ public class UnverifiedBiscuit {
             }
         }
 
-        List<RevocationIdentifier> revocation_ids = this.revocation_identifiers();
-        long rev = symbols.get("revocation_id").get();
-        for (int i = 0; i < revocation_ids.size(); i++) {
-            byte[] id = revocation_ids.get(i).getBytes();
-            world.add_fact(new Fact(new Predicate(rev, Arrays.asList(new Term.Integer(i), new Term.Bytes(id)))));
-        }
-
         return Right(world);
     }
 
@@ -352,7 +345,7 @@ public class UnverifiedBiscuit {
     public String print() {
         StringBuilder s = new StringBuilder();
         s.append("UnverifiedBiscuit {\n\tsymbols: ");
-        s.append(this.symbols.symbols);
+        s.append(this.symbols.getAllSymbols());
         s.append("\n\tauthority: ");
         s.append(this.authority.print(this.symbols));
         s.append("\n\tblocks: [\n");
@@ -370,16 +363,7 @@ public class UnverifiedBiscuit {
      * Default symbols list
      */
     static public SymbolTable default_symbol_table() {
-        SymbolTable syms = new SymbolTable();
-        syms.insert("authority");
-        syms.insert("ambient");
-        syms.insert("resource");
-        syms.insert("operation");
-        syms.insert("right");
-        syms.insert("current_time");
-        syms.insert("revocation_id");
-
-        return syms;
+        return new SymbolTable();
     }
 
     @Override

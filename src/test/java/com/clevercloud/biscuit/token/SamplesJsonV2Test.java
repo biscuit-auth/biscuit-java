@@ -60,6 +60,8 @@ class SamplesJsonV2Test {
                     if (f.length() > 0) {
                         if (f.startsWith("check if")) {
                             authorizer.add_check(f);
+                        } else if (f.startsWith("revocation_id")) {
+                            // do nothing
                         } else {
                             authorizer.add_fact(f);
                         }

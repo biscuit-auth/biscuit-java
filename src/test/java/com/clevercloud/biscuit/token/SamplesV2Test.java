@@ -205,7 +205,7 @@ public class SamplesV2Test {
         Error e = (Error) Try.of(() -> v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))).getCause();
         assertEquals(
                 new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
-                        new FailedCheck.FailedBlock(1, 1, "check if time($date), $date <= 2018-12-20T00:00:00+00:00")
+                        new FailedCheck.FailedBlock(1, 1, "check if time($date), $date <= 2018-12-20T00:00:00Z")
                 ))),
                 e);
     }

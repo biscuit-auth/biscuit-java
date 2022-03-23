@@ -338,7 +338,7 @@ public class Biscuit extends UnverifiedBiscuit {
     public String print() {
         StringBuilder s = new StringBuilder();
         s.append("Biscuit {\n\tsymbols: ");
-        s.append(this.symbols.symbols);
+        s.append(this.symbols.getAllSymbols());
         s.append("\n\tauthority: ");
         s.append(this.authority.print(this.symbols));
         s.append("\n\tblocks: [\n");

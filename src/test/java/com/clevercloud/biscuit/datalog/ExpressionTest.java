@@ -21,7 +21,7 @@ public class ExpressionTest {
 
         Expression e = new Expression(new ArrayList<Op>(Arrays.asList(
                 new Op.Value(new Term.Integer(1)),
-                new Op.Value(new Term.Variable(2)),
+                new Op.Value(new Term.Variable(SymbolTable.DEFAULT_SYMBOLS_OFFSET + 2)),
                 new Op.Binary(Op.BinaryOp.LessThan),
                 new Op.Unary(Op.UnaryOp.Negate)
         )));
@@ -32,7 +32,7 @@ public class ExpressionTest {
         );
 
         HashMap<Long, Term> variables = new HashMap<>();
-        variables.put(2L, new Term.Integer(0));
+        variables.put(SymbolTable.DEFAULT_SYMBOLS_OFFSET + 2L, new Term.Integer(0));
 
         assertEquals(
                 new Term.Bool(true),

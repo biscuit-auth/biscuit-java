@@ -84,7 +84,7 @@ class ParserTest {
     @Test
     void testRuleWithExpression() {
             Either<Error, Tuple2<String, Rule>> res =
-                Parser.rule("valid_date(\"file1\") <- time($0 ), resource( \"file1\"), $0 <= 2019-12-04T09:46:41+00:00");
+                Parser.rule("valid_date(\"file1\") <- time($0 ), resource( \"file1\"), $0 <= 2019-12-04T09:46:41Z");
         assertEquals(Either.right(new Tuple2<>("",
                         constrained_rule("valid_date",
                                 List.of(string("file1")),
@@ -105,7 +105,7 @@ class ParserTest {
     @Test
     void testRuleWithExpressionOrdering() {
         Either<Error, Tuple2<String, Rule>> res =
-                Parser.rule("valid_date(\"file1\") <- time($0 ), $0 <= 2019-12-04T09:46:41+00:00, resource(\"file1\")");
+                Parser.rule("valid_date(\"file1\") <- time($0 ), $0 <= 2019-12-04T09:46:41Z, resource(\"file1\")");
         assertEquals(Either.right(new Tuple2<>("",
                         constrained_rule("valid_date",
                                 List.of(string("file1")),
