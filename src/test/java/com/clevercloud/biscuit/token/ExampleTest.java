@@ -1,6 +1,7 @@
 package com.clevercloud.biscuit.token;
 
 import com.clevercloud.biscuit.crypto.KeyPair;
+import com.clevercloud.biscuit.datalog.AuthorizedWorld;
 import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.builder.Block;
@@ -31,7 +32,7 @@ public class ExampleTest {
                 .build();
     }
 
-    public Long authorize(KeyPair root, byte[] serializedToken) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+    public AuthorizedWorld authorize(KeyPair root, byte[] serializedToken) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         return Biscuit.from_bytes(serializedToken, root.public_key()).authorizer()
                 .add_fact("resource(\"/folder1/file1\")")
                 .add_fact("operation(\"read\")")

@@ -1,6 +1,7 @@
 package com.clevercloud.biscuit.token;
 
 import com.clevercloud.biscuit.crypto.KeyPair;
+import com.clevercloud.biscuit.datalog.AuthorizedWorld;
 import com.clevercloud.biscuit.datalog.Fact;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.error.Error;
@@ -298,7 +299,7 @@ public class BiscuitTest {
         v3.add_fact("resource(\"/folder2/file3\")");
         v3.add_fact("operation(\"read\")");
 
-        Try<Long> res = Try.of(() -> v3.authorize());
+        Try<AuthorizedWorld> res = Try.of(() -> v3.authorize());
         System.out.println(v3.print_world());
 
         assertTrue(res.isFailure());

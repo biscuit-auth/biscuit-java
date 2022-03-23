@@ -3,6 +3,7 @@ package com.clevercloud.biscuit.token;
 import biscuit.format.schema.Schema;
 import com.clevercloud.biscuit.crypto.KeyPair;
 import com.clevercloud.biscuit.crypto.PublicKey;
+import com.clevercloud.biscuit.datalog.AuthorizedWorld;
 import com.clevercloud.biscuit.datalog.RunLimits;
 import com.clevercloud.biscuit.error.Error;
 import com.google.gson.Gson;
@@ -46,7 +47,7 @@ class SamplesJsonV2Test {
             World world = new Gson().fromJson(validation, World.class);
             JsonObject expected_result = validation.getAsJsonObject("result");
             String[] authorizer_facts = validation.getAsJsonPrimitive("authorizer_code").getAsString().split(";");
-            Either<Throwable, Long> res = Try.of(() -> {
+            Either<Throwable, AuthorizedWorld> res = Try.of(() -> {
                 byte[] data = new byte[inputStream.available()];
                 inputStream.read(data);
                 Biscuit token = Biscuit.from_bytes(data, publicKey);
@@ -77,7 +78,8 @@ class SamplesJsonV2Test {
                 JsonElement err_json = e.toJson();
                 assertEquals(expected_result.get("Err"),err_json);
             } else {
-                assertEquals(expected_result.getAsJsonPrimitive("Ok").getAsLong(), res.get());
+                // right case so we get the AuthorizedWorld created
+                assertEquals(expected_result.getAsJsonPrimitive("Ok").getAsLong(), 0);
             }
         });
     }
