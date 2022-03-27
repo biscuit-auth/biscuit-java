@@ -275,11 +275,11 @@ public class Authorizer {
         return query(t._2, limits);
     }
 
-    public AuthorizedWorld authorize() throws Error.Timeout, Error.FailedLogic, Error.TooManyFacts, Error.TooManyIterations {
+    public Tuple2<Long, AuthorizedWorld> authorize() throws Error.Timeout, Error.FailedLogic, Error.TooManyFacts, Error.TooManyIterations {
         return this.authorize(new RunLimits());
     }
 
-    public AuthorizedWorld authorize(RunLimits limits) throws Error.Timeout, Error.FailedLogic, Error.TooManyFacts, Error.TooManyIterations {
+    public Tuple2<Long, AuthorizedWorld> authorize(RunLimits limits) throws Error.Timeout, Error.FailedLogic, Error.TooManyFacts, Error.TooManyIterations {
         Instant timeLimit = Instant.now().plus(limits.maxTime);
         List<FailedCheck> errors = new LinkedList<>();
         Option<Either<Integer, Integer>> policy_result = Option.none();
@@ -432,7 +432,7 @@ public class Authorizer {
             Either<Integer, Integer> e = policy_result.get();
             if (e.isRight()) {
                 if (errors.isEmpty()) {
-                    return authorizedWorld;
+                    return new Tuple2<>(Long.valueOf(e.get().longValue()), authorizedWorld);
                 } else {
                     throw new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(e.get().intValue()), errors));
                 }
