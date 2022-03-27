@@ -47,7 +47,7 @@ class SamplesJsonV2Test {
             World world = new Gson().fromJson(validation, World.class);
             JsonObject expected_result = validation.getAsJsonObject("result");
             String[] authorizer_facts = validation.getAsJsonPrimitive("authorizer_code").getAsString().split(";");
-            Either<Throwable, AuthorizedWorld> res = Try.of(() -> {
+            Either<Throwable, Tuple2<Long, AuthorizedWorld>> res = Try.of(() -> {
                 byte[] data = new byte[inputStream.available()];
                 inputStream.read(data);
                 Biscuit token = Biscuit.from_bytes(data, publicKey);
@@ -78,8 +78,7 @@ class SamplesJsonV2Test {
                 JsonElement err_json = e.toJson();
                 assertEquals(expected_result.get("Err"),err_json);
             } else {
-                // right case so we get the AuthorizedWorld created
-                assertEquals(expected_result.getAsJsonPrimitive("Ok").getAsLong(), 0);
+                assertEquals(expected_result.getAsJsonPrimitive("Ok").getAsLong(), res.get()._1);
             }
         });
     }

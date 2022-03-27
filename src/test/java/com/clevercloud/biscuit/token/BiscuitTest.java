@@ -9,6 +9,7 @@ import com.clevercloud.biscuit.error.FailedCheck;
 import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.builder.Block;
 
+import io.vavr.Tuple2;
 import io.vavr.control.Try;
 
 import org.junit.jupiter.api.Test;
@@ -299,7 +300,7 @@ public class BiscuitTest {
         v3.add_fact("resource(\"/folder2/file3\")");
         v3.add_fact("operation(\"read\")");
 
-        Try<AuthorizedWorld> res = Try.of(() -> v3.authorize());
+        Try<Tuple2<Long, AuthorizedWorld>> res = Try.of(() -> v3.authorize());
         System.out.println(v3.print_world());
 
         assertTrue(res.isFailure());
