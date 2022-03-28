@@ -5,7 +5,9 @@
 [![Central Version](https://img.shields.io/maven-central/v/com.clever-cloud/biscuit-java)](https://mvnrepository.com/artifact/com.clever-cloud/biscuit-java)
 [![Nexus Version](https://img.shields.io/nexus/r/com.clever-cloud/biscuit-java?server=https%3A%2F%2Fs01.oss.sonatype.org)](https://search.maven.org/artifact/com.clever-cloud/biscuit-java)
 
-[Biscuit's](https://github.com/CleverCloud/biscuit) Java library implementation.
+[Biscuit's](https://github.com/biscuit-auth/biscuit) Java library implementation.
+
+This API implements [Biscuit 2.0](https://www.biscuitsec.org/blog/biscuit-2-0/).
 
 ## Usage
 
