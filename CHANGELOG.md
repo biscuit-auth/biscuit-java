@@ -56,3 +56,7 @@ Considering a Base64 `RFC4648_URLSAFE` token,
 * create `Authorizer` from `biscuit` using `Authorizer authorizer = biscuit.authorizer()`;
 * add context to authorize the token (facts, rules, checks);
 * authorize using `Tuple2<Long, AuthorizedWorld> authorizedResult = authorizer.authorize()`.
+
+## v2.0.0
+
+[See the specifications breaking change](https://www.biscuitsec.org/blog/new-v2-breaking-changes/).
