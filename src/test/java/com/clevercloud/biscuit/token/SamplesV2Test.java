@@ -2,12 +2,14 @@ package com.clevercloud.biscuit.token;
 
 import biscuit.format.schema.Schema;
 import com.clevercloud.biscuit.crypto.PublicKey;
+import com.clevercloud.biscuit.datalog.AuthorizedWorld;
 import com.clevercloud.biscuit.datalog.RunLimits;
 import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.error.FailedCheck;
 import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.builder.Check;
 import com.clevercloud.biscuit.token.builder.Rule;
+import io.vavr.Tuple2;
 import io.vavr.control.Try;
 
 import org.junit.jupiter.api.Test;
@@ -447,7 +449,9 @@ public class SamplesV2Test {
         Authorizer v1 = token.authorizer();
         v1.allow();
 
-        assertEquals(Long.valueOf(0), v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500))));
+        Tuple2<Long, AuthorizedWorld> result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
+        assertEquals(0L, v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))._1);
+        assertEquals(0L, result._2.facts().size());
     }
 
     @Test
@@ -508,9 +512,10 @@ public class SamplesV2Test {
         v1.add_fact("operation(\"read\")");
         v1.add_fact("resource(\"file1\")");
         v1.allow();
-        Long result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
+        Tuple2<Long, AuthorizedWorld> result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println("result: " + result);
-        assertEquals(Long.valueOf(0), result);
+        assertEquals(0L, v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))._1);
+        assertEquals(5, result._2.facts().size());
     }
 
     @Test
@@ -536,8 +541,9 @@ public class SamplesV2Test {
                 )
         )));
         v1.allow();
-        Long result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
+        Tuple2<Long, AuthorizedWorld> result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println("result: " + result);
-        assertEquals(Long.valueOf(0), result);
+        assertEquals(0L, v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))._1);
+        assertEquals(1, result._2.facts().size());
     }
 }

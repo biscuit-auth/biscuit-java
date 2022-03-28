@@ -10,12 +10,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public final class World implements Serializable {
+public class World implements Serializable {
    private final Set<Fact> facts;
    private final List<Rule> rules;
 
    public void add_fact(final Fact fact) {
       this.facts.add(fact);
+   }
+
+   public void add_facts(final Set<Fact> facts) {
+      this.facts.addAll(facts);
    }
 
    public void add_rule(final Rule rule) {
@@ -103,6 +107,12 @@ public final class World implements Serializable {
 
    public World() {
       this.facts = new HashSet<>();
+      this.rules = new ArrayList<>();
+   }
+
+   public World(Set<Fact> facts) {
+      this.facts = new HashSet<>();
+      this.facts.addAll(facts);
       this.rules = new ArrayList<>();
    }
 
