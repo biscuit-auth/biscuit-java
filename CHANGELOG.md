@@ -1,6 +1,6 @@
 # Biscuit Java CHANGELOG
 
-## v2.1.0
+## v2.1.0 [Implements Biscuit 2.0 BREAKING CHANGES](https://www.biscuitsec.org/blog/new-v2-breaking-changes/)
 
 ### introduce new symbols and symbols' offset
 
