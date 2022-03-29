@@ -206,8 +206,8 @@ public class Block {
      */
     static public Either<Error.FormatError, Block> deserialize(Schema.Block b) {
         int version = b.getVersion();
-        if (version > SerializedBiscuit.MAX_SCHEMA_VERSION) {
-            return Left(new Error.FormatError.Version(SerializedBiscuit.MAX_SCHEMA_VERSION, version));
+        if (version < SerializedBiscuit.MIN_SCHEMA_VERSION || version > SerializedBiscuit.MAX_SCHEMA_VERSION) {
+            return Left(new Error.FormatError.Version(SerializedBiscuit.MIN_SCHEMA_VERSION, SerializedBiscuit.MAX_SCHEMA_VERSION, version));
         }
 
         SymbolTable symbols = new SymbolTable();
@@ -219,7 +219,7 @@ public class Block {
         ArrayList<Rule> rules = new ArrayList<>();
         ArrayList<Check> checks = new ArrayList<>();
 
-        if (version == 2) {
+        if (version == 3) {
             for (Schema.FactV2 fact : b.getFactsV2List()) {
                 Either<Error.FormatError, Fact> res = Fact.deserializeV2(fact);
                 if (res.isLeft()) {
@@ -253,7 +253,7 @@ public class Block {
             }
             return Right(new Block(symbols, b.getContext(), facts, rules, checks));
         } else {
-            return Left(new Error.FormatError.Version(SerializedBiscuit.MAX_SCHEMA_VERSION, version));
+            return Left(new Error.FormatError.Version(SerializedBiscuit.MIN_SCHEMA_VERSION, SerializedBiscuit.MAX_SCHEMA_VERSION, version));
         }
     }
 
