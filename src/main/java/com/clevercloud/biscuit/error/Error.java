@@ -250,10 +250,12 @@ public class Error extends Exception {
         }
 
         public static class Version extends FormatError {
+            final public int minimum;
             final public int maximum;
             final public int actual;
 
-            public Version(int maximum, int actual) {
+            public Version(int minimum, int maximum, int actual) {
+                this.minimum = minimum;
                 this.maximum = maximum;
                 this.actual = actual;
             }
@@ -265,20 +267,20 @@ public class Error extends Exception {
 
                 Version version = (Version) o;
 
+                if (minimum != version.minimum) return false;
                 if (maximum != version.maximum) return false;
                 return actual == version.actual;
             }
 
             @Override
             public int hashCode() {
-                int result = maximum;
-                result = 31 * result + actual;
-                return result;
+                return super.hashCode();
             }
 
             @Override
             public String toString() {
                 return "Version{" +
+                        "minimum=" + minimum +
                         "maximum=" + maximum +
                         ", actual=" + actual +
                         '}';
@@ -286,6 +288,7 @@ public class Error extends Exception {
             @Override
             public JsonElement toJson() {
                 JsonObject child = new JsonObject();
+                child.addProperty("minimum",this.minimum);
                 child.addProperty("maximum",this.maximum);
                 child.addProperty("actual", this.actual);
                 JsonObject jo = new JsonObject();
