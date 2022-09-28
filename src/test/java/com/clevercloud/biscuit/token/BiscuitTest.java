@@ -365,4 +365,265 @@ public class BiscuitTest {
 
         assertTrue(Try.of(()-> v1.authorize()).isFailure());
     }
+
+    @Test
+    public void testBasicWithNamespaces() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, CloneNotSupportedException, Error {
+        byte[] seed = {0, 0, 0, 0};
+        SecureRandom rng = new SecureRandom(seed);
+
+        System.out.println("preparing the authority block");
+
+        KeyPair root = new KeyPair(rng);
+
+        SymbolTable symbols = Biscuit.default_symbol_table();
+        Block authority_builder = new Block(0, symbols);
+
+        authority_builder.add_fact(fact("namespace:right", Arrays.asList(s("file1"), s("read"))));
+        authority_builder.add_fact(fact("namespace:right", Arrays.asList(s("file1"), s("write"))));
+        authority_builder.add_fact(fact("namespace:right", Arrays.asList(s("file2"), s("read"))));
+        Biscuit b = Biscuit.make(rng, root, Biscuit.default_symbol_table(), authority_builder.build());
+
+        System.out.println(b.print());
+
+        System.out.println("serializing the first token");
+
+        byte[] data = b.serialize();
+
+        System.out.print("data len: ");
+        System.out.println(data.length);
+        System.out.println(hex(data));
+
+        System.out.println("deserializing the first token");
+        Biscuit deser = Biscuit.from_bytes(data, root.public_key());
+
+        System.out.println(deser.print());
+
+        // SECOND BLOCK
+        System.out.println("preparing the second block");
+
+        KeyPair keypair2 = new KeyPair(rng);
+
+        Block builder = deser.create_block();
+        builder.add_check(check(rule(
+                "caveat1",
+                Arrays.asList(var("resource")),
+                Arrays.asList(
+                        pred("resource", Arrays.asList(var("resource"))),
+                        pred("operation", Arrays.asList(s("read"))),
+                        pred("namespace:right", Arrays.asList(var("resource"), s("read")))
+                )
+        )));
+
+        Biscuit b2 = deser.attenuate(rng, keypair2, builder.build());
+
+        System.out.println(b2.print());
+
+        System.out.println("serializing the second token");
+
+        byte[] data2 = b2.serialize();
+
+        System.out.print("data len: ");
+        System.out.println(data2.length);
+        System.out.println(hex(data2));
+
+        System.out.println("deserializing the second token");
+        Biscuit deser2 = Biscuit.from_bytes(data2, root.public_key());
+
+        System.out.println(deser2.print());
+
+        // THIRD BLOCK
+        System.out.println("preparing the third block");
+
+        KeyPair keypair3 = new KeyPair(rng);
+
+        Block builder3 = deser2.create_block();
+        builder3.add_check(check(rule(
+                "caveat2",
+                Arrays.asList(s("file1")),
+                Arrays.asList(
+                        pred("resource", Arrays.asList(s("file1")))
+                )
+        )));
+
+        Biscuit b3 = deser2.attenuate(rng, keypair3, builder3.build());
+
+        System.out.println(b3.print());
+
+        System.out.println("serializing the third token");
+
+        byte[] data3 = b3.serialize();
+
+        System.out.print("data len: ");
+        System.out.println(data3.length);
+        System.out.println(hex(data3));
+
+        System.out.println("deserializing the third token");
+        Biscuit final_token = Biscuit.from_bytes(data3, root.public_key());
+
+        System.out.println(final_token.print());
+
+        // check
+        System.out.println("will check the token for resource=file1 and operation=read");
+
+        SymbolTable check_symbols = new SymbolTable(final_token.symbols);
+        List<Fact> ambient_facts = Arrays.asList(
+                fact("resource", Arrays.asList(s("file1"))).convert(check_symbols),
+                fact("operation", Arrays.asList(s("read"))).convert(check_symbols)
+        );
+
+        final_token.check(check_symbols, ambient_facts,
+                new ArrayList<>(), new ArrayList<>(), new HashMap<>());
+
+        System.out.println("will check the token for resource=file2 and operation=write");
+
+        SymbolTable check_symbols2 = new SymbolTable(final_token.symbols);
+        List<Fact> ambient_facts2 = Arrays.asList(
+                fact("resource", Arrays.asList(s("file2"))).convert(check_symbols2),
+                fact("operation", Arrays.asList(s("write"))).convert(check_symbols2)
+        );
+
+        try {
+            final_token.check(check_symbols2, ambient_facts2,
+                    new ArrayList<>(), new ArrayList<>(), new HashMap<>());
+            fail();
+        } catch (Error e) {
+            System.out.println(e);
+            assertEquals(
+                    new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
+                            new FailedCheck.FailedBlock(1, 0, "check if resource($resource), operation(\"read\"), namespace:right($resource, \"read\")"),
+                            new FailedCheck.FailedBlock(2, 0, "check if resource(\"file1\")")
+                    ))),
+                    e);
+        }
+    }
+
+    @Test
+    public void testBasicWithNamespacesWithAddAuthorityFact() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, CloneNotSupportedException, Error {
+        byte[] seed = {0, 0, 0, 0};
+        SecureRandom rng = new SecureRandom(seed);
+
+        System.out.println("preparing the authority block");
+
+        KeyPair root = new KeyPair(rng);
+
+        SymbolTable symbols = Biscuit.default_symbol_table();
+        com.clevercloud.biscuit.token.builder.Biscuit o = new com.clevercloud.biscuit.token.builder.Biscuit(rng, root, symbols);
+        o.add_authority_fact("namespace:right(\"file1\",\"read\")");
+        o.add_authority_fact("namespace:right(\"file1\",\"write\")");
+        o.add_authority_fact("namespace:right(\"file2\",\"read\")");
+        Biscuit b = o.build();
+
+        System.out.println(b.print());
+
+        System.out.println("serializing the first token");
+
+        byte[] data = b.serialize();
+
+        System.out.print("data len: ");
+        System.out.println(data.length);
+        System.out.println(hex(data));
+
+        System.out.println("deserializing the first token");
+        Biscuit deser = Biscuit.from_bytes(data, root.public_key());
+
+        System.out.println(deser.print());
+
+        // SECOND BLOCK
+        System.out.println("preparing the second block");
+
+        KeyPair keypair2 = new KeyPair(rng);
+
+        Block builder = deser.create_block();
+        builder.add_check(check(rule(
+                "caveat1",
+                Arrays.asList(var("resource")),
+                Arrays.asList(
+                        pred("resource", Arrays.asList(var("resource"))),
+                        pred("operation", Arrays.asList(s("read"))),
+                        pred("namespace:right", Arrays.asList(var("resource"), s("read")))
+                )
+        )));
+
+        Biscuit b2 = deser.attenuate(rng, keypair2, builder.build());
+
+        System.out.println(b2.print());
+
+        System.out.println("serializing the second token");
+
+        byte[] data2 = b2.serialize();
+
+        System.out.print("data len: ");
+        System.out.println(data2.length);
+        System.out.println(hex(data2));
+
+        System.out.println("deserializing the second token");
+        Biscuit deser2 = Biscuit.from_bytes(data2, root.public_key());
+
+        System.out.println(deser2.print());
+
+        // THIRD BLOCK
+        System.out.println("preparing the third block");
+
+        KeyPair keypair3 = new KeyPair(rng);
+
+        Block builder3 = deser2.create_block();
+        builder3.add_check(check(rule(
+                "caveat2",
+                Arrays.asList(s("file1")),
+                Arrays.asList(
+                        pred("resource", Arrays.asList(s("file1")))
+                )
+        )));
+
+        Biscuit b3 = deser2.attenuate(rng, keypair3, builder3.build());
+
+        System.out.println(b3.print());
+
+        System.out.println("serializing the third token");
+
+        byte[] data3 = b3.serialize();
+
+        System.out.print("data len: ");
+        System.out.println(data3.length);
+        System.out.println(hex(data3));
+
+        System.out.println("deserializing the third token");
+        Biscuit final_token = Biscuit.from_bytes(data3, root.public_key());
+
+        System.out.println(final_token.print());
+
+        // check
+        System.out.println("will check the token for resource=file1 and operation=read");
+
+        SymbolTable check_symbols = new SymbolTable(final_token.symbols);
+        List<Fact> ambient_facts = Arrays.asList(
+                fact("resource", Arrays.asList(s("file1"))).convert(check_symbols),
+                fact("operation", Arrays.asList(s("read"))).convert(check_symbols)
+        );
+
+        final_token.check(check_symbols, ambient_facts,
+                new ArrayList<>(), new ArrayList<>(), new HashMap<>());
+
+        System.out.println("will check the token for resource=file2 and operation=write");
+
+        SymbolTable check_symbols2 = new SymbolTable(final_token.symbols);
+        List<Fact> ambient_facts2 = Arrays.asList(
+                fact("resource", Arrays.asList(s("file2"))).convert(check_symbols2),
+                fact("operation", Arrays.asList(s("write"))).convert(check_symbols2)
+        );
+
+        try {
+            final_token.check(check_symbols2, ambient_facts2,
+                    new ArrayList<>(), new ArrayList<>(), new HashMap<>());
+            fail();
+        } catch (Error e) {
+            System.out.println(e);
+            assertEquals(
+                    new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
+                            new FailedCheck.FailedBlock(1, 0, "check if resource($resource), operation(\"read\"), namespace:right($resource, \"read\")"),
+                            new FailedCheck.FailedBlock(2, 0, "check if resource(\"file1\")")
+                    ))),
+                    e);
+        }
+    }
 }
