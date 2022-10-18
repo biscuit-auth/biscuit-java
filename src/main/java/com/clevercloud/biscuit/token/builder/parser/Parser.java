@@ -242,7 +242,7 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<String, Predicate>> fact_predicate(String s) {
-        Tuple2<String, String> tn = take_while(s, (c) -> Character.isAlphabetic(c) || c == '_');
+        Tuple2<String, String> tn = take_while(s, (c) -> Character.isAlphabetic(c) || Character.isDigit(c) || c == '_' || c == ':');
         String name = tn._1;
         s = tn._2;
 

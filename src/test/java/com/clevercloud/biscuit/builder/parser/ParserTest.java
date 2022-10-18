@@ -65,6 +65,11 @@ class ParserTest {
         assertEquals(Either.right(new Tuple2<>("",
                         fact("date", List.of(new Term.Date(1575294593))))),
                 res3);
+
+        Either<Error, Tuple2<String, Fact>> res4 = Parser.fact("n1:right( \"file1\", \"read\" )");
+        assertEquals(Either.right(new Tuple2<>("",
+                        fact("n1:right", Arrays.asList(string("file1"), s("read"))))),
+                res4);
     }
 
     @Test
