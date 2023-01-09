@@ -359,6 +359,10 @@ public class UnverifiedBiscuit {
         return s.toString();
     }
 
+    public SymbolTable symbolTable() { return symbols; }
+    public Block authorityBlock() { return authority; }
+    public List<Block> blocks() { return blocks; }
+
     /**
      * Default symbols list
      */
