@@ -19,6 +19,7 @@ import java.util.List;
 
 import static com.clevercloud.biscuit.token.builder.Utils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class UnverifiedBiscuitTest {
@@ -151,5 +152,51 @@ public class UnverifiedBiscuitTest {
                     ))),
                     e);
         }
+    }
+
+    @Test
+    public void testUnverifiedBiscuitGetters() throws Error {
+        byte[] seed = {0, 0, 0, 0};
+        SecureRandom rng = new SecureRandom(seed);
+        KeyPair keypair0 = new KeyPair(rng);
+
+        SymbolTable symbols0 = Biscuit.default_symbol_table();
+        Block block0 = new Block(0, symbols0);
+        block0.add_fact(fact("right", List.of(s("file1"), s("read"))));
+        block0.add_fact(fact("right", List.of(s("file2"), s("read"))));
+        block0.add_fact(fact("right", List.of(s("file1"), s("write"))));
+        Biscuit biscuit = Biscuit.make(rng, keypair0, symbols0, block0.build());
+
+        Block block1 = biscuit.create_block();
+        block1.add_check(check(rule(
+                "caveat1",
+                List.of(var("resource")),
+                List.of(
+                        pred("resource", List.of(var("resource"))),
+                        pred("operation", List.of(s("read"))),
+                        pred("right", List.of(var("resource"), s("read")))
+                )
+        )));
+
+        biscuit = biscuit.attenuate(block1);
+        String data = biscuit.serialize_b64url();
+
+        UnverifiedBiscuit unverifiedBiscuit = UnverifiedBiscuit.from_b64url(data);
+        
+        SymbolTable unverifiedSymbols = unverifiedBiscuit.symbolTable();
+        List<String> symbolList = biscuit.symbolTable().getAllSymbols();
+        List<String> unverifiedSymbolList = unverifiedSymbols.getAllSymbols();
+        assertEquals(symbolList.size(), unverifiedSymbolList.size());
+        for (String symbol : symbolList) {
+                assertTrue(unverifiedSymbolList.contains(symbol));
+        }
+
+        
+        com.clevercloud.biscuit.token.Block unverifiedAuthority = unverifiedBiscuit.authorityBlock();
+        assertEquals(3, unverifiedAuthority.facts().size());
+        List<com.clevercloud.biscuit.token.Block> unverifiedBlocks = unverifiedBiscuit.blocks();
+        assertEquals(1, unverifiedBlocks.size());
+        assertEquals(1, unverifiedBlocks.get(0).checks().size());
+
     }
 }
