@@ -232,6 +232,11 @@ public class Authorizer {
         return this;
     }
 
+    public Authorizer add_policy(Policy p) {
+        this.policies.add(p);
+        return this;
+    }
+
     public Set<Fact> query(Rule query) throws Error.TooManyFacts, Error.TooManyIterations, Error.Timeout {
         return this.query(query, new RunLimits());
     }
