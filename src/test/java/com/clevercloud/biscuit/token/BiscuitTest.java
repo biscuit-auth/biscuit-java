@@ -626,32 +626,4 @@ public class BiscuitTest {
                     e);
         }
     }
-
-    
-    @Test
-    public void testBlockGetters() throws Error {
-        System.out.println("Testing block getters");
-        SymbolTable symbolTable = Biscuit.default_symbol_table();
-        String context = "hello world";
-        List<com.clevercloud.biscuit.datalog.Fact> facts = new ArrayList<>();
-        List<com.clevercloud.biscuit.datalog.Check> checks = new ArrayList<>();
-
-        facts.add(
-            fact("resource", Arrays.asList(s("file2"))).convert(symbolTable)
-        );
-        checks.add(
-                check(rule(
-                        "caveat2",
-                        Arrays.asList(s("file1")),
-                        Arrays.asList(
-                                pred("resource", Arrays.asList(s("file1")))
-                        )
-                )).convert(symbolTable)
-        );
-        com.clevercloud.biscuit.token.Block block = new com.clevercloud.biscuit.token.Block(symbolTable, context, facts, null, checks);
-        assertNull(block.rules());
-        assertEquals(facts.size(), block.facts().size());
-        assertEquals(facts.get(0), block.facts().get(0));
-        assertEquals(checks, block.checks());
-    }
 }

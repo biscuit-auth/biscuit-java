@@ -283,9 +283,5 @@ public class Block {
             return Left(new Error.FormatError.SerializationError(e.toString()));
         }
     }
-
-    public List<Fact> facts() { return facts; }
-    public List<Rule> rules() { return rules; }
-    public List<Check> checks() { return checks; }
 }
 
