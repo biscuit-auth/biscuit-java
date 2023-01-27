@@ -1,6 +1,7 @@
 package com.clevercloud.biscuit.token.format;
 
 import biscuit.format.schema.Schema;
+import com.clevercloud.biscuit.crypto.KeyDelegate;
 import com.clevercloud.biscuit.crypto.KeyPair;
 import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.error.Error;
@@ -30,6 +31,7 @@ public class SerializedBiscuit {
     public SignedBlock authority;
     public List<SignedBlock> blocks;
     public Proof proof;
+    public Option<Integer> root_key_id;
 
     public static int MIN_SCHEMA_VERSION = 3;
     public static int MAX_SCHEMA_VERSION = 3;
@@ -41,57 +43,89 @@ public class SerializedBiscuit {
      */
     static public SerializedBiscuit from_bytes(byte[] slice, PublicKey root) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         try {
-            //System.out.println("will parse protobuf");
             Schema.Biscuit data = Schema.Biscuit.parseFrom(slice);
-            //System.out.println("parse protobuf");
 
-            SignedBlock authority = new SignedBlock(
-                    data.getAuthority().getBlock().toByteArray(),
-                    new PublicKey(data.getAuthority().getNextKey().getAlgorithm(), data.getAuthority().getNextKey().getKey().toByteArray()),
-                    data.getAuthority().getSignature().toByteArray()
-            );
-
-            ArrayList<SignedBlock> blocks = new ArrayList<>();
-            for (Schema.SignedBlock block : data.getBlocksList()) {
-                blocks.add(new SignedBlock(
-                        block.getBlock().toByteArray(),
-                        new PublicKey(block.getNextKey().getAlgorithm(), block.getNextKey().getKey().toByteArray()),
-                        block.getSignature().toByteArray()
-                ));
-            }
-
-            //System.out.println("parsed blocks");
-
-            Option<KeyPair> secretKey = Option.none();
-            if (data.getProof().hasNextSecret()) {
-                secretKey = Option.some(new KeyPair(data.getProof().getNextSecret().toByteArray()));
-            }
-
-            Option<byte[]> signature = Option.none();
-            if (data.getProof().hasFinalSignature()) {
-                signature = Option.some(data.getProof().getFinalSignature().toByteArray());
-            }
-
-            if (secretKey.isEmpty() && signature.isEmpty()) {
-                throw new Error.FormatError.DeserializationError("empty proof");
-            }
-            Proof proof = new Proof(secretKey, signature);
-
-            //System.out.println("parse proof");
-
-            SerializedBiscuit b = new SerializedBiscuit(authority, blocks, proof);
-
-            Either<Error, Void> res = b.verify(root);
-            if (res.isLeft()) {
-                Error e = res.getLeft();
-                //System.out.println("verification error: "+e.toString());
-                throw e;
-            } else {
-                return b;
-            }
+            return from_bytes_inner(data, root);
         } catch (InvalidProtocolBufferException e) {
             throw new Error.FormatError.DeserializationError(e.toString());
         }
+    }
+
+    /**
+     * Deserializes a SerializedBiscuit from a byte array
+     * @param slice
+     * @return
+     */
+    static public SerializedBiscuit from_bytes(byte[] slice, KeyDelegate delegate) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+        try {
+            Schema.Biscuit data = Schema.Biscuit.parseFrom(slice);
+
+            Option<Integer> root_key_id = Option.none();
+            if(data.hasRootKeyId()) {
+                root_key_id = Option.some(data.getRootKeyId());
+            }
+
+            Option<PublicKey> root = delegate.root_key(root_key_id);
+            if(root.isEmpty()) {
+                throw new InvalidKeyException("unknown root key id");
+            }
+
+            return from_bytes_inner(data, root.get());
+        } catch (InvalidProtocolBufferException e) {
+            throw new Error.FormatError.DeserializationError(e.toString());
+        }
+    }
+
+    static SerializedBiscuit from_bytes_inner(Schema.Biscuit data, PublicKey root) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+        SignedBlock authority = new SignedBlock(
+                data.getAuthority().getBlock().toByteArray(),
+                new PublicKey(data.getAuthority().getNextKey().getAlgorithm(), data.getAuthority().getNextKey().getKey().toByteArray()),
+                data.getAuthority().getSignature().toByteArray()
+        );
+
+        ArrayList<SignedBlock> blocks = new ArrayList<>();
+        for (Schema.SignedBlock block : data.getBlocksList()) {
+            blocks.add(new SignedBlock(
+                    block.getBlock().toByteArray(),
+                    new PublicKey(block.getNextKey().getAlgorithm(), block.getNextKey().getKey().toByteArray()),
+                    block.getSignature().toByteArray()
+            ));
+        }
+
+        //System.out.println("parsed blocks");
+
+        Option<KeyPair> secretKey = Option.none();
+        if (data.getProof().hasNextSecret()) {
+            secretKey = Option.some(new KeyPair(data.getProof().getNextSecret().toByteArray()));
+        }
+
+        Option<byte[]> signature = Option.none();
+        if (data.getProof().hasFinalSignature()) {
+            signature = Option.some(data.getProof().getFinalSignature().toByteArray());
+        }
+
+        if (secretKey.isEmpty() && signature.isEmpty()) {
+            throw new Error.FormatError.DeserializationError("empty proof");
+        }
+        Proof proof = new Proof(secretKey, signature);
+
+        Option<Integer> root_key_id = Option.none();
+        if(data.hasRootKeyId()) {
+            root_key_id = Option.some(data.getRootKeyId());
+        }
+        //System.out.println("parse proof");
+
+        SerializedBiscuit b = new SerializedBiscuit(authority, blocks, proof, root_key_id);
+
+        Either<Error, Void> res = b.verify(root);
+        if (res.isLeft()) {
+            Error e = res.getLeft();
+            //System.out.println("verification error: "+e.toString());
+            throw e;
+        } else {
+            return b;
+        }
+
     }
 
     /**
@@ -182,8 +216,10 @@ public class SerializedBiscuit {
         }
 
         biscuitBuilder.setProof(proofBuilder.build());
+        if (!this.root_key_id.isEmpty()) {
+            biscuitBuilder.setRootKeyId(this.root_key_id.get());
+        }
 
-        //FIXME: set the root key id
         Schema.Biscuit biscuit = biscuitBuilder.build();
 
         try {
@@ -198,6 +234,12 @@ public class SerializedBiscuit {
     }
 
     static public Either<Error.FormatError, SerializedBiscuit> make(final KeyPair root,
+                                                                    final Block authority, final KeyPair next) {
+
+        return make(root, Option.none(), authority, next);
+    }
+
+    static public Either<Error.FormatError, SerializedBiscuit> make(final KeyPair root, final Option<Integer> root_key_id,
                                                                     final Block authority, final KeyPair next) {
         Schema.Block b = authority.serialize();
         try {
@@ -259,7 +301,7 @@ public class SerializedBiscuit {
 
             Proof proof = new Proof(next);
 
-            return Right(new SerializedBiscuit(this.authority, blocks, proof));
+            return Right(new SerializedBiscuit(this.authority, blocks, proof, root_key_id));
         } catch (IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
             return Left(new Error.FormatError.SerializationError(e.toString()));
         }
@@ -416,5 +458,13 @@ public class SerializedBiscuit {
         this.authority = authority;
         this.blocks = blocks;
         this.proof = proof;
+        this.root_key_id = Option.none();
+    }
+
+    SerializedBiscuit(SignedBlock authority, List<SignedBlock> blocks, Proof proof, Option<Integer> root_key_id) {
+        this.authority = authority;
+        this.blocks = blocks;
+        this.proof = proof;
+        this.root_key_id = root_key_id;
     }
 }

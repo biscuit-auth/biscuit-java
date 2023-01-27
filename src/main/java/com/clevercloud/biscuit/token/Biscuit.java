@@ -1,5 +1,6 @@
 package com.clevercloud.biscuit.token;
 
+import com.clevercloud.biscuit.crypto.KeyDelegate;
 import com.clevercloud.biscuit.crypto.KeyPair;
 import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.datalog.SymbolTable;
@@ -55,9 +56,22 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param symbols symbol table
      * @return
      */
+    public static com.clevercloud.biscuit.token.builder.Biscuit builder(final SecureRandom rng, final KeyPair root, final Option<Integer> root_key_id, SymbolTable symbols) {
+        return new com.clevercloud.biscuit.token.builder.Biscuit(rng, root, root_key_id, symbols);
+    }
+
+    /**
+     * Creates a token builder
+     *
+     * @param rng     random number generator
+     * @param root    root private key
+     * @param symbols symbol table
+     * @return
+     */
     public static com.clevercloud.biscuit.token.builder.Biscuit builder(final SecureRandom rng, final KeyPair root, SymbolTable symbols) {
         return new com.clevercloud.biscuit.token.builder.Biscuit(rng, root, symbols);
     }
+
 
     /**
      * Creates a token
@@ -68,6 +82,17 @@ public class Biscuit extends UnverifiedBiscuit {
      * @return
      */
     static public Biscuit make(final SecureRandom rng, final KeyPair root, final SymbolTable symbols, final Block authority) throws Error.SymbolTableOverlap, Error.FormatError {
+        return Biscuit.make(rng, root, Option.none(), symbols, authority);
+    }
+    /**
+     * Creates a token
+     *
+     * @param rng       random number generator
+     * @param root      root private key
+     * @param authority authority block
+     * @return
+     */
+    static public Biscuit make(final SecureRandom rng, final KeyPair root, final Option<Integer> root_key_id,  final SymbolTable symbols, final Block authority) throws Error.SymbolTableOverlap, Error.FormatError {
         if (!Collections.disjoint(symbols.symbols, authority.symbols.symbols)) {
             throw new Error.SymbolTableOverlap();
         }
@@ -77,7 +102,7 @@ public class Biscuit extends UnverifiedBiscuit {
 
         KeyPair next = new KeyPair(rng);
 
-        Either<Error.FormatError, SerializedBiscuit> container = SerializedBiscuit.make(root, authority, next);
+        Either<Error.FormatError, SerializedBiscuit> container = SerializedBiscuit.make(root, root_key_id, authority, next);
         if (container.isLeft()) {
             Error.FormatError e = container.getLeft();
             throw e;
@@ -86,12 +111,16 @@ public class Biscuit extends UnverifiedBiscuit {
             List<byte[]> revocation_ids = s.revocation_identifiers();
 
             Option<SerializedBiscuit> c = Option.some(s);
-            return new Biscuit(authority, blocks, symbols, s, revocation_ids);
+            return new Biscuit(authority, blocks, symbols, s, revocation_ids, root_key_id);
         }
     }
 
     Biscuit(Block authority, List<Block> blocks, SymbolTable symbols, SerializedBiscuit serializedBiscuit, List<byte[]> revocation_ids) {
         super(authority, blocks, symbols, serializedBiscuit, revocation_ids);
+    }
+
+    Biscuit(Block authority, List<Block> blocks, SymbolTable symbols, SerializedBiscuit serializedBiscuit, List<byte[]> revocation_ids, Option<Integer> root_key_id) {
+        super(authority, blocks, symbols, serializedBiscuit, revocation_ids, root_key_id);
     }
 
     /**
@@ -130,6 +159,23 @@ public class Biscuit extends UnverifiedBiscuit {
     }
 
     /**
+     * Deserializes a Biscuit token from a base64 url (RFC4648_URLSAFE) string
+     * <p>
+     * This checks the signature, but does not verify that the first key is the root key,
+     * to allow appending blocks without knowing about the root key.
+     * <p>
+     * The root key check is performed in the verify method
+     * <p>
+     * This method uses the default symbol table
+     *
+     * @param data
+     * @return Biscuit
+     */
+    static public Biscuit from_b64url(String data, KeyDelegate delegate) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+        return Biscuit.from_bytes(Base64.getUrlDecoder().decode(data), delegate);
+    }
+
+    /**
      * Deserializes a Biscuit token from a byte array
      * <p>
      * This checks the signature, but does not verify that the first key is the root key,
@@ -153,6 +199,23 @@ public class Biscuit extends UnverifiedBiscuit {
      * to allow appending blocks without knowing about the root key.
      * <p>
      * The root key check is performed in the verify method
+     * <p>
+     * This method uses the default symbol table
+     *
+     * @param data
+     * @return
+     */
+    static public Biscuit from_bytes(byte[] data, KeyDelegate delegate) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+        return Biscuit.from_bytes_with_symbols(data, delegate, default_symbol_table());
+    }
+
+    /**
+     * Deserializes a Biscuit token from a byte array
+     * <p>
+     * This checks the signature, but does not verify that the first key is the root key,
+     * to allow appending blocks without knowing about the root key.
+     * <p>
+     * The root key check is performed in the verify method
      *
      * @param data
      * @return
@@ -160,6 +223,25 @@ public class Biscuit extends UnverifiedBiscuit {
     static public Biscuit from_bytes_with_symbols(byte[] data, PublicKey root, SymbolTable symbols) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         //System.out.println("will deserialize and verify token");
         SerializedBiscuit ser = SerializedBiscuit.from_bytes(data, root);
+        //System.out.println("deserialized token, will populate Biscuit structure");
+
+        return Biscuit.from_serialized_biscuit(ser, symbols);
+    }
+
+    /**
+     * Deserializes a Biscuit token from a byte array
+     * <p>
+     * This checks the signature, but does not verify that the first key is the root key,
+     * to allow appending blocks without knowing about the root key.
+     * <p>
+     * The root key check is performed in the verify method
+     *
+     * @param data
+     * @return
+     */
+    static public Biscuit from_bytes_with_symbols(byte[] data, KeyDelegate delegate, SymbolTable symbols) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+        //System.out.println("will deserialize and verify token");
+        SerializedBiscuit ser = SerializedBiscuit.from_bytes(data, delegate);
         //System.out.println("deserialized token, will populate Biscuit structure");
 
         return Biscuit.from_serialized_biscuit(ser, symbols);
