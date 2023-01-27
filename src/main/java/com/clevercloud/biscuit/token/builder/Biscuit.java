@@ -9,6 +9,7 @@ import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.token.Block;
 import io.vavr.Tuple2;
 import io.vavr.control.Either;
+import io.vavr.control.Option;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ public class Biscuit {
     List<Fact> facts;
     List<Rule> rules;
     List<Check> checks;
+    Option<Integer> root_key_id;
 
     public Biscuit(final SecureRandom rng, final KeyPair root, SymbolTable base_symbols) {
         this.rng = rng;
@@ -36,6 +38,19 @@ public class Biscuit {
         this.facts = new ArrayList<>();
         this.rules = new ArrayList<>();
         this.checks = new ArrayList<>();
+        this.root_key_id = Option.none();
+    }
+
+    public Biscuit(final SecureRandom rng, final KeyPair root, Option<Integer> root_key_id, SymbolTable base_symbols) {
+        this.rng = rng;
+        this.root = root;
+        this.symbol_start = base_symbols.symbols.size();
+        this.symbols = new SymbolTable(base_symbols);
+        this.context = "";
+        this.facts = new ArrayList<>();
+        this.rules = new ArrayList<>();
+        this.checks = new ArrayList<>();
+        this.root_key_id = root_key_id;
     }
 
     public Biscuit add_authority_fact(com.clevercloud.biscuit.token.builder.Fact f) throws Error.Language {
@@ -100,6 +115,10 @@ public class Biscuit {
         return this;
     }
 
+    public void set_root_key_id(Integer i) {
+        this.root_key_id = Option.some(i);
+    }
+
     public com.clevercloud.biscuit.token.Biscuit build() throws Error {
         SymbolTable base_symbols = new SymbolTable();
         SymbolTable symbols = new SymbolTable();
@@ -113,7 +132,7 @@ public class Biscuit {
         }
 
         Block authority_block = new com.clevercloud.biscuit.token.Block(symbols, context, this.facts, this.rules, this.checks);
-        return com.clevercloud.biscuit.token.Biscuit.make(this.rng, this.root, base_symbols, authority_block);
+        return com.clevercloud.biscuit.token.Biscuit.make(this.rng, this.root, this.root_key_id, base_symbols, authority_block);
     }
 
     public Biscuit add_right(String resource, String right) throws Error.Language {

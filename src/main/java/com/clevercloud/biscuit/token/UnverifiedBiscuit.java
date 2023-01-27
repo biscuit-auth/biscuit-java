@@ -1,5 +1,6 @@
 package com.clevercloud.biscuit.token;
 
+import com.clevercloud.biscuit.crypto.KeyDelegate;
 import com.clevercloud.biscuit.crypto.KeyPair;
 import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.datalog.*;
@@ -29,6 +30,7 @@ public class UnverifiedBiscuit {
     final SymbolTable symbols;
     final SerializedBiscuit serializedBiscuit;
     final List<byte[]> revocation_ids;
+    final Option<Integer> root_key_id;
 
     UnverifiedBiscuit(Block authority, List<Block> blocks, SymbolTable symbols, SerializedBiscuit serializedBiscuit, List<byte[]> revocation_ids) {
         this.authority = authority;
@@ -36,6 +38,16 @@ public class UnverifiedBiscuit {
         this.symbols = symbols;
         this.serializedBiscuit = serializedBiscuit;
         this.revocation_ids = revocation_ids;
+        this.root_key_id = Option.none();
+    }
+
+    UnverifiedBiscuit(Block authority, List<Block> blocks, SymbolTable symbols, SerializedBiscuit serializedBiscuit, List<byte[]> revocation_ids, Option<Integer> root_key_id) {
+        this.authority = authority;
+        this.blocks = blocks;
+        this.symbols = symbols;
+        this.serializedBiscuit = serializedBiscuit;
+        this.revocation_ids = revocation_ids;
+        this.root_key_id = root_key_id;
     }
 
     /**
@@ -249,6 +261,10 @@ public class UnverifiedBiscuit {
         return res;
     }
 
+    public Option<Integer> root_key_id() {
+        return this.root_key_id;
+    }
+
     HashMap<String, Set<Fact>> check(SymbolTable symbols, List<Fact> ambient_facts, List<Rule> ambient_rules,
                                      List<Check> authorizer_checks, HashMap<String, Rule> queries) throws Error {
         Either<Error, World> wres = this.generate_world();
@@ -378,6 +394,19 @@ public class UnverifiedBiscuit {
     public Biscuit verify(PublicKey publicKey) throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         SerializedBiscuit serializedBiscuit = this.serializedBiscuit;
         serializedBiscuit.verify(publicKey);
+        return Biscuit.from_serialized_biscuit(serializedBiscuit, this.symbols);
+    }
+
+    public Biscuit verify(KeyDelegate delegate) throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        SerializedBiscuit serializedBiscuit = this.serializedBiscuit;
+
+
+        Option<PublicKey> root = delegate.root_key(root_key_id);
+        if(root.isEmpty()) {
+            throw new InvalidKeyException("unknown root key id");
+        }
+
+        serializedBiscuit.verify(root.get());
         return Biscuit.from_serialized_biscuit(serializedBiscuit, this.symbols);
     }
 }
