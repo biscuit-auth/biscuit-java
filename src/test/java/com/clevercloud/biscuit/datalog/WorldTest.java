@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -83,7 +84,7 @@ public class WorldTest {
             new Predicate(parent, Arrays.asList(new Term.Variable(syms.insert("parent")), new Term.Variable(syms.insert("sibling1")))),
             new Predicate(parent, Arrays.asList(new Term.Variable(syms.insert("parent")), new Term.Variable(syms.insert("sibling2"))))
       ), new ArrayList<>()));
-      w.run(syms);
+      w.run(new RunLimits(1000, 100, Duration.ofMillis(500)), syms);
 
       System.out.println("siblings: [" + String.join(", ",
               w.query(new Predicate(sibling, Arrays.asList(
