@@ -81,6 +81,7 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param authority authority block
      * @return
      */
+    @Deprecated
     static public Biscuit make(final SecureRandom rng, final KeyPair root, final SymbolTable symbols, final Block authority) throws Error.SymbolTableOverlap, Error.FormatError {
         return Biscuit.make(rng, root, Option.none(), symbols, authority);
     }
