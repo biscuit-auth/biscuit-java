@@ -1,12 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.clever-cloud</groupId>
-    <artifactId>biscuit-java</artifactId>
+    <groupId>org.biscuitsec</groupId>
+    <artifactId>biscuit</artifactId>
     <packaging>jar</packaging>
     <version>2.3.0</version>
     <name>biscuit-java</name>
-    <url>https://github.com/clevercloud/biscuit-java</url>
+    <url>https://github.com/biscuit-auth/biscuit-java</url>
 
     <description>Biscuit authentication Java library</description>
 
@@ -45,13 +45,13 @@
     <developers>
         <developer>
             <name>Marc-Antoine PERENNOU</name>
-            <email>marc-antoine.perennou@clever-cloud.com</email>
-            <organization>Clever Cloud</organization>
-            <organizationUrl>https://clever-cloud.com</organizationUrl>
+            <email>marc-antoine@perennou.com</email>
         </developer>
         <developer>
             <name>Geoffroy COUPRIE</name>
             <email>contact@geoffroycouprie.com</email>
+            <organization>Biscuit</organization>
+            <organizationUrl>https://www.biscuitsec.org/</organizationUrl>
         </developer>
         <developer>
             <name>Alexandre DUVAL</name>
@@ -66,9 +66,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:https://git@github.com/clevercloud/biscuit-java.git</connection>
-        <developerConnection>scm:git:git@github.com:clevercloud/biscuit-java.git</developerConnection>
-        <url>git@github.com:clevercloud/biscuit-java.git</url>
+        <connection>scm:git:https://git@github.com/biscuit-auth/biscuit-java.git</connection>
+        <developerConnection>scm:git:git@github.com:biscuit-auth/biscuit-java.git</developerConnection>
+        <url>git@github.com:biscuit-auth/biscuit-java.git</url>
     </scm>
 
     <distributionManagement>
