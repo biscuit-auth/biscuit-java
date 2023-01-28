@@ -1,6 +1,8 @@
 package com.clevercloud.biscuit.token;
 
+import com.clevercloud.biscuit.crypto.KeyDelegate;
 import com.clevercloud.biscuit.crypto.KeyPair;
+import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.datalog.AuthorizedWorld;
 import com.clevercloud.biscuit.datalog.Fact;
 import com.clevercloud.biscuit.datalog.SymbolTable;
@@ -10,6 +12,7 @@ import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.builder.Block;
 
 import io.vavr.Tuple2;
+import io.vavr.control.Option;
 import io.vavr.control.Try;
 
 import org.junit.jupiter.api.Test;
@@ -625,5 +628,69 @@ public class BiscuitTest {
                     ))),
                     e);
         }
+    }
+
+    @Test
+    public void testRootKeyId() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, CloneNotSupportedException, Error {
+        byte[] seed = {0, 0, 0, 0};
+        SecureRandom rng = new SecureRandom(seed);
+
+        System.out.println("preparing the authority block");
+
+        KeyPair root = new KeyPair(rng);
+
+        SymbolTable symbols = Biscuit.default_symbol_table();
+        Block authority_builder = new Block(0, symbols);
+
+        authority_builder.add_fact(fact("right", Arrays.asList(s("file1"), s("read"))));
+        authority_builder.add_fact(fact("right", Arrays.asList(s("file2"), s("read"))));
+        authority_builder.add_fact(fact("right", Arrays.asList(s("file1"), s("write"))));
+
+        Biscuit b = Biscuit.make(rng, root, Option.some(1), Biscuit.default_symbol_table(), authority_builder.build());
+
+        System.out.println(b.print());
+
+        System.out.println("serializing the first token");
+
+        byte[] data = b.serialize();
+
+        System.out.print("data len: ");
+        System.out.println(data.length);
+        System.out.println(hex(data));
+
+        System.out.println("deserializing the first token");
+
+        assertThrows(InvalidKeyException.class, () -> {
+            Biscuit deser = Biscuit.from_bytes(data, new KeyDelegate() {
+                @Override
+                public Option<PublicKey> root_key(Option<Integer> key_id) {
+                    return Option.none();
+                }
+            });
+        });
+
+
+        assertThrows(com.clevercloud.biscuit.error.Error.FormatError.Signature.InvalidSignature.class, () -> {
+            Biscuit deser = Biscuit.from_bytes(data, new KeyDelegate() {
+                @Override
+                public Option<PublicKey> root_key(Option<Integer> key_id) {
+
+                    KeyPair root = new KeyPair(rng);
+                    return Option.some(root.public_key());
+                }
+            });
+        });
+
+        Biscuit deser = Biscuit.from_bytes(data, new KeyDelegate() {
+            @Override
+            public Option<PublicKey> root_key(Option<Integer> key_id) {
+                if (key_id.get() == 1) {
+                    return Option.some(root.public_key());
+                } else {
+                    return Option.none();
+                }
+            }
+        });
+
     }
 }

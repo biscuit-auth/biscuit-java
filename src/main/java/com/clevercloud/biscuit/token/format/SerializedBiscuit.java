@@ -261,7 +261,7 @@ public class SerializedBiscuit {
             SignedBlock signedBlock = new SignedBlock(block, next_key, signature);
             Proof proof = new Proof(next);
 
-            return Right(new SerializedBiscuit(signedBlock, new ArrayList<>(), proof));
+            return Right(new SerializedBiscuit(signedBlock, new ArrayList<>(), proof, root_key_id));
         } catch (IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
             return Left(new Error.FormatError.SerializationError(e.toString()));
         }
