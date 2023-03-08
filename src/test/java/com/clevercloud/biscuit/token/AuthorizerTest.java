@@ -14,13 +14,14 @@ import com.clevercloud.biscuit.token.builder.Term;
 import static com.clevercloud.biscuit.token.builder.Utils.*;
 
 public class AuthorizerTest {
- 
+
     @Test
     public void testAuthorizerPolicy() throws Parser {
         Authorizer authorizer = new Authorizer();
         List<Policy> policies = authorizer.policies;
         authorizer.deny();
         assertEquals(1, policies.size());
+        assertEquals(policies.size(), authorizer.world.policies().size());
 
         authorizer.add_policy(new Policy(
             Arrays.asList(
@@ -32,8 +33,10 @@ public class AuthorizerTest {
                 )
             ), Policy.Kind.Deny));
         assertEquals(2, policies.size());
+        assertEquals(policies.size(), authorizer.world.policies().size());
 
-        authorizer.add_policy("deny if true");
+        authorizer.add_policy("allow if true");
         assertEquals(3, policies.size());
+        assertEquals(policies.size(), authorizer.world.policies().size());
     }
 }
