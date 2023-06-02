@@ -79,21 +79,33 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param rng       random number generator
      * @param root      root private key
      * @param authority authority block
-     * @return
+     * @return Biscuit
      */
-    @Deprecated
     static public Biscuit make(final SecureRandom rng, final KeyPair root, final SymbolTable symbols, final Block authority) throws Error.SymbolTableOverlap, Error.FormatError {
         return Biscuit.make(rng, root, Option.none(), symbols, authority);
     }
+
     /**
      * Creates a token
      *
      * @param rng       random number generator
      * @param root      root private key
      * @param authority authority block
-     * @return
+     * @return Biscuit
      */
-    static public Biscuit make(final SecureRandom rng, final KeyPair root, final Option<Integer> root_key_id,  final SymbolTable symbols, final Block authority) throws Error.SymbolTableOverlap, Error.FormatError {
+    static public Biscuit make(final SecureRandom rng, final KeyPair root, final Integer root_key_id, final SymbolTable symbols, final Block authority) throws Error.SymbolTableOverlap, Error.FormatError {
+        return Biscuit.make(rng, root, Option.of(root_key_id), symbols, authority);
+    }
+
+    /**
+     * Creates a token
+     *
+     * @param rng       random number generator
+     * @param root      root private key
+     * @param authority authority block
+     * @return Biscuit
+     */
+    static private Biscuit make(final SecureRandom rng, final KeyPair root, final Option<Integer> root_key_id,  final SymbolTable symbols, final Block authority) throws Error.SymbolTableOverlap, Error.FormatError {
         if (!Collections.disjoint(symbols.symbols, authority.symbols.symbols)) {
             throw new Error.SymbolTableOverlap();
         }
