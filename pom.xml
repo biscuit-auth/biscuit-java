@@ -8,7 +8,7 @@
     <name>biscuit-java</name>
     <url>https://github.com/biscuit-auth/biscuit-java</url>
 
-    <description>Biscuit authentication Java library</description>
+    <description>Java support for the biscuit auth token and policy language</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
