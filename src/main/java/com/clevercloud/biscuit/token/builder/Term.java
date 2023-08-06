@@ -3,6 +3,7 @@ package com.clevercloud.biscuit.token.builder;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 
@@ -13,11 +14,7 @@ public abstract class Term {
     }
 
     public static class Str extends Term {
-        String value;
-
-        public String getValue() {
-            return value;
-        }
+        final String value;
 
         public Str(String value) {
             this.value = value;
@@ -28,7 +25,11 @@ public abstract class Term {
             return new com.clevercloud.biscuit.datalog.Term.Str(symbols.insert(this.value));
         }
 
-            @Override
+        public String getValue() {
+            return value;
+        }
+
+        @Override
         public String toString() {
             return "\""+value+"\"";
         }
@@ -43,12 +44,12 @@ public abstract class Term {
 
         @Override
         public int hashCode() {
-            return Objects.hash(value);
+            return value.hashCode();
         }
     }
 
     public static class Variable extends Term {
-        String value;
+        final String value;
 
         public Variable(String value) {
             this.value = value;
@@ -57,6 +58,10 @@ public abstract class Term {
         @Override
         public com.clevercloud.biscuit.datalog.Term convert(SymbolTable symbols) {
             return new com.clevercloud.biscuit.datalog.Term.Variable(symbols.insert(this.value));
+        }
+
+        public String getValue() {
+            return value;
         }
 
         @Override
@@ -81,10 +86,14 @@ public abstract class Term {
     }
 
     public static class Integer extends Term {
-        long value;
+        final long value;
 
         public Integer(long value) {
             this.value = value;
+        }
+
+        public long getValue() {
+            return value;
         }
 
         @Override
@@ -94,7 +103,7 @@ public abstract class Term {
 
         @Override
         public String toString() {
-            return ""+value;
+            return String.valueOf(value);
         }
 
         @Override
@@ -109,13 +118,12 @@ public abstract class Term {
 
         @Override
         public int hashCode() {
-            return (int) (value ^ (value >>> 32));
+            return Long.hashCode(value);
         }
     }
 
-
     public static class Bytes extends Term {
-        byte[] value;
+        final byte[] value;
 
         public Bytes(byte[] value) {
             this.value = value;
@@ -126,9 +134,13 @@ public abstract class Term {
             return new com.clevercloud.biscuit.datalog.Term.Bytes(this.value);
         }
 
+        public byte[] getValue() {
+            return Arrays.copyOf(value, value.length);
+        }
+
         @Override
         public String toString() {
-            return "\""+value+"\"";
+            return "\""+ value +"\"";
         }
 
         @Override
@@ -148,7 +160,7 @@ public abstract class Term {
     }
 
     public static class Date extends Term {
-        long value;
+        final long value;
 
         public Date(long value) {
             this.value = value;
@@ -159,9 +171,13 @@ public abstract class Term {
             return new com.clevercloud.biscuit.datalog.Term.Date(this.value);
         }
 
+        public long getValue() {
+            return value;
+        }
+
         @Override
         public String toString() {
-            return ""+value;
+            return String.valueOf(value);
         }
 
         @Override
@@ -176,12 +192,12 @@ public abstract class Term {
 
         @Override
         public int hashCode() {
-            return (int) (value ^ (value >>> 32));
+            return Long.hashCode(value);
         }
     }
 
     public static class Bool extends Term {
-        boolean value;
+        final boolean value;
 
         public Bool(boolean value) {
             this.value = value;
@@ -192,9 +208,13 @@ public abstract class Term {
             return new com.clevercloud.biscuit.datalog.Term.Bool(this.value);
         }
 
+        public boolean getValue() {
+            return value;
+        }
+
         @Override
         public String toString() {
-            return ""+value;
+            return String.valueOf(value);
         }
 
         @Override
@@ -209,14 +229,14 @@ public abstract class Term {
 
         @Override
         public int hashCode() {
-            return (value ? 1 : 0);
+            return Boolean.hashCode(value);
         }
     }
 
     public static class Set extends Term {
-        HashSet<Term> value;
+        final java.util.Set<Term> value;
 
-        public Set(HashSet<Term> value) {
+        public Set(java.util.Set<Term> value) {
             this.value = value;
         }
 
@@ -231,11 +251,13 @@ public abstract class Term {
             return new com.clevercloud.biscuit.datalog.Term.Set(s);
         }
 
+        public java.util.Set<Term> getValue() {
+            return Collections.unmodifiableSet(value);
+        }
+
         @Override
         public String toString() {
-            return "[" +
-                     value +
-                    ']';
+            return "[" + value + ']';
         }
 
         @Override
@@ -245,7 +267,7 @@ public abstract class Term {
 
             Set set = (Set) o;
 
-            return value != null ? value.equals(set.value) : set.value == null;
+            return Objects.equals(value, set.value);
         }
 
         @Override
