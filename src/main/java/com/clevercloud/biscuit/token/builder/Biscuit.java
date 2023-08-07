@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.clevercloud.biscuit.token.Biscuit.make;
 import static com.clevercloud.biscuit.token.builder.Utils.*;
 
 public class Biscuit {
@@ -132,7 +133,11 @@ public class Biscuit {
         }
 
         Block authority_block = new com.clevercloud.biscuit.token.Block(symbols, context, this.facts, this.rules, this.checks);
-        return com.clevercloud.biscuit.token.Biscuit.make(this.rng, this.root, this.root_key_id, base_symbols, authority_block);
+        if (this.root_key_id.isDefined()) {
+            return make(this.rng, this.root, this.root_key_id.get(), base_symbols, authority_block);
+        } else {
+            return make(this.rng, this.root, base_symbols, authority_block);
+        }
     }
 
     public Biscuit add_right(String resource, String right) throws Error.Language {

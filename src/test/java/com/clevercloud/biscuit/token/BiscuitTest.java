@@ -646,7 +646,7 @@ public class BiscuitTest {
         authority_builder.add_fact(fact("right", Arrays.asList(s("file2"), s("read"))));
         authority_builder.add_fact(fact("right", Arrays.asList(s("file1"), s("write"))));
 
-        Biscuit b = Biscuit.make(rng, root, Option.some(1), Biscuit.default_symbol_table(), authority_builder.build());
+        Biscuit b = Biscuit.make(rng, root, 1, Biscuit.default_symbol_table(), authority_builder.build());
 
         System.out.println(b.print());
 
