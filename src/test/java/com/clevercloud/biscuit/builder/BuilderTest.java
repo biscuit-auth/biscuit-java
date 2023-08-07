@@ -8,15 +8,17 @@ import com.clevercloud.biscuit.token.builder.Block;
 import com.clevercloud.biscuit.token.builder.Expression;
 import com.clevercloud.biscuit.token.builder.Term;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Set;
 
 import static com.clevercloud.biscuit.token.builder.Utils.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BuilderTest {
 
@@ -60,5 +62,45 @@ public class BuilderTest {
         System.out.println(rootBiscuit.print());
 
         assertNotNull(rootBiscuit);
+    }
+
+    @Test
+    public void testStringValueOfAStringTerm() {
+        assertEquals( "\"hello\"", new Term.Str("hello").toString() );
+    }
+
+    @Test
+    public void testStringValueOfAnIntegerTerm() {
+        assertEquals( "123", new Term.Integer(123).toString() );
+    }
+
+    @Test
+    public void testStringValueOfAVariableTerm() {
+        assertEquals( "$hello", new Term.Variable("hello").toString() );
+    }
+
+    @Test
+    public void testStringValueOfASetTerm() {
+        String actual = new Term.Set(Set.of(new Term.Str("a"), new Term.Str("b"), new Term.Integer((3)))).toString();
+        assertTrue(actual.startsWith("[["), "starts with [[");
+        assertTrue(actual.endsWith("]]"), "ends with ]]");
+        assertTrue(actual.contains("\"a\""), "contains a");
+        assertTrue(actual.contains("\"b\""), "contains b");
+        assertTrue(actual.contains("3"), "contains 3");
+    }
+
+    @Test
+    public void testStringValueOfAByteArrayTermIsJustTheArrayReferenceNotTheContents() {
+        String string = new Term.Bytes("Hello".getBytes(StandardCharsets.UTF_8)).toString();
+        assertTrue(string.startsWith("\"[B@"), "starts with quote, and array reference");
+        assertTrue(string.endsWith("\""), "ends with quote");
+    }
+
+    @Test
+    public void testArrayValueIsCopy() {
+        byte[] someBytes = "Hello".getBytes(StandardCharsets.UTF_8);
+        Term.Bytes term = new Term.Bytes(someBytes);
+        assertTrue(Arrays.equals(someBytes, term.getValue()), "same content");
+        assertNotEquals(System.identityHashCode(someBytes), System.identityHashCode(term.getValue()), "different objects");
     }
 }
