@@ -563,10 +563,9 @@ public class Error extends Exception {
 
         @Override
         public JsonElement toJson(){
-            JsonObject jo = new JsonObject();
             JsonObject error = new JsonObject();
             error.add("error", this.error.toJson());
-            return jo;
+            return error;
         }
     }
 }
