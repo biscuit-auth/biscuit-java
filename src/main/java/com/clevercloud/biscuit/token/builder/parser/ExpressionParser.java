@@ -261,8 +261,6 @@ public class ExpressionParser {
             }
 
             Tuple2<String, Expression> t = res.get();
-
-            s = space(s.substring(1));
             return Either.right(new Tuple2<>(t._1,  t._2));
         }
 
