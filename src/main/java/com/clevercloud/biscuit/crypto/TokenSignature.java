@@ -191,6 +191,6 @@ public class TokenSignature {
     }
 
     public static byte[] fromHex(String s) {
-        return com.clevercloud.biscuit.token.builder.Utils.hexStringToByteArray(hex);
+        return com.clevercloud.biscuit.token.builder.Utils.hexStringToByteArray(s);
     }
 }
