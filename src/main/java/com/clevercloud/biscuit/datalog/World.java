@@ -1,6 +1,7 @@
 package com.clevercloud.biscuit.datalog;
 
 import com.clevercloud.biscuit.error.Error;
+import com.clevercloud.biscuit.token.Policy;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 public class World implements Serializable {
    private final Set<Fact> facts;
    private final List<Rule> rules;
+   private final List<Policy> policies;
 
    public void add_fact(final Fact fact) {
       this.facts.add(fact);
@@ -24,6 +26,10 @@ public class World implements Serializable {
 
    public void add_rule(final Rule rule) {
       this.rules.add(rule);
+   }
+
+   public void add_policy(final Policy policy) {
+      this.policies.add(policy);
    }
 
    public void clearRules() {
@@ -72,6 +78,8 @@ public class World implements Serializable {
 
    public List<Rule> rules() { return this.rules; }
 
+   public List<Policy> policies() { return this.policies; }
+
    public final Set<Fact> query(final Predicate pred) {
       return this.facts.stream().filter((f) -> {
          if (f.predicate().name() != pred.name()) {
@@ -108,22 +116,32 @@ public class World implements Serializable {
    public World() {
       this.facts = new HashSet<>();
       this.rules = new ArrayList<>();
+      this.policies = new ArrayList<>();
    }
 
    public World(Set<Fact> facts) {
       this.facts = new HashSet<>();
       this.facts.addAll(facts);
       this.rules = new ArrayList<>();
+      this.policies = new ArrayList<>();
    }
 
    public World(Set<Fact> facts,  List<Rule> rules) {
       this.facts = facts;
       this.rules = rules;
+      this.policies = new ArrayList<>();
    }
 
    public World(Set<Fact> facts, List<Rule> rules, List<Check> checks) {
       this.facts = facts;
       this.rules = rules;
+      this.policies = new ArrayList<>();
+   }
+
+   public World(Set<Fact> facts, List<Rule> rules, List<Check> checks, List<Policy> policies) {
+      this.facts = facts;
+      this.rules = rules;
+      this.policies = policies;
    }
 
    public World(World w) {
@@ -135,6 +153,11 @@ public class World implements Serializable {
       this.rules = new ArrayList<>();
       for(Rule rule: w.rules) {
          this.rules.add(rule);
+      }
+
+      this.policies = new ArrayList<>();
+      for(Policy policy: w.policies) {
+         this.policies.add(policy);
       }
 
    }
@@ -152,6 +175,12 @@ public class World implements Serializable {
       for(Rule r: this.rules) {
          s.append("\n\t\t\t");
          s.append(symbol_table.print_rule(r));
+      }
+
+      s.append("\n\t\t]\n\t\tpolicies: [");
+      for(Policy policy: this.policies) {
+         s.append("\n\t\t\t");
+         s.append(symbol_table.print_policy(policy));
       }
 
       s.append("\n\t\t]\n\t}");

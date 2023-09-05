@@ -2,6 +2,7 @@ package com.clevercloud.biscuit.datalog;
 
 import com.clevercloud.biscuit.crypto.TokenSignature;
 import com.clevercloud.biscuit.datalog.expressions.Expression;
+import com.clevercloud.biscuit.token.Policy;
 import com.clevercloud.biscuit.token.builder.Utils;
 import io.vavr.control.Option;
 
@@ -186,9 +187,14 @@ public final class SymbolTable implements Serializable {
         return res + String.join(" or ", queries);
     }
 
+    public String print_policy(final Policy p) {
+        return String.join(" or ", p.print(this));
+    }
+
     public String print_world(final World w) {
         final List<String> facts = w.facts().stream().map((f) -> this.print_fact(f)).collect(Collectors.toList());
         final List<String> rules = w.rules().stream().map((r) -> this.print_rule(r)).collect(Collectors.toList());
+        final List<String> policies = w.policies().stream().map((p) -> this.print_policy(p)).collect(Collectors.toList());
 
         StringBuilder b = new StringBuilder();
         b.append("World {\n\tfacts: [\n\t\t");

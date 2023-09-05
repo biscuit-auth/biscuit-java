@@ -200,7 +200,9 @@ public class Authorizer {
                 Arrays.asList(new Expression.Value(new Term.Bool(true)))
         ));
 
-        this.policies.add(new Policy(q, Policy.Kind.Allow));
+        Policy policy = new Policy(q, Policy.Kind.Allow);
+        this.policies.add(policy);
+        world.add_policy(policy);
         return this;
     }
 
@@ -214,7 +216,9 @@ public class Authorizer {
                 Arrays.asList(new Expression.Value(new Term.Bool(true)))
         ));
 
-        this.policies.add(new Policy(q, Policy.Kind.Deny));
+        Policy policy = new Policy(q, Policy.Kind.Deny);
+        this.policies.add(policy);
+        world.add_policy(policy);
         return this;
     }
 
@@ -229,11 +233,13 @@ public class Authorizer {
         Tuple2<String, com.clevercloud.biscuit.token.Policy> t = res.get();
 
         this.policies.add(t._2);
+        world.add_policy(t._2);
         return this;
     }
 
     public Authorizer add_policy(Policy p) {
         this.policies.add(p);
+        world.add_policy(p);
         return this;
     }
 
@@ -452,6 +458,7 @@ public class Authorizer {
     public String print_world() {
         final List<String> facts = this.world.facts().stream().map((f) -> this.symbols.print_fact(f)).collect(Collectors.toList());
         final List<String> rules = this.world.rules().stream().map((r) -> this.symbols.print_rule(r)).collect(Collectors.toList());
+        final List<String> policies = this.world.policies().stream().map((p) -> this.symbols.print_policy(p)).collect(Collectors.toList());
 
         List<String> checks = new ArrayList<>();
 
@@ -480,6 +487,8 @@ public class Authorizer {
         b.append(String.join(",\n\t\t", rules));
         b.append("\n\t],\n\tchecks: [\n\t\t");
         b.append(String.join(",\n\t\t", checks));
+        b.append("\n\t],\n\tpolicies: [\n\t\t");
+        b.append(String.join(",\n\t\t", policies));
         b.append("\n\t]\n}");
 
         return b.toString();

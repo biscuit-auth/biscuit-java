@@ -5,6 +5,7 @@ import com.clevercloud.biscuit.token.builder.Rule;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Policy {
     public enum Kind {
@@ -41,9 +42,20 @@ public class Policy {
     public String toString() {
         switch(this.kind) {
             case Allow:
-                return "allow if "+queries;
+                return "allow if "+ queries;
             case Deny:
-                return "deny if "+queries;
+                return "deny if " + queries;
+        }
+        return null;
+    }
+
+    public String print(SymbolTable symbolTable) {
+        String formattedQueries = queries.stream().map((q) -> symbolTable.print_rule(q.convert(symbolTable))).collect(Collectors.joining());
+        switch (this.kind) {
+            case Allow:
+                return "allow if " + formattedQueries;
+            case Deny:
+                return "deny if " + formattedQueries;
         }
         return null;
     }
