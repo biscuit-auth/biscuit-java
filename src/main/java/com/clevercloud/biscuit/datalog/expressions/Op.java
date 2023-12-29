@@ -230,6 +230,7 @@ public abstract class Op {
         LessOrEqual,
         GreaterOrEqual,
         Equal,
+        NotEqual,
         Contains,
         Prefix,
         Suffix,
@@ -242,6 +243,9 @@ public abstract class Op {
         Or,
         Intersection,
         Union,
+        BitwiseAnd,
+        BitwiseOr,
+        BitwiseXor,
     }
 
     public final static class Binary extends Op {
@@ -322,6 +326,30 @@ public abstract class Op {
                         Set<Term> leftSet = ((Term.Set) left).value();
                         Set<Term> rightSet = ((Term.Set) right).value();
                         stack.push(new Term.Bool( leftSet.size() == rightSet.size() && leftSet.containsAll(rightSet)));
+                        return true;
+                    }
+                    break;
+                case NotEqual:
+                    if (right instanceof Term.Integer && left instanceof Term.Integer) {
+                        stack.push(new Term.Bool(((Term.Integer) left).value() != ((Term.Integer) right).value()));
+                        return true;
+                    }
+                    if (right instanceof Term.Str && left instanceof Term.Str) {
+                        stack.push(new Term.Bool(((Term.Str) left).value() != ((Term.Str) right).value()));
+                        return true;
+                    }
+                    if (right instanceof Term.Bytes && left instanceof Term.Bytes) {
+                        stack.push(new Term.Bool(!Arrays.equals(((Term.Bytes) left).value(), (((Term.Bytes) right).value()))));
+                        return true;
+                    }
+                    if (right instanceof Term.Date && left instanceof Term.Date) {
+                        stack.push(new Term.Bool(((Term.Date) left).value() != ((Term.Date) right).value()));
+                        return true;
+                    }
+                    if (right instanceof Term.Set && left instanceof Term.Set) {
+                        Set<Term> leftSet = ((Term.Set) left).value();
+                        Set<Term> rightSet = ((Term.Set) right).value();
+                        stack.push(new Term.Bool( leftSet.size() != rightSet.size() || !leftSet.containsAll(rightSet)));
                         return true;
                     }
                     break;
@@ -467,6 +495,30 @@ public abstract class Op {
                         return true;
                     }
                     break;
+                case BitwiseAnd:
+                    if (right instanceof Term.Integer && left instanceof Term.Integer) {
+                        long r = ((Term.Integer) right).value();
+                        long l = ((Term.Integer) left).value();
+                        stack.push(new Term.Integer(r & l));
+                        return true;
+                    }
+                    break;
+                case BitwiseOr:
+                    if (right instanceof Term.Integer && left instanceof Term.Integer) {
+                        long r = ((Term.Integer) right).value();
+                        long l = ((Term.Integer) left).value();
+                        stack.push(new Term.Integer(r | l));
+                        return true;
+                    }
+                    break;
+                case BitwiseXor:
+                    if (right instanceof Term.Integer && left instanceof Term.Integer) {
+                        long r = ((Term.Integer) right).value();
+                        long l = ((Term.Integer) left).value();
+                        stack.push(new Term.Integer(r ^ l));
+                        return true;
+                    }
+                    break;
                 default:
                     return false;
             }
@@ -497,6 +549,10 @@ public abstract class Op {
                     break;
                 case Equal:
                     _s = left + " == " + right;
+                    stack.push(_s);
+                    break;
+                case NotEqual:
+                    _s = left + " != " + right;
                     stack.push(_s);
                     break;
                 case Contains:
@@ -547,6 +603,18 @@ public abstract class Op {
                     _s = left + ".union("+right+")";
                     stack.push(_s);
                     break;
+                case BitwiseAnd:
+                    _s = left + " & " + right;
+                    stack.push(_s);
+                    break;
+                case BitwiseOr:
+                    _s = left + " | " + right;
+                    stack.push(_s);
+                    break;
+                case BitwiseXor:
+                    _s = left + " ^ " + right;
+                    stack.push(_s);
+                    break;
             }
 
             return _s;
@@ -573,6 +641,9 @@ public abstract class Op {
                     break;
                 case Equal:
                     b1.setKind(Schema.OpBinary.Kind.Equal);
+                    break;
+                case NotEqual:
+                    b1.setKind(Schema.OpBinary.Kind.NotEqual);
                     break;
                 case Contains:
                     b1.setKind(Schema.OpBinary.Kind.Contains);
@@ -610,6 +681,15 @@ public abstract class Op {
                 case Union:
                     b1.setKind(Schema.OpBinary.Kind.Union);
                     break;
+                case BitwiseAnd:
+                    b1.setKind(Schema.OpBinary.Kind.BitwiseAnd);
+                    break;
+                case BitwiseOr:
+                    b1.setKind(Schema.OpBinary.Kind.BitwiseOr);
+                    break;
+                case BitwiseXor:
+                    b1.setKind(Schema.OpBinary.Kind.BitwiseXor);
+                    break;
             }
 
             b.setBinary(b1.build());
@@ -629,6 +709,8 @@ public abstract class Op {
                     return Right(new Op.Binary(BinaryOp.GreaterOrEqual));
                 case Equal:
                     return Right(new Op.Binary(BinaryOp.Equal));
+                case NotEqual:
+                    return Right(new Op.Binary(BinaryOp.NotEqual));
                 case Contains:
                     return Right(new Op.Binary(BinaryOp.Contains));
                 case Prefix:
@@ -653,9 +735,15 @@ public abstract class Op {
                     return Right(new Op.Binary(BinaryOp.Intersection));
                 case Union:
                     return Right(new Op.Binary(BinaryOp.Union));
+                case BitwiseAnd:
+                    return Right(new Op.Binary(BinaryOp.BitwiseAnd));
+                case BitwiseOr:
+                    return Right(new Op.Binary(BinaryOp.BitwiseOr));
+                case BitwiseXor:
+                    return Right(new Op.Binary(BinaryOp.BitwiseXor));
             }
 
-            return Left(new Error.FormatError.DeserializationError("invalid binary operation"));
+            return Left(new Error.FormatError.DeserializationError("invalid binary operation: "+op.getKind()));
         }
 
         @Override

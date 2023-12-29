@@ -34,7 +34,7 @@ public class SerializedBiscuit {
     public Option<Integer> root_key_id;
 
     public static int MIN_SCHEMA_VERSION = 3;
-    public static int MAX_SCHEMA_VERSION = 3;
+    public static int MAX_SCHEMA_VERSION = 4;
 
     /**
      * Deserializes a SerializedBiscuit from a byte array

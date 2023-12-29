@@ -219,42 +219,38 @@ public class Block {
         ArrayList<Rule> rules = new ArrayList<>();
         ArrayList<Check> checks = new ArrayList<>();
 
-        if (version == 3) {
-            for (Schema.FactV2 fact : b.getFactsV2List()) {
-                Either<Error.FormatError, Fact> res = Fact.deserializeV2(fact);
-                if (res.isLeft()) {
-                    Error.FormatError e = res.getLeft();
-                    return Left(e);
-                } else {
-                    facts.add(res.get());
-                }
+        for (Schema.FactV2 fact : b.getFactsV2List()) {
+            Either<Error.FormatError, Fact> res = Fact.deserializeV2(fact);
+            if (res.isLeft()) {
+                Error.FormatError e = res.getLeft();
+                return Left(e);
+            } else {
+                facts.add(res.get());
             }
-
-
-            for (Schema.RuleV2 rule : b.getRulesV2List()) {
-                Either<Error.FormatError, Rule> res = Rule.deserializeV2(rule);
-                if (res.isLeft()) {
-                    Error.FormatError e = res.getLeft();
-                    return Left(e);
-                } else {
-                    rules.add(res.get());
-                }
-            }
-
-
-            for (Schema.CheckV2 check : b.getChecksV2List()) {
-                Either<Error.FormatError, Check> res = Check.deserializeV2(check);
-                if (res.isLeft()) {
-                    Error.FormatError e = res.getLeft();
-                    return Left(e);
-                } else {
-                    checks.add(res.get());
-                }
-            }
-            return Right(new Block(symbols, b.getContext(), facts, rules, checks));
-        } else {
-            return Left(new Error.FormatError.Version(SerializedBiscuit.MIN_SCHEMA_VERSION, SerializedBiscuit.MAX_SCHEMA_VERSION, version));
         }
+
+
+        for (Schema.RuleV2 rule : b.getRulesV2List()) {
+            Either<Error.FormatError, Rule> res = Rule.deserializeV2(rule);
+            if (res.isLeft()) {
+                Error.FormatError e = res.getLeft();
+                return Left(e);
+            } else {
+                rules.add(res.get());
+            }
+        }
+
+
+        for (Schema.CheckV2 check : b.getChecksV2List()) {
+            Either<Error.FormatError, Check> res = Check.deserializeV2(check);
+            if (res.isLeft()) {
+                Error.FormatError e = res.getLeft();
+                return Left(e);
+            } else {
+                checks.add(res.get());
+            }
+        }
+        return Right(new Block(symbols, b.getContext(), facts, rules, checks));
     }
 
     /**

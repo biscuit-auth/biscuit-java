@@ -61,6 +61,9 @@ public abstract class Expression {
                     case Equal:
                         stack.push(new Expression.Binary(Op.Equal, e1, e2));
                         break;
+                    case NotEqual:
+                        stack.push(new Expression.Binary(Op.NotEqual, e1, e2));
+                        break;
                     case Contains:
                         stack.push(new Expression.Binary(Op.Contains, e1, e2));
                         break;
@@ -97,6 +100,15 @@ public abstract class Expression {
                     case Union:
                         stack.push(new Expression.Binary(Op.Union, e1, e2));
                         break;
+                    case BitwiseAnd:
+                        stack.push(new Expression.Binary(Op.BitwiseAnd, e1, e2));
+                        break;
+                    case BitwiseOr:
+                        stack.push(new Expression.Binary(Op.BitwiseOr, e1, e2));
+                        break;
+                    case BitwiseXor:
+                        stack.push(new Expression.Binary(Op.BitwiseXor, e1, e2));
+                        break;
                     default:
                         return null;
                 }
@@ -116,6 +128,7 @@ public abstract class Expression {
         LessOrEqual,
         GreaterOrEqual,
         Equal,
+        NotEqual,
         Contains,
         Prefix,
         Suffix,
@@ -129,6 +142,9 @@ public abstract class Expression {
         Length,
         Intersection,
         Union,
+        BitwiseAnd,
+        BitwiseOr,
+        BitwiseXor
     }
 
     public final static class Value extends Expression {
@@ -248,6 +264,9 @@ public abstract class Expression {
                 case Equal:
                     ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.Equal));
                     break;
+                case NotEqual:
+                    ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.NotEqual));
+                    break;
                 case Contains:
                     ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.Contains));
                     break;
@@ -283,6 +302,15 @@ public abstract class Expression {
                     break;
                 case Union:
                     ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.Union));
+                    break;
+                case BitwiseAnd:
+                    ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.BitwiseAnd));
+                    break;
+                case BitwiseOr:
+                    ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.BitwiseOr));
+                    break;
+                case BitwiseXor:
+                    ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.BitwiseXor));
                     break;
             }
         }
