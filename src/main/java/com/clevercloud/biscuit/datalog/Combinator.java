@@ -9,7 +9,6 @@ import java.util.*;
 public final class Combinator implements Serializable {
    private final MatchedVariables variables;
    private final List<Predicate> next_predicates;
-   private final List<Expression> expressions;
    private final Set<Fact> all_facts;
    private final Predicate pred;
    private final Iterator<Fact> fit;
@@ -25,15 +24,7 @@ public final class Combinator implements Serializable {
                this.current_it = null;
                continue;
             }
-
-            MatchedVariables next_vars = next_vars_opt.get();
-
-            final Option<Map<Long, Term>> v_opt = next_vars.check_expressions(this.expressions, symbols);
-            if(v_opt.isEmpty()) {
-               continue;
-            } else {
-               return Option.some(next_vars);
-            }
+            return next_vars_opt;
          }
 
          // we iterate over the facts that match the current predicate
@@ -67,7 +58,7 @@ public final class Combinator implements Serializable {
 
             // there are no more predicates to check
             if (next_predicates.isEmpty()) {
-               final Option<Map<Long, Term>> v_opt = vars.check_expressions(this.expressions, symbols);
+               final Option<Map<Long, Term>> v_opt = vars.complete();
                if(v_opt.isEmpty()) {
                   continue;
                } else {
@@ -76,7 +67,7 @@ public final class Combinator implements Serializable {
             } else {
                // we found a matching fact, we create a new combinator over the rest of the predicates
                // no need to copy all of the expressions at all levels
-               this.current_it = new Combinator(vars, next_predicates, new ArrayList<>(), this.all_facts, this.symbols);
+               this.current_it = new Combinator(vars, next_predicates, this.all_facts, this.symbols);
             }
          } else {
             break;
@@ -96,17 +87,16 @@ public final class Combinator implements Serializable {
             return variables;
          }
 
-         Optional<Map<Long, Term>> vars = res.get().complete();
-         if(vars.isPresent()) {
+         Option<Map<Long, Term>> vars = res.get().complete();
+         if(vars.isDefined()) {
             variables.add(vars.get());
          }
       }
    }
 
-   public Combinator(final MatchedVariables variables, final List<Predicate> predicates, final List<Expression> expressions,
+   public Combinator(final MatchedVariables variables, final List<Predicate> predicates,
                      final Set<Fact> all_facts, final SymbolTable symbols) {
       this.variables = variables;
-      this.expressions = expressions;
       this.all_facts = all_facts;
       this.current_it = null;
       this.pred = predicates.get(0);

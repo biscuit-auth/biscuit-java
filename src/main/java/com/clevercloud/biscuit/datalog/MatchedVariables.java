@@ -27,16 +27,16 @@ public final class MatchedVariables implements Serializable {
       return this.variables.values().stream().allMatch((v) -> v.isPresent());
    }
 
-   public Optional<Map<Long, Term>> complete() {
+   public Option<Map<Long, Term>> complete() {
       final Map<Long, Term> variables = new HashMap<>();
       for (final Map.Entry<Long, Optional<Term>> entry : this.variables.entrySet()) {
          if (entry.getValue().isPresent()) {
             variables.put(entry.getKey(), entry.getValue().get());
          } else {
-            return Optional.empty();
+            return Option.none();
          }
       }
-      return Optional.of(variables);
+      return Option.some(variables);
    }
 
    public MatchedVariables clone() {
@@ -57,8 +57,8 @@ public final class MatchedVariables implements Serializable {
    }
 
    public Option<Map<Long, Term>> check_expressions(List<Expression> expressions, SymbolTable symbols) {
-      final Optional<Map<Long, Term>> vars = this.complete();
-      if (vars.isPresent()) {
+      final Option<Map<Long, Term>> vars = this.complete();
+      if (vars.isDefined()) {
          Map<Long, Term> variables = vars.get();
 
          for(Expression e: expressions) {
