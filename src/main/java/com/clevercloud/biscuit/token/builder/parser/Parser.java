@@ -205,7 +205,7 @@ public class Parser {
 
         s = space(s);
         if (s.length() == 0 || s.charAt(0) != '(') {
-            return Either.left(new Error(s, "opening parens not found"));
+            return Either.left(new Error(s, "opening parens not found for predicate "+name));
         }
         s = s.substring(1);
 
@@ -248,7 +248,7 @@ public class Parser {
 
         s = space(s);
         if (s.length() == 0 || s.charAt(0) != '(') {
-            return Either.left(new Error(s, "opening parens not found"));
+            return Either.left(new Error(s, "opening parens not found for fact "+name));
         }
         s = s.substring(1);
 
