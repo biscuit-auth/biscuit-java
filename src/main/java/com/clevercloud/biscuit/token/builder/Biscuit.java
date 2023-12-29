@@ -1,10 +1,10 @@
 package com.clevercloud.biscuit.token.builder;
 
 import com.clevercloud.biscuit.crypto.KeyPair;
+import com.clevercloud.biscuit.datalog.*;
+import com.clevercloud.biscuit.datalog.Check;
 import com.clevercloud.biscuit.datalog.Fact;
 import com.clevercloud.biscuit.datalog.Rule;
-import com.clevercloud.biscuit.datalog.SymbolTable;
-import com.clevercloud.biscuit.datalog.Check;
 import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.token.Block;
 import io.vavr.Tuple2;
@@ -131,8 +131,11 @@ public class Biscuit {
         for (int i = this.symbol_start; i < this.symbols.symbols.size(); i++) {
             symbols.add(this.symbols.symbols.get(i));
         }
+        SchemaVersion schemaVersion = new SchemaVersion(this.facts, this.rules, this.checks);
 
-        Block authority_block = new com.clevercloud.biscuit.token.Block(symbols, context, this.facts, this.rules, this.checks);
+        Block authority_block = new com.clevercloud.biscuit.token.Block(symbols, context, this.facts, this.rules,
+                this.checks, schemaVersion.version());
+
         if (this.root_key_id.isDefined()) {
             return make(this.rng, this.root, this.root_key_id.get(), base_symbols, authority_block);
         } else {

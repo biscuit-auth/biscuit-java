@@ -33,7 +33,6 @@ public class Block {
     /**
      * creates a new block
      *
-     * @param index
      * @param base_symbols
      */
     public Block(SymbolTable base_symbols) {
@@ -48,89 +47,18 @@ public class Block {
     /**
      * creates a new block
      *
-     * @param index
      * @param base_symbols
      * @param facts
      * @param checks
      */
-    public Block(SymbolTable base_symbols, String context, List<Fact> facts, List<Rule> rules, List<Check> checks) {
+    public Block(SymbolTable base_symbols, String context, List<Fact> facts, List<Rule> rules, List<Check> checks, int version) {
         this.symbols = base_symbols;
         this.context = context;
         this.facts = facts;
         this.rules = rules;
         this.checks = checks;
-        this.version = SerializedBiscuit.MAX_SCHEMA_VERSION;
+        this.version = version;
     }
-
-    /*
-    Either<LogicError, Void> check(long i, World w, SymbolTable symbols, List<Check> authorizer_checks,
-                                   HashMap<String, Rule> queries, HashMap<String, HashMap<Long, Set<Fact>>> query_results) {
-        World world = new World(w);
-        long authority_index = symbols.get("authority").get().longValue();
-        long ambient_index = symbols.get("ambient").get().longValue();
-
-        for (Fact fact : this.facts) {
-            if (fact.predicate().ids().get(0).equals(new ID.Symbol(authority_index)) ||
-                    fact.predicate().ids().get(0).equals(new ID.Symbol(ambient_index))) {
-                return Left(new LogicError.InvalidBlockFact(i, symbols.print_fact(fact)));
-            }
-
-            world.add_fact(fact);
-        }
-
-        for(Rule rule: this.rules) {
-            world.add_rule(rule);
-        }
-
-        world.run();
-
-        ArrayList<FailedCheck> errors = new ArrayList<>();
-
-        for (int j = 0; j < this.checks.size(); j++) {
-            boolean successful = false;
-            Check c = this.checks.get(j);
-
-            for(int k = 0; k < c.queries().size(); k++) {
-                Set<Fact> res = world.query_rule(c.queries().get(k));
-                if (!res.isEmpty()) {
-                    successful = true;
-                    break;
-                }
-            }
-
-            if (!successful) {
-                errors.add(new FailedCheck.FailedBlock(i, j, symbols.print_check(this.checks.get(j))));
-            }
-        }
-
-        for (int j = 0; j < authorizer_checks.size(); j++) {
-            boolean successful = false;
-            Check c = authorizer_checks.get(j);
-
-            for(int k = 0; k < c.queries().size(); k++) {
-                Set<Fact> res = world.query_rule(c.queries().get(k));
-                if (!res.isEmpty()) {
-                    successful = true;
-                    break;
-                }
-            }
-
-            if (!successful) {
-                errors.add(new FailedCheck.FailedAuthorizer(j, symbols.print_check(authorizer_checks.get(j))));
-            }
-        }
-
-        for(String name: queries.keySet()) {
-            Set<Fact> res = world.query_rule(queries.get(name));
-            query_results.get(name).put(new Long(this.index), res);
-        }
-
-        if (errors.isEmpty()) {
-            return Right(null);
-        } else {
-            return Left(new LogicError.FailedChecks(errors));
-        }
-    }*/
 
     /**
      * pretty printing for a block
@@ -250,7 +178,15 @@ public class Block {
                 checks.add(res.get());
             }
         }
-        return Right(new Block(symbols, b.getContext(), facts, rules, checks));
+
+        SchemaVersion schemaVersion = new SchemaVersion(facts, rules, checks);
+        Either<Error.FormatError, Void> res = schemaVersion.checkCompatibility(version);
+        if (res.isLeft()) {
+            Error.FormatError e = res.getLeft();
+            return Left(e);
+        }
+
+        return Right(new Block(symbols, b.getContext(), facts, rules, checks, version));
     }
 
     /**

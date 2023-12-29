@@ -1,10 +1,10 @@
 package com.clevercloud.biscuit.token.builder;
 
 
+import com.clevercloud.biscuit.datalog.*;
+import com.clevercloud.biscuit.datalog.Check;
 import com.clevercloud.biscuit.datalog.Fact;
 import com.clevercloud.biscuit.datalog.Rule;
-import com.clevercloud.biscuit.datalog.Check;
-import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.error.Error;
 import io.vavr.Tuple2;
 import io.vavr.control.Either;
@@ -102,7 +102,10 @@ public class Block {
             symbols.add(this.symbols.symbols.get(i));
         }
 
-        return new com.clevercloud.biscuit.token.Block(symbols, this.context, this.facts, this.rules, this.checks);
+        SchemaVersion schemaVersion = new SchemaVersion(this.facts, this.rules, this.checks);
+
+        return new com.clevercloud.biscuit.token.Block(symbols, this.context, this.facts, this.rules, this.checks,
+                schemaVersion.version());
     }
 
     public Block check_right(String right) {
