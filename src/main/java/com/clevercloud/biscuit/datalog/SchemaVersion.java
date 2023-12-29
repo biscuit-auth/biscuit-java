@@ -10,6 +10,7 @@ import io.vavr.control.Either;
 
 import java.util.List;
 
+import static com.clevercloud.biscuit.datalog.Check.Kind.All;
 import static com.clevercloud.biscuit.token.format.SerializedBiscuit.MIN_SCHEMA_VERSION;
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
@@ -29,14 +30,14 @@ public class SchemaVersion {
             .iter()
             .any(|c: &Check| c.queries.iter().any(|q| !q.scopes.is_empty()));
          */
-        //TODO
+
         containsCheckAll = false;
-        /*for(Check check: checks) {
-            if (check.kind() == CheckKind::All) {
+        for(Check check: checks) {
+            if (check.kind() == All) {
                 containsCheckAll = true;
                 break;
             }
-        }*/
+        }
 
         containsV4 = false;
         for(Check check: checks) {

@@ -5,6 +5,7 @@ import com.clevercloud.biscuit.crypto.KeyPair;
 import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.datalog.AuthorizedWorld;
 import com.clevercloud.biscuit.datalog.Fact;
+import com.clevercloud.biscuit.datalog.RunLimits;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.error.FailedCheck;
@@ -22,6 +23,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.SignatureException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 
@@ -692,5 +694,44 @@ public class BiscuitTest {
             }
         });
 
+    }
+
+    @Test
+    public void testCheckAll() throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        byte[] seed = {0, 0, 0, 0};
+        SecureRandom rng = new SecureRandom(seed);
+
+        System.out.println("preparing the authority block");
+
+        KeyPair root = new KeyPair(rng);
+
+        Biscuit biscuit = Biscuit.builder(root)
+                .add_authority_check("check all operation($op), allowed_operations($allowed), $allowed.contains($op)")
+                .build();
+        Authorizer authorizer = biscuit.verify(root.public_key()).authorizer();
+        authorizer.add_fact("operation(\"read\")");
+        authorizer.add_fact("operation(\"write\")");
+        authorizer.add_fact("allowed_operations([\"write\"])");
+        authorizer.add_policy("allow if true");
+
+        try {
+            authorizer.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
+        } catch(Error.FailedLogic e) {
+            System.out.println(e);
+            assertEquals(new Error.FailedLogic(new LogicError.Unauthorized(
+                    new LogicError.MatchedPolicy.Allow(0),
+                    Arrays.asList(
+                            new FailedCheck.FailedBlock(0, 0, "check all operation($op), allowed_operations($allowed), $allowed.contains($op)")
+                    )
+            )), e);
+        }
+
+        Authorizer authorizer2 = biscuit.verify(root.public_key()).authorizer();
+        authorizer2.add_fact("operation(\"read\")");
+        authorizer2.add_fact("operation(\"write\")");
+        authorizer2.add_fact("allowed_operations([\"read\", \"write\"])");
+        authorizer2.add_policy("allow if true");
+
+        authorizer2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
     }
 }

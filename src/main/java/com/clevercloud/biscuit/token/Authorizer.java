@@ -314,7 +314,15 @@ public class Authorizer {
             boolean successful = false;
 
             for (int j = 0; j < c.queries().size(); j++) {
-                boolean res = world.query_match(c.queries().get(j), symbols);
+                boolean res = false;
+                switch (c.kind()) {
+                    case One:
+                        res = world.query_match(c.queries().get(j), symbols);
+                        break;
+                    case All:
+                        res = world.query_match_all(c.queries().get(j), symbols);
+                        break;
+                }
 
                 if (Instant.now().compareTo(timeLimit) >= 0) {
                     throw new Error.Timeout();
@@ -340,7 +348,15 @@ public class Authorizer {
                 com.clevercloud.biscuit.datalog.Check check = c.convert(symbols);
 
                 for (int k = 0; k < check.queries().size(); k++) {
-                    boolean res = world.query_match(check.queries().get(k), symbols);
+                    boolean res = false;
+                    switch (check.kind()) {
+                        case One:
+                            res = world.query_match(check.queries().get(k), symbols);
+                            break;
+                        case All:
+                            res = world.query_match_all(check.queries().get(k), symbols);
+                            break;
+                    }
 
                     if (Instant.now().compareTo(timeLimit) >= 0) {
                         throw new Error.Timeout();
@@ -414,7 +430,15 @@ public class Authorizer {
                     com.clevercloud.biscuit.datalog.Check check = c.convert(symbols);
 
                     for (int k = 0; k < check.queries().size(); k++) {
-                        boolean res = blockWorld.query_match(check.queries().get(k), symbols);
+                        boolean res = false;
+                        switch (check.kind()) {
+                            case One:
+                                res = blockWorld.query_match(check.queries().get(k), symbols);
+                                break;
+                            case All:
+                                res = blockWorld.query_match_all(check.queries().get(k), symbols);
+                                break;
+                        }
 
                         if (Instant.now().compareTo(timeLimit) >= 0) {
                             throw new Error.Timeout();

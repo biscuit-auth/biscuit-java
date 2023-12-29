@@ -115,7 +115,40 @@ public final class Rule implements Serializable {
          }
       }
    }
-   
+
+   // verifies that the expressions return true for every matching set of facts
+   public boolean check_match_all(final Set<Fact> facts, SymbolTable symbols) {
+      final Set<Long> variables_set = new HashSet<>();
+      for (final Predicate pred : this.body) {
+         variables_set.addAll(pred.terms().stream().filter((id) -> id instanceof Term.Variable).map((id) -> ((Term.Variable) id).value()).collect(Collectors.toSet()));
+      }
+      final MatchedVariables variables = new MatchedVariables(variables_set);
+
+      if(this.body.isEmpty()) {
+         return variables.check_expressions(this.expressions, symbols).isDefined();
+      }
+
+      Combinator c = new Combinator(variables, this.body, facts, symbols);
+
+      boolean found = false;
+
+      while(true) {
+         Option<MatchedVariables> res = c.next();
+         if (res.isDefined()) {
+            // we need at least one match
+            found = true;
+
+            MatchedVariables vars = res.get();
+
+            // the expression must succeed for all the matching sets of facts
+            if (!vars.check_expressions(this.expressions, symbols).isDefined()) {
+               return false;
+            }
+         } else {
+            return found;
+         }
+      }
+   }
 
    public Rule(final Predicate head, final List<Predicate> body, final List<Expression>  expressions) {
       this.head = head;

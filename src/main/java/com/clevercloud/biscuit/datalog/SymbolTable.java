@@ -188,9 +188,20 @@ public final class SymbolTable implements Serializable {
     }
 
     public String print_check(final Check c) {
-        String res = "check if ";
+        String prefix;
+        switch (c.kind()) {
+            case One:
+                prefix = "check if ";
+                break;
+            case All:
+                prefix = "check all ";
+                break;
+            default:
+                prefix = "check if ";
+                break;
+        }
         final List<String> queries = c.queries().stream().map((q) -> this.print_rule_body(q)).collect(Collectors.toList());
-        return res + String.join(" or ", queries);
+        return prefix + String.join(" or ", queries);
     }
 
     public String print_world(final World w) {

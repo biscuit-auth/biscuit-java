@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
+import static com.clevercloud.biscuit.datalog.Check.Kind.One;
+
 public class Utils {
     public static com.clevercloud.biscuit.token.builder.Fact fact(String name, List<Term> ids) throws Error.Language {
         return new com.clevercloud.biscuit.token.builder.Fact(name, ids);
@@ -28,7 +30,7 @@ public class Utils {
     }
 
     public static Check check(com.clevercloud.biscuit.token.builder.Rule rule) {
-        return new Check(rule);
+        return new Check(One,rule);
     }
 
     public static Term integer(long i) {
