@@ -158,22 +158,29 @@ public final class SymbolTable implements Serializable {
 
 
     public String print_predicate(final Predicate p) {
-        List<String> ids = p.terms().stream().map((i) -> {
-            if (i instanceof Term.Variable) {
-                return "$" + this.print_symbol((int) ((Term.Variable) i).value());
-            } else if (i instanceof Term.Date) {
-                return fromEpochIsoDate(((Term.Date) i).value());
-            } else if (i instanceof Term.Integer) {
-                return "" + ((Term.Integer) i).value();
-            } else if (i instanceof Term.Str) {
-                return "\"" + this.print_symbol((int) ((Term.Str) i).value()) + "\"";
-            } else if (i instanceof Term.Bytes) {
-                return "hex:" + Utils.byteArrayToHexString(((Term.Bytes) i).value());
-            } else {
-                return "???";
-            }
+        List<String> ids = p.terms().stream().map((t) -> {
+            return this.print_term(t);
         }).collect(Collectors.toList());
         return Optional.ofNullable(this.print_symbol((int) p.name())).orElse("<?>") + "(" + String.join(", ", ids) + ")";
+    }
+
+    public String print_term(final Term i) {
+        if (i instanceof Term.Variable) {
+            return "$" + this.print_symbol((int) ((Term.Variable) i).value());
+        } else if (i instanceof Term.Date) {
+            return fromEpochIsoDate(((Term.Date) i).value());
+        } else if (i instanceof Term.Integer) {
+            return "" + ((Term.Integer) i).value();
+        } else if (i instanceof Term.Str) {
+            return "\"" + this.print_symbol((int) ((Term.Str) i).value()) + "\"";
+        } else if (i instanceof Term.Bytes) {
+            return "hex:" + Utils.byteArrayToHexString(((Term.Bytes) i).value());
+        } else if (i instanceof Term.Set) {
+            final List<String> values = ((Term.Set) i).value().stream().map((v) -> this.print_term(v)).collect(Collectors.toList());
+            return "[" + String.join(", ", values) + "]";
+        } else {
+            return "???";
+        }
     }
 
     public String print_fact(final Fact f) {
