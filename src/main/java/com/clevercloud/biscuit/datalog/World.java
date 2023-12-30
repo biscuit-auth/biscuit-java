@@ -105,6 +105,11 @@ public class World implements Serializable {
       return rule.find_match(this.facts, symbols);
    }
 
+   public final boolean query_match_all(final Rule rule, SymbolTable symbols) {
+      return rule.check_match_all(this.facts, symbols);
+   }
+
+
    public World() {
       this.facts = new HashSet<>();
       this.rules = new ArrayList<>();

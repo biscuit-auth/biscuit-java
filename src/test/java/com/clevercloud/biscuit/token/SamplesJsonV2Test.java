@@ -30,7 +30,7 @@ class SamplesJsonV2Test {
     @TestFactory
     Stream<DynamicTest> jsonTest() {
         InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/samples.json");
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("samples/samples.json");
         Gson gson = new Gson();
         Sample sample = gson.fromJson(new InputStreamReader(new BufferedInputStream(inputStream)), Sample.class);
         PublicKey publicKey = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, sample.root_public_key);
@@ -42,7 +42,7 @@ class SamplesJsonV2Test {
         return DynamicTest.dynamicTest(testCase.title + ": "+testCase.filename, () -> {
             System.out.println("Testcase name: \""+testCase.title+"\"");
             System.out.println("filename: \""+testCase.filename+"\"");
-            InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("v2/" + testCase.filename);
+            InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("samples/" + testCase.filename);
             JsonObject validation = testCase.validations.getAsJsonObject().entrySet().iterator().next().getValue().getAsJsonObject();
             World world = new Gson().fromJson(validation, World.class);
             JsonObject expected_result = validation.getAsJsonObject("result");
@@ -59,8 +59,10 @@ class SamplesJsonV2Test {
                 for (String f : authorizer_facts) {
                     f = f.trim();
                     if (f.length() > 0) {
-                        if (f.startsWith("check if")) {
+                        if (f.startsWith("check if") || f.startsWith("check all")) {
                             authorizer.add_check(f);
+                        } else if (f.startsWith("allow if") || f.startsWith("deny if")) {
+                            authorizer.add_policy(f);
                         } else if (f.startsWith("revocation_id")) {
                             // do nothing
                         } else {

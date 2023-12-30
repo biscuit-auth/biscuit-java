@@ -9,6 +9,8 @@ import io.vavr.Tuple2;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 import org.junit.jupiter.api.Test;
+
+import static com.clevercloud.biscuit.datalog.Check.Kind.One;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.*;
@@ -128,11 +130,26 @@ class ParserTest {
                 res);
     }
 
+
+    @Test
+    void ruleWithFreeExpressionVariables() {
+        Either<Error, Tuple2<String, Rule>> res =
+                Parser.rule("right($0) <- resource($0), operation(\"read\"), $test");
+        assertEquals(
+                Either.left(
+                        new Error(" resource($0), operation(\"read\"), $test",
+                                "rule head or expressions contains variables that are not used in predicates of the rule's body: [test]")
+                ),
+                res);
+    }
+
     @Test
     void testCheck() {
         Either<Error, Tuple2<String, Check>> res =
                 Parser.check("check if resource($0), operation(\"read\") or admin()");
-        assertEquals(Either.right(new Tuple2<>("", new Check(Arrays.asList(
+        assertEquals(Either.right(new Tuple2<>("", new Check(
+                One,
+                Arrays.asList(
                     rule("query",
                             new ArrayList<>(),
                             Arrays.asList(

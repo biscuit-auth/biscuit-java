@@ -14,6 +14,7 @@ import io.vavr.control.Try;
 
 import org.junit.jupiter.api.Test;
 
+import static com.clevercloud.biscuit.datalog.Check.Kind.One;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
@@ -402,7 +403,7 @@ public class SamplesV2Test {
                         pred("must_be_present", Arrays.asList(var("0")))
                 )
         ));
-        v1.add_check(new Check(queries));
+        v1.add_check(new Check(One, queries));
         v1.allow();
 
         v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));

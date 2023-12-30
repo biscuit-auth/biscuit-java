@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.HashSet;
 import java.util.function.Function;
 
+import static com.clevercloud.biscuit.datalog.Check.Kind.All;
+import static com.clevercloud.biscuit.datalog.Check.Kind.One;
 import static com.clevercloud.biscuit.token.builder.Utils.s;
 import static com.clevercloud.biscuit.token.builder.Utils.var;
 
@@ -71,12 +73,17 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<String, Check>> check(String s) {
-        String prefix = "check if";
-        if (!s.startsWith(prefix)) {
+        com.clevercloud.biscuit.datalog.Check.Kind kind;
+
+        if (s.startsWith("check if")) {
+            kind = One;
+            s = s.substring("check if".length());
+        } else if (s.startsWith("check all")) {
+            kind = All;
+            s = s.substring("check all".length());
+        } else {
             return Either.left(new Error(s, "missing check prefix"));
         }
-
-        s = s.substring(prefix.length());
 
         List<Rule> queries = new ArrayList<>();
         Either<Error, Tuple2<String, List<Rule>>> bodyRes = check_body(s);
@@ -90,7 +97,7 @@ public class Parser {
             return Either.left(new Error(s, "the string was not entirely parsed, remaining: " + t._1));
         }
 
-        return Either.right(new Tuple2<>(t._1, new Check(t._2)));
+        return Either.right(new Tuple2<>(t._1, new Check(kind, t._2)));
     }
 
     public static Either<Error, Tuple2<String, Policy>> policy(String s) {
@@ -205,7 +212,7 @@ public class Parser {
 
         s = space(s);
         if (s.length() == 0 || s.charAt(0) != '(') {
-            return Either.left(new Error(s, "opening parens not found"));
+            return Either.left(new Error(s, "opening parens not found for predicate "+name));
         }
         s = s.substring(1);
 
@@ -248,7 +255,7 @@ public class Parser {
 
         s = space(s);
         if (s.length() == 0 || s.charAt(0) != '(') {
-            return Either.left(new Error(s, "opening parens not found"));
+            return Either.left(new Error(s, "opening parens not found for fact "+name));
         }
         s = s.substring(1);
 

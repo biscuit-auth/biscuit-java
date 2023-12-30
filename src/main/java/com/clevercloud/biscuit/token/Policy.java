@@ -28,15 +28,6 @@ public class Policy {
         this.kind = kind;
     }
 
-    public com.clevercloud.biscuit.datalog.Check convert(SymbolTable symbols) {
-        ArrayList<com.clevercloud.biscuit.datalog.Rule> queries = new ArrayList<>();
-
-        for(Rule q: this.queries) {
-            queries.add(q.convert(symbols));
-        }
-        return new com.clevercloud.biscuit.datalog.Check(queries);
-    }
-
     @Override
     public String toString() {
         switch(this.kind) {

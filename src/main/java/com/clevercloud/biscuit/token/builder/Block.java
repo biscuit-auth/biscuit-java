@@ -1,14 +1,15 @@
 package com.clevercloud.biscuit.token.builder;
 
 
+import com.clevercloud.biscuit.datalog.*;
+import com.clevercloud.biscuit.datalog.Check;
 import com.clevercloud.biscuit.datalog.Fact;
 import com.clevercloud.biscuit.datalog.Rule;
-import com.clevercloud.biscuit.datalog.Check;
-import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.error.Error;
 import io.vavr.Tuple2;
 import io.vavr.control.Either;
 
+import static com.clevercloud.biscuit.datalog.Check.Kind.One;
 import static com.clevercloud.biscuit.token.builder.Utils.*;
 
 
@@ -102,7 +103,10 @@ public class Block {
             symbols.add(this.symbols.symbols.get(i));
         }
 
-        return new com.clevercloud.biscuit.token.Block(symbols, this.context, this.facts, this.rules, this.checks);
+        SchemaVersion schemaVersion = new SchemaVersion(this.facts, this.rules, this.checks);
+
+        return new com.clevercloud.biscuit.token.Block(symbols, this.context, this.facts, this.rules, this.checks,
+                schemaVersion.version());
     }
 
     public Block check_right(String right) {
@@ -116,7 +120,7 @@ public class Block {
                         pred("right", Arrays.asList(var("resource"), s(right)))
                 )
         ));
-        return this.add_check(new com.clevercloud.biscuit.token.builder.Check(queries));
+        return this.add_check(new com.clevercloud.biscuit.token.builder.Check(One, queries));
     }
 
     public Block resource_prefix(String prefix) {
@@ -129,7 +133,7 @@ public class Block {
                 Arrays.asList(new Expression.Binary(Expression.Op.Prefix, new Expression.Value(var("resource")),
                         new Expression.Value(string(prefix))))
         ));
-        return this.add_check(new com.clevercloud.biscuit.token.builder.Check(queries));
+        return this.add_check(new com.clevercloud.biscuit.token.builder.Check(One, queries));
     }
 
     public Block resource_suffix(String suffix) {
@@ -142,7 +146,7 @@ public class Block {
                 Arrays.asList(new Expression.Binary(Expression.Op.Suffix, new Expression.Value(var("resource")),
                         new Expression.Value(string(suffix))))
         ));
-        return this.add_check(new com.clevercloud.biscuit.token.builder.Check(queries));
+        return this.add_check(new com.clevercloud.biscuit.token.builder.Check(One, queries));
     }
 
     public Block expiration_date(Date d) {
@@ -155,6 +159,6 @@ public class Block {
                 Arrays.asList(new Expression.Binary(Expression.Op.LessOrEqual, new Expression.Value(var("date")),
                         new Expression.Value(date(d))))
         ));
-        return this.add_check(new com.clevercloud.biscuit.token.builder.Check(queries));
+        return this.add_check(new com.clevercloud.biscuit.token.builder.Check(One, queries));
     }
 }

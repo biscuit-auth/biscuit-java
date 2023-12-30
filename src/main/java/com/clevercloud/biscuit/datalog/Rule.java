@@ -36,11 +36,11 @@ public final class Rule implements Serializable {
          variables_set.addAll(pred.terms().stream().filter((id) -> id instanceof Term.Variable).map((id) -> ((Term.Variable) id).value()).collect(Collectors.toSet()));
       }
       final MatchedVariables variables = new MatchedVariables(variables_set);
-
       if(this.body.isEmpty()) {
-         final Option<Map<Long, Term>> h_opt = variables.check_expressions(this.expressions, symbols);
-         if(h_opt.isDefined()) {
-            final Map<Long, Term> h = h_opt.get();
+         final Option<Map<Long, Term>> complete_vars_opt = variables.check_expressions(this.expressions, symbols);
+         if(complete_vars_opt.isDefined()) {
+            final Map<Long, Term> h = complete_vars_opt.get();
+
             final Predicate p = this.head.clone();
             final ListIterator<Term> idit = p.ids_iterator();
             while (idit.hasNext()) {
@@ -56,29 +56,38 @@ public final class Rule implements Serializable {
          }
       }
 
-      for (final Map<Long, Term> h : new Combinator(variables, this.body, this.expressions, facts, symbols).combine()) {
-         final Predicate p = this.head.clone();
-         final ListIterator<Term> idit = p.ids_iterator();
-         boolean unbound_variable = false;
-         while (idit.hasNext()) {
-            final Term id = idit.next();
-            if (id instanceof Term.Variable) {
-               final Term value = h.get(((Term.Variable) id).value());
-               idit.set(value);
+      Combinator c = new Combinator(variables, this.body, facts, symbols);
+      while (true) {
+         final Option<MatchedVariables> vars_opt = c.next();
+         if(!vars_opt.isDefined()) {
+            break;
+         }
+         MatchedVariables vars = vars_opt.get();
+         final Option<Map<Long, Term>> complete_vars_opt = vars.check_expressions(this.expressions, symbols);
+         if(complete_vars_opt.isDefined()) {
+            final Map<Long, Term> h = complete_vars_opt.get();
+            final Predicate p = this.head.clone();
+            final ListIterator<Term> idit = p.ids_iterator();
+            boolean unbound_variable = false;
+            while (idit.hasNext()) {
+               final Term id = idit.next();
+               if (id instanceof Term.Variable) {
+                  final Term value = h.get(((Term.Variable) id).value());
+                  idit.set(value);
 
-               // variables that appear in the head should appear in the body and constraints as well
-               if(value == null) {
-                  unbound_variable = true;
+                  // variables that appear in the head or expressions should appear in the body as well
+                  if (value == null) {
+                     unbound_variable = true;
+                  }
                }
             }
-         }
 
-         if (!unbound_variable) {
-            new_facts.add(new Fact(p));
+            if (!unbound_variable) {
+               new_facts.add(new Fact(p));
+            }
          }
       }
    }
-
 
    // do not produce new facts, only find one matching set of facts
    public boolean find_match(final Set<Fact> facts, SymbolTable symbols) {
@@ -92,9 +101,53 @@ public final class Rule implements Serializable {
          return variables.check_expressions(this.expressions, symbols).isDefined();
       }
 
-      Combinator c = new Combinator(variables, this.body, this.expressions, facts, symbols);
+      Combinator c = new Combinator(variables, this.body,  facts, symbols);
 
-      return c.next().isDefined();
+      while(true) {
+         Option<MatchedVariables> res = c.next();
+         if (res.isDefined()) {
+            MatchedVariables vars = res.get();
+            if (vars.check_expressions(this.expressions, symbols).isDefined()) {
+               return true;
+            }
+         } else {
+            return false;
+         }
+      }
+   }
+
+   // verifies that the expressions return true for every matching set of facts
+   public boolean check_match_all(final Set<Fact> facts, SymbolTable symbols) {
+      final Set<Long> variables_set = new HashSet<>();
+      for (final Predicate pred : this.body) {
+         variables_set.addAll(pred.terms().stream().filter((id) -> id instanceof Term.Variable).map((id) -> ((Term.Variable) id).value()).collect(Collectors.toSet()));
+      }
+      final MatchedVariables variables = new MatchedVariables(variables_set);
+
+      if(this.body.isEmpty()) {
+         return variables.check_expressions(this.expressions, symbols).isDefined();
+      }
+
+      Combinator c = new Combinator(variables, this.body, facts, symbols);
+
+      boolean found = false;
+
+      while(true) {
+         Option<MatchedVariables> res = c.next();
+         if (res.isDefined()) {
+            // we need at least one match
+            found = true;
+
+            MatchedVariables vars = res.get();
+
+            // the expression must succeed for all the matching sets of facts
+            if (!vars.check_expressions(this.expressions, symbols).isDefined()) {
+               return false;
+            }
+         } else {
+            return found;
+         }
+      }
    }
 
    public Rule(final Predicate head, final List<Predicate> body, final List<Expression>  expressions) {

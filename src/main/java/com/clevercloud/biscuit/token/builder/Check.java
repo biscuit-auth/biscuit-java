@@ -6,18 +6,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.clevercloud.biscuit.datalog.Check.Kind.One;
+
 public class Check {
+    private final com.clevercloud.biscuit.datalog.Check.Kind kind;
     List<Rule> queries;
 
-    public Check(List<Rule> queries) {
+    public Check(com.clevercloud.biscuit.datalog.Check.Kind kind, List<Rule> queries) {
+        this.kind = kind;
         this.queries = queries;
     }
-    public Check(Rule query) {
+
+    public Check(com.clevercloud.biscuit.datalog.Check.Kind kind, Rule query) {
+        this.kind = kind;
+
         ArrayList<Rule> r = new ArrayList<>();
         r.add(query);
         queries = r;
     }
-
 
     public com.clevercloud.biscuit.datalog.Check convert(SymbolTable symbols) {
         ArrayList<com.clevercloud.biscuit.datalog.Rule> queries = new ArrayList<>();
@@ -25,7 +31,7 @@ public class Check {
         for(Rule q: this.queries) {
             queries.add(q.convert(symbols));
         }
-        return new com.clevercloud.biscuit.datalog.Check(queries);
+        return new com.clevercloud.biscuit.datalog.Check(this.kind, queries);
     }
 
     public static Check convert_from(com.clevercloud.biscuit.datalog.Check r, SymbolTable symbols) {
@@ -35,7 +41,7 @@ public class Check {
             queries.add(Rule.convert_from(q, symbols));
         }
 
-        return new Check(queries);
+        return new Check(r.kind(), queries);
     }
 
     @Override
@@ -52,7 +58,11 @@ public class Check {
             return res;
         }).collect(Collectors.toList());
 
-        return "check if " + String.join(" or ", qs);
+        if(kind == One) {
+            return "check if " + String.join(" or ", qs);
+        } else {
+            return "check all " + String.join(" or ", qs);
+        }
     }
 
     @Override
