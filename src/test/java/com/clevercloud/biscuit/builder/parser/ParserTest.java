@@ -130,6 +130,19 @@ class ParserTest {
                 res);
     }
 
+
+    @Test
+    void ruleWithFreeExpressionVariables() {
+        Either<Error, Tuple2<String, Rule>> res =
+                Parser.rule("right($0) <- resource($0), operation(\"read\"), $test");
+        assertEquals(
+                Either.left(
+                        new Error(" resource($0), operation(\"read\"), $test",
+                                "rule head or expressions contains variables that are not used in predicates of the rule's body: [test]")
+                ),
+                res);
+    }
+
     @Test
     void testCheck() {
         Either<Error, Tuple2<String, Check>> res =

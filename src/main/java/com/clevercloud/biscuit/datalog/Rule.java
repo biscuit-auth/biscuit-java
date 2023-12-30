@@ -75,7 +75,7 @@ public final class Rule implements Serializable {
                   final Term value = h.get(((Term.Variable) id).value());
                   idit.set(value);
 
-                  // variables that appear in the head should appear in the body and constraints as well
+                  // variables that appear in the head or expressions should appear in the body as well
                   if (value == null) {
                      unbound_variable = true;
                   }

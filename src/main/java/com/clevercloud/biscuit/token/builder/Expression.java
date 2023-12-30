@@ -3,10 +3,7 @@ package com.clevercloud.biscuit.token.builder;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.datalog.expressions.Op;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
+import java.util.*;
 
 public abstract class Expression {
     public com.clevercloud.biscuit.datalog.expressions.Expression convert(SymbolTable symbols) {
@@ -119,6 +116,7 @@ public abstract class Expression {
     }
 
     public abstract void toOpcodes(SymbolTable symbols, List<com.clevercloud.biscuit.datalog.expressions.Op> ops);
+    public abstract void gatherVariables(Set<String> variables);
 
     public enum Op {
         Negate,
@@ -156,6 +154,12 @@ public abstract class Expression {
 
         public void toOpcodes(SymbolTable symbols, List<com.clevercloud.biscuit.datalog.expressions.Op> ops) {
             ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Value(this.value.convert(symbols)));
+        }
+
+        public  void gatherVariables(Set<String> variables) {
+            if(this.value instanceof Term.Variable) {
+                variables.add(((Term.Variable) this.value).value);
+            }
         }
 
         @Override
@@ -204,6 +208,10 @@ public abstract class Expression {
                     ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Unary(com.clevercloud.biscuit.datalog.expressions.Op.UnaryOp.Length));
                     break;
             }
+        }
+
+        public  void gatherVariables(Set<String> variables) {
+            this.arg1.gatherVariables(variables);
         }
 
         @Override
@@ -313,6 +321,11 @@ public abstract class Expression {
                     ops.add(new com.clevercloud.biscuit.datalog.expressions.Op.Binary(com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp.BitwiseXor));
                     break;
             }
+        }
+
+        public  void gatherVariables(Set<String> variables) {
+            this.arg1.gatherVariables(variables);
+            this.arg2.gatherVariables(variables);
         }
 
         @Override
