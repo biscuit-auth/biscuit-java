@@ -28,6 +28,7 @@ public class Block {
     final List<Fact> facts;
     final List<Rule> rules;
     final List<Check> checks;
+    final List<Scope> scopes;
     final long version;
 
     /**
@@ -41,6 +42,7 @@ public class Block {
         this.facts = new ArrayList<>();
         this.rules = new ArrayList<>();
         this.checks = new ArrayList<>();
+        this.scopes = new ArrayList<>();
         this.version = SerializedBiscuit.MAX_SCHEMA_VERSION;
     }
 
@@ -51,12 +53,14 @@ public class Block {
      * @param facts
      * @param checks
      */
-    public Block(SymbolTable base_symbols, String context, List<Fact> facts, List<Rule> rules, List<Check> checks, int version) {
+    public Block(SymbolTable base_symbols, String context, List<Fact> facts, List<Rule> rules, List<Check> checks,
+                 List<Scope> scopes, int version) {
         this.symbols = base_symbols;
         this.context = context;
         this.facts = facts;
         this.rules = rules;
         this.checks = checks;
+        this.scopes = scopes;
         this.version = version;
     }
 
@@ -122,6 +126,10 @@ public class Block {
             b.addChecksV2(this.checks.get(i).serialize());
         }
 
+        for (Scope scope: this.scopes) {
+            b.addScope(scope.serialize());
+        }
+
         b.setVersion(SerializedBiscuit.MAX_SCHEMA_VERSION);
         return b.build();
     }
@@ -179,14 +187,25 @@ public class Block {
             }
         }
 
-        SchemaVersion schemaVersion = new SchemaVersion(facts, rules, checks);
+        ArrayList<Scope> scopes = new ArrayList<>();
+        for (Schema.Scope scope: b.getScopeList()) {
+            Either<Error.FormatError, Scope> res = Scope.deserialize(scope);
+            if(res.isLeft()) {
+                Error.FormatError e = res.getLeft();
+                return Left(e);
+            } else {
+                scopes.add(res.get());
+            }
+        }
+
+        SchemaVersion schemaVersion = new SchemaVersion(facts, rules, checks, scopes);
         Either<Error.FormatError, Void> res = schemaVersion.checkCompatibility(version);
         if (res.isLeft()) {
             Error.FormatError e = res.getLeft();
             return Left(e);
         }
 
-        return Right(new Block(symbols, b.getContext(), facts, rules, checks, version));
+        return Right(new Block(symbols, b.getContext(), facts, rules, checks, scopes, version));
     }
 
     /**

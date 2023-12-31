@@ -20,13 +20,13 @@ public class Utils {
 
     public static com.clevercloud.biscuit.token.builder.Rule rule(String head_name, List<Term> head_ids,
                                                                   List<com.clevercloud.biscuit.token.builder.Predicate> predicates) {
-        return new com.clevercloud.biscuit.token.builder.Rule(pred(head_name, head_ids), predicates, new ArrayList<>());
+        return new com.clevercloud.biscuit.token.builder.Rule(pred(head_name, head_ids), predicates, new ArrayList<>(), new ArrayList<>());
     }
 
     public static com.clevercloud.biscuit.token.builder.Rule constrained_rule(String head_name, List<Term> head_ids,
                                                                               List<com.clevercloud.biscuit.token.builder.Predicate> predicates,
                                                                               List<Expression> expressions) {
-        return new com.clevercloud.biscuit.token.builder.Rule(pred(head_name, head_ids), predicates, expressions);
+        return new com.clevercloud.biscuit.token.builder.Rule(pred(head_name, head_ids), predicates, expressions, new ArrayList<>());
     }
 
     public static Check check(com.clevercloud.biscuit.token.builder.Rule rule) {

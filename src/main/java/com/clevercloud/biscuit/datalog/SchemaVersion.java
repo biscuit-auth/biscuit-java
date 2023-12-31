@@ -2,10 +2,7 @@ package com.clevercloud.biscuit.datalog;
 
 import com.clevercloud.biscuit.datalog.expressions.Expression;
 import com.clevercloud.biscuit.datalog.expressions.Op;
-import com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp;
 import com.clevercloud.biscuit.error.Error;
-import com.clevercloud.biscuit.token.Block;
-import com.clevercloud.biscuit.token.format.SerializedBiscuit;
 import io.vavr.control.Either;
 
 import java.util.List;
@@ -20,16 +17,28 @@ public class SchemaVersion {
     private boolean containsCheckAll;
     private boolean containsV4;
 
-    public SchemaVersion(List<Fact> facts, List<Rule> rules, List<Check> checks) {
+    public SchemaVersion(List<Fact> facts, List<Rule> rules, List<Check> checks, List<Scope> scopes) {
         // TODO
-        containsScopes = false;
-        /*
-        let contains_scopes = !scopes.is_empty()
-        || rules.iter().any(|r: &Rule| !r.scopes.is_empty())
-        || checks
-            .iter()
-            .any(|c: &Check| c.queries.iter().any(|q| !q.scopes.is_empty()));
-         */
+        containsScopes = !scopes.isEmpty();
+
+        if(!containsScopes) {
+            for(Rule r: rules) {
+                if (!r.scopes().isEmpty()) {
+                    containsScopes = true;
+                    break;
+                }
+            }
+        }
+        if(!containsScopes) {
+            for(Check check: checks) {
+                for(Rule query: check.queries()) {
+                    if(!query.scopes().isEmpty()) {
+                        containsScopes = true;
+                        break;
+                    }
+                }
+            }
+        }
 
         containsCheckAll = false;
         for(Check check: checks) {

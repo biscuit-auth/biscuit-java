@@ -17,6 +17,7 @@ public final class Rule implements Serializable {
    private final Predicate head;
    private final List<Predicate> body;
    private final List<Expression> expressions;
+   private final List<Scope> scopes;
 
    public final Predicate head() {
       return this.head;
@@ -28,6 +29,10 @@ public final class Rule implements Serializable {
 
    public final List<Expression> expressions() {
       return this.expressions;
+   }
+
+   public List<Scope> scopes() {
+      return scopes;
    }
 
    public void apply(final Set<Fact> facts, final Set<Fact> new_facts, SymbolTable symbols) {
@@ -150,10 +155,12 @@ public final class Rule implements Serializable {
       }
    }
 
-   public Rule(final Predicate head, final List<Predicate> body, final List<Expression>  expressions) {
+   public Rule(final Predicate head, final List<Predicate> body, final List<Expression>  expressions,
+               final List<Scope> scopes) {
       this.head = head;
       this.body = body;
       this.expressions = expressions;
+      this.scopes = scopes;
    }
 
    public Schema.RuleV2 serialize() {
@@ -166,6 +173,10 @@ public final class Rule implements Serializable {
 
       for (int i = 0; i < this.expressions.size(); i++) {
          b.addExpressions(this.expressions.get(i).serialize());
+      }
+
+      for (Scope scope: this.scopes) {
+         b.addScope(scope.serialize());
       }
 
       return b.build();
@@ -194,12 +205,23 @@ public final class Rule implements Serializable {
          }
       }
 
+      ArrayList<Scope> scopes = new ArrayList<>();
+      for (Schema.Scope scope: rule.getScopeList()) {
+         Either<Error.FormatError, Scope> res = Scope.deserialize(scope);
+         if(res.isLeft()) {
+            Error.FormatError e = res.getLeft();
+            return Left(e);
+         } else {
+            scopes.add(res.get());
+         }
+      }
+
       Either<Error.FormatError, Predicate> res = Predicate.deserializeV2(rule.getHead());
       if(res.isLeft()) {
          Error.FormatError e = res.getLeft();
          return Left(e);
       } else {
-         return Right(new Rule(res.get(), body, expressions));
+         return Right(new Rule(res.get(), body, expressions, scopes));
       }
    }
 }

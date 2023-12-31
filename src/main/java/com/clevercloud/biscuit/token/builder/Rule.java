@@ -15,12 +15,14 @@ public class Rule implements Cloneable {
     List<Predicate> body;
     List<Expression> expressions;
     Option<Map<String, Option<Term>>> variables;
+    List<Scope> scopes;
 
-    public Rule(Predicate head, List<Predicate> body, List<Expression> expressions) {
+    public Rule(Predicate head, List<Predicate> body, List<Expression> expressions, List<Scope> scopes) {
         Map<String, Option<Term>> variables = new HashMap<>();
         this.head = head;
         this.body = body;
         this.expressions = expressions;
+        this.scopes = scopes;
         for (Term t : head.terms) {
             if (t instanceof Term.Variable) {
                 variables.put(((Term.Variable) t).value, Option.none());
@@ -50,7 +52,9 @@ public class Rule implements Cloneable {
         body.addAll(this.body);
         List<Expression> expressions = new ArrayList<>();
         expressions.addAll(this.expressions);
-        return new Rule(head, body, expressions);
+        List<Scope> scopes = new ArrayList<>();
+        scopes.addAll(this.scopes);
+        return new Rule(head, body, expressions, scopes);
     }
 
     public void set(String name, Term term) throws Error.Language {
@@ -127,6 +131,8 @@ public class Rule implements Cloneable {
         com.clevercloud.biscuit.datalog.Predicate head = r.head.convert(symbols);
         ArrayList<com.clevercloud.biscuit.datalog.Predicate> body = new ArrayList<>();
         ArrayList<com.clevercloud.biscuit.datalog.expressions.Expression> expressions = new ArrayList<>();
+        ArrayList<com.clevercloud.biscuit.datalog.Scope> scopes = new ArrayList<>();
+
 
         for (Predicate p : r.body) {
             body.add(p.convert(symbols));
@@ -136,7 +142,11 @@ public class Rule implements Cloneable {
             expressions.add(e.convert(symbols));
         }
 
-        return new com.clevercloud.biscuit.datalog.Rule(head, body, expressions);
+        for (Scope s : r.scopes) {
+            scopes.add(s.convert(symbols));
+        }
+
+        return new com.clevercloud.biscuit.datalog.Rule(head, body, expressions, scopes);
     }
 
     public static Rule convert_from(com.clevercloud.biscuit.datalog.Rule r, SymbolTable symbols) {
@@ -144,6 +154,8 @@ public class Rule implements Cloneable {
 
         ArrayList<Predicate> body = new ArrayList<>();
         ArrayList<Expression> expressions = new ArrayList<>();
+        ArrayList<Scope> scopes = new ArrayList<>();
+
 
         for (com.clevercloud.biscuit.datalog.Predicate p : r.body()) {
             body.add(Predicate.convert_from(p, symbols));
@@ -153,7 +165,11 @@ public class Rule implements Cloneable {
             expressions.add(Expression.convert_from(e, symbols));
         }
 
-        return new Rule(head, body, expressions);
+        for (com.clevercloud.biscuit.datalog.Scope s : r.scopes()) {
+            scopes.add(Scope.convert_from(s, symbols));
+        }
+
+        return new Rule(head, body, expressions, scopes);
     }
 
     @Override
