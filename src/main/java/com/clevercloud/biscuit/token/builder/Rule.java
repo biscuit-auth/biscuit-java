@@ -109,9 +109,14 @@ public class Rule implements Cloneable {
                 return Stream.of(((Term.Variable) t).value);
             } else return Stream.empty();
         }).collect(Collectors.toSet());
+
         for(Expression e: this.expressions) {
             e.gatherVariables(free_variables);
         }
+        if (free_variables.isEmpty()) {
+            return Either.right(this);
+        }
+
         for (Predicate p : this.body) {
             for (Term term : p.terms) {
                 if (term instanceof Term.Variable) {
@@ -122,6 +127,7 @@ public class Rule implements Cloneable {
                 }
             }
         }
+
         return Either.left("rule head or expressions contains variables that are not used in predicates of the rule's body: " + free_variables.toString());
     }
 
@@ -181,6 +187,7 @@ public class Rule implements Cloneable {
 
         if (head != null ? !head.equals(rule.head) : rule.head != null) return false;
         if (body != null ? !body.equals(rule.body) : rule.body != null) return false;
+        if (scopes != null ? !scopes.equals(rule.scopes) : rule.scopes != null) return false;
         return expressions != null ? expressions.equals(rule.expressions) : rule.expressions == null;
     }
 
@@ -189,6 +196,7 @@ public class Rule implements Cloneable {
         int result = head != null ? head.hashCode() : 0;
         result = 31 * result + (body != null ? body.hashCode() : 0);
         result = 31 * result + (expressions != null ? expressions.hashCode() : 0);
+        result = 31 * result + (scopes != null ? scopes.hashCode() : 0);
         return result;
     }
 
@@ -202,6 +210,11 @@ public class Rule implements Cloneable {
         if (!r.expressions.isEmpty()) {
             final List<String> e = r.expressions.stream().map((expression) -> expression.toString()).collect(Collectors.toList());
             res += ", " + String.join(", ", e);
+        }
+
+        if(!r.scopes.isEmpty()) {
+            final List<String> e = r.scopes.stream().map((scope) -> scope.toString()).collect(Collectors.toList());
+            res += " trusting " + String.join(", ", e);
         }
 
         return res;

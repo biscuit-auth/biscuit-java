@@ -155,7 +155,14 @@ public final class Rule implements Serializable {
       }
    }
 
-   public Rule(final Predicate head, final List<Predicate> body, final List<Expression>  expressions,
+   public Rule(final Predicate head, final List<Predicate> body, final List<Expression> expressions) {
+      this.head = head;
+      this.body = body;
+      this.expressions = expressions;
+      this.scopes = new ArrayList<>();
+   }
+
+   public Rule(final Predicate head, final List<Predicate> body, final List<Expression> expressions,
                final List<Scope> scopes) {
       this.head = head;
       this.body = body;

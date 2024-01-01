@@ -1,9 +1,12 @@
 package com.clevercloud.biscuit.token.builder.parser;
 
+import biscuit.format.schema.Schema;
+import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.token.Policy;
 import com.clevercloud.biscuit.token.builder.*;
 import io.vavr.Tuple2;
 import io.vavr.Tuple3;
+import io.vavr.Tuple4;
 import io.vavr.control.Either;
 
 import java.time.OffsetDateTime;
@@ -15,8 +18,7 @@ import java.util.function.Function;
 
 import static com.clevercloud.biscuit.datalog.Check.Kind.All;
 import static com.clevercloud.biscuit.datalog.Check.Kind.One;
-import static com.clevercloud.biscuit.token.builder.Utils.s;
-import static com.clevercloud.biscuit.token.builder.Utils.var;
+import static com.clevercloud.biscuit.token.builder.Utils.*;
 
 public class Parser {
     public static Either<Error, Tuple2<String, Fact>> fact(String s) {
@@ -52,18 +54,18 @@ public class Parser {
         List<Predicate> predicates = new ArrayList<Predicate>();
         s = s.substring(2);
 
-        Either<Error, Tuple3<String, List<Predicate>, List<Expression>>> bodyRes = rule_body(s);
+        Either<Error, Tuple4<String, List<Predicate>, List<Expression>, List<Scope>>> bodyRes = rule_body(s);
         if (bodyRes.isLeft()) {
             return Either.left(bodyRes.getLeft());
         }
 
-        Tuple3<String, List<Predicate>, List<Expression>> body = bodyRes.get();
+        Tuple4<String, List<Predicate>, List<Expression>, List<Scope>> body = bodyRes.get();
 
         if (!body._1.isEmpty()) {
             return Either.left(new Error(s, "the string was not entirely parsed, remaining: " + body._1));
         }
 
-        Rule rule = new Rule(head, body._2, body._3);
+        Rule rule = new Rule(head, body._2, body._3, body._4);
         Either<String, Rule> valid = rule.validate_variables();
         if (valid.isLeft()) {
             return Either.left(new Error(s, valid.getLeft()));
@@ -131,15 +133,16 @@ public class Parser {
 
     public static Either<Error, Tuple2<String, List<Rule>>> check_body(String s) {
         List<Rule> queries = new ArrayList<>();
-        Either<Error, Tuple3<String, List<Predicate>, List<Expression>>> bodyRes = rule_body(s);
+        Either<Error, Tuple4<String, List<Predicate>, List<Expression>, List<Scope>>> bodyRes = rule_body(s);
         if (bodyRes.isLeft()) {
             return Either.left(bodyRes.getLeft());
         }
 
-        Tuple3<String, List<Predicate>, List<Expression>> body = bodyRes.get();
+        Tuple4<String, List<Predicate>, List<Expression>, List<Scope>> body = bodyRes.get();
 
         s = body._1;
-        queries.add(new Rule(new Predicate("query", new ArrayList<>()), body._2, body._3));
+        //FIXME: parse scopes
+        queries.add(new Rule(new Predicate("query", new ArrayList<>()), body._2, body._3,  body._4));
 
         int i = 0;
         while (true) {
@@ -154,21 +157,21 @@ public class Parser {
             }
             s = s.substring(2);
 
-            Either<Error, Tuple3<String, List<Predicate>, List<Expression>>> bodyRes2 = rule_body(s);
+            Either<Error, Tuple4<String, List<Predicate>, List<Expression>, List<Scope>>> bodyRes2 = rule_body(s);
             if (bodyRes2.isLeft()) {
                 return Either.left(bodyRes2.getLeft());
             }
 
-            Tuple3<String, List<Predicate>, List<Expression>> body2 = bodyRes2.get();
+            Tuple4<String, List<Predicate>, List<Expression>, List<Scope>> body2 = bodyRes2.get();
 
             s = body2._1;
-            queries.add(new Rule(new Predicate("query", new ArrayList<>()), body2._2, body2._3));
+            queries.add(new Rule(new Predicate("query", new ArrayList<>()), body2._2, body2._3,  body2._4));
         }
 
         return Either.right(new Tuple2<>(s, queries));
     }
 
-    public static Either<Error, Tuple3<String, List<Predicate>, List<Expression>>> rule_body(String s) {
+    public static Either<Error, Tuple4<String, List<Predicate>, List<Expression>, List<Scope>>> rule_body(String s) {
         List<Predicate> predicates = new ArrayList<Predicate>();
         List<Expression> expressions = new ArrayList<>();
 
@@ -200,9 +203,15 @@ public class Parser {
             }
         }
 
-        //FIXME: handle constraints
+        Either<Error, Tuple2<String, List<Scope>>> res = scopes(s);
+        if(res.isLeft()) {
+            return Either.right(new Tuple4<>(s, predicates, expressions, new ArrayList<>()));
+        } else {
+            Tuple2<String, List<Scope>> t = res.get();
+            return Either.right(new Tuple4<>(t._1, predicates, expressions, t._2));
 
-        return Either.right(new Tuple3<>(s, predicates, expressions));
+        }
+
     }
 
     public static Either<Error, Tuple2<String, Predicate>> predicate(String s) {
@@ -246,6 +255,82 @@ public class Parser {
         String remaining = s.substring(1);
 
         return Either.right(new Tuple2<String, Predicate>(remaining, new Predicate(name, terms)));
+    }
+
+    public static Either<Error, Tuple2<String, List<Scope>>> scopes(String s) {
+        if (!s.startsWith("trusting")) {
+            return Either.left(new Error(s, "missing scopes prefix"));
+        }
+        s = s.substring("trusting".length());
+        s = space(s);
+
+        List<Scope> scopes = new ArrayList<Scope>();
+
+        while (true) {
+            s = space(s);
+
+            Either<Error, Tuple2<String, Scope>> res = scope(s);
+            if (res.isLeft()) {
+                break;
+            }
+
+            Tuple2<String, Scope> t = res.get();
+            s = t._1;
+            scopes.add(t._2);
+
+            s = space(s);
+
+            if (s.length() == 0 || s.charAt(0) != ',') {
+                break;
+            } else {
+                s = s.substring(1);
+            }
+        }
+
+        return Either.right(new Tuple2(s, scopes));
+    }
+
+    public static Either<Error, Tuple2<String, Scope>> scope(String s) {
+        if (s.startsWith("authority")) {
+            s = s.substring("authority".length());
+            return Either.right(new Tuple2(s, Scope.authority()));
+        }
+
+        if (s.startsWith("previous")) {
+            s = s.substring("previous".length());
+            return Either.right(new Tuple2(s, Scope.previous()));
+        }
+
+        if (0 < s.length() && s.charAt(0) == '{') {
+            String remaining = s.substring(1);
+            Either<Error, Tuple2<String, String>> res = name(remaining);
+            if (res.isLeft()) {
+                return Either.left(new Error(s, "unrecognized parameter"));
+            }
+            Tuple2<String, String> t = res.get();
+            if (0 < s.length() && s.charAt(0) == '}') {
+                return Either.right(new Tuple2(t._1, Scope.parameter(t._2)));
+            } else {
+                return Either.left(new Error(s, "unrecognized parameter end"));
+            }
+        }
+
+        Either<Error, Tuple2<String, PublicKey>> res2 = publicKey(s);
+        if (res2.isLeft()) {
+            return Either.left(new Error(s, "unrecognized public key"));
+        }
+        Tuple2<String, PublicKey> t = res2.get();
+        return Either.right(new Tuple2(t._1, Scope.publicKey(t._2)));
+    }
+
+    public static Either<Error, Tuple2<String, PublicKey>> publicKey(String s) {
+        if (!s.startsWith("ed25519/")) {
+            return Either.left(new Error(s, "unrecognized public key prefix"));
+        }
+
+        s = s.substring("ed25519/".length());
+        Tuple2<String, byte[]> t = hex(s);
+        return Either.right(new Tuple2(t._1, new PublicKey(Schema.PublicKey.Algorithm.Ed25519, t._2)));
     }
 
     public static Either<Error, Tuple2<String, Predicate>> fact_predicate(String s) {
@@ -304,37 +389,43 @@ public class Parser {
         Either<Error, Tuple2<String, Term.Variable>> res5 = variable(s);
         if (res5.isRight()) {
             Tuple2<String, Term.Variable> t = res5.get();
-            return Either.right(new Tuple2<String, Term>(t._1, t._2));
+            return Either.right(new Tuple2(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Str>> res2 = string(s);
         if (res2.isRight()) {
             Tuple2<String, Term.Str> t = res2.get();
-            return Either.right(new Tuple2<String, Term>(t._1, t._2));
+            return Either.right(new Tuple2(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Set>> res7 = set(s);
         if (res7.isRight()) {
             Tuple2<String, Term.Set> t = res7.get();
-            return Either.right(new Tuple2<String, Term>(t._1, t._2));
+            return Either.right(new Tuple2(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Bool>> res6 = bool(s);
         if (res6.isRight()) {
             Tuple2<String, Term.Bool> t = res6.get();
-            return Either.right(new Tuple2<>(t._1, t._2));
+            return Either.right(new Tuple2(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Date>> res4 = date(s);
         if (res4.isRight()) {
             Tuple2<String, Term.Date> t = res4.get();
-            return Either.right(new Tuple2<String, Term>(t._1, t._2));
+            return Either.right(new Tuple2(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Integer>> res3 = integer(s);
         if (res3.isRight()) {
             Tuple2<String, Term.Integer> t = res3.get();
-            return Either.right(new Tuple2<String, Term>(t._1, t._2));
+            return Either.right(new Tuple2(t._1, t._2));
+        }
+
+        Either<Error, Tuple2<String, Term.Bytes>> res8 = bytes(s);
+        if (res8.isRight()) {
+            Tuple2<String, Term.Bytes> t = res8.get();
+            return Either.right(new Tuple2(t._1, t._2));
         }
 
         return Either.left(new Error(s, "unrecognized value"));
@@ -348,33 +439,38 @@ public class Parser {
         Either<Error, Tuple2<String, Term.Str>> res2 = string(s);
         if (res2.isRight()) {
             Tuple2<String, Term.Str> t = res2.get();
-            return Either.right(new Tuple2<String, Term>(t._1, t._2));
+            return Either.right(new Tuple2(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Set>> res7 = set(s);
         if (res7.isRight()) {
             Tuple2<String, Term.Set> t = res7.get();
-            return Either.right(new Tuple2<String, Term>(t._1, t._2));
+            return Either.right(new Tuple2(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Bool>> res6 = bool(s);
         if (res6.isRight()) {
             Tuple2<String, Term.Bool> t = res6.get();
-            return Either.right(new Tuple2<>(t._1, t._2));
+            return Either.right(new Tuple2(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Date>> res4 = date(s);
         if (res4.isRight()) {
             Tuple2<String, Term.Date> t = res4.get();
-            return Either.right(new Tuple2<String, Term>(t._1, t._2));
+            return Either.right(new Tuple2(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Integer>> res3 = integer(s);
         if (res3.isRight()) {
             Tuple2<String, Term.Integer> t = res3.get();
-            return Either.right(new Tuple2<String, Term>(t._1, t._2));
+            return Either.right(new Tuple2(t._1, t._2));
         }
 
+        Either<Error, Tuple2<String, Term.Bytes>> res8 = bytes(s);
+        if (res8.isRight()) {
+            Tuple2<String, Term.Bytes> t = res8.get();
+            return Either.right(new Tuple2(t._1, t._2));
+        }
 
         return Either.left(new Error(s, "unrecognized value"));
     }
@@ -520,6 +616,33 @@ public class Parser {
         String remaining = s.substring(1);
 
         return Either.right(new Tuple2<>(remaining, new Term.Set(terms)));
+    }
+
+    public static Either<Error, Tuple2<String, Term.Bytes>> bytes(String s) {
+        if (!s.startsWith("hex:")) {
+            return Either.left(new Error(s, "not a bytes array"));
+        }
+        s = s.substring(4);
+        Tuple2<String, byte[]> t = hex(s);
+        return Either.right(new Tuple2<>(t._1, new Term.Bytes(t._2)));
+    }
+
+    public static Tuple2<String, byte[]> hex(String s) {
+        int index = 0;
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if("0123456789ABCDEFabcdef".indexOf(c) == -1) {
+                break;
+            }
+
+            index += 1;
+        }
+
+        String hex =  s.substring(0, index);
+        byte[] bytes = hexStringToByteArray(hex);
+        s = s.substring(index);
+        return new Tuple2<>(s,bytes);
+
     }
 
     public static Either<Error, Tuple2<String, Expression>> expression(String s) {

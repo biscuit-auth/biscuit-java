@@ -1,5 +1,7 @@
 package com.clevercloud.biscuit.builder.parser;
 
+import biscuit.format.schema.Schema;
+import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.datalog.expressions.Op;
 import com.clevercloud.biscuit.token.builder.*;
@@ -130,7 +132,6 @@ class ParserTest {
                 res);
     }
 
-
     @Test
     void ruleWithFreeExpressionVariables() {
         Either<Error, Tuple2<String, Rule>> res =
@@ -140,6 +141,28 @@ class ParserTest {
                         new Error(" resource($0), operation(\"read\"), $test",
                                 "rule head or expressions contains variables that are not used in predicates of the rule's body: [test]")
                 ),
+                res);
+    }
+
+    @Test
+    void testRuleWithScope() {
+        Either<Error, Tuple2<String, Rule>> res =
+                Parser.rule("valid_date(\"file1\") <- resource(\"file1\")  trusting ed25519/6e9e6d5a75cf0c0e87ec1256b4dfed0ca3ba452912d213fcc70f8516583db9db, authority ");
+        assertEquals(Either.right(new Tuple2<>("",
+                        new Rule(
+                                new Predicate(
+                                        "valid_date",
+                                        List.of(string("file1")
+                                        )),
+                                Arrays.asList(
+                                        pred("resource", List.of(string("file1")))
+                                ),
+                                new ArrayList(),
+                                Arrays.asList(
+                                        Scope.publicKey(new PublicKey(Schema.PublicKey.Algorithm.Ed25519, "6e9e6d5a75cf0c0e87ec1256b4dfed0ca3ba452912d213fcc70f8516583db9db")),
+                                        Scope.authority()
+                                )
+                        ))),
                 res);
     }
 

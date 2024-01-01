@@ -8,6 +8,7 @@ import io.vavr.control.Either;
 
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
@@ -52,6 +53,10 @@ public class Scope {
         return new Scope(Kind.PublicKey, publicKey);
     }
 
+    public static Scope parameter(String parameter) {
+        return new Scope(Kind.Parameter, parameter);
+    }
+
     public com.clevercloud.biscuit.datalog.Scope convert(SymbolTable symbols) {
         switch (this.kind) {
             case Authority:
@@ -59,10 +64,14 @@ public class Scope {
             case Previous:
                 return com.clevercloud.biscuit.datalog.Scope.previous();
             case Parameter:
-                throw new Exception("Remaining parameter: "+this.parameter);
+                //FIXME
+                return null;
+                //throw new Exception("Remaining parameter: "+this.parameter);
             case PublicKey:
                 return com.clevercloud.biscuit.datalog.Scope.publicKey(symbols.insert(this.publicKey));
         }
+        //FIXME
+        return null;
     }
 
     public static Scope convert_from(com.clevercloud.biscuit.datalog.Scope scope, SymbolTable symbols) {
@@ -77,7 +86,43 @@ public class Scope {
         }
 
         //FIXME error management should bubble up here
-        throw new Exception("panic");
+        //throw new Exception("panic");
+        return null;
 
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Scope scope = (Scope) o;
+
+        if (kind != scope.kind) return false;
+        if (!Objects.equals(publicKey, scope.publicKey)) return false;
+        return Objects.equals(parameter, scope.parameter);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = kind.hashCode();
+        result = 31 * result + (publicKey != null ? publicKey.hashCode() : 0);
+        result = 31 * result + (parameter != null ? parameter.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        switch (this.kind) {
+            case Authority:
+                return "authority";
+            case Previous:
+                return "previous";
+            case Parameter:
+                return "{"+this.parameter+"}";
+            case PublicKey:
+                return this.publicKey.toString();
+        }
+        return null;
     }
 }

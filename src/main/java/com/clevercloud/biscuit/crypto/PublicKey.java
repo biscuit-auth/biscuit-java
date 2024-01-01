@@ -55,4 +55,9 @@ public class PublicKey {
     public int hashCode() {
         return key.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return "ed25519/" + toHex();
+    }
 }
