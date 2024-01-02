@@ -3,6 +3,7 @@ package com.clevercloud.biscuit.builder.parser;
 import biscuit.format.schema.Schema;
 import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.datalog.SymbolTable;
+import com.clevercloud.biscuit.datalog.TemporarySymbolTable;
 import com.clevercloud.biscuit.datalog.expressions.Op;
 import com.clevercloud.biscuit.token.builder.*;
 import com.clevercloud.biscuit.token.builder.parser.Error;
@@ -314,7 +315,7 @@ class ParserTest {
         );
 
         Map<Long,com.clevercloud.biscuit.datalog.Term> variables = new HashMap<>();
-        Option<com.clevercloud.biscuit.datalog.Term> value = ex.evaluate(variables, s);
+        Option<com.clevercloud.biscuit.datalog.Term> value = ex.evaluate(variables, new TemporarySymbolTable(s));
         assertEquals(Option.some(new com.clevercloud.biscuit.datalog.Term.Integer(7)), value);
         assertEquals("1 + 2 * 3", ex.print(s).get());
 
@@ -356,7 +357,7 @@ class ParserTest {
         );
 
         Map<Long,com.clevercloud.biscuit.datalog.Term> variables2 = new HashMap<>();
-        Option<com.clevercloud.biscuit.datalog.Term> value2 = ex2.evaluate(variables2, s2);
+        Option<com.clevercloud.biscuit.datalog.Term> value2 = ex2.evaluate(variables2, new TemporarySymbolTable(s2));
         assertEquals(Option.some(new com.clevercloud.biscuit.datalog.Term.Integer(9)), value2);
         assertEquals("(1 + 2) * 3", ex2.print(s2).get());
     }

@@ -33,7 +33,7 @@ public class ExampleTest {
                 .build();
     }
 
-    public Tuple2<Long, AuthorizedWorld> authorize(KeyPair root, byte[] serializedToken) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+    public Long authorize(KeyPair root, byte[] serializedToken) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         return Biscuit.from_bytes(serializedToken, root.public_key()).authorizer()
                 .add_fact("resource(\"/folder1/file1\")")
                 .add_fact("operation(\"read\")")
@@ -47,7 +47,7 @@ public class ExampleTest {
         return token.attenuate(block);
     }
 
-    public Set<Fact> query(Authorizer authorizer) throws Error.Timeout, Error.TooManyFacts, Error.TooManyIterations, Error.Parser {
+    /*public Set<Fact> query(Authorizer authorizer) throws Error.Timeout, Error.TooManyFacts, Error.TooManyIterations, Error.Parser {
         return authorizer.query("data($name, $id) <- user($name, $id)");
-    }
+    }*/
 }

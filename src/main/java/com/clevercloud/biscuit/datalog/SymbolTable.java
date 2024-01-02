@@ -78,6 +78,10 @@ public final class SymbolTable implements Serializable {
         }
     }
 
+    public int currentOffset() {
+        return this.symbols.size();
+    }
+
     public long insert(final PublicKey publicKey) {
         int index = this.publicKeys.indexOf(publicKey);
         if (index == -1) {
@@ -225,8 +229,8 @@ public final class SymbolTable implements Serializable {
     }
 
     public String print_world(final World w) {
-        final List<String> facts = w.facts().stream().map((f) -> this.print_fact(f)).collect(Collectors.toList());
-        final List<String> rules = w.rules().stream().map((r) -> this.print_rule(r)).collect(Collectors.toList());
+        final List<String> facts = w.facts().iterator().map((f) -> this.print_fact(f)).collect(Collectors.toList());
+        final List<String> rules = w.rules().iterator().map((r) -> this.print_rule(r)).collect(Collectors.toList());
 
         StringBuilder b = new StringBuilder();
         b.append("World {\n\tfacts: [\n\t\t");

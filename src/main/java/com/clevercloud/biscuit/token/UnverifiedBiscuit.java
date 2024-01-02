@@ -218,30 +218,6 @@ public class UnverifiedBiscuit {
         return l;
     }
 
-    Either<Error, World> generate_world() {
-        World world = new World();
-
-        for (Fact fact : this.authority.facts) {
-            world.add_fact(fact);
-        }
-
-        for (Rule rule : this.authority.rules) {
-            world.add_rule(rule);
-        }
-
-        for (Block b : this.blocks) {
-            for (Fact fact : b.facts) {
-                world.add_fact(fact);
-            }
-
-            for (Rule rule : b.rules) {
-                world.add_rule(rule);
-            }
-        }
-
-        return Right(world);
-    }
-
     public List<Option<String>> context() {
         ArrayList<Option<String>> res = new ArrayList<>();
         if (this.authority.context.isEmpty()) {
@@ -265,95 +241,6 @@ public class UnverifiedBiscuit {
         return this.root_key_id;
     }
 
-    HashMap<String, Set<Fact>> check(SymbolTable symbols, List<Fact> ambient_facts, List<Rule> ambient_rules,
-                                     List<Check> authorizer_checks, HashMap<String, Rule> queries) throws Error {
-        Either<Error, World> wres = this.generate_world();
-
-        if (wres.isLeft()) {
-            Error e = wres.getLeft();
-            throw e;
-        }
-
-        World world = wres.get();
-
-        for (Fact fact : ambient_facts) {
-            world.add_fact(fact);
-        }
-
-        for (Rule rule : ambient_rules) {
-            world.add_rule(rule);
-        }
-
-        world.run(symbols);
-
-        ArrayList<FailedCheck> errors = new ArrayList<>();
-        for (int j = 0; j < this.authority.checks.size(); j++) {
-            boolean successful = false;
-            Check c = this.authority.checks.get(j);
-
-            for (int k = 0; k < c.queries().size(); k++) {
-                Set<Fact> res = world.query_rule(c.queries().get(k), symbols);
-                if (!res.isEmpty()) {
-                    successful = true;
-                    break;
-                }
-            }
-
-            if (!successful) {
-                errors.add(new FailedCheck.FailedBlock(0, j, symbols.print_check(this.authority.checks.get(j))));
-            }
-        }
-
-        for (int j = 0; j < authorizer_checks.size(); j++) {
-            boolean successful = false;
-            Check c = authorizer_checks.get(j);
-
-            for (int k = 0; k < c.queries().size(); k++) {
-                Set<Fact> res = world.query_rule(c.queries().get(k), symbols);
-                if (!res.isEmpty()) {
-                    successful = true;
-                    break;
-                }
-            }
-
-            if (!successful) {
-                errors.add(new FailedCheck.FailedAuthorizer(j + 1, symbols.print_check(authorizer_checks.get(j))));
-            }
-        }
-
-        for (int i = 0; i < this.blocks.size(); i++) {
-            Block b = this.blocks.get(i);
-
-            for (int j = 0; j < b.checks.size(); j++) {
-                boolean successful = false;
-                Check c = b.checks.get(j);
-
-                for (int k = 0; k < c.queries().size(); k++) {
-                    Set<Fact> res = world.query_rule(c.queries().get(k), symbols);
-                    if (!res.isEmpty()) {
-                        successful = true;
-                        break;
-                    }
-                }
-
-                if (!successful) {
-                    errors.add(new FailedCheck.FailedBlock(i + 1, j, symbols.print_check(b.checks.get(j))));
-                }
-            }
-        }
-
-        HashMap<String, Set<Fact>> query_results = new HashMap<>();
-        for (String name : queries.keySet()) {
-            Set<Fact> res = world.query_rule(queries.get(name), symbols);
-            query_results.put(name, res);
-        }
-
-        if (errors.isEmpty()) {
-            return query_results;
-        } else {
-            throw new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), errors));
-        }
-    }
 
     /**
      * Prints a token's content

@@ -1,5 +1,6 @@
 package com.clevercloud.biscuit.error;
 
+import com.clevercloud.biscuit.datalog.expressions.Expression;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
@@ -529,6 +530,35 @@ public class Error extends Exception {
         @Override
         public JsonElement toJson(){
             return new JsonPrimitive("Timeout");
+        }
+    }
+
+    public static class Execution extends Error {
+        Expression e;
+
+        public Execution(Expression ex) {
+            e = ex;
+        }
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            return o != null && getClass() == o.getClass();
+        }
+        @Override
+        public JsonElement toJson(){
+            return new JsonPrimitive("Execution");
+        }
+    }
+
+    public static class InvalidType extends Error {
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            return o != null && getClass() == o.getClass();
+        }
+        @Override
+        public JsonElement toJson(){
+            return new JsonPrimitive("InvalidType");
         }
     }
 

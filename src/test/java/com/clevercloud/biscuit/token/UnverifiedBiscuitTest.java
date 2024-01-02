@@ -2,6 +2,7 @@ package com.clevercloud.biscuit.token;
 
 import com.clevercloud.biscuit.crypto.KeyPair;
 import com.clevercloud.biscuit.datalog.Fact;
+import com.clevercloud.biscuit.datalog.RunLimits;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.error.FailedCheck;
@@ -13,7 +14,9 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.SignatureException;
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -121,31 +124,25 @@ public class UnverifiedBiscuitTest {
         // check
         System.out.println("will check the token for resource=file1 and operation=read");
 
-        SymbolTable check_symbols = new SymbolTable(finalBiscuit.symbols);
-        List<Fact> ambient_facts = List.of(
-                fact("resource", List.of(s("file1"))).convert(check_symbols),
-                fact("operation", List.of(s("read"))).convert(check_symbols)
-        );
-
-        finalBiscuit.check(check_symbols, ambient_facts,
-                new ArrayList<>(), new ArrayList<>(), new HashMap<>());
+        Authorizer authorizer = finalBiscuit.authorizer();
+        authorizer.add_fact("resource(\"file1\")");
+        authorizer.add_fact("operation(\"read\")");
+        authorizer.add_policy("allow if true");
+        authorizer.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
 
         System.out.println("will check the token for resource=file2 and operation=write");
 
-        SymbolTable check_symbols2 = new SymbolTable(finalBiscuit.symbols);
-        List<Fact> ambient_facts2 = List.of(
-                fact("resource", List.of(s("file2"))).convert(check_symbols2),
-                fact("operation", List.of(s("write"))).convert(check_symbols2)
-        );
+        Authorizer authorizer2 = finalBiscuit.authorizer();
+        authorizer2.add_fact("resource(\"file2\")");
+        authorizer2.add_fact("operation(\"write\")");
+        authorizer2.add_policy("allow if true");
 
         try {
-            finalBiscuit.check(check_symbols2, ambient_facts2,
-                    new ArrayList<>(), new ArrayList<>(), new HashMap<>());
-            fail();
+            authorizer2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         } catch (Error e) {
             System.out.println(e);
             assertEquals(
-                    new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), List.of(
+                    new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                             new FailedCheck.FailedBlock(1, 0, "check if resource($resource), operation(\"read\"), right($resource, \"read\")"),
                             new FailedCheck.FailedBlock(2, 0, "check if resource(\"file1\")")
                     ))),

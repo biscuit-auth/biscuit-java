@@ -322,8 +322,9 @@ public class SamplesV2Test {
 
         Authorizer v1 = token.authorizer();
         v1.add_fact("resource(\"file1\")");
+        v1.add_fact("time(2020-12-21T09:23:12Z)");
         //v1.add_fact(fact("time", Arrays.asList(new Term.Date(1608542592))));
-        v1.set_time();
+        //v1.set_time();
         v1.allow();
         v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println(v1.print_world());
@@ -450,9 +451,9 @@ public class SamplesV2Test {
         Authorizer v1 = token.authorizer();
         v1.allow();
 
-        Tuple2<Long, AuthorizedWorld> result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
-        assertEquals(0L, v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))._1);
-        assertEquals(0L, result._2.facts().size());
+        Long result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
+        assertEquals(0L, v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500))));
+        assertEquals(0L, v1.world.facts().size());
     }
 
     @Test
@@ -513,10 +514,10 @@ public class SamplesV2Test {
         v1.add_fact("operation(\"read\")");
         v1.add_fact("resource(\"file1\")");
         v1.allow();
-        Tuple2<Long, AuthorizedWorld> result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
+        Long result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println("result: " + result);
-        assertEquals(0L, v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))._1);
-        assertEquals(5, result._2.facts().size());
+        assertEquals(0L, v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500))));
+        assertEquals(8, v1.world.facts().size());
     }
 
     @Test
@@ -542,9 +543,9 @@ public class SamplesV2Test {
                 )
         )));
         v1.allow();
-        Tuple2<Long, AuthorizedWorld> result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
+        Long result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println("result: " + result);
-        assertEquals(0L, v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)))._1);
-        assertEquals(1, result._2.facts().size());
+        assertEquals(0L, v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500))));
+        assertEquals(2, v1.world.facts().size());
     }
 }

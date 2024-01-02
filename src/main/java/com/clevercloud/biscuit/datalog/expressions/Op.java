@@ -1,6 +1,7 @@
 package com.clevercloud.biscuit.datalog.expressions;
 
 import biscuit.format.schema.Schema;
+import com.clevercloud.biscuit.datalog.TemporarySymbolTable;
 import com.clevercloud.biscuit.datalog.Term;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.error.Error;
@@ -15,7 +16,7 @@ import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
 public abstract class Op {
-    public abstract boolean evaluate(Deque<Term> stack, Map<Long, Term> variables, SymbolTable symbols);
+    public abstract boolean evaluate(Deque<Term> stack, Map<Long, Term> variables, TemporarySymbolTable symbols);
 
     public abstract String print(Deque<String> stack, SymbolTable symbols);
 
@@ -45,7 +46,7 @@ public abstract class Op {
         }
 
         @Override
-        public boolean evaluate(Deque<Term> stack, Map<Long, Term> variables, SymbolTable symbols) {
+        public boolean evaluate(Deque<Term> stack, Map<Long, Term> variables, TemporarySymbolTable symbols) {
             if (value instanceof Term.Variable) {
                 Term.Variable var = (Term.Variable) value;
                 Term valueVar = variables.get(var.value());
@@ -117,7 +118,7 @@ public abstract class Op {
         }
 
         @Override
-        public boolean evaluate(Deque<Term> stack, Map<Long, Term> variables, SymbolTable symbols) {
+        public boolean evaluate(Deque<Term> stack, Map<Long, Term> variables, TemporarySymbolTable symbols) {
             Term value = stack.pop();
             switch (this.op) {
                 case Negate:
@@ -260,7 +261,7 @@ public abstract class Op {
         }
 
         @Override
-        public boolean evaluate(Deque<Term> stack, Map<Long, Term> variables, SymbolTable symbols) {
+        public boolean evaluate(Deque<Term> stack, Map<Long, Term> variables, TemporarySymbolTable symbols) {
             Term right = stack.pop();
             Term left = stack.pop();
 
@@ -432,8 +433,8 @@ public abstract class Op {
                             return false;
                         }
                         String concatenation = left_s.get() + right_s.get();
-                        symbols.add(concatenation);
-                        stack.push(new Term.Str(symbols.get(concatenation).get()));
+                        long index = symbols.insert(concatenation);
+                        stack.push(new Term.Str(index));
                         return true;
                     }
                     break;
