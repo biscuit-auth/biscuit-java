@@ -1,17 +1,9 @@
 package com.clevercloud.biscuit.token.builder;
 
-import biscuit.format.schema.Schema;
 import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.datalog.SymbolTable;
-import com.clevercloud.biscuit.error.Error;
-import io.vavr.control.Either;
 
-
-import java.util.ArrayList;
 import java.util.Objects;
-
-import static io.vavr.API.Left;
-import static io.vavr.API.Right;
 
 public class Scope {
     enum Kind {
@@ -28,19 +20,21 @@ public class Scope {
     private Scope(Kind kind) {
         this.kind = kind;
         this.publicKey = null;
-        this.parameter = new String();
+        this.parameter = "";
     }
 
     private Scope(Kind kind, PublicKey publicKey) {
         this.kind = kind;
         this.publicKey = publicKey;
-        this.parameter = new String();
+        this.parameter = "";
     }
+
     private Scope(Kind kind, String parameter) {
         this.kind = kind;
         this.publicKey = null;
         this.parameter = parameter;
     }
+
     public static Scope authority() {
         return new Scope(Kind.Authority);
     }
@@ -66,7 +60,7 @@ public class Scope {
             case Parameter:
                 //FIXME
                 return null;
-                //throw new Exception("Remaining parameter: "+this.parameter);
+            //throw new Exception("Remaining parameter: "+this.parameter);
             case PublicKey:
                 return com.clevercloud.biscuit.datalog.Scope.publicKey(symbols.insert(this.publicKey));
         }
@@ -75,7 +69,7 @@ public class Scope {
     }
 
     public static Scope convert_from(com.clevercloud.biscuit.datalog.Scope scope, SymbolTable symbols) {
-        switch(scope.kind()) {
+        switch (scope.kind()) {
             case Authority:
                 return new Scope(Kind.Authority);
             case Previous:
@@ -119,7 +113,7 @@ public class Scope {
             case Previous:
                 return "previous";
             case Parameter:
-                return "{"+this.parameter+"}";
+                return "{" + this.parameter + "}";
             case PublicKey:
                 return this.publicKey.toString();
         }

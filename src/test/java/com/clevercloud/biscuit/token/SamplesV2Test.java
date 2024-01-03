@@ -2,14 +2,12 @@ package com.clevercloud.biscuit.token;
 
 import biscuit.format.schema.Schema;
 import com.clevercloud.biscuit.crypto.PublicKey;
-import com.clevercloud.biscuit.datalog.AuthorizedWorld;
 import com.clevercloud.biscuit.datalog.RunLimits;
 import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.error.FailedCheck;
 import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.builder.Check;
 import com.clevercloud.biscuit.token.builder.Rule;
-import io.vavr.Tuple2;
 import io.vavr.control.Try;
 
 import org.junit.jupiter.api.Test;
@@ -28,7 +26,6 @@ import java.util.Arrays;
 
 import static com.clevercloud.biscuit.crypto.TokenSignature.fromHex;
 import static com.clevercloud.biscuit.token.builder.Utils.*;
-import static io.vavr.API.Right;
 
 
 public class SamplesV2Test {

@@ -3,8 +3,6 @@ package com.clevercloud.biscuit.token;
 import com.clevercloud.biscuit.crypto.KeyDelegate;
 import com.clevercloud.biscuit.crypto.KeyPair;
 import com.clevercloud.biscuit.crypto.PublicKey;
-import com.clevercloud.biscuit.datalog.AuthorizedWorld;
-import com.clevercloud.biscuit.datalog.Fact;
 import com.clevercloud.biscuit.datalog.RunLimits;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.error.Error;
@@ -12,7 +10,6 @@ import com.clevercloud.biscuit.error.FailedCheck;
 import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.builder.Block;
 
-import io.vavr.Tuple2;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 

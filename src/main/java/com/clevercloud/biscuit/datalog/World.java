@@ -1,6 +1,5 @@
 package com.clevercloud.biscuit.datalog;
 
-import com.clevercloud.biscuit.datalog.expressions.Expression;
 import com.clevercloud.biscuit.error.Error;
 import io.vavr.Tuple2;
 import io.vavr.control.Either;
@@ -9,7 +8,6 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class World implements Serializable {
@@ -20,9 +18,6 @@ public class World implements Serializable {
       this.facts.add(origin, fact);
    }
 
-   /*public void add_facts(final Set<Fact> facts) {
-      this.facts.addAll(facts);
-   }*/
 
    public void add_rule(Long origin, TrustedOrigins scope, Rule rule) {
       this.rules.add(origin, scope, rule);
@@ -45,7 +40,7 @@ public class World implements Serializable {
 
          for(Map.Entry<TrustedOrigins, List<Tuple2<Long, Rule>>> entry: this.rules.rules.entrySet()) {
             for(Tuple2<Long, Rule> t: entry.getValue()) {
-               Supplier<Stream<Tuple2<Origin, Fact>>> factsSupplier = () -> this.facts.iterator(entry.getKey());
+               Supplier<Stream<Tuple2<Origin, Fact>>> factsSupplier = () -> this.facts.stream(entry.getKey());
 
                Stream<Either<Error, Tuple2<Origin, Fact>>> stream =  t._2.apply(factsSupplier, t._1, symbols);
                 for (Iterator<Either<Error, Tuple2<Origin, Fact>>> it = stream.iterator(); it.hasNext(); ) {
@@ -89,33 +84,10 @@ public class World implements Serializable {
 
    public RuleSet rules() { return this.rules; }
 
-   /*public final Set<Fact> query(final Predicate pred) {
-      return this.facts.stream().filter((f) -> {
-         if (f.predicate().name() != pred.name()) {
-            return false;
-         }
-         final int min_size = Math.min(f.predicate().terms().size(), pred.terms().size());
-         for (int i = 0; i < min_size; ++i) {
-            final Term fid = f.predicate().terms().get(i);
-            final Term pid = pred.terms().get(i);
-            if ((fid instanceof Term.Integer || fid instanceof Term.Str || fid instanceof Term.Date)
-                    && fid.getClass() == pid.getClass()) {
-               if (!fid.equals(pid)) {
-                  return false;
-               }
-            // FIXME: is it still necessary?
-            //} else if (!(fid instanceof Term.Symbol && pid instanceof Term.Variable)) {
-            //   return false;
-            }
-         }
-         return true;
-      }).collect(Collectors.toSet());
-   }*/
-
    public final FactSet query_rule(final Rule rule, Long origin, TrustedOrigins scope, SymbolTable symbols) throws Error {
       final FactSet newFacts = new FactSet();
 
-      Supplier<Stream<Tuple2<Origin, Fact>>> factsSupplier = () -> this.facts.iterator(scope);
+      Supplier<Stream<Tuple2<Origin, Fact>>> factsSupplier = () -> this.facts.stream(scope);
 
       Stream<Either<Error, Tuple2<Origin, Fact>>> stream = rule.apply(factsSupplier, origin, symbols);
       for (Iterator<Either<Error, Tuple2<Origin, Fact>>> it = stream.iterator(); it.hasNext(); ) {
@@ -157,11 +129,6 @@ public class World implements Serializable {
       this.rules = rules.clone();
    }
 
-   /*public World(Set<Fact> facts, List<Rule> rules, List<Check> checks) {
-      this.facts = facts;
-      this.rules = rules;
-   }*/
-
    public World(World w) {
       this.facts = w.facts.clone();
       this.rules = w.rules.clone();
@@ -171,14 +138,14 @@ public class World implements Serializable {
       StringBuilder s = new StringBuilder();
 
       s.append("World {\n\t\tfacts: [");
-       for (Iterator<Fact> it = this.facts.iterator().iterator(); it.hasNext(); ) {
+       for (Iterator<Fact> it = this.facts.stream().iterator(); it.hasNext(); ) {
            Fact f = it.next();
            s.append("\n\t\t\t");
            s.append(symbol_table.print_fact(f));
        }
 
       s.append("\n\t\t]\n\t\trules: [");
-       for (Iterator<Rule> it = this.rules.iterator().iterator(); it.hasNext(); ) {
+       for (Iterator<Rule> it = this.rules.stream().iterator(); it.hasNext(); ) {
            Rule r = it.next();
            s.append("\n\t\t\t");
            s.append(symbol_table.print_rule(r));

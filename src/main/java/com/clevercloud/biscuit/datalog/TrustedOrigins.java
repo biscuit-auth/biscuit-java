@@ -1,15 +1,14 @@
 package com.clevercloud.biscuit.datalog;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 public class TrustedOrigins {
-    private Origin inner;
+    private final Origin inner;
 
-    public TrustedOrigins(int ... origins) {
+    public TrustedOrigins(int... origins) {
         Origin origin = new Origin();
-        for(int i: origins) {
+        for (int i : origins) {
             origin.add(i);
         }
         inner = origin;
@@ -20,7 +19,7 @@ public class TrustedOrigins {
     }
 
     private TrustedOrigins(Origin inner) {
-        if(inner == null) {
+        if (inner == null) {
             throw new RuntimeException();
         }
         this.inner = inner;
@@ -29,6 +28,7 @@ public class TrustedOrigins {
     public TrustedOrigins clone() {
         return new TrustedOrigins(this.inner.clone());
     }
+
     public static TrustedOrigins defaultOrigins() {
         TrustedOrigins origins = new TrustedOrigins();
         origins.inner.add(0);
@@ -51,21 +51,21 @@ public class TrustedOrigins {
         origins.inner.add(currentBlock);
         origins.inner.add(Long.MAX_VALUE);
 
-        for(Scope scope: ruleScopes) {
+        for (Scope scope : ruleScopes) {
             switch (scope.kind()) {
                 case Authority:
                     origins.inner.add(0);
                     break;
                 case Previous:
-                    if(currentBlock != Long.MAX_VALUE) {
-                        for(long i = 0; i < currentBlock+1; i++) {
+                    if (currentBlock != Long.MAX_VALUE) {
+                        for (long i = 0; i < currentBlock + 1; i++) {
                             origins.inner.add(i);
                         }
                     }
                     break;
                 case PublicKey:
                     List<Long> blockIds = publicKeyToBlockId.get(scope.publicKey());
-                    if(blockIds != null) {
+                    if (blockIds != null) {
                         origins.inner.inner.addAll(blockIds);
                     }
             }

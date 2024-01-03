@@ -22,7 +22,7 @@ public final class Combinator implements Serializable, Iterator<Tuple2<Origin, M
 
    @Override
    public boolean hasNext() {
-      if(this.nextElement != null && this.nextElement.isDefined()) {
+      if (this.nextElement != null && this.nextElement.isDefined()) {
          return true;
       }
       this.nextElement = getNext();
@@ -31,10 +31,10 @@ public final class Combinator implements Serializable, Iterator<Tuple2<Origin, M
 
    @Override
    public Tuple2<Origin, Map<Long, Term>> next() {
-      if(this.nextElement == null || !this.nextElement.isDefined()) {
+      if (this.nextElement == null || !this.nextElement.isDefined()) {
          this.nextElement = getNext();
       }
-      if(this.nextElement == null || !this.nextElement.isDefined()) {
+      if (this.nextElement == null || !this.nextElement.isDefined()) {
          throw new NoSuchElementException();
       } else {
          Tuple2<Origin, Map<Long, Term>> t = this.nextElement.get();
@@ -46,7 +46,7 @@ public final class Combinator implements Serializable, Iterator<Tuple2<Origin, M
    public Option<Tuple2<Origin, Map<Long, Term>>> getNext() {
       if (this.predicates.isEmpty()) {
          final Option<Map<Long, Term>> v_opt = this.variables.complete();
-         if(v_opt.isEmpty()) {
+         if (v_opt.isEmpty()) {
             return Option.none();
          } else {
             Map<Long, Term> variables = v_opt.get();
@@ -54,15 +54,15 @@ public final class Combinator implements Serializable, Iterator<Tuple2<Origin, M
             // we should return a value, but only once. To prevent further
             // successful calls, we create a set of variables that cannot
             // possibly be completed, so the next call will fail
-            Set<Long> set = new HashSet();
-            set.add((long)0);
+            Set<Long> set = new HashSet<>();
+            set.add((long) 0);
 
             this.variables = new MatchedVariables(set);
-            return Option.some(new Tuple2(new Origin(), variables));
+            return Option.some(new Tuple2<>(new Origin(), variables));
          }
       }
 
-      while(true) {
+      while (true) {
          if (this.currentIt == null) {
             Predicate predicate = this.predicates.get(0);
 
@@ -105,7 +105,7 @@ public final class Combinator implements Serializable, Iterator<Tuple2<Origin, M
                      if (v_opt.isEmpty()) {
                         continue;
                      } else {
-                        return Option.some(new Tuple2(currentOrigin, v_opt.get()));
+                        return Option.some(new Tuple2<>(currentOrigin, v_opt.get()));
                      }
                   } else {
                      this.currentOrigin = currentOrigin;

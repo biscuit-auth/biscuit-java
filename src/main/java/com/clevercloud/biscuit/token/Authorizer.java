@@ -51,7 +51,7 @@ public class Authorizer {
      * Creates an empty authorizer
      * <p>
      * used to apply policies when unauthenticated (no token)
-     * and to preload a authorizer that is cloned for each new request
+     * and to preload an authorizer that is cloned for each new request
      */
     public Authorizer() {
         this.world = new World();
@@ -81,7 +81,7 @@ public class Authorizer {
      * also checks that the token is valid for this root public key
      *
      * @param token
-     * @return
+     * @return Authorizer
      */
     static public Authorizer make(Biscuit token) throws Error.FailedLogic {
         return new Authorizer(token, new World());
@@ -191,7 +191,7 @@ public class Authorizer {
     }
 
     public Authorizer set_time() throws Error.Language {
-        world.add_fact(Origin.authorizer(), fact("time", Arrays.asList(date(new Date()))).convert(symbols));
+        world.add_fact(Origin.authorizer(), fact("time", List.of(date(new Date()))).convert(symbols));
         return this;
     }
 
@@ -200,8 +200,8 @@ public class Authorizer {
 
         final Rule getRevocationIds = rule(
                 "revocation_id",
-                Arrays.asList(var("id")),
-                Arrays.asList(pred("revocation_id", Arrays.asList(var("id"))))
+                List.of(var("id")),
+                List.of(pred("revocation_id", List.of(var("id"))))
         );
 
         this.query(getRevocationIds).stream().forEach(fact -> {
@@ -222,7 +222,7 @@ public class Authorizer {
                 "allow",
                 new ArrayList<>(),
                 new ArrayList<>(),
-                Arrays.asList(new Expression.Value(new Term.Bool(true)))
+                List.of(new Expression.Value(new Term.Bool(true)))
         ));
 
         this.policies.add(new Policy(q, Policy.Kind.Allow));
@@ -236,7 +236,7 @@ public class Authorizer {
                 "deny",
                 new ArrayList<>(),
                 new ArrayList<>(),
-                Arrays.asList(new Expression.Value(new Term.Bool(true)))
+                List.of(new Expression.Value(new Term.Bool(true)))
         ));
 
         this.policies.add(new Policy(q, Policy.Kind.Deny));
@@ -262,6 +262,11 @@ public class Authorizer {
         return this;
     }
 
+    public Authorizer add_scope(Scope s) {
+        this.scopes.add(s);
+        return this;
+    }
+
     public Set<Fact> query(Rule query) throws Error {
         return this.query(query, new RunLimits());
     }
@@ -282,17 +287,6 @@ public class Authorizer {
     public Set<Fact> query(Rule query, RunLimits limits) throws Error {
         world.run(limits, symbols);
 
-        /*
-         let rule_trusted_origins = TrustedOrigins::from_scopes(
-            &rule.scopes,
-            &TrustedOrigins::default(), // for queries, we don't want to default on the authorizer trust
-            // queries are there to explore the final state of the world,
-            // whereas authorizer contents are there to authorize or not
-            // a token
-            usize::MAX,
-            &self.public_key_to_block_id,
-        );
-         */
         com.clevercloud.biscuit.datalog.Rule rule = query.convert(symbols);
         TrustedOrigins ruleTrustedorigins = TrustedOrigins.fromScopes(
                 rule.scopes(),
@@ -305,8 +299,8 @@ public class Authorizer {
                 ruleTrustedorigins, symbols);
         Set<Fact> s = new HashSet<>();
 
-        for (Iterator it = facts.iterator().iterator(); it.hasNext(); ) {
-            com.clevercloud.biscuit.datalog.Fact f = (com.clevercloud.biscuit.datalog.Fact) it.next();
+        for (Iterator<com.clevercloud.biscuit.datalog.Fact> it = facts.stream().iterator(); it.hasNext(); ) {
+            com.clevercloud.biscuit.datalog.Fact f = it.next();
             s.add(Fact.convert_from(f, symbols));
         }
 
@@ -394,7 +388,6 @@ public class Authorizer {
         }
 
         if (token != null) {
-
             TrustedOrigins authorityTrustedOrigins = TrustedOrigins.fromScopes(
                     token.authority.scopes,
                     TrustedOrigins.defaultOrigins(),
@@ -462,9 +455,9 @@ public class Authorizer {
 
                 if (res) {
                     if (this.policies.get(i).kind == Policy.Kind.Allow) {
-                        policy_result = Option.some(Right(Integer.valueOf(i)));
+                        policy_result = Option.some(Right(i));
                     } else {
-                        policy_result = Option.some(Left(Integer.valueOf(i)));
+                        policy_result = Option.some(Left(i));
                     }
                     break policies_test;
                 }
@@ -550,12 +543,12 @@ public class Authorizer {
             Either<Integer, Integer> e = policy_result.get();
             if (e.isRight()) {
                 if (errors.isEmpty()) {
-                    return Long.valueOf(e.get().longValue());
+                    return e.get().longValue();
                 } else {
-                    throw new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(e.get().intValue()), errors));
+                    throw new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(e.get()), errors));
                 }
             } else {
-                throw new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Deny(e.getLeft().intValue()), errors));
+                throw new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Deny(e.getLeft()), errors));
             }
         } else {
             throw new Error.FailedLogic(new LogicError.NoMatchingPolicy(errors));
@@ -564,8 +557,8 @@ public class Authorizer {
 
     public String print_world() {
         //FIXME
-        final List<String> facts = this.world.facts().iterator().map((f) -> this.symbols.print_fact(f)).collect(Collectors.toList());
-        final List<String> rules = this.world.rules().iterator().map((r) -> this.symbols.print_rule(r)).collect(Collectors.toList());
+        final List<String> facts = this.world.facts().stream().map((f) -> this.symbols.print_fact(f)).collect(Collectors.toList());
+        final List<String> rules = this.world.rules().stream().map((r) -> this.symbols.print_rule(r)).collect(Collectors.toList());
 
         List<String> checks = new ArrayList<>();
 
@@ -587,15 +580,12 @@ public class Authorizer {
             }
         }
 
-        StringBuilder b = new StringBuilder();
-        b.append("World {\n\tfacts: [\n\t\t");
-        b.append(String.join(",\n\t\t", facts));
-        b.append("\n\t],\n\trules: [\n\t\t");
-        b.append(String.join(",\n\t\t", rules));
-        b.append("\n\t],\n\tchecks: [\n\t\t");
-        b.append(String.join(",\n\t\t", checks));
-        b.append("\n\t]\n}");
-
-        return b.toString();
+        return "World {\n\tfacts: [\n\t\t" +
+                String.join(",\n\t\t", facts) +
+                "\n\t],\n\trules: [\n\t\t" +
+                String.join(",\n\t\t", rules) +
+                "\n\t],\n\tchecks: [\n\t\t" +
+                String.join(",\n\t\t", checks) +
+                "\n\t]\n}";
     }
 }

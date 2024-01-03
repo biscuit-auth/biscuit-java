@@ -27,10 +27,10 @@ public class Origin {
         return new Origin(Long.MAX_VALUE);
     }
     public void add(int i) {
-        inner.add(new Long(i));
+        inner.add((long) i);
     }
     public void add(long i) {
-        inner.add(new Long(i));
+        inner.add(i);
     }
 
     public void union(Origin other) {
@@ -38,8 +38,7 @@ public class Origin {
     }
 
     public Origin clone() {
-        final HashSet<Long> newInner = new HashSet();
-        newInner.addAll(this.inner);
+        final HashSet<Long> newInner = new HashSet<>(this.inner);
         return new Origin(newInner);
     }
 

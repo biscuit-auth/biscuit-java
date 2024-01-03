@@ -1,11 +1,9 @@
 package com.clevercloud.biscuit.datalog;
 
 import biscuit.format.schema.Schema;
-import com.clevercloud.biscuit.datalog.expressions.Expression;
 import com.clevercloud.biscuit.error.Error;
 import io.vavr.control.Either;
 
-import java.util.ArrayList;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
@@ -24,6 +22,7 @@ public class Scope {
         this.kind = kind;
         this.publicKey = publicKey;
     }
+
     public static Scope authority() {
         return new Scope(Kind.Authority, 0);
     }
@@ -47,7 +46,7 @@ public class Scope {
     public Schema.Scope serialize() {
         Schema.Scope.Builder b = Schema.Scope.newBuilder();
 
-        switch(this.kind) {
+        switch (this.kind) {
             case Authority:
                 b.setScopeType(Schema.Scope.ScopeType.Authority);
                 break;
@@ -66,8 +65,8 @@ public class Scope {
             long publicKey = scope.getPublicKey();
             return Right(Scope.publicKey(publicKey));
         }
-        if(scope.hasScopeType()) {
-            switch(scope.getScopeType()) {
+        if (scope.hasScopeType()) {
+            switch (scope.getScopeType()) {
                 case Authority:
                     return Right(Scope.authority());
                 case Previous:

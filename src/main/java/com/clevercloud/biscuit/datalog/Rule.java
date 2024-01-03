@@ -50,56 +50,50 @@ public final class Rule implements Serializable {
               .spliteratorUnknownSize(combinator, Spliterator.ORDERED);
       Stream<Tuple2<Origin, Map<Long, Term>>> stream = StreamSupport.stream(splitItr, false);
 
-       //somehow we have inference errors when writing this as a lambda
-       return stream.map(t -> {
-         Origin origin = t._1;
-         Map<Long, Term> generatedVariables = t._2;
-         TemporarySymbolTable temporarySymbols = new TemporarySymbolTable(symbols);
-         for (Expression e : this.expressions) {
-            Option<Term> res = e.evaluate(generatedVariables, temporarySymbols);
-            if (res.isDefined()) {
-               Term term = res.get();
-               if (term instanceof Term.Bool) {
-                  Term.Bool b = (Term.Bool) term;
-                  if (!b.value()) {
-                     return Either.right(new Tuple3(origin, generatedVariables, false));
-                  }
-                  // continue evaluating if true
-               } else {
-                  return Either.left(new InvalidType());
-               }
-            }
-         }
-         return Either.right(new Tuple3(origin, generatedVariables, true));
-         /*
-      .filter((java.util.function.Predicate<? super Either<? extends Object, ? extends Object>>) new java.util.function.Predicate<Either<Error, Tuple3<Origin, Map<Long, Term>, Boolean>>>() {
-         //somehow we have inference errors when writing this as a lambda
-         @Override
-         public boolean test(Either<Error, Tuple3<Origin, Map<Long, Term>, Boolean>> res) {
-            return res.isRight() & res.get()._3.booleanValue();
-         }
-      })*/
-      }).filter((java.util.function.Predicate<? super Either<? extends Object, ? extends Object>>)
-               res -> res.isRight() & ((Tuple3<Origin, Map<Long, Term>, Boolean>)res.get())._3.booleanValue()).map(res -> {
-         Tuple3<Origin, Map<Long, Term>, Boolean> t = (Tuple3<Origin, Map<Long, Term>, Boolean>) res.get();
-         Origin origin = t._1;
-         Map<Long, Term> generatedVariables = t._2;
+      //somehow we have inference errors when writing this as a lambda
+      return stream.map(t -> {
+                 Origin origin = t._1;
+                 Map<Long, Term> generatedVariables = t._2;
+                 TemporarySymbolTable temporarySymbols = new TemporarySymbolTable(symbols);
+                 for (Expression e : this.expressions) {
+                    Option<Term> res = e.evaluate(generatedVariables, temporarySymbols);
+                    if (res.isDefined()) {
+                       Term term = res.get();
+                       if (term instanceof Term.Bool) {
+                          Term.Bool b = (Term.Bool) term;
+                          if (!b.value()) {
+                             return Either.right(new Tuple3(origin, generatedVariables, false));
+                          }
+                          // continue evaluating if true
+                       } else {
+                          return Either.left(new InvalidType());
+                       }
+                    }
+                 }
+                 return Either.right(new Tuple3(origin, generatedVariables, true));
+              })
+              // sometimes we need to make the compiler happy
+              .filter((java.util.function.Predicate<? super Either<? extends Object, ? extends Object>>)
+                      res -> res.isRight() & ((Tuple3<Origin, Map<Long, Term>, Boolean>) res.get())._3.booleanValue()).map(res -> {
+                 Tuple3<Origin, Map<Long, Term>, Boolean> t = (Tuple3<Origin, Map<Long, Term>, Boolean>) res.get();
+                 Origin origin = t._1;
+                 Map<Long, Term> generatedVariables = t._2;
 
-         Predicate p = this.head.clone();
-         for (int index = 0; index < p.terms().size(); index++) {
-            if (p.terms().get(index) instanceof Term.Variable) {
-               Term.Variable var = (Term.Variable) p.terms().get(index);
-               if(!generatedVariables.containsKey(var.value())) {
-                  //throw new Error("variables that appear in the head should appear in the body as well");
-                  return Either.left(new Error.InternalError());
-               }
-               p.terms().set(index, generatedVariables.get(var.value()));
-            }
-         }
+                 Predicate p = this.head.clone();
+                 for (int index = 0; index < p.terms().size(); index++) {
+                    if (p.terms().get(index) instanceof Term.Variable) {
+                       Term.Variable var = (Term.Variable) p.terms().get(index);
+                       if (!generatedVariables.containsKey(var.value())) {
+                          //throw new Error("variables that appear in the head should appear in the body as well");
+                          return Either.left(new Error.InternalError());
+                       }
+                       p.terms().set(index, generatedVariables.get(var.value()));
+                    }
+                 }
 
-         origin.add(ruleOrigin);
-         return Either.right(new Tuple2<Origin, Fact>(origin, new Fact(p)));
-      });
+                 origin.add(ruleOrigin);
+                 return Either.right(new Tuple2<Origin, Fact>(origin, new Fact(p)));
+              });
    }
 
    private MatchedVariables variablesSet() {
@@ -119,7 +113,7 @@ public final class Rule implements Serializable {
          return variables.check_expressions(this.expressions, symbols).isDefined();
       }
 
-      Supplier<Stream<Tuple2<Origin, Fact>>> factsSupplier = () -> facts.iterator(scope);
+      Supplier<Stream<Tuple2<Origin, Fact>>> factsSupplier = () -> facts.stream(scope);
       Stream<Either<Error, Tuple2<Origin, Fact>>> stream = this.apply(factsSupplier, origin, symbols);
 
       Iterator<Either<Error, Tuple2<Origin, Fact>>> it = stream.iterator();
@@ -144,7 +138,7 @@ public final class Rule implements Serializable {
          return variables.check_expressions(this.expressions, symbols).isDefined();
       }
 
-      Supplier<Stream<Tuple2<Origin, Fact>>> factsSupplier = () -> facts.iterator(scope);
+      Supplier<Stream<Tuple2<Origin, Fact>>> factsSupplier = () -> facts.stream(scope);
       Combinator combinator = new Combinator(variables, this.body, factsSupplier, symbols);
       boolean found = false;
 

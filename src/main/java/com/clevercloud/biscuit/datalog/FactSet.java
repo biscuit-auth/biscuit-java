@@ -3,24 +3,23 @@ package com.clevercloud.biscuit.datalog;
 import io.vavr.Tuple2;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FactSet {
     private final HashMap<Origin, HashSet<Fact>> facts;
 
     public FactSet() {
-        facts = new HashMap();
+        facts = new HashMap<>();
     }
 
     public FactSet(Origin o, HashSet<Fact> factSet) {
-        facts = new HashMap();
+        facts = new HashMap<>();
         facts.put(o, factSet);
     }
 
     public void add(Origin origin, Fact fact) {
         if(!facts.containsKey(origin)) {
-            facts.put(origin, new HashSet());
+            facts.put(origin, new HashSet<>());
         }
         facts.get(origin).add(fact);
     }
@@ -38,8 +37,7 @@ public class FactSet {
         FactSet newFacts = new FactSet();
 
         for(Map.Entry<Origin, HashSet<Fact>> entry: this.facts.entrySet()) {
-            HashSet<Fact> h = new HashSet<>();
-            h.addAll(entry.getValue());
+            HashSet<Fact> h = new HashSet<>(entry.getValue());
             newFacts.facts.put(entry.getKey(), h);
         }
 
@@ -55,7 +53,7 @@ public class FactSet {
             }
         }
     }
-    public Stream iterator(TrustedOrigins blockIds) {
+    public Stream stream(TrustedOrigins blockIds) {
         return facts.entrySet()
                 .stream()
                 .filter(entry -> {
@@ -67,7 +65,7 @@ public class FactSet {
                         .map(fact -> new Tuple2(entry.getKey(), fact)));
     }
 
-    public Stream<Fact> iterator() {
+    public Stream<Fact> stream() {
         return facts.entrySet()
                 .stream()
                 .flatMap(entry -> entry.getValue()
@@ -93,17 +91,17 @@ public class FactSet {
 
     @Override
     public String toString() {
-        String res = "FactSet {";
+        StringBuilder res = new StringBuilder("FactSet {");
         for(Map.Entry<Origin, HashSet<Fact>> entry: this.facts.entrySet()) {
-            res += "\n\t"+entry.getKey()+"[";
+            res.append("\n\t").append(entry.getKey()).append("[");
             for(Fact fact: entry.getValue()) {
-                res += "\n\t\t"+fact;
+                res.append("\n\t\t").append(fact);
             }
-            res +="\n]";
+            res.append("\n]");
         }
-        res += "\n}";
+        res.append("\n}");
 
-        return res;
+        return res.toString();
     }
 }
 

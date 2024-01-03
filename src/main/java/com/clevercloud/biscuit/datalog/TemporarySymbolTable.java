@@ -19,8 +19,8 @@ public class TemporarySymbolTable {
     }
 
     public Option<String> get_s(int i) {
-        if(i >= this.offset) {
-            if(i - this.offset < this.symbols.size()) {
+        if (i >= this.offset) {
+            if (i - this.offset < this.symbols.size()) {
                 return Option.some(this.symbols.get(i - this.offset));
             } else {
                 return Option.none();
@@ -32,12 +32,12 @@ public class TemporarySymbolTable {
 
     public long insert(final String symbol) {
         Option<Long> opt = this.base.get(symbol);
-        if(opt.isDefined()) {
-            return opt.get().longValue();
+        if (opt.isDefined()) {
+            return opt.get();
         }
 
         int index = this.symbols.indexOf(symbol);
-        if(index != -1) {
+        if (index != -1) {
             return (long) (this.offset + index);
         }
         this.symbols.add(symbol);
