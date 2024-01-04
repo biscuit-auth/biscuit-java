@@ -2,11 +2,17 @@ package com.clevercloud.biscuit.crypto;
 
 import biscuit.format.schema.Schema;
 import biscuit.format.schema.Schema.PublicKey.Algorithm;
+import com.clevercloud.biscuit.datalog.Scope;
+import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.token.builder.Utils;
+import com.google.protobuf.ByteString;
+import io.vavr.control.Either;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
 
 import static com.clevercloud.biscuit.crypto.KeyPair.ed25519;
+import static io.vavr.API.Left;
+import static io.vavr.API.Right;
 
 public class PublicKey {
 
@@ -39,6 +45,22 @@ public class PublicKey {
         EdDSAPublicKey pubKey = new EdDSAPublicKey(pubKeySpec);
         this.key = pubKey;
         this.algorithm = algorithm;
+    }
+
+    public Schema.PublicKey serialize() {
+        Schema.PublicKey.Builder publicKey = Schema.PublicKey.newBuilder();
+        publicKey.setKey(ByteString.copyFrom(this.toBytes()));
+        publicKey.setAlgorithm(this.algorithm);
+        return publicKey.build();
+    }
+
+    static public PublicKey deserialize(Schema.PublicKey pk) throws Error.FormatError.DeserializationError {
+        if(!pk.hasAlgorithm() || !pk.hasKey() || pk.getAlgorithm() != Algorithm.Ed25519) {
+            throw new Error.FormatError.DeserializationError("Invalid " +
+                    "public key");
+        }
+
+        return new PublicKey(pk.getAlgorithm(), pk.getKey().toByteArray());
     }
 
     @Override

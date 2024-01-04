@@ -17,6 +17,10 @@ public class FactSet {
         facts.put(o, factSet);
     }
 
+    public HashMap<Origin, HashSet<Fact>> facts() {
+        return this.facts;
+    }
+
     public void add(Origin origin, Fact fact) {
         if(!facts.containsKey(origin)) {
             facts.put(origin, new HashSet<>());

@@ -1,6 +1,7 @@
 package com.clevercloud.biscuit.token.builder;
 
 
+import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.datalog.*;
 import com.clevercloud.biscuit.datalog.Check;
 import com.clevercloud.biscuit.datalog.Fact;
@@ -22,6 +23,7 @@ import java.util.List;
 public class Block {
     long index;
     int symbol_start;
+    int publicKeyStart;
     SymbolTable symbols;
     String context;
     List<Fact> facts;
@@ -32,6 +34,7 @@ public class Block {
     public Block(long index, SymbolTable base_symbols) {
         this.index = index;
         this.symbol_start = base_symbols.symbols.size();
+        this.publicKeyStart = base_symbols.publicKeys.size();
         this.symbols = new SymbolTable(base_symbols);
         this.context = "";
         this.facts = new ArrayList<>();
@@ -111,10 +114,15 @@ public class Block {
             symbols.add(this.symbols.symbols.get(i));
         }
 
+        List<PublicKey> publicKeys = new ArrayList<>();
+        for (int i = this.publicKeyStart; i < this.symbols.publicKeys.size(); i++) {
+            publicKeys.add(this.symbols.publicKeys.get(i));
+        }
+
         SchemaVersion schemaVersion = new SchemaVersion(this.facts, this.rules, this.checks, this.scopes);
 
         return new com.clevercloud.biscuit.token.Block(symbols, this.context, this.facts, this.rules, this.checks,
-                this.scopes, schemaVersion.version());
+                this.scopes, publicKeys, schemaVersion.version());
     }
 
     public Block check_right(String right) {

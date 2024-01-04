@@ -1,6 +1,7 @@
 package com.clevercloud.biscuit.token.builder;
 
 import com.clevercloud.biscuit.crypto.KeyPair;
+import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.datalog.*;
 import com.clevercloud.biscuit.datalog.Check;
 import com.clevercloud.biscuit.datalog.Fact;
@@ -24,6 +25,7 @@ public class Biscuit {
     SecureRandom rng;
     KeyPair root;
     int symbol_start;
+    int publicKeyStart;
     SymbolTable symbols;
     String context;
     List<Fact> facts;
@@ -36,6 +38,7 @@ public class Biscuit {
         this.rng = rng;
         this.root = root;
         this.symbol_start = base_symbols.symbols.size();
+        this.publicKeyStart = base_symbols.publicKeys.size();
         this.symbols = new SymbolTable(base_symbols);
         this.context = "";
         this.facts = new ArrayList<>();
@@ -141,10 +144,15 @@ public class Biscuit {
             symbols.add(this.symbols.symbols.get(i));
         }
 
+        List<PublicKey> publicKeys = new ArrayList<>();
+        for (int i = this.publicKeyStart; i < this.symbols.publicKeys.size(); i++) {
+            publicKeys.add(this.symbols.publicKeys.get(i));
+        }
+
         SchemaVersion schemaVersion = new SchemaVersion(this.facts, this.rules, this.checks, this.scopes);
 
         Block authority_block = new com.clevercloud.biscuit.token.Block(symbols, context, this.facts, this.rules,
-                this.checks, scopes, schemaVersion.version());
+                this.checks, scopes, publicKeys, schemaVersion.version());
 
         if (this.root_key_id.isDefined()) {
             return make(this.rng, this.root, this.root_key_id.get(), base_symbols, authority_block);

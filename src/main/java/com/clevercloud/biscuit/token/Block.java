@@ -1,20 +1,18 @@
 package com.clevercloud.biscuit.token;
 
 import biscuit.format.schema.Schema;
+import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.datalog.*;
-import com.clevercloud.biscuit.error.FailedCheck;
-import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.format.SerializedBiscuit;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.vavr.control.Either;
+import io.vavr.control.Option;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
@@ -29,6 +27,7 @@ public class Block {
     final List<Rule> rules;
     final List<Check> checks;
     final List<Scope> scopes;
+    final List<PublicKey> publicKeys;
     final long version;
 
     /**
@@ -43,6 +42,7 @@ public class Block {
         this.rules = new ArrayList<>();
         this.checks = new ArrayList<>();
         this.scopes = new ArrayList<>();
+        this.publicKeys = new ArrayList<>();
         this.version = SerializedBiscuit.MAX_SCHEMA_VERSION;
     }
 
@@ -54,7 +54,7 @@ public class Block {
      * @param checks
      */
     public Block(SymbolTable base_symbols, String context, List<Fact> facts, List<Rule> rules, List<Check> checks,
-                 List<Scope> scopes, int version) {
+                 List<Scope> scopes, List<PublicKey> publicKeys, int version) {
         this.symbols = base_symbols;
         this.context = context;
         this.facts = facts;
@@ -62,6 +62,15 @@ public class Block {
         this.checks = checks;
         this.scopes = scopes;
         this.version = version;
+        this.publicKeys = publicKeys;
+    }
+
+    public SymbolTable symbols() {
+        return symbols;
+    }
+
+    public List<PublicKey> publicKeys() {
+        return publicKeys;
     }
 
     /**
@@ -128,6 +137,10 @@ public class Block {
 
         for (Scope scope: this.scopes) {
             b.addScope(scope.serialize());
+        }
+
+        for(PublicKey pk: this.publicKeys) {
+            b.addPublicKeys(pk.serialize());
         }
 
         b.setVersion(SerializedBiscuit.MAX_SCHEMA_VERSION);
@@ -198,6 +211,15 @@ public class Block {
             }
         }
 
+        ArrayList<PublicKey> publicKeys = new ArrayList<>();
+        for (Schema.PublicKey pk: b.getPublicKeysList()) {
+            try {
+                publicKeys.add(PublicKey.deserialize(pk));
+            } catch(Error.FormatError e) {
+                return Left(e);
+            }
+        }
+
         SchemaVersion schemaVersion = new SchemaVersion(facts, rules, checks, scopes);
         Either<Error.FormatError, Void> res = schemaVersion.checkCompatibility(version);
         if (res.isLeft()) {
@@ -205,7 +227,7 @@ public class Block {
             return Left(e);
         }
 
-        return Right(new Block(symbols, b.getContext(), facts, rules, checks, scopes, version));
+        return Right(new Block(symbols, b.getContext(), facts, rules, checks, scopes, publicKeys, version));
     }
 
     /**

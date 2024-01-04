@@ -557,7 +557,15 @@ public class Authorizer {
 
     public String print_world() {
         //FIXME
-        final List<String> facts = this.world.facts().stream().map((f) -> this.symbols.print_fact(f)).collect(Collectors.toList());
+        StringBuilder facts = new StringBuilder();
+        for(Map.Entry<Origin, HashSet<com.clevercloud.biscuit.datalog.Fact>> entry: this.world.facts().facts().entrySet()) {
+            facts.append("\n\t\t"+entry.getKey()+":");
+            for(com.clevercloud.biscuit.datalog.Fact f: entry.getValue()) {
+                facts.append("\n\t\t\t");
+                facts.append(this.symbols.print_fact(f));
+            }
+        }
+        //final List<String> facts = this.world.facts().facts().entrySet().stream().map((f) -> this.symbols.print_fact(f)).collect(Collectors.toList());
         final List<String> rules = this.world.rules().stream().map((r) -> this.symbols.print_rule(r)).collect(Collectors.toList());
 
         List<String> checks = new ArrayList<>();
@@ -580,8 +588,9 @@ public class Authorizer {
             }
         }
 
-        return "World {\n\tfacts: [\n\t\t" +
-                String.join(",\n\t\t", facts) +
+        return "World {\n\tfacts: [" +
+                facts.toString() +
+                //String.join(",\n\t\t", facts) +
                 "\n\t],\n\trules: [\n\t\t" +
                 String.join(",\n\t\t", rules) +
                 "\n\t],\n\tchecks: [\n\t\t" +

@@ -138,11 +138,13 @@ public class World implements Serializable {
       StringBuilder s = new StringBuilder();
 
       s.append("World {\n\t\tfacts: [");
-       for (Iterator<Fact> it = this.facts.stream().iterator(); it.hasNext(); ) {
-           Fact f = it.next();
-           s.append("\n\t\t\t");
-           s.append(symbol_table.print_fact(f));
-       }
+      for(Map.Entry<Origin, HashSet<Fact>> entry: this.facts.facts().entrySet()) {
+         s.append("\n\t\t\t"+entry.getKey()+":");
+         for(Fact f: entry.getValue()) {
+            s.append("\n\t\t\t\t");
+            s.append(symbol_table.print_fact(f));
+         }
+      }
 
       s.append("\n\t\t]\n\t\trules: [");
        for (Iterator<Rule> it = this.rules.stream().iterator(); it.hasNext(); ) {
