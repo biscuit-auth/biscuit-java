@@ -70,7 +70,7 @@ public final class Combinator implements Serializable, Iterator<Tuple2<Origin, M
                // we iterate over the facts that match the current predicate
                if (this.currentFacts.hasNext()) {
                   final Tuple2<Origin, Fact> t = this.currentFacts.next();
-                  Origin currentOrigin = t._1;
+                  Origin currentOrigin = t._1.clone();
                   Fact fact = t._2;
 
                   // create a new MatchedVariables in which we fix variables we could unify from our first predicate and the current fact
@@ -129,8 +129,7 @@ public final class Combinator implements Serializable, Iterator<Tuple2<Origin, M
 
          if (opt.isDefined()) {
             Tuple2<Origin, Map<Long, Term>> t = opt.get();
-            t._1.union(currentOrigin);
-            return Option.some(t);
+            return Option.some(new Tuple2<>(t._1.union(currentOrigin), t._2));
          } else {
             currentOrigin = null;
             currentIt = null;

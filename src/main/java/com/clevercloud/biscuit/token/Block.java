@@ -28,6 +28,7 @@ public class Block {
     final List<Check> checks;
     final List<Scope> scopes;
     final List<PublicKey> publicKeys;
+    final Option<PublicKey> externalKey;
     final long version;
 
     /**
@@ -43,6 +44,7 @@ public class Block {
         this.checks = new ArrayList<>();
         this.scopes = new ArrayList<>();
         this.publicKeys = new ArrayList<>();
+        this.externalKey = Option.none();
         this.version = SerializedBiscuit.MAX_SCHEMA_VERSION;
     }
 
@@ -54,7 +56,7 @@ public class Block {
      * @param checks
      */
     public Block(SymbolTable base_symbols, String context, List<Fact> facts, List<Rule> rules, List<Check> checks,
-                 List<Scope> scopes, List<PublicKey> publicKeys, int version) {
+                 List<Scope> scopes, List<PublicKey> publicKeys, Option<PublicKey> externalKey, int version) {
         this.symbols = base_symbols;
         this.context = context;
         this.facts = facts;
@@ -63,6 +65,7 @@ public class Block {
         this.scopes = scopes;
         this.version = version;
         this.publicKeys = publicKeys;
+        this.externalKey = externalKey;
     }
 
     public SymbolTable symbols() {
@@ -87,6 +90,10 @@ public class Block {
         s.append(this.symbols.symbols);
         s.append("\n\t\tcontext: ");
         s.append(this.context);
+        if(this.externalKey.isDefined()) {
+            s.append("\n\t\texternal key: ");
+            s.append(this.externalKey.get().toString());
+        }
         s.append("\n\t\tfacts: [");
         for (Fact f : this.facts) {
             s.append("\n\t\t\t");
@@ -153,7 +160,7 @@ public class Block {
      * @param b
      * @return
      */
-    static public Either<Error.FormatError, Block> deserialize(Schema.Block b) {
+    static public Either<Error.FormatError, Block> deserialize(Schema.Block b, Option<PublicKey> externalKey) {
         int version = b.getVersion();
         if (version < SerializedBiscuit.MIN_SCHEMA_VERSION || version > SerializedBiscuit.MAX_SCHEMA_VERSION) {
             return Left(new Error.FormatError.Version(SerializedBiscuit.MIN_SCHEMA_VERSION, SerializedBiscuit.MAX_SCHEMA_VERSION, version));
@@ -227,7 +234,7 @@ public class Block {
             return Left(e);
         }
 
-        return Right(new Block(symbols, b.getContext(), facts, rules, checks, scopes, publicKeys, version));
+        return Right(new Block(symbols, b.getContext(), facts, rules, checks, scopes, publicKeys, externalKey, version));
     }
 
     /**
@@ -236,10 +243,10 @@ public class Block {
      * @param slice
      * @return
      */
-    static public Either<Error.FormatError, Block> from_bytes(byte[] slice) {
+    static public Either<Error.FormatError, Block> from_bytes(byte[] slice, Option<PublicKey> externalKey) {
         try {
             Schema.Block data = Schema.Block.parseFrom(slice);
-            return Block.deserialize(data);
+            return Block.deserialize(data, externalKey);
         } catch (InvalidProtocolBufferException e) {
             return Left(new Error.FormatError.DeserializationError(e.toString()));
         }

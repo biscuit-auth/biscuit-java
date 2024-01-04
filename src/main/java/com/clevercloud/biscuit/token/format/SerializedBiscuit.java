@@ -453,26 +453,28 @@ public class SerializedBiscuit {
 
     public Tuple3<Block, ArrayList<Block>, HashMap<Long, List<Long>>> extractBlocks(SymbolTable symbols) throws Error {
         ArrayList<Option<PublicKey>> blockExternalKeys = new ArrayList<>();
-        Either<Error.FormatError, Block> authRes = Block.from_bytes(this.authority.block);
+        Either<Error.FormatError, Block> authRes = Block.from_bytes(this.authority.block, Option.none());
         if (authRes.isLeft()) {
             Error e = authRes.getLeft();
             throw e;
         }
         Block authority = authRes.get();
         for(PublicKey pk: authority.publicKeys()) {
-            symbols.publicKeys.add(pk);
+            symbols.insert(pk);
         }
         blockExternalKeys.add(Option.none());
-
 
         for (String s : authority.symbols().symbols) {
             symbols.add(s);
         }
 
-
         ArrayList<Block> blocks = new ArrayList<>();
         for (SignedBlock bdata : this.blocks) {
-            Either<Error.FormatError, Block> blockRes = Block.from_bytes(bdata.block);
+            Option<PublicKey> externalKey = Option.none();
+            if(bdata.externalSignature.isDefined()) {
+                externalKey = Option.some(bdata.externalSignature.get().key);
+            }
+            Either<Error.FormatError, Block> blockRes = Block.from_bytes(bdata.block, externalKey);
             if (blockRes.isLeft()) {
                 Error e = blockRes.getLeft();
                 throw e;
@@ -481,7 +483,7 @@ public class SerializedBiscuit {
 
             // blocks with external signatures keep their own symbol table
             if(bdata.externalSignature.isDefined()) {
-                symbols.publicKeys.add(bdata.externalSignature.get().key);
+                symbols.insert(bdata.externalSignature.get().key);
                 blockExternalKeys.add(Option.some(bdata.externalSignature.get().key));
             } else {
                 blockExternalKeys.add(Option.none());
@@ -490,7 +492,7 @@ public class SerializedBiscuit {
                 }
             }
             for(PublicKey pk: block.publicKeys()) {
-                symbols.publicKeys.add(pk);
+                symbols.insert(pk);
             }
             blocks.add(block);
         }

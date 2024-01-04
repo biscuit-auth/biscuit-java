@@ -75,4 +75,12 @@ public class Scope {
         }
         return Left(new Error.FormatError.DeserializationError("invalid Scope"));
     }
+
+    @Override
+    public String toString() {
+        return "Scope{" +
+                "kind=" + kind +
+                ", publicKey=" + publicKey +
+                '}';
+    }
 }

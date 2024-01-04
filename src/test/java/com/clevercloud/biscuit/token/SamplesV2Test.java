@@ -514,7 +514,7 @@ public class SamplesV2Test {
         Long result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println("result: " + result);
         assertEquals(0L, v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500))));
-        assertEquals(8, v1.world.facts().size());
+        assertEquals(5, v1.world.facts().size());
     }
 
     @Test
@@ -543,6 +543,6 @@ public class SamplesV2Test {
         Long result = v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         System.out.println("result: " + result);
         assertEquals(0L, v1.authorize(new RunLimits(500, 100, Duration.ofMillis(500))));
-        assertEquals(2, v1.world.facts().size());
+        assertEquals(1, v1.world.facts().size());
     }
 }

@@ -37,8 +37,8 @@ public class Biscuit {
     public Biscuit(final SecureRandom rng, final KeyPair root, SymbolTable base_symbols) {
         this.rng = rng;
         this.root = root;
-        this.symbol_start = base_symbols.symbols.size();
-        this.publicKeyStart = base_symbols.publicKeys.size();
+        this.symbol_start = base_symbols.currentOffset();
+        this.publicKeyStart = base_symbols.currentPublicKeyOffset();
         this.symbols = new SymbolTable(base_symbols);
         this.context = "";
         this.facts = new ArrayList<>();
@@ -145,14 +145,14 @@ public class Biscuit {
         }
 
         List<PublicKey> publicKeys = new ArrayList<>();
-        for (int i = this.publicKeyStart; i < this.symbols.publicKeys.size(); i++) {
-            publicKeys.add(this.symbols.publicKeys.get(i));
+        for (int i = this.publicKeyStart; i < this.symbols.currentPublicKeyOffset(); i++) {
+            publicKeys.add(this.symbols.publicKeys().get(i));
         }
 
         SchemaVersion schemaVersion = new SchemaVersion(this.facts, this.rules, this.checks, this.scopes);
 
         Block authority_block = new com.clevercloud.biscuit.token.Block(symbols, context, this.facts, this.rules,
-                this.checks, scopes, publicKeys, schemaVersion.version());
+                this.checks, scopes, publicKeys, Option.none(), schemaVersion.version());
 
         if (this.root_key_id.isDefined()) {
             return make(this.rng, this.root, this.root_key_id.get(), base_symbols, authority_block);

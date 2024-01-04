@@ -10,6 +10,7 @@ import com.clevercloud.biscuit.datalog.Rule;
 import com.clevercloud.biscuit.error.Error;
 import io.vavr.Tuple2;
 import io.vavr.control.Either;
+import io.vavr.control.Option;
 
 import static com.clevercloud.biscuit.datalog.Check.Kind.One;
 import static com.clevercloud.biscuit.token.builder.Utils.*;
@@ -33,8 +34,8 @@ public class Block {
 
     public Block(long index, SymbolTable base_symbols) {
         this.index = index;
-        this.symbol_start = base_symbols.symbols.size();
-        this.publicKeyStart = base_symbols.publicKeys.size();
+        this.symbol_start = base_symbols.currentOffset();
+        this.publicKeyStart = base_symbols.currentPublicKeyOffset();
         this.symbols = new SymbolTable(base_symbols);
         this.context = "";
         this.facts = new ArrayList<>();
@@ -115,14 +116,14 @@ public class Block {
         }
 
         List<PublicKey> publicKeys = new ArrayList<>();
-        for (int i = this.publicKeyStart; i < this.symbols.publicKeys.size(); i++) {
-            publicKeys.add(this.symbols.publicKeys.get(i));
+        for (int i = this.publicKeyStart; i < this.symbols.currentPublicKeyOffset(); i++) {
+            publicKeys.add(this.symbols.publicKeys().get(i));
         }
 
         SchemaVersion schemaVersion = new SchemaVersion(this.facts, this.rules, this.checks, this.scopes);
 
         return new com.clevercloud.biscuit.token.Block(symbols, this.context, this.facts, this.rules, this.checks,
-                this.scopes, publicKeys, schemaVersion.version());
+                this.scopes, publicKeys, Option.none(), schemaVersion.version());
     }
 
     public Block check_right(String right) {

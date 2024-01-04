@@ -33,8 +33,10 @@ public class Origin {
         inner.add(i);
     }
 
-    public void union(Origin other) {
-        this.inner.addAll(other.inner);
+    public Origin union(Origin other) {
+        Origin o = this.clone();
+        o.inner.addAll(other.inner);
+        return o;
     }
 
     public Origin clone() {

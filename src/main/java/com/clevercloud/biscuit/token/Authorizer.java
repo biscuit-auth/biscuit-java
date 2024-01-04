@@ -1,5 +1,6 @@
 package com.clevercloud.biscuit.token;
 
+import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.datalog.*;
 import com.clevercloud.biscuit.datalog.Scope;
 import com.clevercloud.biscuit.error.Error;
@@ -106,6 +107,11 @@ public class Authorizer {
                 if(res.isLeft()){
                     throw new Error.FailedLogic(new LogicError.InvalidBlockRule(0, token.symbols.print_rule(converted_rule)));
                 }
+            }
+            this.publicKeyToBlockId.putAll(token.publicKeyToBlockId);
+            for(Long keyId: token.publicKeyToBlockId.keySet()) {
+                PublicKey pk = token.symbols.get_pk((int) keyId.longValue()).get();
+                this.symbols.insert(pk);
             }
         }
     }
@@ -335,8 +341,16 @@ public class Authorizer {
         if (token != null) {
             for (com.clevercloud.biscuit.datalog.Fact fact : token.authority.facts) {
                 com.clevercloud.biscuit.datalog.Fact converted_fact = Fact.convert_from(fact, token.symbols).convert(this.symbols);
-                world.add_fact(authorizerOrigin, converted_fact);
+                world.add_fact(new Origin(0), converted_fact);
             }
+
+            TrustedOrigins authorityTrustedOrigins = TrustedOrigins.fromScopes(
+                    token.authority.scopes,
+                    TrustedOrigins.defaultOrigins(),
+                    0,
+                    this.publicKeyToBlockId
+            );
+
             for (com.clevercloud.biscuit.datalog.Rule rule : token.authority.rules) {
                 com.clevercloud.biscuit.token.builder.Rule _rule = Rule.convert_from(rule, token.symbols);
                 com.clevercloud.biscuit.datalog.Rule converted_rule = _rule.convert(this.symbols);
@@ -344,6 +358,50 @@ public class Authorizer {
                 Either<String,Rule> res = _rule.validate_variables();
                 if(res.isLeft()){
                     throw new Error.FailedLogic(new LogicError.InvalidBlockRule(0, token.symbols.print_rule(converted_rule)));
+                }
+                TrustedOrigins ruleTrustedOrigins = TrustedOrigins.fromScopes(
+                        converted_rule.scopes(),
+                        authorityTrustedOrigins,
+                        0,
+                        this.publicKeyToBlockId
+                );
+                world.add_rule((long) 0, ruleTrustedOrigins, converted_rule);
+            }
+
+            for (int i = 0; i < token.blocks.size(); i++) {
+                Block block = token.blocks.get(i);
+                TrustedOrigins blockTrustedOrigins = TrustedOrigins.fromScopes(
+                        block.scopes,
+                        TrustedOrigins.defaultOrigins(),
+                        i + 1,
+                        this.publicKeyToBlockId
+                );
+                SymbolTable blockSymbols = token.symbols;
+
+                if (block.externalKey.isDefined()) {
+                    blockSymbols = new SymbolTable(block.symbols.symbols, token.symbols.publicKeys());
+                }
+
+                for (com.clevercloud.biscuit.datalog.Fact fact : block.facts) {
+                    com.clevercloud.biscuit.datalog.Fact converted_fact = Fact.convert_from(fact, blockSymbols).convert(this.symbols);
+                    world.add_fact(new Origin(i + 1), converted_fact);
+                }
+
+                for (com.clevercloud.biscuit.datalog.Rule rule : block.rules) {
+                    com.clevercloud.biscuit.token.builder.Rule _rule = Rule.convert_from(rule, blockSymbols);
+                    com.clevercloud.biscuit.datalog.Rule converted_rule = _rule.convert(this.symbols);
+
+                    Either<String, Rule> res = _rule.validate_variables();
+                    if (res.isLeft()) {
+                        throw new Error.FailedLogic(new LogicError.InvalidBlockRule(0, this.symbols.print_rule(converted_rule)));
+                    }
+                    TrustedOrigins ruleTrustedOrigins = TrustedOrigins.fromScopes(
+                            converted_rule.scopes(),
+                            blockTrustedOrigins,
+                            i + 1,
+                            this.publicKeyToBlockId
+                    );
+                    world.add_rule((long) i + 1, ruleTrustedOrigins, converted_rule);
                 }
             }
         }
@@ -398,7 +456,7 @@ public class Authorizer {
             for (int j = 0; j < token.authority.checks.size(); j++) {
                 boolean successful = false;
 
-                Check c = Check.convert_from(token.authority.checks.get(j), symbols);
+                Check c = Check.convert_from(token.authority.checks.get(j), token.symbols);
                 com.clevercloud.biscuit.datalog.Check check = c.convert(symbols);
 
                 for (int k = 0; k < check.queries().size(); k++) {
@@ -441,13 +499,13 @@ public class Authorizer {
 
             for (int j = 0; j < policy.queries.size(); j++) {
                 com.clevercloud.biscuit.datalog.Rule query = policy.queries.get(j).convert(symbols);
-                TrustedOrigins ruleTrustedOrigins = TrustedOrigins.fromScopes(
+                TrustedOrigins policyTrustedOrigins = TrustedOrigins.fromScopes(
                         query.scopes(),
                         authorizerTrustedOrigins,
                         Long.MAX_VALUE,
                         this.publicKeyToBlockId
                 );
-                boolean res = world.query_match(query, Long.MAX_VALUE, ruleTrustedOrigins, symbols);
+                boolean res = world.query_match(query, Long.MAX_VALUE, policyTrustedOrigins, symbols);
 
                 if (Instant.now().compareTo(timeLimit) >= 0) {
                     throw new Error.Timeout();
@@ -473,35 +531,15 @@ public class Authorizer {
                         i+1,
                         this.publicKeyToBlockId
                 );
-
-                for (com.clevercloud.biscuit.datalog.Fact fact : b.facts) {
-                    com.clevercloud.biscuit.datalog.Fact converted_fact = Fact.convert_from(fact, token.symbols).convert(this.symbols);
-                    world.add_fact(new Origin(i+1), converted_fact);
+                SymbolTable blockSymbols = token.symbols;
+                if(b.externalKey.isDefined()) {
+                    blockSymbols = new SymbolTable(b.symbols.symbols, token.symbols.publicKeys());
                 }
-
-                for (com.clevercloud.biscuit.datalog.Rule rule : b.rules) {
-                    com.clevercloud.biscuit.token.builder.Rule _rule = Rule.convert_from(rule, token.symbols);
-                    com.clevercloud.biscuit.datalog.Rule converted_rule = _rule.convert(this.symbols);
-
-                    Either<String,Rule> res = _rule.validate_variables();
-                    if(res.isLeft()){
-                        throw new Error.FailedLogic(new LogicError.InvalidBlockRule(0, token.symbols.print_rule(converted_rule)));
-                    }
-                    TrustedOrigins ruleTrustedOrigins = TrustedOrigins.fromScopes(
-                            converted_rule.scopes(),
-                            blockTrustedOrigins,
-                            i+1,
-                            this.publicKeyToBlockId
-                    );
-                    world.add_rule((long)i+1, ruleTrustedOrigins, converted_rule);
-                }
-
-                world.run(limits, symbols);
 
                 for (int j = 0; j < b.checks.size(); j++) {
                     boolean successful = false;
 
-                    Check c = Check.convert_from(b.checks.get(j),symbols);
+                    Check c = Check.convert_from(b.checks.get(j), blockSymbols);
                     com.clevercloud.biscuit.datalog.Check check = c.convert(symbols);
 
                     for (int k = 0; k < check.queries().size(); k++) {

@@ -61,7 +61,7 @@ public final class SymbolTable implements Serializable {
             "query"
     );
     public final List<String> symbols;
-    public final List<PublicKey> publicKeys;
+    private final List<PublicKey> publicKeys;
 
     public long insert(final String symbol) {
         int index = this.defaultSymbols.indexOf(symbol);
@@ -80,6 +80,13 @@ public final class SymbolTable implements Serializable {
 
     public int currentOffset() {
         return this.symbols.size();
+    }
+    public int currentPublicKeyOffset() {
+        return this.publicKeys.size();
+    }
+
+    public List<PublicKey> publicKeys() {
+        return publicKeys;
     }
 
     public long insert(final PublicKey publicKey) {
@@ -276,6 +283,13 @@ public final class SymbolTable implements Serializable {
         symbols.addAll(s.symbols);
         this.publicKeys = new ArrayList<>();
         publicKeys.addAll(s.publicKeys);
+    }
+
+    public SymbolTable(List<String> symbols, List<PublicKey> publicKeys) {
+        this.symbols = new ArrayList<>();
+        this.symbols.addAll(symbols);
+        this.publicKeys = new ArrayList<>();
+        this.publicKeys.addAll(publicKeys);
     }
 
     public List<String> getAllSymbols() {

@@ -77,4 +77,11 @@ public class TrustedOrigins {
     public boolean contains(Origin factOrigin) {
         return this.inner.inner.containsAll(factOrigin.inner);
     }
+
+    @Override
+    public String toString() {
+        return "TrustedOrigins{" +
+                "inner=" + inner +
+                '}';
+    }
 }
