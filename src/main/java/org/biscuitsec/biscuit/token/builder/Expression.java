@@ -178,9 +178,7 @@ public abstract class Expression {
 
         @Override
         public String toString() {
-            return "Value{" +
-                    "value=" + value +
-                    '}';
+            return value.toString();
         }
     }
 

@@ -46,22 +46,7 @@ public class Check {
 
     @Override
     public String toString() {
-        final List<String> qs = queries.stream().map((q) -> {
-            final List<String> b = q.body.stream().map((pred) -> pred.toString()).collect(Collectors.toList());
-            String res = String.join(", ", b);
-
-            if(!q.expressions.isEmpty()) {
-                final List<String> e = q.expressions.stream().map((expression) -> expression.toString()).collect(Collectors.toList());
-                res += ", "+ String.join(", ", e);
-            }
-
-            if(!q.scopes.isEmpty()) {
-                final List<String> e = q.scopes.stream().map((scope) -> scope.toString()).collect(Collectors.toList());
-                res += " trusting " + String.join(", ", e);
-            }
-
-            return res;
-        }).collect(Collectors.toList());
+        final List<String> qs = queries.stream().map((q) -> q.bodyToString()).collect(Collectors.toList());
 
         if(kind == One) {
             return "check if " + String.join(" or ", qs);

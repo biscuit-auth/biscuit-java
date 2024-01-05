@@ -220,7 +220,11 @@ public abstract class Term {
 
         @Override
         public String toString() {
-            return String.valueOf(value);
+            if(value) {
+                return "true";
+            } else {
+                return "false";
+            }
         }
 
         @Override

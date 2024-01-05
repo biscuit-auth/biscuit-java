@@ -79,7 +79,6 @@ class SamplesTest {
                             }
                         }
                     }
-                    authorizer.allow(); // TODO manage the policies
                     System.out.println(authorizer.print_world());
                     try {
                         Long authorizeResult = authorizer.authorize(runLimits);
@@ -100,6 +99,18 @@ class SamplesTest {
                             assertEquals(world.facts.size(), authorizerWorld.facts.size());
                             for (int i = 0; i < world.facts.size(); i++) {
                                 assertEquals(world.facts.get(i), authorizerWorld.facts.get(i));
+                            }
+                            assertEquals(world.rules.size(), authorizerWorld.rules.size());
+                            for (int i = 0; i < world.rules.size(); i++) {
+                                assertEquals(world.rules.get(i), authorizerWorld.rules.get(i));
+                            }
+                            assertEquals(world.checks.size(), authorizerWorld.checks.size());
+                            for (int i = 0; i < world.checks.size(); i++) {
+                                assertEquals(world.checks.get(i), authorizerWorld.checks.get(i));
+                            }
+                            assertEquals(world.policies.size(), authorizerWorld.policies.size());
+                            for (int i = 0; i < world.policies.size(); i++) {
+                                assertEquals(world.policies.get(i), authorizerWorld.policies.get(i));
                             }
                         }
 
@@ -122,6 +133,18 @@ class SamplesTest {
                             assertEquals(world.facts.size(), authorizerWorld.facts.size());
                             for (int i = 0; i < world.facts.size(); i++) {
                                 assertEquals(world.facts.get(i), authorizerWorld.facts.get(i));
+                            }
+                            assertEquals(world.rules.size(), authorizerWorld.rules.size());
+                            for (int i = 0; i < world.rules.size(); i++) {
+                                assertEquals(world.rules.get(i), authorizerWorld.rules.get(i));
+                            }
+                            assertEquals(world.checks.size(), authorizerWorld.checks.size());
+                            for (int i = 0; i < world.checks.size(); i++) {
+                                assertEquals(world.checks.get(i), authorizerWorld.checks.get(i));
+                            }
+                            assertEquals(world.policies.size(), authorizerWorld.policies.size());
+                            for (int i = 0; i < world.policies.size(); i++) {
+                                assertEquals(world.policies.get(i), authorizerWorld.policies.get(i));
                             }
                         }
 

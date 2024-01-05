@@ -602,7 +602,6 @@ public class Authorizer {
                 facts.append(this.symbols.print_fact(f));
             }
         }
-        //final List<String> facts = this.world.facts().facts().entrySet().stream().map((f) -> this.symbols.print_fact(f)).collect(Collectors.toList());
         final List<String> rules = this.world.rules().stream().map((r) -> this.symbols.print_rule(r)).collect(Collectors.toList());
 
         List<String> checks = new ArrayList<>();
