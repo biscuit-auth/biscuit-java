@@ -95,6 +95,8 @@ class SamplesTest {
                             Collections.sort(authorizerWorld.rules);
                             Collections.sort(authorizerWorld.checks);
                             Collections.sort(authorizerWorld.policies);
+                            System.out.println("validation world"+world);
+                            System.out.println("authorizer world"+authorizerWorld);
 
                             assertEquals(world.facts.size(), authorizerWorld.facts.size());
                             for (int i = 0; i < world.facts.size(); i++) {
