@@ -18,8 +18,10 @@ import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,7 +51,6 @@ class SamplesTest {
                 String validationName = validationEntry.getKey();
                 JsonObject validation = validationEntry.getValue().getAsJsonObject();
 
-                World world = new Gson().fromJson(validation, World.class);
                 JsonObject expected_result = validation.getAsJsonObject("result");
                 String[] authorizer_facts = validation.getAsJsonPrimitive("authorizer_code").getAsString().split(";");
                 Either<Throwable, Long> res = Try.of(() -> {
@@ -83,7 +84,52 @@ class SamplesTest {
                     }
                     authorizer.allow(); // TODO manage the policies
                     System.out.println(authorizer.print_world());
-                    return authorizer.authorize(runLimits);
+                    try {
+                        Long authorizeResult = authorizer.authorize(runLimits);
+
+                        if(validation.has("world")) {
+                            World world = new Gson().fromJson(validation.get("world").getAsJsonObject(), World.class);
+                            World authorizerWorld = new World(
+                                    authorizer.facts().stream().map(f -> f.toString()).collect(Collectors.toList()),
+                                    authorizer.rules().stream().map(r -> r.toString()).collect(Collectors.toList()),
+                                    authorizer.checks().stream().map(c -> c.toString()).collect(Collectors.toList()),
+                                    authorizer.policies().stream().map(p -> p.toString()).collect(Collectors.toList())
+                            );
+                            Collections.sort(authorizerWorld.facts);
+                            Collections.sort(authorizerWorld.rules);
+                            Collections.sort(authorizerWorld.checks);
+                            Collections.sort(authorizerWorld.policies);
+
+                            assertEquals(world.facts.size(), authorizerWorld.facts.size());
+                            for (int i = 0; i < world.facts.size(); i++) {
+                                assertEquals(world.facts.get(i), authorizerWorld.facts.get(i));
+                            }
+                        }
+
+                        return authorizeResult;
+                    } catch (Exception e) {
+
+                        if(validation.has("world")) {
+                            World world = new Gson().fromJson(validation.get("world").getAsJsonObject(), World.class);
+                            World authorizerWorld = new World(
+                                    authorizer.facts().stream().map(f -> f.toString()).collect(Collectors.toList()),
+                                    authorizer.rules().stream().map(r -> r.toString()).collect(Collectors.toList()),
+                                    authorizer.checks().stream().map(c -> c.toString()).collect(Collectors.toList()),
+                                    authorizer.policies().stream().map(p -> p.toString()).collect(Collectors.toList())
+                            );
+                            Collections.sort(authorizerWorld.facts);
+                            Collections.sort(authorizerWorld.rules);
+                            Collections.sort(authorizerWorld.checks);
+                            Collections.sort(authorizerWorld.policies);
+
+                            assertEquals(world.facts.size(), authorizerWorld.facts.size());
+                            for (int i = 0; i < world.facts.size(); i++) {
+                                assertEquals(world.facts.get(i), authorizerWorld.facts.get(i));
+                            }
+                        }
+
+                        throw e;
+                    }
                 }).toEither();
                 if (res.isLeft()) {
                     if(res.getLeft() instanceof Error) {
@@ -212,5 +258,22 @@ class SamplesTest {
         List<String> rules;
         List<String> checks;
         List<String> policies;
+
+        public World(List<String> facts, List<String> rules, List<String> checks, List<String> policies) {
+            this.facts = facts;
+            this.rules = rules;
+            this.checks = checks;
+            this.policies = policies;
+        }
+
+        @Override
+        public String toString() {
+            return "World{" +
+                    "facts=" + facts +
+                    ", rules=" + rules +
+                    ", checks=" + checks +
+                    ", policies=" + policies +
+                    '}';
+        }
     }
 }

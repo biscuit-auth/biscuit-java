@@ -11,6 +11,8 @@ import io.vavr.Tuple2;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 import org.biscuitsec.biscuit.datalog.Scope;
+import org.biscuitsec.biscuit.token.builder.Check;
+import org.biscuitsec.biscuit.token.builder.Fact;
 import org.biscuitsec.biscuit.token.builder.Term;
 import org.biscuitsec.biscuit.token.builder.parser.Parser;
 
@@ -592,7 +594,6 @@ public class Authorizer {
     }
 
     public String print_world() {
-        //FIXME
         StringBuilder facts = new StringBuilder();
         for(Map.Entry<Origin, HashSet<org.biscuitsec.biscuit.datalog.Fact>> entry: this.world.facts().facts().entrySet()) {
             facts.append("\n\t\t"+entry.getKey()+":");
@@ -632,5 +633,32 @@ public class Authorizer {
                 "\n\t],\n\tchecks: [\n\t\t" +
                 String.join(",\n\t\t", checks) +
                 "\n\t]\n}";
+    }
+
+    public List<Fact> facts() {
+        return this.world.facts().stream()
+                .map((f) -> org.biscuitsec.biscuit.token.builder.Fact.convert_from(f, this.symbols))
+                .collect(Collectors.toList());
+    }
+
+    public List<org.biscuitsec.biscuit.token.builder.Rule> rules() {
+        return this.world.rules().stream()
+                .map((r) -> org.biscuitsec.biscuit.token.builder.Rule.convert_from(r, this.symbols))
+                .collect(Collectors.toList());
+    }
+
+    public List<Check> checks() {
+        List<Check> checks = new ArrayList<>(this.checks);
+        for(List<org.biscuitsec.biscuit.datalog.Check> blockChecks: this.token_checks) {
+            for(org.biscuitsec.biscuit.datalog.Check check: blockChecks) {
+                checks.add(Check.convert_from(check, this.symbols));
+            }
+        }
+
+        return checks;
+    }
+
+    public List<Policy> policies() {
+        return this.policies;
     }
 }
