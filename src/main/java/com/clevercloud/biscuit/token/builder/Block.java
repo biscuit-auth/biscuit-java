@@ -1,13 +1,16 @@
 package com.clevercloud.biscuit.token.builder;
 
 
+import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.datalog.*;
 import com.clevercloud.biscuit.datalog.Check;
 import com.clevercloud.biscuit.datalog.Fact;
+import com.clevercloud.biscuit.datalog.Scope;
 import com.clevercloud.biscuit.datalog.Rule;
 import com.clevercloud.biscuit.error.Error;
 import io.vavr.Tuple2;
 import io.vavr.control.Either;
+import io.vavr.control.Option;
 
 import static com.clevercloud.biscuit.datalog.Check.Kind.One;
 import static com.clevercloud.biscuit.token.builder.Utils.*;
@@ -21,20 +24,24 @@ import java.util.List;
 public class Block {
     long index;
     int symbol_start;
+    int publicKeyStart;
     SymbolTable symbols;
     String context;
     List<Fact> facts;
     List<Rule> rules;
     List<Check> checks;
+    List<Scope> scopes;
 
     public Block(long index, SymbolTable base_symbols) {
         this.index = index;
-        this.symbol_start = base_symbols.symbols.size();
+        this.symbol_start = base_symbols.currentOffset();
+        this.publicKeyStart = base_symbols.currentPublicKeyOffset();
         this.symbols = new SymbolTable(base_symbols);
         this.context = "";
         this.facts = new ArrayList<>();
         this.rules = new ArrayList<>();
         this.checks = new ArrayList<>();
+        this.scopes = new ArrayList<>();
     }
 
     public Block add_fact(com.clevercloud.biscuit.token.builder.Fact f) {
@@ -91,6 +98,11 @@ public class Block {
         return add_check(t._2);
     }
 
+    public Block add_scope(com.clevercloud.biscuit.token.builder.Scope scope) {
+        this.scopes.add(scope.convert(this.symbols));
+        return this;
+    }
+
     public Block set_context(String context) {
         this.context = context;
         return this;
@@ -103,10 +115,15 @@ public class Block {
             symbols.add(this.symbols.symbols.get(i));
         }
 
-        SchemaVersion schemaVersion = new SchemaVersion(this.facts, this.rules, this.checks);
+        List<PublicKey> publicKeys = new ArrayList<>();
+        for (int i = this.publicKeyStart; i < this.symbols.currentPublicKeyOffset(); i++) {
+            publicKeys.add(this.symbols.publicKeys().get(i));
+        }
+
+        SchemaVersion schemaVersion = new SchemaVersion(this.facts, this.rules, this.checks, this.scopes);
 
         return new com.clevercloud.biscuit.token.Block(symbols, this.context, this.facts, this.rules, this.checks,
-                schemaVersion.version());
+                this.scopes, publicKeys, Option.none(), schemaVersion.version());
     }
 
     public Block check_right(String right) {

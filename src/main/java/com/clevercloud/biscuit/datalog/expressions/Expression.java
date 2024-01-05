@@ -1,6 +1,7 @@
 package com.clevercloud.biscuit.datalog.expressions;
 
 import biscuit.format.schema.Schema;
+import com.clevercloud.biscuit.datalog.TemporarySymbolTable;
 import com.clevercloud.biscuit.datalog.Term;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.error.Error;
@@ -26,15 +27,11 @@ public class Expression {
         return ops;
     }
 
-    public Option<Term> evaluate(Map<Long, Term> variables, SymbolTable symbols) {
-        /*
-         Create a SymbolTable from original one to keep previous SymbolTable state after a rule or check execution,
-         to avoid filling it up too much with concatenated strings (BinaryOp.Adds on String)
-         */
-        SymbolTable tmpSymbols = new SymbolTable(symbols);
+    //FIXME: should return a Result<Term, error::Expression>
+    public Option<Term> evaluate(Map<Long, Term> variables, TemporarySymbolTable symbols) {
         Deque<Term> stack = new ArrayDeque<Term>(16); //Default value
         for(Op op: ops){
-            if(!op.evaluate(stack,variables, tmpSymbols)){
+            if(!op.evaluate(stack,variables, symbols)){
                 return Option.none();
             }
         }

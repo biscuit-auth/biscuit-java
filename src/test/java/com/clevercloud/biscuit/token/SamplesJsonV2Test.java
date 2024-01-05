@@ -3,13 +3,11 @@ package com.clevercloud.biscuit.token;
 import biscuit.format.schema.Schema;
 import com.clevercloud.biscuit.crypto.KeyPair;
 import com.clevercloud.biscuit.crypto.PublicKey;
-import com.clevercloud.biscuit.datalog.AuthorizedWorld;
 import com.clevercloud.biscuit.datalog.RunLimits;
 import com.clevercloud.biscuit.error.Error;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import io.vavr.Tuple2;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 import org.junit.jupiter.api.DynamicTest;
@@ -47,7 +45,7 @@ class SamplesJsonV2Test {
             World world = new Gson().fromJson(validation, World.class);
             JsonObject expected_result = validation.getAsJsonObject("result");
             String[] authorizer_facts = validation.getAsJsonPrimitive("authorizer_code").getAsString().split(";");
-            Either<Throwable, Tuple2<Long, AuthorizedWorld>> res = Try.of(() -> {
+            Either<Throwable, Long> res = Try.of(() -> {
                 byte[] data = new byte[inputStream.available()];
                 inputStream.read(data);
                 Biscuit token = Biscuit.from_bytes(data, publicKey);
@@ -80,7 +78,7 @@ class SamplesJsonV2Test {
                 JsonElement err_json = e.toJson();
                 assertEquals(expected_result.get("Err"),err_json);
             } else {
-                assertEquals(expected_result.getAsJsonPrimitive("Ok").getAsLong(), res.get()._1);
+                assertEquals(expected_result.getAsJsonPrimitive("Ok").getAsLong(), res.get());
             }
         });
     }

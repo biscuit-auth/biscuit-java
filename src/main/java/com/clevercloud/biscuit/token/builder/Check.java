@@ -55,6 +55,11 @@ public class Check {
                 res += ", "+ String.join(", ", e);
             }
 
+            if(!q.scopes.isEmpty()) {
+                final List<String> e = q.scopes.stream().map((scope) -> scope.toString()).collect(Collectors.toList());
+                res += " trusting " + String.join(", ", e);
+            }
+
             return res;
         }).collect(Collectors.toList());
 

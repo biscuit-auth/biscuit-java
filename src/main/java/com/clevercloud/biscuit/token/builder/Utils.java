@@ -20,13 +20,13 @@ public class Utils {
 
     public static com.clevercloud.biscuit.token.builder.Rule rule(String head_name, List<Term> head_ids,
                                                                   List<com.clevercloud.biscuit.token.builder.Predicate> predicates) {
-        return new com.clevercloud.biscuit.token.builder.Rule(pred(head_name, head_ids), predicates, new ArrayList<>());
+        return new com.clevercloud.biscuit.token.builder.Rule(pred(head_name, head_ids), predicates, new ArrayList<>(), new ArrayList<>());
     }
 
     public static com.clevercloud.biscuit.token.builder.Rule constrained_rule(String head_name, List<Term> head_ids,
                                                                               List<com.clevercloud.biscuit.token.builder.Predicate> predicates,
                                                                               List<Expression> expressions) {
-        return new com.clevercloud.biscuit.token.builder.Rule(pred(head_name, head_ids), predicates, expressions);
+        return new com.clevercloud.biscuit.token.builder.Rule(pred(head_name, head_ids), predicates, expressions, new ArrayList<>());
     }
 
     public static Check check(com.clevercloud.biscuit.token.builder.Rule rule) {
@@ -57,7 +57,7 @@ public class Utils {
         return new Term.Set(s);
     }
 
-    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+    public static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
     public static String byteArrayToHexString(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
         for (int j = 0; j < bytes.length; j++) {
@@ -69,6 +69,7 @@ public class Utils {
     }
 
     public static byte[] hexStringToByteArray(String hex) {
+        hex = hex.toUpperCase();
         int l = hex.length();
         byte[] data = new byte[l/2];
         for (int i = 0; i < l; i += 2) {

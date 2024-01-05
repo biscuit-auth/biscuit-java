@@ -36,7 +36,7 @@ public class ExpressionTest {
 
         assertEquals(
                 new Term.Bool(true),
-                e.evaluate(variables, symbols).get()
+                e.evaluate(variables, new TemporarySymbolTable(symbols)).get()
         );
     }
 
@@ -61,7 +61,7 @@ public class ExpressionTest {
 
         assertEquals(
                 new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET + 2),
-                e.evaluate(new HashMap<>(), symbols).get()
+                e.evaluate(new HashMap<>(),  new TemporarySymbolTable(symbols)).get()
         );
     }
 
@@ -85,7 +85,7 @@ public class ExpressionTest {
 
         assertEquals(
                 new Term.Bool(true),
-                e.evaluate(new HashMap<>(), symbols).get()
+                e.evaluate(new HashMap<>(),  new TemporarySymbolTable(symbols)).get()
         );
     }
 
@@ -110,7 +110,7 @@ public class ExpressionTest {
 
         assertEquals(
                 new Term.Bool(false),
-                e.evaluate(new HashMap<>(), symbols).get()
+                e.evaluate(new HashMap<>(),  new TemporarySymbolTable(symbols)).get()
         );
     }
 }

@@ -23,6 +23,10 @@ public final class MatchedVariables implements Serializable {
       }
    }
 
+   public Optional<Term> get(final long key) {
+      return this.variables.get(key);
+   }
+
    public boolean is_complete() {
       return this.variables.values().stream().allMatch((v) -> v.isPresent());
    }
@@ -61,8 +65,9 @@ public final class MatchedVariables implements Serializable {
       if (vars.isDefined()) {
          Map<Long, Term> variables = vars.get();
 
+
          for(Expression e: expressions) {
-            Option<Term> res = e.evaluate(variables, symbols);
+            Option<Term> res = e.evaluate(variables, new TemporarySymbolTable(symbols));
 
             if(res.isEmpty()) {
                return Option.none();

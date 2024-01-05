@@ -1,5 +1,6 @@
 package com.clevercloud.biscuit.datalog;
 
+import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.crypto.TokenSignature;
 import com.clevercloud.biscuit.datalog.expressions.Expression;
 import com.clevercloud.biscuit.token.builder.Utils;
@@ -60,6 +61,7 @@ public final class SymbolTable implements Serializable {
             "query"
     );
     public final List<String> symbols;
+    private final List<PublicKey> publicKeys;
 
     public long insert(final String symbol) {
         int index = this.defaultSymbols.indexOf(symbol);
@@ -71,6 +73,27 @@ public final class SymbolTable implements Serializable {
             } else {
                 return index + DEFAULT_SYMBOLS_OFFSET;
             }
+        } else {
+            return index;
+        }
+    }
+
+    public int currentOffset() {
+        return this.symbols.size();
+    }
+    public int currentPublicKeyOffset() {
+        return this.publicKeys.size();
+    }
+
+    public List<PublicKey> publicKeys() {
+        return publicKeys;
+    }
+
+    public long insert(final PublicKey publicKey) {
+        int index = this.publicKeys.indexOf(publicKey);
+        if (index == -1) {
+            this.publicKeys.add(publicKey);
+            return this.publicKeys.size() - 1;
         } else {
             return index;
         }
@@ -101,6 +124,14 @@ public final class SymbolTable implements Serializable {
             return Option.some(this.defaultSymbols.get(i));
         } else if (i >= DEFAULT_SYMBOLS_OFFSET && i < this.symbols.size() + DEFAULT_SYMBOLS_OFFSET) {
             return Option.some(this.symbols.get(i - DEFAULT_SYMBOLS_OFFSET));
+        } else {
+            return Option.none();
+        }
+    }
+
+    public Option<PublicKey> get_pk(int i) {
+        if (i >= 0 && i < this.publicKeys.size()) {
+            return Option.some(this.publicKeys.get(i));
         } else {
             return Option.none();
         }
@@ -149,6 +180,12 @@ public final class SymbolTable implements Serializable {
             }
             res += String.join(", ", expressions);
         }
+
+        if(!r.scopes().isEmpty()) {
+            res += " trusting ";
+            final List<String> scopes = r.scopes().stream().map((s) -> this.print_scope(s)).collect(Collectors.toList());
+            res += String.join(", ", scopes);
+        }
         return res;
     }
 
@@ -156,6 +193,20 @@ public final class SymbolTable implements Serializable {
         return e.print(this).get();
     }
 
+    public String print_scope(final Scope scope) {
+        switch(scope.kind) {
+            case Authority:
+                return "authority";
+            case Previous:
+                return "previous";
+            case PublicKey:
+                Option<PublicKey> pk = this.get_pk((int) scope.publicKey);
+                if(pk.isDefined()) {
+                    return pk.toString();
+                }
+        }
+        return "?";
+    }
 
     public String print_predicate(final Predicate p) {
         List<String> ids = p.terms().stream().map((t) -> {
@@ -224,11 +275,21 @@ public final class SymbolTable implements Serializable {
 
     public SymbolTable() {
         this.symbols = new ArrayList<>();
+        this.publicKeys = new ArrayList<>();
     }
 
     public SymbolTable(SymbolTable s) {
         this.symbols = new ArrayList<>();
         symbols.addAll(s.symbols);
+        this.publicKeys = new ArrayList<>();
+        publicKeys.addAll(s.publicKeys);
+    }
+
+    public SymbolTable(List<String> symbols, List<PublicKey> publicKeys) {
+        this.symbols = new ArrayList<>();
+        this.symbols.addAll(symbols);
+        this.publicKeys = new ArrayList<>();
+        this.publicKeys.addAll(publicKeys);
     }
 
     public List<String> getAllSymbols() {

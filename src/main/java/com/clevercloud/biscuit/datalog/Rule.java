@@ -3,12 +3,18 @@ package com.clevercloud.biscuit.datalog;
 import biscuit.format.schema.Schema;
 import com.clevercloud.biscuit.datalog.expressions.Expression;
 import com.clevercloud.biscuit.error.Error;
+import com.clevercloud.biscuit.error.Error.InvalidType;
+import io.vavr.Tuple2;
+import io.vavr.Tuple3;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
@@ -17,6 +23,7 @@ public final class Rule implements Serializable {
    private final Predicate head;
    private final List<Predicate> body;
    private final List<Expression> expressions;
+   private final List<Scope> scopes;
 
    public final Predicate head() {
       return this.head;
@@ -30,130 +37,149 @@ public final class Rule implements Serializable {
       return this.expressions;
    }
 
-   public void apply(final Set<Fact> facts, final Set<Fact> new_facts, SymbolTable symbols) {
+   public List<Scope> scopes() {
+      return scopes;
+   }
+
+   public Stream<Either<Error, Tuple2<Origin, Fact>>> apply(
+           final Supplier<Stream<Tuple2<Origin, Fact>>> factsSupplier, Long ruleOrigin, SymbolTable symbols) {
+      MatchedVariables variables = variablesSet();
+
+      Combinator combinator = new Combinator(variables, this.body, factsSupplier, symbols);
+      Spliterator<Tuple2<Origin, Map<Long, Term>>> splitItr = Spliterators
+              .spliteratorUnknownSize(combinator, Spliterator.ORDERED);
+      Stream<Tuple2<Origin, Map<Long, Term>>> stream = StreamSupport.stream(splitItr, false);
+
+      //somehow we have inference errors when writing this as a lambda
+      return stream.map(t -> {
+                 Origin origin = t._1;
+                 Map<Long, Term> generatedVariables = t._2;
+                 TemporarySymbolTable temporarySymbols = new TemporarySymbolTable(symbols);
+                 for (Expression e : this.expressions) {
+                    Option<Term> res = e.evaluate(generatedVariables, temporarySymbols);
+                    if (res.isDefined()) {
+                       Term term = res.get();
+                       if (term instanceof Term.Bool) {
+                          Term.Bool b = (Term.Bool) term;
+                          if (!b.value()) {
+                             return Either.right(new Tuple3(origin, generatedVariables, false));
+                          }
+                          // continue evaluating if true
+                       } else {
+                          return Either.left(new InvalidType());
+                       }
+                    }
+                 }
+                 return Either.right(new Tuple3(origin, generatedVariables, true));
+              })
+              // sometimes we need to make the compiler happy
+              .filter((java.util.function.Predicate<? super Either<? extends Object, ? extends Object>>)
+                      res -> res.isRight() & ((Tuple3<Origin, Map<Long, Term>, Boolean>) res.get())._3.booleanValue()).map(res -> {
+                 Tuple3<Origin, Map<Long, Term>, Boolean> t = (Tuple3<Origin, Map<Long, Term>, Boolean>) res.get();
+                 Origin origin = t._1;
+                 Map<Long, Term> generatedVariables = t._2;
+
+                 Predicate p = this.head.clone();
+                 for (int index = 0; index < p.terms().size(); index++) {
+                    if (p.terms().get(index) instanceof Term.Variable) {
+                       Term.Variable var = (Term.Variable) p.terms().get(index);
+                       if (!generatedVariables.containsKey(var.value())) {
+                          //throw new Error("variables that appear in the head should appear in the body as well");
+                          return Either.left(new Error.InternalError());
+                       }
+                       p.terms().set(index, generatedVariables.get(var.value()));
+                    }
+                 }
+
+                 origin.add(ruleOrigin);
+                 return Either.right(new Tuple2<Origin, Fact>(origin, new Fact(p)));
+              });
+   }
+
+   private MatchedVariables variablesSet() {
       final Set<Long> variables_set = new HashSet<>();
+
       for (final Predicate pred : this.body) {
          variables_set.addAll(pred.terms().stream().filter((id) -> id instanceof Term.Variable).map((id) -> ((Term.Variable) id).value()).collect(Collectors.toSet()));
       }
-      final MatchedVariables variables = new MatchedVariables(variables_set);
-      if(this.body.isEmpty()) {
-         final Option<Map<Long, Term>> complete_vars_opt = variables.check_expressions(this.expressions, symbols);
-         if(complete_vars_opt.isDefined()) {
-            final Map<Long, Term> h = complete_vars_opt.get();
-
-            final Predicate p = this.head.clone();
-            final ListIterator<Term> idit = p.ids_iterator();
-            while (idit.hasNext()) {
-               //FIXME: variables that appear in the head should appear in the body and constraints as well
-               final Term id = idit.next();
-               if (id instanceof Term.Variable) {
-                  final Term value = h.get(((Term.Variable) id).value());
-                  idit.set(value);
-               }
-            }
-
-            new_facts.add(new Fact(p));
-         }
-      }
-
-      Combinator c = new Combinator(variables, this.body, facts, symbols);
-      while (true) {
-         final Option<MatchedVariables> vars_opt = c.next();
-         if(!vars_opt.isDefined()) {
-            break;
-         }
-         MatchedVariables vars = vars_opt.get();
-         final Option<Map<Long, Term>> complete_vars_opt = vars.check_expressions(this.expressions, symbols);
-         if(complete_vars_opt.isDefined()) {
-            final Map<Long, Term> h = complete_vars_opt.get();
-            final Predicate p = this.head.clone();
-            final ListIterator<Term> idit = p.ids_iterator();
-            boolean unbound_variable = false;
-            while (idit.hasNext()) {
-               final Term id = idit.next();
-               if (id instanceof Term.Variable) {
-                  final Term value = h.get(((Term.Variable) id).value());
-                  idit.set(value);
-
-                  // variables that appear in the head or expressions should appear in the body as well
-                  if (value == null) {
-                     unbound_variable = true;
-                  }
-               }
-            }
-
-            if (!unbound_variable) {
-               new_facts.add(new Fact(p));
-            }
-         }
-      }
+      return new MatchedVariables(variables_set);
    }
 
    // do not produce new facts, only find one matching set of facts
-   public boolean find_match(final Set<Fact> facts, SymbolTable symbols) {
-      final Set<Long> variables_set = new HashSet<>();
-      for (final Predicate pred : this.body) {
-         variables_set.addAll(pred.terms().stream().filter((id) -> id instanceof Term.Variable).map((id) -> ((Term.Variable) id).value()).collect(Collectors.toSet()));
-      }
-      final MatchedVariables variables = new MatchedVariables(variables_set);
+   public boolean find_match(final FactSet facts, Long origin, TrustedOrigins scope, SymbolTable symbols) throws Error {
+      MatchedVariables variables = variablesSet();
 
       if(this.body.isEmpty()) {
          return variables.check_expressions(this.expressions, symbols).isDefined();
       }
 
-      Combinator c = new Combinator(variables, this.body,  facts, symbols);
+      Supplier<Stream<Tuple2<Origin, Fact>>> factsSupplier = () -> facts.stream(scope);
+      Stream<Either<Error, Tuple2<Origin, Fact>>> stream = this.apply(factsSupplier, origin, symbols);
 
-      while(true) {
-         Option<MatchedVariables> res = c.next();
-         if (res.isDefined()) {
-            MatchedVariables vars = res.get();
-            if (vars.check_expressions(this.expressions, symbols).isDefined()) {
-               return true;
-            }
-         } else {
-            return false;
-         }
+      Iterator<Either<Error, Tuple2<Origin, Fact>>> it = stream.iterator();
+
+      if(!it.hasNext()) {
+         return false;
+      }
+
+      Either<Error, Tuple2<Origin, Fact>> next = it.next();
+      if(next.isRight()) {
+         return true;
+      } else {
+         throw next.getLeft();
       }
    }
 
    // verifies that the expressions return true for every matching set of facts
-   public boolean check_match_all(final Set<Fact> facts, SymbolTable symbols) {
-      final Set<Long> variables_set = new HashSet<>();
-      for (final Predicate pred : this.body) {
-         variables_set.addAll(pred.terms().stream().filter((id) -> id instanceof Term.Variable).map((id) -> ((Term.Variable) id).value()).collect(Collectors.toSet()));
-      }
-      final MatchedVariables variables = new MatchedVariables(variables_set);
+   public boolean check_match_all(final FactSet facts, TrustedOrigins scope, SymbolTable symbols) throws InvalidType {
+      MatchedVariables variables = variablesSet();
 
       if(this.body.isEmpty()) {
          return variables.check_expressions(this.expressions, symbols).isDefined();
       }
 
-      Combinator c = new Combinator(variables, this.body, facts, symbols);
-
+      Supplier<Stream<Tuple2<Origin, Fact>>> factsSupplier = () -> facts.stream(scope);
+      Combinator combinator = new Combinator(variables, this.body, factsSupplier, symbols);
       boolean found = false;
 
-      while(true) {
-         Option<MatchedVariables> res = c.next();
-         if (res.isDefined()) {
-            // we need at least one match
-            found = true;
+       for (Combinator it = combinator; it.hasNext(); ) {
+           Tuple2<Origin, Map<Long, Term>> t = it.next();
+           Map<Long, Term> generatedVariables = t._2;
+           found = true;
 
-            MatchedVariables vars = res.get();
-
-            // the expression must succeed for all the matching sets of facts
-            if (!vars.check_expressions(this.expressions, symbols).isDefined()) {
-               return false;
-            }
-         } else {
-            return found;
-         }
-      }
+           TemporarySymbolTable temporarySymbols = new TemporarySymbolTable(symbols);
+           for (Expression e : this.expressions) {
+              Option<Term> res = e.evaluate(generatedVariables, temporarySymbols);
+              if (res.isDefined()) {
+                 Term term = res.get();
+                 if (term instanceof Term.Bool) {
+                    Term.Bool b = (Term.Bool) term;
+                    if (!b.value()) {
+                       return false;
+                    }
+                    // continue evaluating if true
+                 } else {
+                    throw new InvalidType();
+                 }
+              }
+           }
+       }
+      return found;
    }
 
-   public Rule(final Predicate head, final List<Predicate> body, final List<Expression>  expressions) {
+   public Rule(final Predicate head, final List<Predicate> body, final List<Expression> expressions) {
       this.head = head;
       this.body = body;
       this.expressions = expressions;
+      this.scopes = new ArrayList<>();
+   }
+
+   public Rule(final Predicate head, final List<Predicate> body, final List<Expression> expressions,
+               final List<Scope> scopes) {
+      this.head = head;
+      this.body = body;
+      this.expressions = expressions;
+      this.scopes = scopes;
    }
 
    public Schema.RuleV2 serialize() {
@@ -166,6 +192,10 @@ public final class Rule implements Serializable {
 
       for (int i = 0; i < this.expressions.size(); i++) {
          b.addExpressions(this.expressions.get(i).serialize());
+      }
+
+      for (Scope scope: this.scopes) {
+         b.addScope(scope.serialize());
       }
 
       return b.build();
@@ -194,12 +224,23 @@ public final class Rule implements Serializable {
          }
       }
 
+      ArrayList<Scope> scopes = new ArrayList<>();
+      for (Schema.Scope scope: rule.getScopeList()) {
+         Either<Error.FormatError, Scope> res = Scope.deserialize(scope);
+         if(res.isLeft()) {
+            Error.FormatError e = res.getLeft();
+            return Left(e);
+         } else {
+            scopes.add(res.get());
+         }
+      }
+
       Either<Error.FormatError, Predicate> res = Predicate.deserializeV2(rule.getHead());
       if(res.isLeft()) {
          Error.FormatError e = res.getLeft();
          return Left(e);
       } else {
-         return Right(new Rule(res.get(), body, expressions));
+         return Right(new Rule(res.get(), body, expressions, scopes));
       }
    }
 }

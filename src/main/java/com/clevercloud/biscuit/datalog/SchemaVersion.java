@@ -2,10 +2,7 @@ package com.clevercloud.biscuit.datalog;
 
 import com.clevercloud.biscuit.datalog.expressions.Expression;
 import com.clevercloud.biscuit.datalog.expressions.Op;
-import com.clevercloud.biscuit.datalog.expressions.Op.BinaryOp;
 import com.clevercloud.biscuit.error.Error;
-import com.clevercloud.biscuit.token.Block;
-import com.clevercloud.biscuit.token.format.SerializedBiscuit;
 import io.vavr.control.Either;
 
 import java.util.List;
@@ -20,19 +17,30 @@ public class SchemaVersion {
     private boolean containsCheckAll;
     private boolean containsV4;
 
-    public SchemaVersion(List<Fact> facts, List<Rule> rules, List<Check> checks) {
-        // TODO
-        containsScopes = false;
-        /*
-        let contains_scopes = !scopes.is_empty()
-        || rules.iter().any(|r: &Rule| !r.scopes.is_empty())
-        || checks
-            .iter()
-            .any(|c: &Check| c.queries.iter().any(|q| !q.scopes.is_empty()));
-         */
+    public SchemaVersion(List<Fact> facts, List<Rule> rules, List<Check> checks, List<Scope> scopes) {
+        containsScopes = !scopes.isEmpty();
+
+        if (!containsScopes) {
+            for (Rule r : rules) {
+                if (!r.scopes().isEmpty()) {
+                    containsScopes = true;
+                    break;
+                }
+            }
+        }
+        if (!containsScopes) {
+            for (Check check : checks) {
+                for (Rule query : check.queries()) {
+                    if (!query.scopes().isEmpty()) {
+                        containsScopes = true;
+                        break;
+                    }
+                }
+            }
+        }
 
         containsCheckAll = false;
-        for(Check check: checks) {
+        for (Check check : checks) {
             if (check.kind() == All) {
                 containsCheckAll = true;
                 break;
@@ -40,8 +48,8 @@ public class SchemaVersion {
         }
 
         containsV4 = false;
-        for(Check check: checks) {
-            for(Rule query: check.queries()) {
+        for (Check check : checks) {
+            for (Rule query : check.queries()) {
                 if (containsV4Ops(query.expressions())) {
                     containsV4 = true;
                     break;
@@ -52,7 +60,7 @@ public class SchemaVersion {
 
     public int version() {
         if (containsScopes || containsV4 || containsCheckAll) {
-          return  4;
+            return 4;
         } else {
             return MIN_SCHEMA_VERSION;
         }
@@ -63,10 +71,10 @@ public class SchemaVersion {
             if (containsScopes) {
                 return Left(new Error.FormatError.DeserializationError("v3 blocks must not have scopes"));
             }
-            if(containsV4) {
+            if (containsV4) {
                 return Left(new Error.FormatError.DeserializationError("v3 blocks must not have v4 operators (bitwise operators or !="));
             }
-            if(containsCheckAll) {
+            if (containsCheckAll) {
                 return Left(new Error.FormatError.DeserializationError("v3 blocks must not use check all"));
             }
         }
@@ -75,8 +83,8 @@ public class SchemaVersion {
     }
 
     public static boolean containsV4Ops(List<Expression> expressions) {
-        for(Expression e: expressions) {
-            for (Op op: e.getOps()) {
+        for (Expression e : expressions) {
+            for (Op op : e.getOps()) {
                 if (op instanceof Op.Binary) {
                     Op.Binary b = (Op.Binary) op;
                     switch (b.getOp()) {

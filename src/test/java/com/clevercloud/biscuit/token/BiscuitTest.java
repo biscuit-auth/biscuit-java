@@ -3,8 +3,6 @@ package com.clevercloud.biscuit.token;
 import com.clevercloud.biscuit.crypto.KeyDelegate;
 import com.clevercloud.biscuit.crypto.KeyPair;
 import com.clevercloud.biscuit.crypto.PublicKey;
-import com.clevercloud.biscuit.datalog.AuthorizedWorld;
-import com.clevercloud.biscuit.datalog.Fact;
 import com.clevercloud.biscuit.datalog.RunLimits;
 import com.clevercloud.biscuit.datalog.SymbolTable;
 import com.clevercloud.biscuit.error.Error;
@@ -12,7 +10,6 @@ import com.clevercloud.biscuit.error.FailedCheck;
 import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.builder.Block;
 
-import io.vavr.Tuple2;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 
@@ -132,27 +129,21 @@ public class BiscuitTest {
         // check
         System.out.println("will check the token for resource=file1 and operation=read");
 
-        SymbolTable check_symbols = new SymbolTable(final_token.symbols);
-        List<Fact> ambient_facts = Arrays.asList(
-                fact("resource", Arrays.asList(s("file1"))).convert(check_symbols),
-                fact("operation", Arrays.asList(s("read"))).convert(check_symbols)
-        );
-
-        final_token.check(check_symbols, ambient_facts,
-                new ArrayList<>(), new ArrayList<>(), new HashMap<>());
+        Authorizer authorizer = final_token.authorizer();
+        authorizer.add_fact("resource(\"file1\")");
+        authorizer.add_fact("operation(\"read\")");
+        authorizer.add_policy("allow if true");
+        authorizer.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
 
         System.out.println("will check the token for resource=file2 and operation=write");
 
-        SymbolTable check_symbols2 = new SymbolTable(final_token.symbols);
-        List<Fact> ambient_facts2 = Arrays.asList(
-                fact("resource", Arrays.asList(s("file2"))).convert(check_symbols2),
-                fact("operation", Arrays.asList(s("write"))).convert(check_symbols2)
-        );
+        Authorizer authorizer2 = final_token.authorizer();
+        authorizer2.add_fact("resource(\"file2\")");
+        authorizer2.add_fact("operation(\"write\")");
+        authorizer2.add_policy("allow if true");
 
         try {
-            final_token.check(check_symbols2, ambient_facts2,
-                    new ArrayList<>(), new ArrayList<>(), new HashMap<>());
-            fail();
+            authorizer2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         } catch (Error e) {
             System.out.println(e);
             assertEquals(
@@ -305,7 +296,7 @@ public class BiscuitTest {
         v3.add_fact("resource(\"/folder2/file3\")");
         v3.add_fact("operation(\"read\")");
 
-        Try<Tuple2<Long, AuthorizedWorld>> res = Try.of(() -> v3.authorize());
+        Try<Long> res = Try.of(() -> v3.authorize());
         System.out.println(v3.print_world());
 
         assertTrue(res.isFailure());
@@ -470,27 +461,21 @@ public class BiscuitTest {
         // check
         System.out.println("will check the token for resource=file1 and operation=read");
 
-        SymbolTable check_symbols = new SymbolTable(final_token.symbols);
-        List<Fact> ambient_facts = Arrays.asList(
-                fact("resource", Arrays.asList(s("file1"))).convert(check_symbols),
-                fact("operation", Arrays.asList(s("read"))).convert(check_symbols)
-        );
-
-        final_token.check(check_symbols, ambient_facts,
-                new ArrayList<>(), new ArrayList<>(), new HashMap<>());
+        Authorizer authorizer = final_token.authorizer();
+        authorizer.add_fact("resource(\"file1\")");
+        authorizer.add_fact("operation(\"read\")");
+        authorizer.add_policy("allow if true");
+        authorizer.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
 
         System.out.println("will check the token for resource=file2 and operation=write");
 
-        SymbolTable check_symbols2 = new SymbolTable(final_token.symbols);
-        List<Fact> ambient_facts2 = Arrays.asList(
-                fact("resource", Arrays.asList(s("file2"))).convert(check_symbols2),
-                fact("operation", Arrays.asList(s("write"))).convert(check_symbols2)
-        );
+        Authorizer authorizer2 = final_token.authorizer();
+        authorizer2.add_fact("resource(\"file2\")");
+        authorizer2.add_fact("operation(\"write\")");
+        authorizer2.add_policy("allow if true");
 
         try {
-            final_token.check(check_symbols2, ambient_facts2,
-                    new ArrayList<>(), new ArrayList<>(), new HashMap<>());
-            fail();
+            authorizer2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         } catch (Error e) {
             System.out.println(e);
             assertEquals(
@@ -600,27 +585,20 @@ public class BiscuitTest {
         // check
         System.out.println("will check the token for resource=file1 and operation=read");
 
-        SymbolTable check_symbols = new SymbolTable(final_token.symbols);
-        List<Fact> ambient_facts = Arrays.asList(
-                fact("resource", Arrays.asList(s("file1"))).convert(check_symbols),
-                fact("operation", Arrays.asList(s("read"))).convert(check_symbols)
-        );
-
-        final_token.check(check_symbols, ambient_facts,
-                new ArrayList<>(), new ArrayList<>(), new HashMap<>());
+        Authorizer authorizer = final_token.authorizer();
+        authorizer.add_fact("resource(\"file1\")");
+        authorizer.add_fact("operation(\"read\")");
+        authorizer.add_policy("allow if true");
+        authorizer.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
 
         System.out.println("will check the token for resource=file2 and operation=write");
 
-        SymbolTable check_symbols2 = new SymbolTable(final_token.symbols);
-        List<Fact> ambient_facts2 = Arrays.asList(
-                fact("resource", Arrays.asList(s("file2"))).convert(check_symbols2),
-                fact("operation", Arrays.asList(s("write"))).convert(check_symbols2)
-        );
-
+        Authorizer authorizer2 = final_token.authorizer();
+        authorizer2.add_fact("resource(\"file2\")");
+        authorizer2.add_fact("operation(\"write\")");
+        authorizer2.add_policy("allow if true");
         try {
-            final_token.check(check_symbols2, ambient_facts2,
-                    new ArrayList<>(), new ArrayList<>(), new HashMap<>());
-            fail();
+            authorizer2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         } catch (Error e) {
             System.out.println(e);
             assertEquals(

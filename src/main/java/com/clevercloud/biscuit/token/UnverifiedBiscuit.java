@@ -5,10 +5,8 @@ import com.clevercloud.biscuit.crypto.KeyPair;
 import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.datalog.*;
 import com.clevercloud.biscuit.error.Error;
-import com.clevercloud.biscuit.error.FailedCheck;
-import com.clevercloud.biscuit.error.LogicError;
 import com.clevercloud.biscuit.token.format.SerializedBiscuit;
-import com.clevercloud.biscuit.token.format.SignedBlock;
+import io.vavr.Tuple3;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 
@@ -18,8 +16,6 @@ import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static io.vavr.API.Right;
 
 /**
  * UnverifiedBiscuit auth token. UnverifiedBiscuit means it's deserialized without checking signatures.
@@ -31,21 +27,27 @@ public class UnverifiedBiscuit {
     final SerializedBiscuit serializedBiscuit;
     final List<byte[]> revocation_ids;
     final Option<Integer> root_key_id;
+    final HashMap<Long, List<Long>> publicKeyToBlockId;
 
-    UnverifiedBiscuit(Block authority, List<Block> blocks, SymbolTable symbols, SerializedBiscuit serializedBiscuit, List<byte[]> revocation_ids) {
+    UnverifiedBiscuit(Block authority, List<Block> blocks, SymbolTable symbols, SerializedBiscuit serializedBiscuit,
+                      HashMap<Long, List<Long>> publicKeyToBlockId, List<byte[]> revocation_ids) {
         this.authority = authority;
         this.blocks = blocks;
         this.symbols = symbols;
         this.serializedBiscuit = serializedBiscuit;
+        this.publicKeyToBlockId = publicKeyToBlockId;
         this.revocation_ids = revocation_ids;
         this.root_key_id = Option.none();
     }
 
-    UnverifiedBiscuit(Block authority, List<Block> blocks, SymbolTable symbols, SerializedBiscuit serializedBiscuit, List<byte[]> revocation_ids, Option<Integer> root_key_id) {
+    UnverifiedBiscuit(Block authority, List<Block> blocks, SymbolTable symbols, SerializedBiscuit serializedBiscuit,
+                      HashMap<Long, List<Long>> publicKeyToBlockId, List<byte[]> revocation_ids,
+                      Option<Integer> root_key_id) {
         this.authority = authority;
         this.blocks = blocks;
         this.symbols = symbols;
         this.serializedBiscuit = serializedBiscuit;
+        this.publicKeyToBlockId = publicKeyToBlockId;
         this.revocation_ids = revocation_ids;
         this.root_key_id = root_key_id;
     }
@@ -91,36 +93,14 @@ public class UnverifiedBiscuit {
      * @return UnverifiedBiscuit
      */
     static private UnverifiedBiscuit from_serialized_biscuit(SerializedBiscuit ser, SymbolTable symbols) throws Error {
-        Either<Error.FormatError, Block> authRes = Block.from_bytes(ser.authority.block);
-        if (authRes.isLeft()) {
-            Error e = authRes.getLeft();
-            throw e;
-        }
-        Block authority = authRes.get();
-
-        ArrayList<Block> blocks = new ArrayList<>();
-        for (SignedBlock bdata : ser.blocks) {
-            Either<Error.FormatError, Block> blockRes = Block.from_bytes(bdata.block);
-            if (blockRes.isLeft()) {
-                Error e = blockRes.getLeft();
-                throw e;
-            }
-            blocks.add(blockRes.get());
-        }
-
-        for (String s : authority.symbols.symbols) {
-            symbols.add(s);
-        }
-
-        for (Block b : blocks) {
-            for (String s : b.symbols.symbols) {
-                symbols.add(s);
-            }
-        }
+        Tuple3<Block, ArrayList<Block>, HashMap<Long, List<Long>>> t = ser.extractBlocks(symbols);
+        Block authority = t._1;
+        ArrayList<Block> blocks = t._2;
+        HashMap<Long, List<Long>> publicKeyToBlockId = t._3;
 
         List<byte[]> revocation_ids = ser.revocation_identifiers();
 
-        return new UnverifiedBiscuit(authority, blocks, symbols, ser, revocation_ids);
+        return new UnverifiedBiscuit(authority, blocks, symbols, ser, publicKeyToBlockId, revocation_ids);
     }
 
     /**
@@ -198,8 +178,13 @@ public class UnverifiedBiscuit {
 
         List<byte[]> revocation_ids = container.revocation_identifiers();
 
-        return new UnverifiedBiscuit(copiedBiscuit.authority, blocks, symbols, container, revocation_ids);
+        HashMap<Long, List<Long>> publicKeyToBlockId = new HashMap<>();
+        publicKeyToBlockId.putAll(this.publicKeyToBlockId);
+
+        return new UnverifiedBiscuit(copiedBiscuit.authority, blocks, symbols, container,
+                publicKeyToBlockId, revocation_ids);
     }
+    //FIXME: attenuate 3rd Party
 
     public List<RevocationIdentifier> revocation_identifiers() {
         return this.revocation_ids.stream()
@@ -216,30 +201,6 @@ public class UnverifiedBiscuit {
         }
 
         return l;
-    }
-
-    Either<Error, World> generate_world() {
-        World world = new World();
-
-        for (Fact fact : this.authority.facts) {
-            world.add_fact(fact);
-        }
-
-        for (Rule rule : this.authority.rules) {
-            world.add_rule(rule);
-        }
-
-        for (Block b : this.blocks) {
-            for (Fact fact : b.facts) {
-                world.add_fact(fact);
-            }
-
-            for (Rule rule : b.rules) {
-                world.add_rule(rule);
-            }
-        }
-
-        return Right(world);
     }
 
     public List<Option<String>> context() {
@@ -265,95 +226,6 @@ public class UnverifiedBiscuit {
         return this.root_key_id;
     }
 
-    HashMap<String, Set<Fact>> check(SymbolTable symbols, List<Fact> ambient_facts, List<Rule> ambient_rules,
-                                     List<Check> authorizer_checks, HashMap<String, Rule> queries) throws Error {
-        Either<Error, World> wres = this.generate_world();
-
-        if (wres.isLeft()) {
-            Error e = wres.getLeft();
-            throw e;
-        }
-
-        World world = wres.get();
-
-        for (Fact fact : ambient_facts) {
-            world.add_fact(fact);
-        }
-
-        for (Rule rule : ambient_rules) {
-            world.add_rule(rule);
-        }
-
-        world.run(symbols);
-
-        ArrayList<FailedCheck> errors = new ArrayList<>();
-        for (int j = 0; j < this.authority.checks.size(); j++) {
-            boolean successful = false;
-            Check c = this.authority.checks.get(j);
-
-            for (int k = 0; k < c.queries().size(); k++) {
-                Set<Fact> res = world.query_rule(c.queries().get(k), symbols);
-                if (!res.isEmpty()) {
-                    successful = true;
-                    break;
-                }
-            }
-
-            if (!successful) {
-                errors.add(new FailedCheck.FailedBlock(0, j, symbols.print_check(this.authority.checks.get(j))));
-            }
-        }
-
-        for (int j = 0; j < authorizer_checks.size(); j++) {
-            boolean successful = false;
-            Check c = authorizer_checks.get(j);
-
-            for (int k = 0; k < c.queries().size(); k++) {
-                Set<Fact> res = world.query_rule(c.queries().get(k), symbols);
-                if (!res.isEmpty()) {
-                    successful = true;
-                    break;
-                }
-            }
-
-            if (!successful) {
-                errors.add(new FailedCheck.FailedAuthorizer(j + 1, symbols.print_check(authorizer_checks.get(j))));
-            }
-        }
-
-        for (int i = 0; i < this.blocks.size(); i++) {
-            Block b = this.blocks.get(i);
-
-            for (int j = 0; j < b.checks.size(); j++) {
-                boolean successful = false;
-                Check c = b.checks.get(j);
-
-                for (int k = 0; k < c.queries().size(); k++) {
-                    Set<Fact> res = world.query_rule(c.queries().get(k), symbols);
-                    if (!res.isEmpty()) {
-                        successful = true;
-                        break;
-                    }
-                }
-
-                if (!successful) {
-                    errors.add(new FailedCheck.FailedBlock(i + 1, j, symbols.print_check(b.checks.get(j))));
-                }
-            }
-        }
-
-        HashMap<String, Set<Fact>> query_results = new HashMap<>();
-        for (String name : queries.keySet()) {
-            Set<Fact> res = world.query_rule(queries.get(name), symbols);
-            query_results.put(name, res);
-        }
-
-        if (errors.isEmpty()) {
-            return query_results;
-        } else {
-            throw new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), errors));
-        }
-    }
 
     /**
      * Prints a token's content

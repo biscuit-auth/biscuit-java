@@ -1,10 +1,12 @@
 package com.clevercloud.biscuit.token.builder;
 
 import com.clevercloud.biscuit.crypto.KeyPair;
+import com.clevercloud.biscuit.crypto.PublicKey;
 import com.clevercloud.biscuit.datalog.*;
 import com.clevercloud.biscuit.datalog.Check;
 import com.clevercloud.biscuit.datalog.Fact;
 import com.clevercloud.biscuit.datalog.Rule;
+import com.clevercloud.biscuit.datalog.Scope;
 import com.clevercloud.biscuit.error.Error;
 import com.clevercloud.biscuit.token.Block;
 import io.vavr.Tuple2;
@@ -23,22 +25,26 @@ public class Biscuit {
     SecureRandom rng;
     KeyPair root;
     int symbol_start;
+    int publicKeyStart;
     SymbolTable symbols;
     String context;
     List<Fact> facts;
     List<Rule> rules;
     List<Check> checks;
+    List<Scope> scopes;
     Option<Integer> root_key_id;
 
     public Biscuit(final SecureRandom rng, final KeyPair root, SymbolTable base_symbols) {
         this.rng = rng;
         this.root = root;
-        this.symbol_start = base_symbols.symbols.size();
+        this.symbol_start = base_symbols.currentOffset();
+        this.publicKeyStart = base_symbols.currentPublicKeyOffset();
         this.symbols = new SymbolTable(base_symbols);
         this.context = "";
         this.facts = new ArrayList<>();
         this.rules = new ArrayList<>();
         this.checks = new ArrayList<>();
+        this.scopes = new ArrayList<>();
         this.root_key_id = Option.none();
     }
 
@@ -51,6 +57,7 @@ public class Biscuit {
         this.facts = new ArrayList<>();
         this.rules = new ArrayList<>();
         this.checks = new ArrayList<>();
+        this.scopes = new ArrayList<>();
         this.root_key_id = root_key_id;
     }
 
@@ -116,6 +123,11 @@ public class Biscuit {
         return this;
     }
 
+    public Biscuit add_scope(com.clevercloud.biscuit.token.builder.Scope scope) {
+        this.scopes.add(scope.convert(this.symbols));
+        return this;
+    }
+
     public void set_root_key_id(Integer i) {
         this.root_key_id = Option.some(i);
     }
@@ -131,10 +143,16 @@ public class Biscuit {
         for (int i = this.symbol_start; i < this.symbols.symbols.size(); i++) {
             symbols.add(this.symbols.symbols.get(i));
         }
-        SchemaVersion schemaVersion = new SchemaVersion(this.facts, this.rules, this.checks);
+
+        List<PublicKey> publicKeys = new ArrayList<>();
+        for (int i = this.publicKeyStart; i < this.symbols.currentPublicKeyOffset(); i++) {
+            publicKeys.add(this.symbols.publicKeys().get(i));
+        }
+
+        SchemaVersion schemaVersion = new SchemaVersion(this.facts, this.rules, this.checks, this.scopes);
 
         Block authority_block = new com.clevercloud.biscuit.token.Block(symbols, context, this.facts, this.rules,
-                this.checks, schemaVersion.version());
+                this.checks, scopes, publicKeys, Option.none(), schemaVersion.version());
 
         if (this.root_key_id.isDefined()) {
             return make(this.rng, this.root, this.root_key_id.get(), base_symbols, authority_block);
