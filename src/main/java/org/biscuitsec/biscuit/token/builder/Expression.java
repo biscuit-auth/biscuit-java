@@ -231,10 +231,15 @@ public abstract class Expression {
 
         @Override
         public String toString() {
-            return "Unary{" +
-                    "op=" + op +
-                    ", arg1=" + arg1 +
-                    '}';
+            switch(op) {
+                case Negate:
+                    return "!"+arg1;
+                case Parens:
+                    return "("+arg1+")";
+                case Length:
+                    return arg1.toString()+".length()";
+            }
+            return "";
         }
     }
 
@@ -347,11 +352,51 @@ public abstract class Expression {
 
         @Override
         public String toString() {
-            return "Binary{" +
-                    "op=" + op +
-                    ", arg1=" + arg1 +
-                    ", arg2=" + arg2 +
-                    '}';
+            switch(op) {
+                case LessThan:
+                    return arg1.toString() + " < " + arg2.toString();
+                case GreaterThan:
+                    return arg1.toString() + " > " + arg2.toString();
+                case LessOrEqual:
+                    return arg1.toString() + " <= " + arg2.toString();
+                case GreaterOrEqual:
+                    return arg1.toString() + " >= " + arg2.toString();
+                case Equal:
+                    return arg1.toString() + " == " + arg2.toString();
+                case NotEqual:
+                    return arg1.toString() + " != " + arg2.toString();
+                case Contains:
+                    return arg1.toString() + ".contains(" + arg2.toString()+")";
+                case Prefix:
+                    return arg1.toString() + ".starts_with(" + arg2.toString()+")";
+                case Suffix:
+                    return arg1.toString() + ".ends_with(" + arg2.toString()+")";
+                case Regex:
+                    return arg1.toString() + ".matches(" + arg2.toString()+")";
+                case Add:
+                    return arg1.toString() + " + " + arg2.toString();
+                case Sub:
+                    return arg1.toString() + " - " + arg2.toString();
+                case Mul:
+                    return arg1.toString() + " * " + arg2.toString();
+                case Div:
+                    return arg1.toString() + " / " + arg2.toString();
+                case And:
+                    return arg1.toString() + " && " + arg2.toString();
+                case Or:
+                    return arg1.toString() + " || " + arg2.toString();
+                case Intersection:
+                    return arg1.toString() + ".intersection(" + arg2.toString()+")";
+                case Union:
+                    return arg1.toString() + ".union(" + arg2.toString()+")";
+                case BitwiseAnd:
+                    return arg1.toString() + " & " + arg2.toString();
+                case BitwiseOr:
+                    return arg1.toString() + " | " + arg2.toString();
+                case BitwiseXor:
+                    return arg1.toString() + " ^ " + arg2.toString();
+            }
+            return "";
         }
     }
 }
