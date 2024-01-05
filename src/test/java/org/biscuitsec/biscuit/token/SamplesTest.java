@@ -1,6 +1,7 @@
 package org.biscuitsec.biscuit.token;
 
 import biscuit.format.schema.Schema;
+import com.google.gson.JsonArray;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.datalog.RunLimits;
@@ -41,6 +42,7 @@ class SamplesTest {
             System.out.println("Testcase name: \""+testCase.title+"\"");
             System.out.println("filename: \""+testCase.filename+"\"");
             InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("samples/" + testCase.filename);
+
             JsonObject validation = testCase.validations.getAsJsonObject().entrySet().iterator().next().getValue().getAsJsonObject();
             World world = new Gson().fromJson(validation, World.class);
             JsonObject expected_result = validation.getAsJsonObject("result");
@@ -49,6 +51,13 @@ class SamplesTest {
                 byte[] data = new byte[inputStream.available()];
                 inputStream.read(data);
                 Biscuit token = Biscuit.from_bytes(data, publicKey);
+
+                List<RevocationIdentifier> revocationIds = token.revocation_identifiers();
+                JsonArray validationRevocationIds = validation.getAsJsonArray("revocation_ids");
+                assertEquals(revocationIds.size(), validationRevocationIds.size());
+                for(int i = 0; i < revocationIds.size(); i++) {
+                    assertEquals(validationRevocationIds.get(i).getAsString(), revocationIds.get(i).toHex());
+                }
 
                 // TODO Add check of the token
 
@@ -73,10 +82,14 @@ class SamplesTest {
                 return authorizer.authorize(runLimits);
             }).toEither();
             if (res.isLeft()) {
-                Error e = (Error) res.getLeft();
-                System.out.println("got error: " + e);
-                JsonElement err_json = e.toJson();
-                assertEquals(expected_result.get("Err"),err_json);
+                if(res.getLeft() instanceof Error) {
+                    Error e = (Error) res.getLeft();
+                    System.out.println("got error: " + e);
+                    JsonElement err_json = e.toJson();
+                    assertEquals(expected_result.get("Err"), err_json);
+                } else {
+                    throw res.getLeft();
+                }
             } else {
                 assertEquals(expected_result.getAsJsonPrimitive("Ok").getAsLong(), res.get());
             }

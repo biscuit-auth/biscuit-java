@@ -1,5 +1,7 @@
 package org.biscuitsec.biscuit.token;
 
+import org.biscuitsec.biscuit.token.builder.Utils;
+
 import java.util.Base64;
 
 public class RevocationIdentifier {
@@ -24,6 +26,10 @@ public class RevocationIdentifier {
      */
     public String serialize_b64url() {
         return Base64.getEncoder().encodeToString(this.bytes);
+    }
+
+    public String toHex() {
+        return Utils.byteArrayToHexString(this.bytes).toLowerCase();
     }
 
     public static RevocationIdentifier from_bytes(byte[] bytes) {
