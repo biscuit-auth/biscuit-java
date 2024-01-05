@@ -1,14 +1,11 @@
 package org.biscuitsec.biscuit.token;
 
 import biscuit.format.schema.Schema;
-import com.google.gson.JsonArray;
+import com.google.gson.*;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.datalog.RunLimits;
 import org.biscuitsec.biscuit.error.Error;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 import org.junit.jupiter.api.DynamicTest;
@@ -87,7 +84,7 @@ class SamplesTest {
                     try {
                         Long authorizeResult = authorizer.authorize(runLimits);
 
-                        if(validation.has("world")) {
+                        if(validation.has("world") && !validation.get("world").isJsonNull()) {
                             World world = new Gson().fromJson(validation.get("world").getAsJsonObject(), World.class);
                             World authorizerWorld = new World(
                                     authorizer.facts().stream().map(f -> f.toString()).collect(Collectors.toList()),
@@ -109,7 +106,7 @@ class SamplesTest {
                         return authorizeResult;
                     } catch (Exception e) {
 
-                        if(validation.has("world")) {
+                        if(validation.has("world") && !validation.get("world").isJsonNull()) {
                             World world = new Gson().fromJson(validation.get("world").getAsJsonObject(), World.class);
                             World authorizerWorld = new World(
                                     authorizer.facts().stream().map(f -> f.toString()).collect(Collectors.toList()),

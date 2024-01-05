@@ -2,6 +2,11 @@ package org.biscuitsec.biscuit.token.builder;
 
 import org.biscuitsec.biscuit.datalog.SymbolTable;
 
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -177,7 +182,8 @@ public abstract class Term {
 
         @Override
         public String toString() {
-            return String.valueOf(value);
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_INSTANT;
+            return Instant.ofEpochSecond(value).atOffset(ZoneOffset.ofTotalSeconds(0)).format(dateTimeFormatter);
         }
 
         @Override
@@ -257,7 +263,7 @@ public abstract class Term {
 
         @Override
         public String toString() {
-            return "[" + value + ']';
+            return value.toString();
         }
 
         @Override

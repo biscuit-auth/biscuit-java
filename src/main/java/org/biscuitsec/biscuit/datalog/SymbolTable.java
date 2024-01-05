@@ -20,7 +20,7 @@ public final class SymbolTable implements Serializable {
 
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_INSTANT;
 
-    private String fromEpochIsoDate(long epochSec) {
+    public String fromEpochIsoDate(long epochSec) {
         return Instant.ofEpochSecond(epochSec).atOffset(ZoneOffset.ofTotalSeconds(0)).format(dateTimeFormatter);
     }
 
