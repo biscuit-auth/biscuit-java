@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-class SamplesJsonV2Test {
+class SamplesTest {
     final RunLimits runLimits = new RunLimits(500,100, Duration.ofMillis(500));
     @TestFactory
     Stream<DynamicTest> jsonTest() {
