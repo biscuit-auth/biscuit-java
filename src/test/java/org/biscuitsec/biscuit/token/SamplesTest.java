@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,56 +43,60 @@ class SamplesTest {
             System.out.println("Testcase name: \""+testCase.title+"\"");
             System.out.println("filename: \""+testCase.filename+"\"");
             InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("samples/" + testCase.filename);
+            byte[] data = new byte[inputStream.available()];
 
-            JsonObject validation = testCase.validations.getAsJsonObject().entrySet().iterator().next().getValue().getAsJsonObject();
-            World world = new Gson().fromJson(validation, World.class);
-            JsonObject expected_result = validation.getAsJsonObject("result");
-            String[] authorizer_facts = validation.getAsJsonPrimitive("authorizer_code").getAsString().split(";");
-            Either<Throwable, Long> res = Try.of(() -> {
-                byte[] data = new byte[inputStream.available()];
-                inputStream.read(data);
-                Biscuit token = Biscuit.from_bytes(data, publicKey);
+            for(Map.Entry<String, JsonElement> validationEntry: testCase.validations.getAsJsonObject().entrySet()) {
+                String validationName = validationEntry.getKey();
+                JsonObject validation = validationEntry.getValue().getAsJsonObject();
 
-                List<RevocationIdentifier> revocationIds = token.revocation_identifiers();
-                JsonArray validationRevocationIds = validation.getAsJsonArray("revocation_ids");
-                assertEquals(revocationIds.size(), validationRevocationIds.size());
-                for(int i = 0; i < revocationIds.size(); i++) {
-                    assertEquals(validationRevocationIds.get(i).getAsString(), revocationIds.get(i).toHex());
-                }
+                World world = new Gson().fromJson(validation, World.class);
+                JsonObject expected_result = validation.getAsJsonObject("result");
+                String[] authorizer_facts = validation.getAsJsonPrimitive("authorizer_code").getAsString().split(";");
+                Either<Throwable, Long> res = Try.of(() -> {
+                    inputStream.read(data);
+                    Biscuit token = Biscuit.from_bytes(data, publicKey);
 
-                // TODO Add check of the token
+                    List<RevocationIdentifier> revocationIds = token.revocation_identifiers();
+                    JsonArray validationRevocationIds = validation.getAsJsonArray("revocation_ids");
+                    assertEquals(revocationIds.size(), validationRevocationIds.size());
+                    for(int i = 0; i < revocationIds.size(); i++) {
+                        assertEquals(validationRevocationIds.get(i).getAsString(), revocationIds.get(i).toHex());
+                    }
 
-                Authorizer authorizer = token.authorizer();
-                System.out.println(token.print());
-                for (String f : authorizer_facts) {
-                    f = f.trim();
-                    if (f.length() > 0) {
-                        if (f.startsWith("check if") || f.startsWith("check all")) {
-                            authorizer.add_check(f);
-                        } else if (f.startsWith("allow if") || f.startsWith("deny if")) {
-                            authorizer.add_policy(f);
-                        } else if (f.startsWith("revocation_id")) {
-                            // do nothing
-                        } else {
-                            authorizer.add_fact(f);
+                    // TODO Add check of the token
+
+                    Authorizer authorizer = token.authorizer();
+                    System.out.println(token.print());
+                    for (String f : authorizer_facts) {
+                        f = f.trim();
+                        if (f.length() > 0) {
+                            if (f.startsWith("check if") || f.startsWith("check all")) {
+                                authorizer.add_check(f);
+                            } else if (f.startsWith("allow if") || f.startsWith("deny if")) {
+                                authorizer.add_policy(f);
+                            } else if (f.startsWith("revocation_id")) {
+                                // do nothing
+                            } else {
+                                authorizer.add_fact(f);
+                            }
                         }
                     }
-                }
-                authorizer.allow(); // TODO manage the policies
-                System.out.println(authorizer.print_world());
-                return authorizer.authorize(runLimits);
-            }).toEither();
-            if (res.isLeft()) {
-                if(res.getLeft() instanceof Error) {
-                    Error e = (Error) res.getLeft();
-                    System.out.println("got error: " + e);
-                    JsonElement err_json = e.toJson();
-                    assertEquals(expected_result.get("Err"), err_json);
+                    authorizer.allow(); // TODO manage the policies
+                    System.out.println(authorizer.print_world());
+                    return authorizer.authorize(runLimits);
+                }).toEither();
+                if (res.isLeft()) {
+                    if(res.getLeft() instanceof Error) {
+                        Error e = (Error) res.getLeft();
+                        System.out.println("got error: " + e);
+                        JsonElement err_json = e.toJson();
+                        assertEquals(expected_result.get("Err"), err_json);
+                    } else {
+                        throw res.getLeft();
+                    }
                 } else {
-                    throw res.getLeft();
+                    assertEquals(expected_result.getAsJsonPrimitive("Ok").getAsLong(), res.get());
                 }
-            } else {
-                assertEquals(expected_result.getAsJsonPrimitive("Ok").getAsLong(), res.get());
             }
         });
     }
