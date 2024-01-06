@@ -290,11 +290,11 @@ class SamplesTest {
 
         @Override
         public String toString() {
-            return "World{" +
+            return "World{\n" +
                     "facts=" + facts +
-                    ", rules=" + rules +
-                    ", checks=" + checks +
-                    ", policies=" + policies +
+                    ",\nrules=" + rules +
+                    ",\nchecks=" + checks +
+                    ",\npolicies=" + policies +
                     '}';
         }
     }

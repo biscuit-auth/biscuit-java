@@ -137,31 +137,6 @@ public final class SymbolTable implements Serializable {
         }
     }
 
-    public String print_id(final Term value) {
-        String _s = "";
-        if (value instanceof Term.Bool) {
-            _s = Boolean.toString(((Term.Bool) value).value());
-        } else if (value instanceof Term.Bytes) {
-            _s = TokenSignature.hex(((Term.Bytes) value).value());
-        } else if (value instanceof Term.Date) {
-            _s = fromEpochIsoDate(((Term.Date) value).value());
-        } else if (value instanceof Term.Integer) {
-            _s = Long.toString(((Term.Integer) value).value());
-        } else if (value instanceof Term.Set) {
-            Term.Set idset = (Term.Set) value;
-            if (idset.value().size() > 0) {
-                _s = "[ ";
-                _s += String.join(", ", idset.value().stream().map((id) -> print_id(id)).collect(Collectors.toList()));
-                _s += " ]";
-            }
-        } else if (value instanceof Term.Str) {
-            _s = "\"" + print_symbol((int) ((Term.Str) value).value()) + "\"";
-        } else if (value instanceof Term.Variable) {
-            _s = "$" + print_symbol((int) ((Term.Variable) value).value());
-        }
-        return _s;
-    }
-
     public String print_rule(final Rule r) {
         String res = this.print_predicate(r.head());
         res += " <- " + this.print_rule_body(r);
@@ -218,6 +193,8 @@ public final class SymbolTable implements Serializable {
     public String print_term(final Term i) {
         if (i instanceof Term.Variable) {
             return "$" + this.print_symbol((int) ((Term.Variable) i).value());
+        } else if(i instanceof Term.Bool) {
+            return i.toString();
         } else if (i instanceof Term.Date) {
             return fromEpochIsoDate(((Term.Date) i).value());
         } else if (i instanceof Term.Integer) {
@@ -225,7 +202,7 @@ public final class SymbolTable implements Serializable {
         } else if (i instanceof Term.Str) {
             return "\"" + this.print_symbol((int) ((Term.Str) i).value()) + "\"";
         } else if (i instanceof Term.Bytes) {
-            return "hex:" + Utils.byteArrayToHexString(((Term.Bytes) i).value());
+            return "hex:" + Utils.byteArrayToHexString(((Term.Bytes) i).value()).toLowerCase();
         } else if (i instanceof Term.Set) {
             final List<String> values = ((Term.Set) i).value().stream().map((v) -> this.print_term(v)).collect(Collectors.toList());
             return "[" + String.join(", ", values) + "]";

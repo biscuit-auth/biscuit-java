@@ -649,8 +649,9 @@ public class Authorizer {
         }
         for(Block block: this.token.blocks) {
             if(block.externalKey.isDefined()) {
+                SymbolTable blockSymbols = new SymbolTable(block.symbols.symbols, token.symbols.publicKeys());
                 for(org.biscuitsec.biscuit.datalog.Check check: block.checks) {
-                    checks.add(Check.convert_from(check, block.symbols));
+                    checks.add(Check.convert_from(check, blockSymbols));
                 }
             } else {
                 for(org.biscuitsec.biscuit.datalog.Check check: block.checks) {

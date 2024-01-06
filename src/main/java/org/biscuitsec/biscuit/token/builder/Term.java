@@ -145,7 +145,7 @@ public abstract class Term {
 
         @Override
         public String toString() {
-            return "\""+ value +"\"";
+            return "hex:" + Utils.byteArrayToHexString(value).toLowerCase();
         }
 
         @Override
