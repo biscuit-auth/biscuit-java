@@ -200,23 +200,38 @@ public class Rule implements Cloneable {
         return result;
     }
 
+    public String bodyToString() {
+        Rule r = this.clone();
+        r.apply_variables();
+        String res = "";
+
+        if(!r.body.isEmpty()) {
+            final List<String> b = r.body.stream().map((pred) -> pred.toString()).collect(Collectors.toList());
+             res += String.join(", ", b);
+        }
+
+        if (!r.expressions.isEmpty()) {
+            if(!r.body.isEmpty()) {
+                res += ", ";
+            }
+            final List<String> e = r.expressions.stream().map((expression) -> expression.toString()).collect(Collectors.toList());
+            res += String.join(", ", e);
+        }
+
+        if(!r.scopes.isEmpty()) {
+            if(!r.body.isEmpty() || !r.expressions.isEmpty()) {
+                res += " ";
+            }
+            final List<String> e = r.scopes.stream().map((scope) -> scope.toString()).collect(Collectors.toList());
+            res += "trusting " + String.join(", ", e);
+        }
+
+        return res;
+    }
     @Override
     public String toString() {
         Rule r = this.clone();
         r.apply_variables();
-        final List<String> b = r.body.stream().map((pred) -> pred.toString()).collect(Collectors.toList());
-        String res = r.head.toString() + " <- " + String.join(", ", b);
-
-        if (!r.expressions.isEmpty()) {
-            final List<String> e = r.expressions.stream().map((expression) -> expression.toString()).collect(Collectors.toList());
-            res += ", " + String.join(", ", e);
-        }
-
-        if(!r.scopes.isEmpty()) {
-            final List<String> e = r.scopes.stream().map((scope) -> scope.toString()).collect(Collectors.toList());
-            res += " trusting " + String.join(", ", e);
-        }
-
-        return res;
+        return r.head.toString() + " <- " + bodyToString();
     }
 }

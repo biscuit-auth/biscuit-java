@@ -11,6 +11,8 @@ import io.vavr.Tuple2;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 import org.biscuitsec.biscuit.datalog.Scope;
+import org.biscuitsec.biscuit.token.builder.Check;
+import org.biscuitsec.biscuit.token.builder.Fact;
 import org.biscuitsec.biscuit.token.builder.Term;
 import org.biscuitsec.biscuit.token.builder.parser.Parser;
 
@@ -27,7 +29,6 @@ import static io.vavr.API.Right;
 public class Authorizer {
     Biscuit token;
     List<org.biscuitsec.biscuit.token.builder.Check> checks;
-    List<List<org.biscuitsec.biscuit.datalog.Check>> token_checks;
     List<Policy> policies;
     List<Scope> scopes;
     HashMap<Long, List<Long>> publicKeyToBlockId;
@@ -41,7 +42,6 @@ public class Authorizer {
         this.checks = new ArrayList<>();
         this.policies = new ArrayList<>();
         this.scopes = new ArrayList<>();
-        this.token_checks = this.token.checks();
         this.publicKeyToBlockId = new HashMap<>();
         update_on_token();
     }
@@ -57,17 +57,15 @@ public class Authorizer {
         this.symbols = Biscuit.default_symbol_table();
         this.checks = new ArrayList<>();
         this.policies = new ArrayList<>();
-        this.token_checks = new ArrayList<>();
         this.scopes = new ArrayList<>();
         this.publicKeyToBlockId = new HashMap<>();
     }
 
     private Authorizer(Biscuit token, List<org.biscuitsec.biscuit.token.builder.Check> checks, List<Policy> policies,
-                       List<List<org.biscuitsec.biscuit.datalog.Check>> token_checks, World world, SymbolTable symbols) {
+                       World world, SymbolTable symbols) {
         this.token = token;
         this.checks = checks;
         this.policies = policies;
-        this.token_checks = token_checks;
         this.world = world;
         this.symbols = symbols;
         this.scopes = new ArrayList<>();
@@ -88,7 +86,7 @@ public class Authorizer {
 
     public Authorizer clone() {
         return new Authorizer(this.token, new ArrayList<>(this.checks), new ArrayList<>(this.policies),
-                new ArrayList<>(this.token_checks), new World(this.world), new SymbolTable(this.symbols));
+                new World(this.world), new SymbolTable(this.symbols));
     }
 
     public void update_on_token() throws Error.FailedLogic {
@@ -592,7 +590,6 @@ public class Authorizer {
     }
 
     public String print_world() {
-        //FIXME
         StringBuilder facts = new StringBuilder();
         for(Map.Entry<Origin, HashSet<org.biscuitsec.biscuit.datalog.Fact>> entry: this.world.facts().facts().entrySet()) {
             facts.append("\n\t\t"+entry.getKey()+":");
@@ -601,7 +598,6 @@ public class Authorizer {
                 facts.append(this.symbols.print_fact(f));
             }
         }
-        //final List<String> facts = this.world.facts().facts().entrySet().stream().map((f) -> this.symbols.print_fact(f)).collect(Collectors.toList());
         final List<String> rules = this.world.rules().stream().map((r) -> this.symbols.print_rule(r)).collect(Collectors.toList());
 
         List<String> checks = new ArrayList<>();
@@ -632,5 +628,42 @@ public class Authorizer {
                 "\n\t],\n\tchecks: [\n\t\t" +
                 String.join(",\n\t\t", checks) +
                 "\n\t]\n}";
+    }
+
+    public List<Fact> facts() {
+        return this.world.facts().stream()
+                .map((f) -> org.biscuitsec.biscuit.token.builder.Fact.convert_from(f, this.symbols))
+                .collect(Collectors.toList());
+    }
+
+    public List<org.biscuitsec.biscuit.token.builder.Rule> rules() {
+        return this.world.rules().stream()
+                .map((r) -> org.biscuitsec.biscuit.token.builder.Rule.convert_from(r, this.symbols))
+                .collect(Collectors.toList());
+    }
+
+    public List<Check> checks() {
+        List<Check> checks = new ArrayList<>(this.checks);
+        for(org.biscuitsec.biscuit.datalog.Check check: this.token.authority.checks) {
+            checks.add(Check.convert_from(check, token.symbols));
+        }
+        for(Block block: this.token.blocks) {
+            if(block.externalKey.isDefined()) {
+                SymbolTable blockSymbols = new SymbolTable(block.symbols.symbols, token.symbols.publicKeys());
+                for(org.biscuitsec.biscuit.datalog.Check check: block.checks) {
+                    checks.add(Check.convert_from(check, blockSymbols));
+                }
+            } else {
+                for(org.biscuitsec.biscuit.datalog.Check check: block.checks) {
+                    checks.add(Check.convert_from(check, token.symbols));
+                }
+            }
+        }
+
+        return checks;
+    }
+
+    public List<Policy> policies() {
+        return this.policies;
     }
 }

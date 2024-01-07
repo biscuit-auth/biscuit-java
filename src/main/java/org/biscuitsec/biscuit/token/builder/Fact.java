@@ -93,7 +93,7 @@ public class Fact implements Cloneable{
     public String toString() {
         Fact f = this.clone();
         f.apply_variables();
-        return "fact(" + f.predicate + ")";
+        return  f.predicate.toString();
     }
 
     public String name() {

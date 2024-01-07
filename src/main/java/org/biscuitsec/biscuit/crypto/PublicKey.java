@@ -75,6 +75,6 @@ public class PublicKey {
 
     @Override
     public String toString() {
-        return "ed25519/" + toHex();
+        return "ed25519/" + toHex().toLowerCase();
     }
 }

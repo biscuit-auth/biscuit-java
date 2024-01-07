@@ -75,7 +75,6 @@ class Token {
             PublicKey next_key  = this.keys.get(i);
             byte[] signature = this.signatures.get(i);
 
-            System.out.println("verifying block "+i+" with current key "+current_key.toHex()+" block "+block+" next key "+next_key.toHex()+" signature "+signature);
             Signature sgr = new EdDSAEngine(MessageDigest.getInstance(KeyPair.ed25519.getHashAlgorithm()));
             ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
             algo_buf.putInt(Integer.valueOf(next.public_key().algorithm.getNumber()));
@@ -88,7 +87,6 @@ class Token {
             if (sgr.verify(signature)) {
                 current_key = next_key;
             } else {
-                System.out.println("signature not verified");
                 return Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"));
             }
         }
@@ -96,9 +94,6 @@ class Token {
         if(this.next.public_key == current_key.key) {
             return Right(null);
         } else {
-            System.out.println("current key and next public key not equal:");
-            System.out.println("current: "+current_key.toHex());
-            System.out.println("next: "+this.next.public_key().toHex());
             return Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"));
         }
     }
