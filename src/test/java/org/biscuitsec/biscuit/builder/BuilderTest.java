@@ -82,8 +82,8 @@ public class BuilderTest {
     @Test
     public void testStringValueOfASetTerm() {
         String actual = new Term.Set(Set.of(new Term.Str("a"), new Term.Str("b"), new Term.Integer((3)))).toString();
-        assertTrue(actual.startsWith("[["), "starts with [[");
-        assertTrue(actual.endsWith("]]"), "ends with ]]");
+        assertTrue(actual.startsWith("["), "starts with [");
+        assertTrue(actual.endsWith("]"), "ends with ]");
         assertTrue(actual.contains("\"a\""), "contains a");
         assertTrue(actual.contains("\"b\""), "contains b");
         assertTrue(actual.contains("3"), "contains 3");
@@ -92,8 +92,7 @@ public class BuilderTest {
     @Test
     public void testStringValueOfAByteArrayTermIsJustTheArrayReferenceNotTheContents() {
         String string = new Term.Bytes("Hello".getBytes(StandardCharsets.UTF_8)).toString();
-        assertTrue(string.startsWith("\"[B@"), "starts with quote, and array reference");
-        assertTrue(string.endsWith("\""), "ends with quote");
+        assertTrue(string.startsWith("hex:"), "starts with hex prefix");
     }
 
     @Test
