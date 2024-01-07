@@ -158,17 +158,27 @@ class SamplesTest {
                         throw e;
                     }
                 }).toEither();
-                if (res.isLeft()) {
-                    if(res.getLeft() instanceof Error) {
-                        Error e = (Error) res.getLeft();
-                        System.out.println("got error: " + e);
-                        JsonElement err_json = e.toJson();
-                        assertEquals(expected_result.get("Err"), err_json);
-                    } else {
+
+                if(expected_result.has("Ok")) {
+                    if (res.isLeft()) {
+                        System.out.println("validation '"+validationName+"' expected result Ok("+expected_result.getAsJsonPrimitive("Ok").getAsLong()+"), got error");
                         throw res.getLeft();
+                    } else {
+                        assertEquals(expected_result.getAsJsonPrimitive("Ok").getAsLong(), res.get());
                     }
                 } else {
-                    assertEquals(expected_result.getAsJsonPrimitive("Ok").getAsLong(), res.get());
+                    if (res.isLeft()) {
+                        if(res.getLeft() instanceof Error) {
+                            Error e = (Error) res.getLeft();
+                            System.out.println("validation '\"+validationName+\"' got error: " + e);
+                            JsonElement err_json = e.toJson();
+                            assertEquals(expected_result.get("Err"), err_json);
+                        } else {
+                            throw res.getLeft();
+                        }
+                    } else {
+                        throw new Exception("validation '\"+validationName+\"' expected result error("+expected_result.get("Err")+"), got success: "+res.get());
+                    }
                 }
             }
         });
