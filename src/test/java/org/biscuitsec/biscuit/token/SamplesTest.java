@@ -170,14 +170,14 @@ class SamplesTest {
                     if (res.isLeft()) {
                         if(res.getLeft() instanceof Error) {
                             Error e = (Error) res.getLeft();
-                            System.out.println("validation '\"+validationName+\"' got error: " + e);
+                            System.out.println("validation '"+validationName+"' got error: " + e);
                             JsonElement err_json = e.toJson();
                             assertEquals(expected_result.get("Err"), err_json);
                         } else {
                             throw res.getLeft();
                         }
                     } else {
-                        throw new Exception("validation '\"+validationName+\"' expected result error("+expected_result.get("Err")+"), got success: "+res.get());
+                        throw new Exception("validation '"+validationName+"' expected result error("+expected_result.get("Err")+"), got success: "+res.get());
                     }
                 }
             }
