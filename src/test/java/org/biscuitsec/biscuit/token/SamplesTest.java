@@ -88,24 +88,19 @@ class SamplesTest {
 
                         if(validation.has("world") && !validation.get("world").isJsonNull()) {
                             World world = new Gson().fromJson(validation.get("world").getAsJsonObject(), World.class);
+                            System.out.println("will fix origin");
+                            world.fixOrigin();
+                            System.out.println("fixed origin");
+
 
                             World authorizerWorld = new World(authorizer);
 
-                            //Collections.sort(world.facts);
-                            /*Collections.sort(world.rules);
-                            Collections.sort(world.checks);
-                            Collections.sort(world.policies);*/
-                            //Collections.sort(authorizerWorld.facts);
-                            /*Collections.sort(authorizerWorld.rules);
-                            Collections.sort(authorizerWorld.checks);
-                            Collections.sort(authorizerWorld.policies);*/
+
                             System.out.println("validation world"+world);
                             System.out.println("authorizer world"+authorizerWorld);
 
-                            assertEquals(world.facts.size(), authorizerWorld.facts.size());
-                            for (int i = 0; i < world.facts.size(); i++) {
-                                assertEquals(world.facts.get(i), authorizerWorld.facts.get(i));
-                            }
+                            assertEquals(world.factMap(), authorizerWorld.factMap());
+
                             /*assertEquals(world.rules.size(), authorizerWorld.rules.size());
                             for (int i = 0; i < world.rules.size(); i++) {
                                 assertEquals(world.rules.get(i), authorizerWorld.rules.get(i));
@@ -126,17 +121,15 @@ class SamplesTest {
                         if(validation.has("world") && !validation.get("world").isJsonNull()) {
                             World world = new Gson().fromJson(validation.get("world").getAsJsonObject(), World.class);
                             World authorizerWorld = new World(authorizer);
+                            System.out.println("will fix origin");
+                            world.fixOrigin();
+                            System.out.println("fixed origin");
 
-                            //Collections.sort(world.facts);
-                            //Collections.sort(authorizerWorld.facts);
-                            /*Collections.sort(authorizerWorld.rules);
-                            Collections.sort(authorizerWorld.checks);
-                            Collections.sort(authorizerWorld.policies);*/
 
-                            assertEquals(world.facts.size(), authorizerWorld.facts.size());
-                            for (int i = 0; i < world.facts.size(); i++) {
-                                assertEquals(world.facts.get(i), authorizerWorld.facts.get(i));
-                            }
+                            System.out.println(world.facts);
+                            System.out.println(authorizerWorld.facts);
+                            assertEquals(world.factMap(), authorizerWorld.factMap());
+                            
                             /*assertEquals(world.rules.size(), authorizerWorld.rules.size());
                             for (int i = 0; i < world.rules.size(); i++) {
                                 assertEquals(world.rules.get(i), authorizerWorld.rules.get(i));
@@ -304,7 +297,7 @@ class SamplesTest {
                         ArrayList<Long> origin = new ArrayList<>(entry.getKey().inner);
                         Collections.sort(origin);
                         ArrayList<String> facts = new ArrayList<>(entry.getValue().stream()
-                                .map(r -> r.toString()).collect(Collectors.toList()));
+                                .map(f -> authorizer.symbols.print_fact(f)).collect(Collectors.toList()));
                         Collections.sort(facts);
 
                         return new FactSet(origin, facts);
@@ -344,6 +337,21 @@ class SamplesTest {
             this.policies = authorizer.policies().stream().map(p -> p.toString()).collect(Collectors.toList());
         }
 
+        public void fixOrigin() {
+            for(FactSet f: this.facts) {
+                f.fixOrigin();
+            }
+        }
+
+        public HashMap<List<Long>, List<String>> factMap() {
+            HashMap<List<Long>, List<String>>  worldFacts = new HashMap<>();
+            for(FactSet f: this.facts) {
+                worldFacts.put(f.origin, f.facts);
+            }
+
+            return worldFacts;
+        }
+
         @Override
         public String toString() {
             return "World{\n" +
@@ -360,8 +368,48 @@ class SamplesTest {
         List<String> facts;
 
         public FactSet(List<Long> origin, List<String> facts) {
+            System.out.println("creating new factset with origin "+origin);
             this.origin = origin;
             this.facts = facts;
+        }
+
+        // JSON cannot represent Long.MAX_VALUE so it is stored as null, fix the origin list
+        public void fixOrigin() {
+            System.out.println("fixing origins: "+this.origin);
+            for(int i = 0; i < this.origin.size(); i++) {
+                if (this.origin.get(i) == null) {
+                    this.origin.set(i, Long.MAX_VALUE);
+                }
+            }
+
+            System.out.println("->: "+this.origin);
+
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            FactSet factSet = (FactSet) o;
+
+            if (!Objects.equals(origin, factSet.origin)) return false;
+            return Objects.equals(facts, factSet.facts);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = origin != null ? origin.hashCode() : 0;
+            result = 31 * result + (facts != null ? facts.hashCode() : 0);
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "FactSet{" +
+                    "origin=" + origin +
+                    ", facts=" + facts +
+                    '}';
         }
     }
 
