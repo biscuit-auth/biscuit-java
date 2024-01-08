@@ -27,7 +27,7 @@ public class ExpressionTest {
         )));
 
         assertEquals(
-                "! 1 < $var",
+                "!1 < $var",
                 e.print(symbols).get()
         );
 
@@ -104,7 +104,7 @@ public class ExpressionTest {
         )));
 
         assertEquals(
-                "! \"ab\".contains(\"b\")",
+                "!\"ab\".contains(\"b\")",
                 e.print(symbols).get()
         );
 

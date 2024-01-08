@@ -630,37 +630,49 @@ public class Authorizer {
                 "\n\t]\n}";
     }
 
-    public List<Fact> facts() {
-        return this.world.facts().stream()
-                .map((f) -> org.biscuitsec.biscuit.token.builder.Fact.convert_from(f, this.symbols))
-                .collect(Collectors.toList());
+    public FactSet facts() {
+        return this.world.facts();
     }
 
-    public List<org.biscuitsec.biscuit.token.builder.Rule> rules() {
-        return this.world.rules().stream()
-                .map((r) -> org.biscuitsec.biscuit.token.builder.Rule.convert_from(r, this.symbols))
-                .collect(Collectors.toList());
+    public RuleSet rules() {
+        return this.world.rules();
     }
 
-    public List<Check> checks() {
-        List<Check> checks = new ArrayList<>(this.checks);
-        for(org.biscuitsec.biscuit.datalog.Check check: this.token.authority.checks) {
-            checks.add(Check.convert_from(check, token.symbols));
+    public List<Tuple2<Long, List<Check>>> checks() {
+        List<Tuple2<Long, List<Check>>> allChecks = new ArrayList<>();
+        if(!this.checks.isEmpty()) {
+            allChecks.add(new Tuple2(Long.MAX_VALUE, this.checks));
         }
+
+        List<Check> authorityChecks = new ArrayList<>();
+        for(org.biscuitsec.biscuit.datalog.Check check: this.token.authority.checks) {
+            authorityChecks.add(Check.convert_from(check, this.token.symbols));
+        }
+        if(!authorityChecks.isEmpty()) {
+            allChecks.add(new Tuple2((long) 0, authorityChecks));
+        }
+
+        long count = 1;
         for(Block block: this.token.blocks) {
+            List<Check> blockChecks = new ArrayList<>();
+
             if(block.externalKey.isDefined()) {
                 SymbolTable blockSymbols = new SymbolTable(block.symbols.symbols, token.symbols.publicKeys());
                 for(org.biscuitsec.biscuit.datalog.Check check: block.checks) {
-                    checks.add(Check.convert_from(check, blockSymbols));
+                    blockChecks.add(Check.convert_from(check, blockSymbols));
                 }
             } else {
                 for(org.biscuitsec.biscuit.datalog.Check check: block.checks) {
-                    checks.add(Check.convert_from(check, token.symbols));
+                    blockChecks.add(Check.convert_from(check, token.symbols));
                 }
             }
+            if(!blockChecks.isEmpty()) {
+                allChecks.add(new Tuple2(count, blockChecks));
+            }
+            count += 1;
         }
 
-        return checks;
+        return allChecks;
     }
 
     public List<Policy> policies() {
