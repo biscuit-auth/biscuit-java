@@ -177,7 +177,7 @@ public final class SymbolTable implements Serializable {
             case PublicKey:
                 Option<PublicKey> pk = this.get_pk((int) scope.publicKey);
                 if(pk.isDefined()) {
-                    return pk.toString();
+                    return pk.get().toString();
                 }
         }
         return "?";

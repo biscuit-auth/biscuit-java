@@ -631,15 +631,11 @@ public class Authorizer {
     }
 
     public FactSet facts() {
-        return this.world.facts();/*.stream()
-                .map((f) -> org.biscuitsec.biscuit.token.builder.Fact.convert_from(f, this.symbols))
-                .collect(Collectors.toList());*/
+        return this.world.facts();
     }
 
     public RuleSet rules() {
-        return this.world.rules();/*.stream()
-                .map((r) -> org.biscuitsec.biscuit.token.builder.Rule.convert_from(r, this.symbols))
-                .collect(Collectors.toList());*/
+        return this.world.rules();
     }
 
     public List<Tuple2<Long, List<Check>>> checks() {

@@ -157,7 +157,7 @@ public abstract class Op {
             String _s = "";
             switch (this.op) {
                 case Negate:
-                    _s = "! " + prec;
+                    _s = "!" + prec;
                     stack.push(_s);
                     break;
                 case Parens:

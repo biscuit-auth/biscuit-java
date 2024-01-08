@@ -92,20 +92,18 @@ class SamplesTest {
                             world.fixOrigin();
                             System.out.println("fixed origin");
 
-
                             World authorizerWorld = new World(authorizer);
-
 
                             System.out.println("validation world"+world);
                             System.out.println("authorizer world"+authorizerWorld);
 
                             assertEquals(world.factMap(), authorizerWorld.factMap());
 
-                            /*assertEquals(world.rules.size(), authorizerWorld.rules.size());
+                            assertEquals(world.rules.size(), authorizerWorld.rules.size());
                             for (int i = 0; i < world.rules.size(); i++) {
                                 assertEquals(world.rules.get(i), authorizerWorld.rules.get(i));
                             }
-                            assertEquals(world.checks.size(), authorizerWorld.checks.size());
+                            /*assertEquals(world.checks.size(), authorizerWorld.checks.size());
                             for (int i = 0; i < world.checks.size(); i++) {
                                 assertEquals(world.checks.get(i), authorizerWorld.checks.get(i));
                             }
@@ -129,12 +127,15 @@ class SamplesTest {
                             System.out.println(world.facts);
                             System.out.println(authorizerWorld.facts);
                             assertEquals(world.factMap(), authorizerWorld.factMap());
-                            
-                            /*assertEquals(world.rules.size(), authorizerWorld.rules.size());
+
+                            System.out.println(world.rules);
+                            System.out.println(authorizerWorld.rules);
+
+                            assertEquals(world.rules.size(), authorizerWorld.rules.size());
                             for (int i = 0; i < world.rules.size(); i++) {
                                 assertEquals(world.rules.get(i), authorizerWorld.rules.get(i));
                             }
-                            assertEquals(world.checks.size(), authorizerWorld.checks.size());
+                            /*assertEquals(world.checks.size(), authorizerWorld.checks.size());
                             for (int i = 0; i < world.checks.size(); i++) {
                                 assertEquals(world.checks.get(i), authorizerWorld.checks.get(i));
                             }
@@ -381,6 +382,7 @@ class SamplesTest {
                     this.origin.set(i, Long.MAX_VALUE);
                 }
             }
+            Collections.sort(this.origin);
 
             System.out.println("->: "+this.origin);
 
@@ -434,6 +436,32 @@ class SamplesTest {
                 return this.origin.compareTo(ruleSet.origin);
             }
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            RuleSet ruleSet = (RuleSet) o;
+
+            if (!Objects.equals(origin, ruleSet.origin)) return false;
+            return Objects.equals(rules, ruleSet.rules);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = origin != null ? origin.hashCode() : 0;
+            result = 31 * result + (rules != null ? rules.hashCode() : 0);
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "RuleSet{" +
+                    "origin=" + origin +
+                    ", rules=" + rules +
+                    '}';
+        }
     }
 
     class CheckSet implements Comparable<RuleSet> {
@@ -461,6 +489,14 @@ class SamplesTest {
             } else {
                 return this.origin.compareTo(ruleSet.origin);
             }
+        }
+
+        @Override
+        public String toString() {
+            return "CheckSet{" +
+                    "origin=" + origin +
+                    ", checks=" + checks +
+                    '}';
         }
     }
 
