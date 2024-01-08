@@ -88,29 +88,15 @@ class SamplesTest {
 
                         if(validation.has("world") && !validation.get("world").isJsonNull()) {
                             World world = new Gson().fromJson(validation.get("world").getAsJsonObject(), World.class);
-                            System.out.println("will fix origin");
                             world.fixOrigin();
-                            System.out.println("fixed origin");
 
                             World authorizerWorld = new World(authorizer);
-
-                            System.out.println("validation world"+world);
-                            System.out.println("authorizer world"+authorizerWorld);
-
                             assertEquals(world.factMap(), authorizerWorld.factMap());
+                            assertEquals(world.rules, authorizerWorld.rules);
+                            assertEquals(world.checks, authorizerWorld.checks);
+                            assertEquals(world.policies, authorizerWorld.policies);
 
-                            assertEquals(world.rules.size(), authorizerWorld.rules.size());
-                            for (int i = 0; i < world.rules.size(); i++) {
-                                assertEquals(world.rules.get(i), authorizerWorld.rules.get(i));
-                            }
-                            /*assertEquals(world.checks.size(), authorizerWorld.checks.size());
-                            for (int i = 0; i < world.checks.size(); i++) {
-                                assertEquals(world.checks.get(i), authorizerWorld.checks.get(i));
-                            }
-                            assertEquals(world.policies.size(), authorizerWorld.policies.size());
-                            for (int i = 0; i < world.policies.size(); i++) {
-                                assertEquals(world.policies.get(i), authorizerWorld.policies.get(i));
-                            }*/
+
                         }
 
                         return authorizeResult;
@@ -118,31 +104,13 @@ class SamplesTest {
 
                         if(validation.has("world") && !validation.get("world").isJsonNull()) {
                             World world = new Gson().fromJson(validation.get("world").getAsJsonObject(), World.class);
-                            World authorizerWorld = new World(authorizer);
-                            System.out.println("will fix origin");
                             world.fixOrigin();
-                            System.out.println("fixed origin");
 
-
-                            System.out.println(world.facts);
-                            System.out.println(authorizerWorld.facts);
+                            World authorizerWorld = new World(authorizer);
                             assertEquals(world.factMap(), authorizerWorld.factMap());
-
-                            System.out.println(world.rules);
-                            System.out.println(authorizerWorld.rules);
-
-                            assertEquals(world.rules.size(), authorizerWorld.rules.size());
-                            for (int i = 0; i < world.rules.size(); i++) {
-                                assertEquals(world.rules.get(i), authorizerWorld.rules.get(i));
-                            }
-                            /*assertEquals(world.checks.size(), authorizerWorld.checks.size());
-                            for (int i = 0; i < world.checks.size(); i++) {
-                                assertEquals(world.checks.get(i), authorizerWorld.checks.get(i));
-                            }
-                            assertEquals(world.policies.size(), authorizerWorld.policies.size());
-                            for (int i = 0; i < world.policies.size(); i++) {
-                                assertEquals(world.policies.get(i), authorizerWorld.policies.get(i));
-                            }*/
+                            assertEquals(world.rules, authorizerWorld.rules);
+                            assertEquals(world.checks, authorizerWorld.checks);
+                            assertEquals(world.policies, authorizerWorld.policies);
                         }
 
                         throw e;
@@ -336,12 +304,22 @@ class SamplesTest {
 
             this.checks = checksets;
             this.policies = authorizer.policies().stream().map(p -> p.toString()).collect(Collectors.toList());
+            Collections.sort(this.rules);
+            Collections.sort(this.checks);
         }
 
         public void fixOrigin() {
             for(FactSet f: this.facts) {
                 f.fixOrigin();
             }
+            for(RuleSet r: this.rules) {
+                r.fixOrigin();
+            }
+            Collections.sort(this.rules);
+            for(CheckSet c: this.checks) {
+                c.fixOrigin();
+            }
+            Collections.sort(this.checks);
         }
 
         public HashMap<List<Long>, List<String>> factMap() {
@@ -369,23 +347,18 @@ class SamplesTest {
         List<String> facts;
 
         public FactSet(List<Long> origin, List<String> facts) {
-            System.out.println("creating new factset with origin "+origin);
             this.origin = origin;
             this.facts = facts;
         }
 
         // JSON cannot represent Long.MAX_VALUE so it is stored as null, fix the origin list
         public void fixOrigin() {
-            System.out.println("fixing origins: "+this.origin);
             for(int i = 0; i < this.origin.size(); i++) {
                 if (this.origin.get(i) == null) {
                     this.origin.set(i, Long.MAX_VALUE);
                 }
             }
             Collections.sort(this.origin);
-
-            System.out.println("->: "+this.origin);
-
         }
 
         @Override
@@ -422,6 +395,12 @@ class SamplesTest {
         public RuleSet(Long origin, List<String> rules) {
             this.origin = origin;
             this.rules = rules;
+        }
+
+        public void fixOrigin() {
+            if (this.origin == null || this.origin == -1) {
+                this.origin = Long.MAX_VALUE;
+            }
         }
 
         @Override
@@ -464,7 +443,7 @@ class SamplesTest {
         }
     }
 
-    class CheckSet implements Comparable<RuleSet> {
+    class CheckSet implements Comparable<CheckSet> {
         Long origin;
         List<String> checks;
 
@@ -478,17 +457,41 @@ class SamplesTest {
             this.checks = checks;
         }
 
+        public void fixOrigin() {
+            if (this.origin == null || this.origin == -1) {
+                this.origin = Long.MAX_VALUE;
+            }
+        }
+
         @Override
-        public int compareTo(RuleSet ruleSet) {
+        public int compareTo(CheckSet checkSet) {
             // we only compare origin to sort the list of checksets
             // there's only one of each origin so we don't need to compare the list of rules
             if(this.origin == null) {
                 return -1;
-            } else if (ruleSet.origin == null) {
+            } else if (checkSet.origin == null) {
                 return 1;
             } else {
-                return this.origin.compareTo(ruleSet.origin);
+                return this.origin.compareTo(checkSet.origin);
             }
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            CheckSet checkSet = (CheckSet) o;
+
+            if (!Objects.equals(origin, checkSet.origin)) return false;
+            return Objects.equals(checks, checkSet.checks);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = origin != null ? origin.hashCode() : 0;
+            result = 31 * result + (checks != null ? checks.hashCode() : 0);
+            return result;
         }
 
         @Override

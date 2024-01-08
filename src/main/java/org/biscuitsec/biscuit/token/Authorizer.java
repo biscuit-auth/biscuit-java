@@ -640,13 +640,17 @@ public class Authorizer {
 
     public List<Tuple2<Long, List<Check>>> checks() {
         List<Tuple2<Long, List<Check>>> allChecks = new ArrayList<>();
-        allChecks.add(new Tuple2(null, this.checks));
+        if(!this.checks.isEmpty()) {
+            allChecks.add(new Tuple2(Long.MAX_VALUE, this.checks));
+        }
 
         List<Check> authorityChecks = new ArrayList<>();
         for(org.biscuitsec.biscuit.datalog.Check check: this.token.authority.checks) {
             authorityChecks.add(Check.convert_from(check, this.token.symbols));
         }
-        allChecks.add(new Tuple2((long)0,  authorityChecks));
+        if(!authorityChecks.isEmpty()) {
+            allChecks.add(new Tuple2((long) 0, authorityChecks));
+        }
 
         long count = 1;
         for(Block block: this.token.blocks) {
@@ -662,7 +666,9 @@ public class Authorizer {
                     blockChecks.add(Check.convert_from(check, token.symbols));
                 }
             }
-            allChecks.add(new Tuple2(count, blockChecks));
+            if(!blockChecks.isEmpty()) {
+                allChecks.add(new Tuple2(count, blockChecks));
+            }
             count += 1;
         }
 
