@@ -164,6 +164,10 @@ public abstract class Op {
                     _s = "(" + prec + ")";
                     stack.push(_s);
                     break;
+                case Length:
+                    _s = prec+".length()";
+                    stack.push(_s);
+                    break;
             }
             return _s;
         }
@@ -307,6 +311,10 @@ public abstract class Op {
                     }
                     break;
                 case Equal:
+                    if (right instanceof Term.Bool && left instanceof Term.Bool) {
+                        stack.push(new Term.Bool(((Term.Bool) left).value() == ((Term.Bool) right).value()));
+                        return true;
+                    }
                     if (right instanceof Term.Integer && left instanceof Term.Integer) {
                         stack.push(new Term.Bool(((Term.Integer) left).value() == ((Term.Integer) right).value()));
                         return true;
@@ -331,6 +339,10 @@ public abstract class Op {
                     }
                     break;
                 case NotEqual:
+                    if (right instanceof Term.Bool && left instanceof Term.Bool) {
+                        stack.push(new Term.Bool(((Term.Bool) left).value() == ((Term.Bool) right).value()));
+                        return true;
+                    }
                     if (right instanceof Term.Integer && left instanceof Term.Integer) {
                         stack.push(new Term.Bool(((Term.Integer) left).value() != ((Term.Integer) right).value()));
                         return true;
