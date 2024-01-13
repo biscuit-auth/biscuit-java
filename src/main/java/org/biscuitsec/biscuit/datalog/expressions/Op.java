@@ -419,7 +419,13 @@ public abstract class Op {
                     break;
                 case Add:
                     if (right instanceof Term.Integer && left instanceof Term.Integer) {
-                        stack.push(new Term.Integer(((Term.Integer) left).value() + ((Term.Integer) right).value()));
+                        try {
+                            stack.push(new Term.Integer(
+                                    Math.addExact(((Term.Integer) left).value(), ((Term.Integer) right).value())
+                            ));
+                        } catch (ArithmeticException e) {
+                            throw new Error.Execution(Error.Execution.Kind.Overflow, "overflow");
+                        }
                     }
                     if (right instanceof Term.Str && left instanceof Term.Str) {
                         Option<String> left_s = symbols.get_s((int)((Term.Str) left).value());
@@ -439,12 +445,24 @@ public abstract class Op {
                     break;
                 case Sub:
                     if (right instanceof Term.Integer && left instanceof Term.Integer) {
-                        stack.push(new Term.Integer(((Term.Integer) left).value() - ((Term.Integer) right).value()));
+                        try {
+                            stack.push(new Term.Integer(
+                                    Math.subtractExact(((Term.Integer) left).value(), ((Term.Integer) right).value())
+                            ));
+                        } catch (ArithmeticException e) {
+                            throw new Error.Execution(Error.Execution.Kind.Overflow, "overflow");
+                        }
                     }
                     break;
                 case Mul:
                     if (right instanceof Term.Integer && left instanceof Term.Integer) {
-                        stack.push(new Term.Integer(((Term.Integer) left).value() * ((Term.Integer) right).value()));
+                        try {
+                            stack.push(new Term.Integer(
+                                    Math.multiplyExact(((Term.Integer) left).value(), ((Term.Integer) right).value())
+                            ));
+                        } catch (ArithmeticException e) {
+                            throw new Error.Execution(Error.Execution.Kind.Overflow, "overflow");
+                        }
                     }
                     break;
                 case Div:
