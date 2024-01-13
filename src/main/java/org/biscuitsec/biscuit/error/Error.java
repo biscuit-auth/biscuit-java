@@ -535,10 +535,18 @@ public class Error extends Exception {
 
     public static class Execution extends Error {
         Expression e;
+        String message;
 
-        public Execution(Expression ex) {
+        public Execution(Expression ex, String msg) {
             e = ex;
+            message = msg;
         }
+
+        public Execution( String msg) {
+            e = null;
+            message = msg;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -547,6 +555,12 @@ public class Error extends Exception {
         @Override
         public JsonElement toJson(){
             return new JsonPrimitive("Execution");
+        }
+
+        @Override
+        public String toString() {
+            return "Execution error when evaluating expression '" + e +
+                    "': " + message;
         }
     }
 

@@ -2,6 +2,7 @@ package org.biscuitsec.biscuit.datalog;
 
 import org.biscuitsec.biscuit.datalog.expressions.Expression;
 import org.biscuitsec.biscuit.datalog.expressions.Op;
+import org.biscuitsec.biscuit.error.Error;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -12,7 +13,7 @@ import java.util.HashMap;
 public class ExpressionTest {
 
     @Test
-    public void testNegate() {
+    public void testNegate() throws Error.Execution {
         SymbolTable symbols = new SymbolTable();
         symbols.add("a");
         symbols.add("b");
@@ -36,12 +37,12 @@ public class ExpressionTest {
 
         assertEquals(
                 new Term.Bool(true),
-                e.evaluate(variables, new TemporarySymbolTable(symbols)).get()
+                e.evaluate(variables, new TemporarySymbolTable(symbols))
         );
     }
 
     @Test
-    public void testAddsStr() {
+    public void testAddsStr() throws Error.Execution {
         SymbolTable symbols = new SymbolTable();
         symbols.add("a");
         symbols.add("b");
@@ -61,12 +62,12 @@ public class ExpressionTest {
 
         assertEquals(
                 new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET + 2),
-                e.evaluate(new HashMap<>(),  new TemporarySymbolTable(symbols)).get()
+                e.evaluate(new HashMap<>(),  new TemporarySymbolTable(symbols))
         );
     }
 
     @Test
-    public void testContainsStr() {
+    public void testContainsStr() throws Error.Execution {
         SymbolTable symbols = new SymbolTable();
         symbols.add("ab");
         symbols.add("b");
@@ -85,12 +86,12 @@ public class ExpressionTest {
 
         assertEquals(
                 new Term.Bool(true),
-                e.evaluate(new HashMap<>(),  new TemporarySymbolTable(symbols)).get()
+                e.evaluate(new HashMap<>(),  new TemporarySymbolTable(symbols))
         );
     }
 
     @Test
-    public void testNegativeContainsStr() {
+    public void testNegativeContainsStr() throws Error.Execution {
         SymbolTable symbols = new SymbolTable();
         symbols.add("ab");
         symbols.add("b");
@@ -110,7 +111,7 @@ public class ExpressionTest {
 
         assertEquals(
                 new Term.Bool(false),
-                e.evaluate(new HashMap<>(),  new TemporarySymbolTable(symbols)).get()
+                e.evaluate(new HashMap<>(),  new TemporarySymbolTable(symbols))
         );
     }
 }

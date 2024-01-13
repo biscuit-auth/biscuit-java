@@ -16,7 +16,7 @@ import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
 public abstract class Op {
-    public abstract boolean evaluate(Deque<Term> stack, Map<Long, Term> variables, TemporarySymbolTable symbols);
+    public abstract void evaluate(Deque<Term> stack, Map<Long, Term> variables, TemporarySymbolTable symbols) throws Error.Execution;
 
     public abstract String print(Deque<String> stack, SymbolTable symbols);
 
@@ -46,19 +46,17 @@ public abstract class Op {
         }
 
         @Override
-        public boolean evaluate(Deque<Term> stack, Map<Long, Term> variables, TemporarySymbolTable symbols) {
+        public void evaluate(Deque<Term> stack, Map<Long, Term> variables, TemporarySymbolTable symbols) throws Error.Execution {
             if (value instanceof Term.Variable) {
                 Term.Variable var = (Term.Variable) value;
                 Term valueVar = variables.get(var.value());
                 if (valueVar != null) {
                     stack.push(valueVar);
-                    return true;
                 } else {
-                    return false;
+                    throw new Error.Execution( "cannot find a variable for index "+value);
                 }
             } else {
                 stack.push(value);
-                return true;
             }
 
         }
@@ -118,7 +116,7 @@ public abstract class Op {
         }
 
         @Override
-        public boolean evaluate(Deque<Term> stack, Map<Long, Term> variables, TemporarySymbolTable symbols) {
+        public void evaluate(Deque<Term> stack, Map<Long, Term> variables, TemporarySymbolTable symbols) throws Error.Execution {
             Term value = stack.pop();
             switch (this.op) {
                 case Negate:
@@ -126,7 +124,7 @@ public abstract class Op {
                         Term.Bool b = (Term.Bool) value;
                         stack.push(new Term.Bool(!b.value()));
                     } else {
-                        return false;
+                        throw new Error.Execution("invalid type for negate op, expected boolean");
                     }
                     break;
                 case Parens:
@@ -136,7 +134,7 @@ public abstract class Op {
                     if (value instanceof Term.Str) {
                         Option<String> s = symbols.get_s((int)((Term.Str) value).value());
                         if(s.isEmpty()) {
-                            return false;
+                            throw new Error.Execution("string not found in symbols for id"+value);
                         } else {
                             stack.push(new Term.Integer(s.get().length()));
                         }
@@ -145,10 +143,9 @@ public abstract class Op {
                     } else if (value instanceof Term.Set) {
                         stack.push(new Term.Integer(((Term.Set) value).value().size()));
                     } else {
-                        return false;
+                        throw new Error.Execution("invalid type for length op");
                     }
             }
-            return true;
         }
 
         @Override
@@ -265,7 +262,7 @@ public abstract class Op {
         }
 
         @Override
-        public boolean evaluate(Deque<Term> stack, Map<Long, Term> variables, TemporarySymbolTable symbols) {
+        public void evaluate(Deque<Term> stack, Map<Long, Term> variables, TemporarySymbolTable symbols) throws Error.Execution {
             Term right = stack.pop();
             Term left = stack.pop();
 
@@ -273,100 +270,81 @@ public abstract class Op {
                 case LessThan:
                     if (right instanceof Term.Integer && left instanceof Term.Integer) {
                         stack.push(new Term.Bool(((Term.Integer) left).value() < ((Term.Integer) right).value()));
-                        return true;
                     }
                     if (right instanceof Term.Date && left instanceof Term.Date) {
                         stack.push(new Term.Bool(((Term.Date) left).value() < ((Term.Date) right).value()));
-                        return true;
                     }
                     break;
                 case GreaterThan:
                     if (right instanceof Term.Integer && left instanceof Term.Integer) {
                         stack.push(new Term.Bool(((Term.Integer) left).value() > ((Term.Integer) right).value()));
-                        return true;
                     }
                     if (right instanceof Term.Date && left instanceof Term.Date) {
                         stack.push(new Term.Bool(((Term.Date) left).value() > ((Term.Date) right).value()));
-                        return true;
                     }
                     break;
                 case LessOrEqual:
                     if (right instanceof Term.Integer && left instanceof Term.Integer) {
                         stack.push(new Term.Bool(((Term.Integer) left).value() <= ((Term.Integer) right).value()));
-                        return true;
                     }
                     if (right instanceof Term.Date && left instanceof Term.Date) {
                         stack.push(new Term.Bool(((Term.Date) left).value() <= ((Term.Date) right).value()));
-                        return true;
                     }
                     break;
                 case GreaterOrEqual:
                     if (right instanceof Term.Integer && left instanceof Term.Integer) {
                         stack.push(new Term.Bool(((Term.Integer) left).value() >= ((Term.Integer) right).value()));
-                        return true;
                     }
                     if (right instanceof Term.Date && left instanceof Term.Date) {
                         stack.push(new Term.Bool(((Term.Date) left).value() >= ((Term.Date) right).value()));
-                        return true;
                     }
                     break;
                 case Equal:
                     if (right instanceof Term.Bool && left instanceof Term.Bool) {
                         stack.push(new Term.Bool(((Term.Bool) left).value() == ((Term.Bool) right).value()));
-                        return true;
                     }
                     if (right instanceof Term.Integer && left instanceof Term.Integer) {
                         stack.push(new Term.Bool(((Term.Integer) left).value() == ((Term.Integer) right).value()));
-                        return true;
                     }
                     if (right instanceof Term.Str && left instanceof Term.Str) {
                         stack.push(new Term.Bool(((Term.Str) left).value() == ((Term.Str) right).value()));
-                        return true;
                     }
                     if (right instanceof Term.Bytes && left instanceof Term.Bytes) {
                         stack.push(new Term.Bool(Arrays.equals(((Term.Bytes) left).value(), (((Term.Bytes) right).value()))));
-                        return true;
                     }
                     if (right instanceof Term.Date && left instanceof Term.Date) {
                         stack.push(new Term.Bool(((Term.Date) left).value() == ((Term.Date) right).value()));
-                        return true;
                     }
                     if (right instanceof Term.Set && left instanceof Term.Set) {
                         Set<Term> leftSet = ((Term.Set) left).value();
                         Set<Term> rightSet = ((Term.Set) right).value();
                         stack.push(new Term.Bool( leftSet.size() == rightSet.size() && leftSet.containsAll(rightSet)));
-                        return true;
                     }
                     break;
                 case NotEqual:
                     if (right instanceof Term.Bool && left instanceof Term.Bool) {
                         stack.push(new Term.Bool(((Term.Bool) left).value() == ((Term.Bool) right).value()));
-                        return true;
                     }
                     if (right instanceof Term.Integer && left instanceof Term.Integer) {
                         stack.push(new Term.Bool(((Term.Integer) left).value() != ((Term.Integer) right).value()));
-                        return true;
                     }
                     if (right instanceof Term.Str && left instanceof Term.Str) {
                         stack.push(new Term.Bool(((Term.Str) left).value() != ((Term.Str) right).value()));
-                        return true;
                     }
                     if (right instanceof Term.Bytes && left instanceof Term.Bytes) {
                         stack.push(new Term.Bool(!Arrays.equals(((Term.Bytes) left).value(), (((Term.Bytes) right).value()))));
-                        return true;
                     }
                     if (right instanceof Term.Date && left instanceof Term.Date) {
                         stack.push(new Term.Bool(((Term.Date) left).value() != ((Term.Date) right).value()));
-                        return true;
                     }
                     if (right instanceof Term.Set && left instanceof Term.Set) {
                         Set<Term> leftSet = ((Term.Set) left).value();
                         Set<Term> rightSet = ((Term.Set) right).value();
                         stack.push(new Term.Bool( leftSet.size() != rightSet.size() || !leftSet.containsAll(rightSet)));
-                        return true;
                     }
                     break;
                 case Contains:
+                    System.out.println("calling contains op with left "+left+" and right "+right);
                     if (left instanceof Term.Set &&
                             (right instanceof Term.Integer ||
                                     right instanceof Term.Str ||
@@ -375,91 +353,98 @@ public abstract class Op {
                                     right instanceof Term.Bool)) {
 
                         stack.push(new Term.Bool(((Term.Set) left).value().contains(right)));
-                        return true;
                     }
                     if (right instanceof Term.Set && left instanceof Term.Set) {
                         Set<Term> leftSet = ((Term.Set) left).value();
                         Set<Term> rightSet = ((Term.Set) right).value();
                         stack.push(new Term.Bool(leftSet.containsAll(rightSet)));
-                        return true;
                     }
                     if (left instanceof Term.Str && right instanceof Term.Str) {
                         Option<String> left_s = symbols.get_s((int)((Term.Str) left).value());
                         Option<String> right_s = symbols.get_s((int)((Term.Str) right).value());
 
-                        if (left_s.isEmpty() || right_s.isEmpty()) {
-                            return false;
-                        } else {
-                            stack.push(new Term.Bool(left_s.get().contains(right_s.get())));
-                            return true;
+                        if(left_s.isEmpty()) {
+                            throw new Error.Execution("cannot find string in symbols for index "+((Term.Str) left).value());
                         }
+                        if(right_s.isEmpty()) {
+                            throw new Error.Execution("cannot find string in symbols for index "+((Term.Str) right).value());
+                        }
+
+
+                        stack.push(new Term.Bool(left_s.get().contains(right_s.get())));
                     }
                     break;
                 case Prefix:
                     if (right instanceof Term.Str && left instanceof Term.Str) {
                         Option<String> left_s = symbols.get_s((int)((Term.Str) left).value());
                         Option<String> right_s = symbols.get_s((int)((Term.Str) right).value());
-                        if(left_s.isEmpty() || right_s.isEmpty()) {
-                            return false;
+                        if(left_s.isEmpty()) {
+                            throw new Error.Execution("cannot find string in symbols for index "+((Term.Str) left).value());
+                        }
+                        if(right_s.isEmpty()) {
+                            throw new Error.Execution("cannot find string in symbols for index "+((Term.Str) right).value());
                         }
 
                         stack.push(new Term.Bool(left_s.get().startsWith(right_s.get())));
-                        return true;
                     }
                     break;
                 case Suffix:
                     if (right instanceof Term.Str && left instanceof Term.Str) {
                         Option<String> left_s = symbols.get_s((int)((Term.Str) left).value());
                         Option<String> right_s = symbols.get_s((int)((Term.Str) right).value());
-                        if(left_s.isEmpty() || right_s.isEmpty()) {
-                            return false;
+                        if(left_s.isEmpty()) {
+                            throw new Error.Execution("cannot find string in symbols for index "+((Term.Str) left).value());
+                        }
+                        if(right_s.isEmpty()) {
+                            throw new Error.Execution("cannot find string in symbols for index "+((Term.Str) right).value());
                         }
                         stack.push(new Term.Bool(left_s.get().endsWith(right_s.get())));
-                        return true;
                     }
                     break;
                 case Regex:
                     if (right instanceof Term.Str && left instanceof Term.Str) {
                         Option<String> left_s = symbols.get_s((int)((Term.Str) left).value());
                         Option<String> right_s = symbols.get_s((int)((Term.Str) right).value());
-                        if(left_s.isEmpty() || right_s.isEmpty()) {
-                            return false;
+                        if(left_s.isEmpty()) {
+                            throw new Error.Execution("cannot find string in symbols for index "+((Term.Str) left).value());
+                        }
+                        if(right_s.isEmpty()) {
+                            throw new Error.Execution("cannot find string in symbols for index "+((Term.Str) right).value());
                         }
 
                         Pattern p = Pattern.compile(right_s.get());
                         Matcher m = p.matcher(left_s.get());
                         stack.push(new Term.Bool(m.find()));
-                        return true;
                     }
                     break;
                 case Add:
                     if (right instanceof Term.Integer && left instanceof Term.Integer) {
                         stack.push(new Term.Integer(((Term.Integer) left).value() + ((Term.Integer) right).value()));
-                        return true;
                     }
                     if (right instanceof Term.Str && left instanceof Term.Str) {
                         Option<String> left_s = symbols.get_s((int)((Term.Str) left).value());
                         Option<String> right_s = symbols.get_s((int)((Term.Str) right).value());
 
-                        if(left_s.isEmpty() || right_s.isEmpty()) {
-                            return false;
+                        if(left_s.isEmpty()) {
+                            throw new Error.Execution("cannot find string in symbols for index "+((Term.Str) left).value());
                         }
+                        if(right_s.isEmpty()) {
+                            throw new Error.Execution("cannot find string in symbols for index "+((Term.Str) right).value());
+                        }
+
                         String concatenation = left_s.get() + right_s.get();
                         long index = symbols.insert(concatenation);
                         stack.push(new Term.Str(index));
-                        return true;
                     }
                     break;
                 case Sub:
                     if (right instanceof Term.Integer && left instanceof Term.Integer) {
                         stack.push(new Term.Integer(((Term.Integer) left).value() - ((Term.Integer) right).value()));
-                        return true;
                     }
                     break;
                 case Mul:
                     if (right instanceof Term.Integer && left instanceof Term.Integer) {
                         stack.push(new Term.Integer(((Term.Integer) left).value() * ((Term.Integer) right).value()));
-                        return true;
                     }
                     break;
                 case Div:
@@ -467,20 +452,17 @@ public abstract class Op {
                         long rl = ((Term.Integer) right).value();
                         if (rl != 0) {
                             stack.push(new Term.Integer(((Term.Integer) left).value() / rl));
-                            return true;
                         }
                     }
                     break;
                 case And:
                     if (right instanceof Term.Bool && left instanceof Term.Bool) {
                         stack.push(new Term.Bool(((Term.Bool) left).value() && ((Term.Bool) right).value()));
-                        return true;
                     }
                     break;
                 case Or:
                     if (right instanceof Term.Bool && left instanceof Term.Bool) {
                         stack.push(new Term.Bool(((Term.Bool) left).value() || ((Term.Bool) right).value()));
-                        return true;
                     }
                     break;
                 case Intersection:
@@ -494,7 +476,6 @@ public abstract class Op {
                             }
                         }
                         stack.push(new Term.Set(intersec));
-                        return true;
                     }
                     break;
                 case Union:
@@ -505,7 +486,6 @@ public abstract class Op {
                         union.addAll(_right);
                         union.addAll(_left);
                         stack.push(new Term.Set(union));
-                        return true;
                     }
                     break;
                 case BitwiseAnd:
@@ -513,7 +493,6 @@ public abstract class Op {
                         long r = ((Term.Integer) right).value();
                         long l = ((Term.Integer) left).value();
                         stack.push(new Term.Integer(r & l));
-                        return true;
                     }
                     break;
                 case BitwiseOr:
@@ -521,7 +500,6 @@ public abstract class Op {
                         long r = ((Term.Integer) right).value();
                         long l = ((Term.Integer) left).value();
                         stack.push(new Term.Integer(r | l));
-                        return true;
                     }
                     break;
                 case BitwiseXor:
@@ -529,13 +507,11 @@ public abstract class Op {
                         long r = ((Term.Integer) right).value();
                         long l = ((Term.Integer) left).value();
                         stack.push(new Term.Integer(r ^ l));
-                        return true;
                     }
                     break;
                 default:
-                    return false;
+                    throw new Error.Execution("binary exec error for op"+this);
             }
-            return false;
         }
 
         @Override

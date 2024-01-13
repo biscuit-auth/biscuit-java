@@ -2,6 +2,7 @@ package org.biscuitsec.biscuit.datalog;
 
 import org.biscuitsec.biscuit.datalog.expressions.Expression;
 import io.vavr.control.Option;
+import org.biscuitsec.biscuit.error.Error;
 
 import java.io.Serializable;
 import java.util.*;
@@ -60,21 +61,17 @@ public final class MatchedVariables implements Serializable {
       }
    }
 
-   public Option<Map<Long, Term>> check_expressions(List<Expression> expressions, SymbolTable symbols) {
+   public Option<Map<Long, Term>> check_expressions(List<Expression> expressions, SymbolTable symbols) throws Error {
       final Option<Map<Long, Term>> vars = this.complete();
       if (vars.isDefined()) {
          Map<Long, Term> variables = vars.get();
 
 
          for(Expression e: expressions) {
-            Option<Term> res = e.evaluate(variables, new TemporarySymbolTable(symbols));
+            Term term = e.evaluate(variables, new TemporarySymbolTable(symbols));
 
-            if(res.isEmpty()) {
-               return Option.none();
-            }
-
-            if(!res.get().equals(new Term.Bool(true))) {
-               return Option.none();
+            if(!term.equals(new Term.Bool(true))) {
+               throw new Error.InvalidType();
             }
          }
 

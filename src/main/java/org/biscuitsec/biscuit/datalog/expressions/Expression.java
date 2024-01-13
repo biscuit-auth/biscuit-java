@@ -28,17 +28,16 @@ public class Expression {
     }
 
     //FIXME: should return a Result<Term, error::Expression>
-    public Option<Term> evaluate(Map<Long, Term> variables, TemporarySymbolTable symbols) {
+    public Term evaluate(Map<Long, Term> variables, TemporarySymbolTable symbols) throws Error.Execution {
         Deque<Term> stack = new ArrayDeque<Term>(16); //Default value
         for(Op op: ops){
-            if(!op.evaluate(stack,variables, symbols)){
-                return Option.none();
-            }
+            System.out.println("evaluating "+op+": "+stack);
+            op.evaluate(stack,variables, symbols);
         }
         if(stack.size() == 1){
-            return Option.some(stack.pop());
+            return stack.pop();
         } else {
-            return Option.none();
+            throw new Error.Execution(this, "execution");
         }
     }
 
