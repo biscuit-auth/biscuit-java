@@ -55,9 +55,9 @@ public final class Rule implements Serializable {
                  Map<Long, Term> generatedVariables = t._2;
                  TemporarySymbolTable temporarySymbols = new TemporarySymbolTable(symbols);
                  for (Expression e : this.expressions) {
-                    Option<Term> res = e.evaluate(generatedVariables, temporarySymbols);
-                    if (res.isDefined()) {
-                       Term term = res.get();
+                    try {
+                       Term term = e.evaluate(generatedVariables, temporarySymbols);
+
                        if (term instanceof Term.Bool) {
                           Term.Bool b = (Term.Bool) term;
                           if (!b.value()) {
@@ -67,7 +67,10 @@ public final class Rule implements Serializable {
                        } else {
                           return Either.left(new Error.InvalidType());
                        }
+                    } catch(Error error) {
+                       return Either.left(error);
                     }
+
                  }
                  return Either.right(new Tuple3(origin, generatedVariables, true));
               })
@@ -130,7 +133,7 @@ public final class Rule implements Serializable {
    }
 
    // verifies that the expressions return true for every matching set of facts
-   public boolean check_match_all(final FactSet facts, TrustedOrigins scope, SymbolTable symbols) throws Error.InvalidType {
+   public boolean check_match_all(final FactSet facts, TrustedOrigins scope, SymbolTable symbols) throws Error {
       MatchedVariables variables = variablesSet();
 
       if(this.body.isEmpty()) {
@@ -148,18 +151,16 @@ public final class Rule implements Serializable {
 
            TemporarySymbolTable temporarySymbols = new TemporarySymbolTable(symbols);
            for (Expression e : this.expressions) {
-              Option<Term> res = e.evaluate(generatedVariables, temporarySymbols);
-              if (res.isDefined()) {
-                 Term term = res.get();
-                 if (term instanceof Term.Bool) {
-                    Term.Bool b = (Term.Bool) term;
-                    if (!b.value()) {
-                       return false;
-                    }
-                    // continue evaluating if true
-                 } else {
-                    throw new Error.InvalidType();
+
+              Term term = e.evaluate(generatedVariables, temporarySymbols);
+              if (term instanceof Term.Bool) {
+                 Term.Bool b = (Term.Bool) term;
+                 if (!b.value()) {
+                    return false;
                  }
+                 // continue evaluating if true
+              } else {
+                 throw new Error.InvalidType();
               }
            }
        }

@@ -280,7 +280,7 @@ class ParserTest {
     }
 
     @Test
-    void testParens() {
+    void testParens() throws org.biscuitsec.biscuit.error.Error.Execution {
         Either<Error, Tuple2<String, Expression>> res =
                 Parser.expression("  1 + 2 * 3  ");
 
@@ -314,8 +314,8 @@ class ParserTest {
         );
 
         Map<Long, org.biscuitsec.biscuit.datalog.Term> variables = new HashMap<>();
-        Option<org.biscuitsec.biscuit.datalog.Term> value = ex.evaluate(variables, new TemporarySymbolTable(s));
-        assertEquals(Option.some(new org.biscuitsec.biscuit.datalog.Term.Integer(7)), value);
+        org.biscuitsec.biscuit.datalog.Term value = ex.evaluate(variables, new TemporarySymbolTable(s));
+        assertEquals(new org.biscuitsec.biscuit.datalog.Term.Integer(7), value);
         assertEquals("1 + 2 * 3", ex.print(s).get());
 
 
@@ -356,8 +356,8 @@ class ParserTest {
         );
 
         Map<Long, org.biscuitsec.biscuit.datalog.Term> variables2 = new HashMap<>();
-        Option<org.biscuitsec.biscuit.datalog.Term> value2 = ex2.evaluate(variables2, new TemporarySymbolTable(s2));
-        assertEquals(Option.some(new org.biscuitsec.biscuit.datalog.Term.Integer(9)), value2);
+        org.biscuitsec.biscuit.datalog.Term value2 = ex2.evaluate(variables2, new TemporarySymbolTable(s2));
+        assertEquals(new org.biscuitsec.biscuit.datalog.Term.Integer(9), value2);
         assertEquals("(1 + 2) * 3", ex2.print(s2).get());
     }
 }

@@ -109,7 +109,7 @@ public class World implements Serializable {
       return rule.find_match(this.facts, origin, scope, symbols);
    }
 
-   public final boolean query_match_all(final Rule rule, TrustedOrigins scope, SymbolTable symbols) throws Error.InvalidType {
+   public final boolean query_match_all(final Rule rule, TrustedOrigins scope, SymbolTable symbols) throws Error {
       return rule.check_match_all(this.facts, scope, symbols);
    }
 

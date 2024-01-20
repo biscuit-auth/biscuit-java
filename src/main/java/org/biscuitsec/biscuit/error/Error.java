@@ -18,7 +18,6 @@ public class Error extends Exception {
         return new JsonObject();
     }
 
-
     public static class InternalError extends Error {}
 
     public static class FormatError extends Error {
@@ -534,11 +533,34 @@ public class Error extends Exception {
     }
 
     public static class Execution extends Error {
-        Expression e;
+        public enum Kind {
+            Execution,
+            Overflow
 
-        public Execution(Expression ex) {
-            e = ex;
         }
+        Expression e;
+        String message;
+
+        Kind kind;
+
+        public Execution(Expression ex, String msg) {
+            e = ex;
+            message = msg;
+            kind = Kind.Execution;
+        }
+
+        public Execution( String msg) {
+            e = null;
+            message = msg;
+            kind = Kind.Execution;
+        }
+
+        public Execution(Kind kind, String msg) {
+            e = null;
+            this.kind = kind;
+            message = msg;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -546,7 +568,16 @@ public class Error extends Exception {
         }
         @Override
         public JsonElement toJson(){
-            return new JsonPrimitive("Execution");
+            JsonObject jo = new JsonObject();
+            jo.add("Execution", new JsonPrimitive(this.kind.toString()));
+            return jo;
+
+        }
+
+        @Override
+        public String toString() {
+            return "Execution error when evaluating expression '" + e +
+                    "': " + message;
         }
     }
 
