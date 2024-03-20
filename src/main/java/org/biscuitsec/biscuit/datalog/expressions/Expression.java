@@ -31,7 +31,6 @@ public class Expression {
     public Term evaluate(Map<Long, Term> variables, TemporarySymbolTable symbols) throws Error.Execution {
         Deque<Term> stack = new ArrayDeque<Term>(16); //Default value
         for(Op op: ops){
-            //System.out.println("evaluating "+op+": "+stack);
             op.evaluate(stack,variables, symbols);
         }
         if(stack.size() == 1){
