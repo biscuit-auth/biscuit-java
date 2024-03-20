@@ -344,7 +344,7 @@ public abstract class Op {
                     }
                     break;
                 case Contains:
-                    System.out.println("calling contains op with left "+left+" and right "+right);
+                    //System.out.println("calling contains op with left "+left+" and right "+right);
                     if (left instanceof Term.Set &&
                             (right instanceof Term.Integer ||
                                     right instanceof Term.Str ||
