@@ -281,7 +281,7 @@ public class Error extends Exception {
             public String toString() {
                 return "Version{" +
                         "minimum=" + minimum +
-                        "maximum=" + maximum +
+                        ", maximum=" + maximum +
                         ", actual=" + actual +
                         '}';
             }
