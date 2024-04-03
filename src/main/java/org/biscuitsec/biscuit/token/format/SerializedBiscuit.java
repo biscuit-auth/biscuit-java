@@ -191,6 +191,14 @@ public class SerializedBiscuit {
             blockBuilder.setNextKey(block.key.serialize());
             blockBuilder.setSignature(ByteString.copyFrom(block.signature));
 
+            if (block.externalSignature.isDefined()) {
+                ExternalSignature externalSignature = block.externalSignature.get();
+                Schema.ExternalSignature.Builder externalSignatureBuilder = Schema.ExternalSignature.newBuilder();
+                externalSignatureBuilder.setPublicKey(externalSignature.key.serialize());
+                externalSignatureBuilder.setSignature(ByteString.copyFrom(externalSignature.signature));
+                blockBuilder.setExternalSignature(externalSignatureBuilder.build());
+            }
+
             biscuitBuilder.addBlocks(blockBuilder.build());
         }
 
