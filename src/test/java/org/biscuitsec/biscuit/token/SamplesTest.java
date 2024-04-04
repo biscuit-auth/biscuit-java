@@ -24,8 +24,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 class SamplesTest {
     final RunLimits runLimits = new RunLimits(500,100, Duration.ofMillis(500));
@@ -56,6 +55,7 @@ class SamplesTest {
                 Either<Throwable, Long> res = Try.of(() -> {
                     inputStream.read(data);
                     Biscuit token = Biscuit.from_bytes(data, publicKey);
+                    assertArrayEquals(token.serialize(), data);
 
                     List<RevocationIdentifier> revocationIds = token.revocation_identifiers();
                     JsonArray validationRevocationIds = validation.getAsJsonArray("revocation_ids");
