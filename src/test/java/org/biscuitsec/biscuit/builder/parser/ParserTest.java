@@ -134,6 +134,43 @@ class ParserTest {
     }
 
     @Test
+    void expressionIntersectionAndContainsTest() {
+        Either<Error, Tuple2<String, Expression>> res =
+                Parser.expression("[1, 2, 3].intersection([1, 2]).contains(1)");
+
+        assertEquals(Either.right(new Tuple2<>("",
+                new Expression.Binary(
+                        Expression.Op.Contains,
+                        new Expression.Binary(
+                                Expression.Op.Intersection,
+                                new Expression.Value(Utils.set(new HashSet<>(Arrays.asList(Utils.integer(1), Utils.integer(2), Utils.integer(3))))),
+                                new Expression.Value(Utils.set(new HashSet<>(Arrays.asList(Utils.integer(1), Utils.integer(2)))))
+                        ),
+                        new Expression.Value(Utils.integer(1))
+                ))), res);
+    }
+
+    @Test
+    void expressionIntersectionAndContainsAndLengthEqualsTest() {
+        Either<Error, Tuple2<String, Expression>> res =
+                Parser.expression("[1, 2, 3].intersection([1, 2]).length() == 2");
+
+        assertEquals(Either.right(new Tuple2<>("",
+                new Expression.Binary(
+                        Expression.Op.Equal,
+                        new Expression.Unary(
+                            Expression.Op.Length,
+                            new Expression.Binary(
+                                    Expression.Op.Intersection,
+                                    new Expression.Value(Utils.set(new HashSet<>(Arrays.asList(Utils.integer(1), Utils.integer(2), Utils.integer(3))))),
+                                    new Expression.Value(Utils.set(new HashSet<>(Arrays.asList(Utils.integer(1), Utils.integer(2)))))
+                            )
+                        ),
+                        new Expression.Value(Utils.integer(2))
+                ))), res);
+    }
+
+    @Test
     void ruleWithFreeExpressionVariables() {
         Either<Error, Tuple2<String, Rule>> res =
                 Parser.rule("right($0) <- resource($0), operation(\"read\"), $test");
@@ -366,11 +403,11 @@ class ParserTest {
     void testDatalogSucceeds() throws org.biscuitsec.biscuit.error.Error.Parser {
         SymbolTable symbols = Biscuit.default_symbol_table();
 
-        String l1 = "fact1(1)";
+        String l1 = "fact1(1, 2)";
         String l2 = "fact2(\"2\")";
         String l3 = "rule1(2) <- fact2(\"2\")";
         String l4 = "check if rule1(2)";
-        String toParse = String.join("\n", Arrays.asList(l1, l2, l3, l4));
+        String toParse = String.join(";", Arrays.asList(l1, l2, l3, l4));
 
         Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1, symbols, toParse);
         assertTrue(output.isRight());
@@ -387,14 +424,69 @@ class ParserTest {
     }
 
     @Test
+    void testDatalogSucceedsArrays() throws org.biscuitsec.biscuit.error.Error.Parser {
+        SymbolTable symbols = Biscuit.default_symbol_table();
+
+        String l1 = "check if [2, 3].union([2])";
+        String toParse = String.join(";", List.of(l1));
+
+        Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1, symbols, toParse);
+        assertTrue(output.isRight());
+
+        Block validBlock = new Block(1, symbols);
+        validBlock.add_check(l1);
+
+        output.forEach(block ->
+                assertArrayEquals(block.build().to_bytes().get(), validBlock.build().to_bytes().get())
+        );
+    }
+
+    @Test
+    void testDatalogSucceedsArraysContains() throws org.biscuitsec.biscuit.error.Error.Parser {
+        SymbolTable symbols = Biscuit.default_symbol_table();
+
+        String l1 = "check if [2019-12-04T09:46:41Z, 2020-12-04T09:46:41Z].contains(2020-12-04T09:46:41Z)";
+        String toParse = String.join(";", List.of(l1));
+
+        Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1, symbols, toParse);
+        assertTrue(output.isRight());
+
+        Block validBlock = new Block(1, symbols);
+        validBlock.add_check(l1);
+
+        output.forEach(block ->
+                assertArrayEquals(block.build().to_bytes().get(), validBlock.build().to_bytes().get())
+        );
+    }
+
+    @Test
     void testDatalogFailed() {
         SymbolTable symbols = Biscuit.default_symbol_table();
 
         String l1 = "fact(1)";
         String l2 = "check fact(1)"; // typo missing "if"
-        String toParse = String.join("\n", Arrays.asList(l1, l2));
+        String toParse = String.join(";", Arrays.asList(l1, l2));
 
         Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1, symbols, toParse);
         assertTrue(output.isLeft());
+    }
+
+    @Test
+    void testDatalogRemoveComment() throws org.biscuitsec.biscuit.error.Error.Parser {
+        SymbolTable symbols = Biscuit.default_symbol_table();
+
+        String l0 = "// test comment";
+        String l1 = "fact1(1, 2);";
+        String l2 = "fact2(\"2\");";
+        String l3 = "rule1(2) <- fact2(\"2\");";
+        String l4 = "// another comment";
+        String l5 = "/* test multiline";
+        String l6 = "comment */ check if rule1(2);";
+        String l7 = "  /* another multiline";
+        String l8 = "comment */";
+        String toParse = String.join("", Arrays.asList(l0, l1, l2, l3, l4, l5, l6, l7, l8));
+
+        Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1, symbols, toParse);
+        assertTrue(output.isRight());
     }
 }

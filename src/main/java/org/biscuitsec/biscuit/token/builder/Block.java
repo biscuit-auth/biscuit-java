@@ -150,8 +150,6 @@ public class Block {
             publicKeys.add(this.symbols.publicKeys().get(i));
         }
 
-        publicKeys.addAll(this.publicKeys);
-
         SchemaVersion schemaVersion = new SchemaVersion(this.facts, this.rules, this.checks, this.scopes);
 
         return new org.biscuitsec.biscuit.token.Block(symbols, this.context, this.facts, this.rules, this.checks,
