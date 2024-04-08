@@ -1,7 +1,9 @@
 package org.biscuitsec.biscuit.token.builder.parser;
 
 import biscuit.format.schema.Schema;
+import io.vavr.collection.Stream;
 import org.biscuitsec.biscuit.crypto.PublicKey;
+import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.token.Policy;
 import io.vavr.Tuple2;
 import io.vavr.Tuple4;
@@ -10,12 +12,48 @@ import org.biscuitsec.biscuit.token.builder.*;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.HashSet;
+import java.util.*;
 import java.util.function.Function;
 
 public class Parser {
+    /**
+     * Takes a datalog string with <code>\n</code> as datalog line separator. It tries to parse
+     * each line using fact, rule, check and scope sequentially.
+     *
+     * If one succeeds it returns Right(Block)
+     * else it returns a Map[lineNumber, List[Error]]
+     *
+     * @param index block index
+     * @param baseSymbols symbols table
+     * @param s datalog string to parse
+     * @return Either<Map<Integer, List<Error>>, Block>
+     */
+    public static Either<Map<Integer, List<Error>>, Block> datalog(long index, SymbolTable baseSymbols, String s) {
+        Block blockBuilder = new Block(index, baseSymbols);
+        Map<Integer, List<Error>> errors = new HashMap<>();
+
+        Stream.of(s.split("\n")).zipWithIndex().forEach(indexedLine -> {
+            Integer lineNumber = indexedLine._2;
+            String codeLine = indexedLine._1;
+            List<Error> lineErrors = new ArrayList<>();
+
+            fact(codeLine).bimap(lineErrors::add, r -> r._2).map(blockBuilder::add_fact);
+            rule(codeLine).bimap(lineErrors::add, r -> r._2).map(blockBuilder::add_rule);
+            check(codeLine).bimap(lineErrors::add, r -> r._2).map(blockBuilder::add_check);
+            scope(codeLine).bimap(lineErrors::add, r -> r._2).map(blockBuilder::add_scope);
+
+            if (lineErrors.size() > 3) {
+                errors.put(lineNumber, lineErrors);
+            }
+        });
+
+        if (!errors.isEmpty()) {
+            return Either.left(errors);
+        }
+
+        return Either.right(blockBuilder);
+    }
+
     public static Either<Error, Tuple2<String, Fact>> fact(String s) {
         Either<Error, Tuple2<String, Predicate>> res = fact_predicate(s);
         if (res.isLeft()) {

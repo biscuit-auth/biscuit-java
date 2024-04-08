@@ -5,6 +5,7 @@ import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.datalog.TemporarySymbolTable;
 import org.biscuitsec.biscuit.datalog.expressions.Op;
+import org.biscuitsec.biscuit.token.Biscuit;
 import org.biscuitsec.biscuit.token.builder.parser.Error;
 import org.biscuitsec.biscuit.token.builder.parser.Parser;
 import io.vavr.Tuple2;
@@ -15,7 +16,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.biscuitsec.biscuit.datalog.Check.Kind.One;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.*;
 
@@ -359,5 +360,41 @@ class ParserTest {
         org.biscuitsec.biscuit.datalog.Term value2 = ex2.evaluate(variables2, new TemporarySymbolTable(s2));
         assertEquals(new org.biscuitsec.biscuit.datalog.Term.Integer(9), value2);
         assertEquals("(1 + 2) * 3", ex2.print(s2).get());
+    }
+
+    @Test
+    void testDatalogSucceeds() throws org.biscuitsec.biscuit.error.Error.Parser {
+        SymbolTable symbols = Biscuit.default_symbol_table();
+
+        String l1 = "fact1(1)";
+        String l2 = "fact2(\"2\")";
+        String l3 = "rule1(2) <- fact2(\"2\")";
+        String l4 = "check if rule1(2)";
+        String toParse = String.join("\n", Arrays.asList(l1, l2, l3, l4));
+
+        Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1, symbols, toParse);
+        assertTrue(output.isRight());
+
+        Block validBlock = new Block(1, symbols);
+        validBlock.add_fact(l1);
+        validBlock.add_fact(l2);
+        validBlock.add_rule(l3);
+        validBlock.add_check(l4);
+
+        output.forEach(block ->
+            assertArrayEquals(block.build().to_bytes().get(), validBlock.build().to_bytes().get())
+        );
+    }
+
+    @Test
+    void testDatalogFailed() {
+        SymbolTable symbols = Biscuit.default_symbol_table();
+
+        String l1 = "fact(1)";
+        String l2 = "check fact(1)"; // typo missing "if"
+        String toParse = String.join("\n", Arrays.asList(l1, l2));
+
+        Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1, symbols, toParse);
+        assertTrue(output.isLeft());
     }
 }
