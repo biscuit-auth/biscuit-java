@@ -165,18 +165,6 @@ class SamplesTest {
         }
     }
 
-    class Token {
-        List<Block> blocks;
-
-        public List<Block> getBlocks() {
-            return blocks;
-        }
-
-        public void setBlocks(List<Block> blocks) {
-            this.blocks = blocks;
-        }
-    }
-
     class TestCase {
         String title;
 
@@ -189,7 +177,7 @@ class SamplesTest {
         }
 
         String filename;
-        List<Token> tokens;
+        List<Block> token;
         JsonElement validations;
 
         public String getFilename() {
@@ -200,12 +188,12 @@ class SamplesTest {
             this.filename = filename;
         }
 
-        public List<Token> getTokens() {
-            return tokens;
+        public List<Block> getToken() {
+            return token;
         }
 
-        public void setTokens(List<Token> tokens) {
-            this.tokens = tokens;
+        public void setTokens(List<Block> token) {
+            this.token = token;
         }
 
         public JsonElement getValidations() {
