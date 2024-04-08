@@ -69,6 +69,11 @@ public class Block {
         return this;
     }
 
+    public Block addSymbol(String symbol) {
+        this.symbols.add(symbol);
+        return this;
+    }
+
     public Block add_fact(org.biscuitsec.biscuit.token.builder.Fact f) {
         this.facts.add(f.convert(this.symbols));
         return this;
