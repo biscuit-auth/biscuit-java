@@ -562,10 +562,10 @@ public class Parser {
             return Either.left(new Error(s, "not an integer"));
         }
 
-        Integer i = Integer.parseInt(s.substring(0, index2));
+        long i = Long.parseLong(s.substring(0, index2));
         String remaining = s.substring(index2);
 
-        return Either.right(new Tuple2<String, Term.Integer>(remaining, (Term.Integer) Utils.integer(i.intValue())));
+        return Either.right(new Tuple2<String, Term.Integer>(remaining, (Term.Integer) Utils.integer(i)));
     }
 
     public static Either<Error, Tuple2<String, Term.Date>> date(String s) {
