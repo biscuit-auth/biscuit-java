@@ -73,8 +73,7 @@ public class FactSet {
         return facts.entrySet()
                 .stream()
                 .flatMap(entry -> entry.getValue()
-                        .stream()
-                        .map(fact -> fact));
+                        .stream());
     }
 
 
