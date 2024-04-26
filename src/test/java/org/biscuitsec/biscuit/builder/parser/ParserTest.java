@@ -157,7 +157,7 @@ class ParserTest {
                                 Arrays.asList(
                                         Utils.pred("resource", List.of(Utils.string("file1")))
                                 ),
-                                new ArrayList(),
+                                new ArrayList<>(),
                                 Arrays.asList(
                                         Scope.publicKey(new PublicKey(Schema.PublicKey.Algorithm.Ed25519, "6e9e6d5a75cf0c0e87ec1256b4dfed0ca3ba452912d213fcc70f8516583db9db")),
                                         Scope.authority()
