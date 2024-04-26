@@ -73,7 +73,6 @@ public class Predicate implements Cloneable {
         String name = this.name;
         List<Term> terms = new ArrayList<Term>(this.terms.size());
         terms.addAll(this.terms);
-        Predicate p = new Predicate(name, terms);
-        return p;
+        return new Predicate(name, terms);
     }
 }
