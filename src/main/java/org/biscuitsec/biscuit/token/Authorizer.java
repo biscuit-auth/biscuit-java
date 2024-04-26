@@ -641,7 +641,7 @@ public class Authorizer {
     public List<Tuple2<Long, List<Check>>> checks() {
         List<Tuple2<Long, List<Check>>> allChecks = new ArrayList<>();
         if(!this.checks.isEmpty()) {
-            allChecks.add(new Tuple2(Long.MAX_VALUE, this.checks));
+            allChecks.add(new Tuple2<>(Long.MAX_VALUE, this.checks));
         }
 
         List<Check> authorityChecks = new ArrayList<>();
@@ -649,7 +649,7 @@ public class Authorizer {
             authorityChecks.add(Check.convert_from(check, this.token.symbols));
         }
         if(!authorityChecks.isEmpty()) {
-            allChecks.add(new Tuple2((long) 0, authorityChecks));
+            allChecks.add(new Tuple2<>((long) 0, authorityChecks));
         }
 
         long count = 1;
@@ -667,7 +667,7 @@ public class Authorizer {
                 }
             }
             if(!blockChecks.isEmpty()) {
-                allChecks.add(new Tuple2(count, blockChecks));
+                allChecks.add(new Tuple2<>(count, blockChecks));
             }
             count += 1;
         }

@@ -66,7 +66,7 @@ public class FactSet {
                 })
                 .flatMap(entry -> entry.getValue()
                         .stream()
-                        .map(fact -> new Tuple2(entry.getKey(), fact)));
+                        .map(fact -> new Tuple2<>(entry.getKey(), fact)));
     }
 
     public Stream<Fact> stream() {

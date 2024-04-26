@@ -282,18 +282,18 @@ public class Parser {
             }
         }
 
-        return Either.right(new Tuple2(s, scopes));
+        return Either.right(new Tuple2<>(s, scopes));
     }
 
     public static Either<Error, Tuple2<String, Scope>> scope(String s) {
         if (s.startsWith("authority")) {
             s = s.substring("authority".length());
-            return Either.right(new Tuple2(s, Scope.authority()));
+            return Either.right(new Tuple2<>(s, Scope.authority()));
         }
 
         if (s.startsWith("previous")) {
             s = s.substring("previous".length());
-            return Either.right(new Tuple2(s, Scope.previous()));
+            return Either.right(new Tuple2<>(s, Scope.previous()));
         }
 
         if (0 < s.length() && s.charAt(0) == '{') {
@@ -304,7 +304,7 @@ public class Parser {
             }
             Tuple2<String, String> t = res.get();
             if (0 < s.length() && s.charAt(0) == '}') {
-                return Either.right(new Tuple2(t._1, Scope.parameter(t._2)));
+                return Either.right(new Tuple2<>(t._1, Scope.parameter(t._2)));
             } else {
                 return Either.left(new Error(s, "unrecognized parameter end"));
             }
@@ -315,7 +315,7 @@ public class Parser {
             return Either.left(new Error(s, "unrecognized public key"));
         }
         Tuple2<String, PublicKey> t = res2.get();
-        return Either.right(new Tuple2(t._1, Scope.publicKey(t._2)));
+        return Either.right(new Tuple2<>(t._1, Scope.publicKey(t._2)));
     }
 
     public static Either<Error, Tuple2<String, PublicKey>> publicKey(String s) {
@@ -325,7 +325,7 @@ public class Parser {
 
         s = s.substring("ed25519/".length());
         Tuple2<String, byte[]> t = hex(s);
-        return Either.right(new Tuple2(t._1, new PublicKey(Schema.PublicKey.Algorithm.Ed25519, t._2)));
+        return Either.right(new Tuple2<>(t._1, new PublicKey(Schema.PublicKey.Algorithm.Ed25519, t._2)));
     }
 
     public static Either<Error, Tuple2<String, Predicate>> fact_predicate(String s) {
@@ -384,43 +384,43 @@ public class Parser {
         Either<Error, Tuple2<String, Term.Variable>> res5 = variable(s);
         if (res5.isRight()) {
             Tuple2<String, Term.Variable> t = res5.get();
-            return Either.right(new Tuple2(t._1, t._2));
+            return Either.right(new Tuple2<>(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Str>> res2 = string(s);
         if (res2.isRight()) {
             Tuple2<String, Term.Str> t = res2.get();
-            return Either.right(new Tuple2(t._1, t._2));
+            return Either.right(new Tuple2<>(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Set>> res7 = set(s);
         if (res7.isRight()) {
             Tuple2<String, Term.Set> t = res7.get();
-            return Either.right(new Tuple2(t._1, t._2));
+            return Either.right(new Tuple2<>(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Bool>> res6 = bool(s);
         if (res6.isRight()) {
             Tuple2<String, Term.Bool> t = res6.get();
-            return Either.right(new Tuple2(t._1, t._2));
+            return Either.right(new Tuple2<>(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Date>> res4 = date(s);
         if (res4.isRight()) {
             Tuple2<String, Term.Date> t = res4.get();
-            return Either.right(new Tuple2(t._1, t._2));
+            return Either.right(new Tuple2<>(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Integer>> res3 = integer(s);
         if (res3.isRight()) {
             Tuple2<String, Term.Integer> t = res3.get();
-            return Either.right(new Tuple2(t._1, t._2));
+            return Either.right(new Tuple2<>(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Bytes>> res8 = bytes(s);
         if (res8.isRight()) {
             Tuple2<String, Term.Bytes> t = res8.get();
-            return Either.right(new Tuple2(t._1, t._2));
+            return Either.right(new Tuple2<>(t._1, t._2));
         }
 
         return Either.left(new Error(s, "unrecognized value"));
@@ -434,37 +434,37 @@ public class Parser {
         Either<Error, Tuple2<String, Term.Str>> res2 = string(s);
         if (res2.isRight()) {
             Tuple2<String, Term.Str> t = res2.get();
-            return Either.right(new Tuple2(t._1, t._2));
+            return Either.right(new Tuple2<>(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Set>> res7 = set(s);
         if (res7.isRight()) {
             Tuple2<String, Term.Set> t = res7.get();
-            return Either.right(new Tuple2(t._1, t._2));
+            return Either.right(new Tuple2<>(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Bool>> res6 = bool(s);
         if (res6.isRight()) {
             Tuple2<String, Term.Bool> t = res6.get();
-            return Either.right(new Tuple2(t._1, t._2));
+            return Either.right(new Tuple2<>(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Date>> res4 = date(s);
         if (res4.isRight()) {
             Tuple2<String, Term.Date> t = res4.get();
-            return Either.right(new Tuple2(t._1, t._2));
+            return Either.right(new Tuple2<>(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Integer>> res3 = integer(s);
         if (res3.isRight()) {
             Tuple2<String, Term.Integer> t = res3.get();
-            return Either.right(new Tuple2(t._1, t._2));
+            return Either.right(new Tuple2<>(t._1, t._2));
         }
 
         Either<Error, Tuple2<String, Term.Bytes>> res8 = bytes(s);
         if (res8.isRight()) {
             Tuple2<String, Term.Bytes> t = res8.get();
-            return Either.right(new Tuple2(t._1, t._2));
+            return Either.right(new Tuple2<>(t._1, t._2));
         }
 
         return Either.left(new Error(s, "unrecognized value"));
