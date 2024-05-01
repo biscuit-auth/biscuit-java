@@ -32,6 +32,8 @@ public class Block {
     List<Rule> rules;
     List<Check> checks;
     List<Scope> scopes;
+    List<PublicKey> publicKeys;
+    Option<PublicKey> externalKey;
 
     public Block(long index, SymbolTable base_symbols) {
         this.index = index;
@@ -43,6 +45,33 @@ public class Block {
         this.rules = new ArrayList<>();
         this.checks = new ArrayList<>();
         this.scopes = new ArrayList<>();
+        this.publicKeys = new ArrayList<>();
+        this.externalKey = Option.none();
+    }
+
+    public Block setExternalKey(Option<PublicKey> externalKey) {
+        this.externalKey = externalKey;
+        return this;
+    }
+
+    public Block addPublicKey(PublicKey publicKey) {
+        this.publicKeys.add(publicKey);
+        return this;
+    }
+
+    public Block addPublicKeys(List<PublicKey> publicKeys) {
+        this.publicKeys.addAll(publicKeys);
+        return this;
+    }
+
+    public Block setPublicKeys(List<PublicKey> publicKeys) {
+        this.publicKeys = publicKeys;
+        return this;
+    }
+
+    public Block addSymbol(String symbol) {
+        this.symbols.add(symbol);
+        return this;
     }
 
     public Block add_fact(org.biscuitsec.biscuit.token.builder.Fact f) {
@@ -124,7 +153,7 @@ public class Block {
         SchemaVersion schemaVersion = new SchemaVersion(this.facts, this.rules, this.checks, this.scopes);
 
         return new org.biscuitsec.biscuit.token.Block(symbols, this.context, this.facts, this.rules, this.checks,
-                this.scopes, publicKeys, Option.none(), schemaVersion.version());
+                this.scopes, publicKeys, this.externalKey, schemaVersion.version());
     }
 
     public Block check_right(String right) {

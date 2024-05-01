@@ -5,6 +5,7 @@ import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.datalog.TemporarySymbolTable;
 import org.biscuitsec.biscuit.datalog.expressions.Op;
+import org.biscuitsec.biscuit.token.Biscuit;
 import org.biscuitsec.biscuit.token.builder.parser.Error;
 import org.biscuitsec.biscuit.token.builder.parser.Parser;
 import io.vavr.Tuple2;
@@ -15,7 +16,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.biscuitsec.biscuit.datalog.Check.Kind.One;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.*;
 
@@ -130,6 +131,43 @@ class ParserTest {
                                 )
                         ))),
                 res);
+    }
+
+    @Test
+    void expressionIntersectionAndContainsTest() {
+        Either<Error, Tuple2<String, Expression>> res =
+                Parser.expression("[1, 2, 3].intersection([1, 2]).contains(1)");
+
+        assertEquals(Either.right(new Tuple2<>("",
+                new Expression.Binary(
+                        Expression.Op.Contains,
+                        new Expression.Binary(
+                                Expression.Op.Intersection,
+                                new Expression.Value(Utils.set(new HashSet<>(Arrays.asList(Utils.integer(1), Utils.integer(2), Utils.integer(3))))),
+                                new Expression.Value(Utils.set(new HashSet<>(Arrays.asList(Utils.integer(1), Utils.integer(2)))))
+                        ),
+                        new Expression.Value(Utils.integer(1))
+                ))), res);
+    }
+
+    @Test
+    void expressionIntersectionAndContainsAndLengthEqualsTest() {
+        Either<Error, Tuple2<String, Expression>> res =
+                Parser.expression("[1, 2, 3].intersection([1, 2]).length() == 2");
+
+        assertEquals(Either.right(new Tuple2<>("",
+                new Expression.Binary(
+                        Expression.Op.Equal,
+                        new Expression.Unary(
+                            Expression.Op.Length,
+                            new Expression.Binary(
+                                    Expression.Op.Intersection,
+                                    new Expression.Value(Utils.set(new HashSet<>(Arrays.asList(Utils.integer(1), Utils.integer(2), Utils.integer(3))))),
+                                    new Expression.Value(Utils.set(new HashSet<>(Arrays.asList(Utils.integer(1), Utils.integer(2)))))
+                            )
+                        ),
+                        new Expression.Value(Utils.integer(2))
+                ))), res);
     }
 
     @Test

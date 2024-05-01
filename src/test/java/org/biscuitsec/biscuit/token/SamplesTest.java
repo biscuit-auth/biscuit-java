@@ -4,15 +4,20 @@ import biscuit.format.schema.Schema;
 import com.google.gson.*;
 import com.google.protobuf.MapEntry;
 import io.vavr.Tuple2;
+import io.vavr.control.Option;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.datalog.Rule;
 import org.biscuitsec.biscuit.datalog.RunLimits;
+import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.datalog.TrustedOrigins;
 import org.biscuitsec.biscuit.error.Error;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 import org.biscuitsec.biscuit.token.builder.Check;
+import org.biscuitsec.biscuit.token.builder.Expression;
+import org.biscuitsec.biscuit.token.builder.parser.ExpressionParser;
+import org.biscuitsec.biscuit.token.builder.parser.Parser;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
@@ -22,6 +27,7 @@ import java.io.InputStreamReader;
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -142,19 +148,11 @@ class SamplesTest {
         });
     }
 
-
     class Block {
         List<String> symbols;
-
-        public String getCode() {
-            return code;
-        }
-
-        public void setCode(String code) {
-            this.code = code;
-        }
-
         String code;
+        List<String> public_keys;
+        String external_key;
 
         public List<String> getSymbols() {
             return symbols;
@@ -163,17 +161,37 @@ class SamplesTest {
         public void setSymbols(List<String> symbols) {
             this.symbols = symbols;
         }
-    }
 
-    class Token {
-        List<Block> blocks;
+        public String getCode() { return code; }
 
-        public List<Block> getBlocks() {
-            return blocks;
+        public void setCode(String code) { this.code = code; }
+
+        public List<PublicKey> getPublicKeys() {
+            return this.public_keys.stream()
+                    .map(pk ->
+                        Parser.publicKey(pk).fold(e -> { throw new IllegalArgumentException(e.toString());}, r -> r._2)
+                    )
+                    .collect(Collectors.toList());
         }
 
-        public void setBlocks(List<Block> blocks) {
-            this.blocks = blocks;
+        public void setPublicKeys(List<PublicKey> publicKeys) {
+            this.public_keys = publicKeys.stream()
+                    .map(PublicKey::toString)
+                    .collect(Collectors.toList());
+        }
+
+        public Option<PublicKey> getExternalKey() {
+            if (this.external_key != null) {
+                PublicKey externalKey = Parser.publicKey(this.external_key)
+                        .fold(e -> { throw new IllegalArgumentException(e.toString());}, r -> r._2);
+                return Option.of(externalKey);
+            } else {
+                return Option.none();
+            }
+        }
+
+        public void setExternalKey(Option<PublicKey> externalKey) {
+            this.external_key = externalKey.map(PublicKey::toString).getOrElse((String) null);
         }
     }
 
@@ -189,7 +207,7 @@ class SamplesTest {
         }
 
         String filename;
-        List<Token> tokens;
+        List<Block> token;
         JsonElement validations;
 
         public String getFilename() {
@@ -200,12 +218,12 @@ class SamplesTest {
             this.filename = filename;
         }
 
-        public List<Token> getTokens() {
-            return tokens;
+        public List<Block> getToken() {
+            return token;
         }
 
-        public void setTokens(List<Token> tokens) {
-            this.tokens = tokens;
+        public void setTokens(List<Block> token) {
+            this.token = token;
         }
 
         public JsonElement getValidations() {

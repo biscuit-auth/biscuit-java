@@ -94,7 +94,12 @@ public class Block {
             s.append("\n\t\texternal key: ");
             s.append(this.externalKey.get().toString());
         }
-        s.append("\n\t\tfacts: [");
+        s.append("\n\t\tscopes: [");
+        for (Scope scope : this.scopes) {
+            s.append("\n\t\t\t");
+            s.append(symbol_table.print_scope(scope));
+        }
+        s.append("\n\t\t]\n\t\tfacts: [");
         for (Fact f : this.facts) {
             s.append("\n\t\t\t");
             s.append(symbol_table.print_fact(f));

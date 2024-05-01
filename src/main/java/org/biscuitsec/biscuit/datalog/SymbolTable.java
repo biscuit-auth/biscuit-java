@@ -262,6 +262,11 @@ public final class SymbolTable implements Serializable {
         publicKeys.addAll(s.publicKeys);
     }
 
+    public SymbolTable(List<String> symbols) {
+        this.symbols = new ArrayList<>(symbols);
+        this.publicKeys = new ArrayList<>();
+    }
+
     public SymbolTable(List<String> symbols, List<PublicKey> publicKeys) {
         this.symbols = new ArrayList<>();
         this.symbols.addAll(symbols);

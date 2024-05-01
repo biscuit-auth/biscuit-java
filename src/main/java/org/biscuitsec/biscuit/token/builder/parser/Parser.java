@@ -1,7 +1,9 @@
 package org.biscuitsec.biscuit.token.builder.parser;
 
 import biscuit.format.schema.Schema;
+import io.vavr.collection.Stream;
 import org.biscuitsec.biscuit.crypto.PublicKey;
+import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.token.Policy;
 import io.vavr.Tuple2;
 import io.vavr.Tuple4;
@@ -10,9 +12,7 @@ import org.biscuitsec.biscuit.token.builder.*;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.HashSet;
+import java.util.*;
 import java.util.function.Function;
 
 public class Parser {
@@ -524,14 +524,14 @@ public class Parser {
             return Either.left(new Error(s, "not an integer"));
         }
 
-        Integer i = Integer.parseInt(s.substring(0, index2));
+        long i = Long.parseLong(s.substring(0, index2));
         String remaining = s.substring(index2);
 
-        return Either.right(new Tuple2<String, Term.Integer>(remaining, (Term.Integer) Utils.integer(i.intValue())));
+        return Either.right(new Tuple2<String, Term.Integer>(remaining, (Term.Integer) Utils.integer(i)));
     }
 
     public static Either<Error, Tuple2<String, Term.Date>> date(String s) {
-        Tuple2<String, String> t = take_while(s, (c) -> c != ' ' && c != ',' && c != ')');
+        Tuple2<String, String> t = take_while(s, (c) -> c != ' ' && c != ',' && c != ')' && c != ']');
 
         try {
             OffsetDateTime d = OffsetDateTime.parse(t._1);

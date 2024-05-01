@@ -306,43 +306,57 @@ public class ExpressionParser {
             return Either.left(res1.getLeft());
         }
         Tuple2<String, Expression> t1 = res1.get();
-        s = space(t1._1);
-        Expression e1 = t1._2;
 
-        if(!s.startsWith(".")) {
-            return Either.right(new Tuple2<>(s, e1));
+        s = t1._1;
+        Expression e = t1._2;
+
+        while(true) {
+            s = space(s);
+            if(s.isEmpty()) {
+                break;
+            }
+
+            if (!s.startsWith(".")) {
+                return Either.right(new Tuple2<>(s, e));
+            }
+
+            s = s.substring(1);
+            Either<Error, Tuple2<String, Expression.Op>> res2 = binary_op7(s);
+            if (!res2.isLeft()) {
+                Tuple2<String, Expression.Op> t2 = res2.get();
+                s = space(t2._1);
+                Expression.Op op = t2._2;
+
+                if (!s.startsWith("(")) {
+                    return Either.left(new Error(s, "missing ("));
+                }
+
+                s = space(s.substring(1));
+
+                Either<Error, Tuple2<String, Expression>> res3 = expr_term(s);
+                if (res3.isLeft()) {
+                    return Either.left(res3.getLeft());
+                }
+
+                Tuple2<String, Expression> t3 = res3.get();
+
+                s = space(t3._1);
+                if (!s.startsWith(")")) {
+                    return Either.left(new Error(s, "missing )"));
+                }
+                s = space(s.substring(1));
+                Expression e2 = t3._2;
+
+                e = new Expression.Binary(op, e, e2);
+            } else {
+                if (s.startsWith("length()")) {
+                    e = new Expression.Unary(Expression.Op.Length, e);
+                    s = s.substring(9);
+                }
+            }
         }
-        s = s.substring(1);
 
-        Either<Error, Tuple2<String, Expression.Op>> res2 = binary_op7(s);
-        if (res2.isLeft()) {
-            return Either.left(res2.getLeft());
-        }
-        Tuple2<String, Expression.Op> t2 = res2.get();
-        s = space(t2._1);
-        Expression.Op op = t2._2;
-
-        if(!s.startsWith("(")) {
-            return Either.left(new Error(s, "missing ("));
-        }
-
-        s = space(s.substring(1));
-
-        Either<Error, Tuple2<String, Expression>> res3 = expr(s);
-        if (res3.isLeft()) {
-            return Either.left(res3.getLeft());
-        }
-
-        Tuple2<String, Expression> t3 = res3.get();
-
-        s = space(t3._1);
-        if(!s.startsWith(")")) {
-            return Either.left(new Error(s, "missing )"));
-        }
-        s = space(s.substring(1));
-        Expression e2 = t3._2;
-
-        return Either.right(new Tuple2<>(s, new Expression.Binary(op, e1, e2)));
+        return Either.right(new Tuple2<>(s, e));
     }
 
     public static Either<Error, Tuple2<String, Expression>> expr_term(String s) {
@@ -517,6 +531,12 @@ public class ExpressionParser {
     }
 
     public static Either<Error, Tuple2<String, Expression.Op>> binary_op7(String s) {
+        if(s.startsWith("intersection")) {
+            return Either.right(new Tuple2<>(s.substring(12), Expression.Op.Intersection));
+        }
+        if(s.startsWith("union")) {
+            return Either.right(new Tuple2<>(s.substring(5), Expression.Op.Union));
+        }
         if(s.startsWith("contains")) {
             return Either.right(new Tuple2<>(s.substring(8), Expression.Op.Contains));
         }
