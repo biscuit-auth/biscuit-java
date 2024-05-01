@@ -130,7 +130,7 @@ public class BiscuitTest {
         System.out.println("will check the token for resource=file1 and operation=read");
 
         Authorizer authorizer = final_token.authorizer();
-        authorizer.add_fact("resurce(\"file1\")");
+        authorizer.add_fact("resource(\"file1\")");
         authorizer.add_fact("operation(\"read\")");
         authorizer.add_policy("allow if true");
         authorizer.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
