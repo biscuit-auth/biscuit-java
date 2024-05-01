@@ -333,7 +333,7 @@ public class ExpressionParser {
 
                 s = space(s.substring(1));
 
-                Either<Error, Tuple2<String, Expression>> res3 = expr7(s);
+                Either<Error, Tuple2<String, Expression>> res3 = expr_term(s);
                 if (res3.isLeft()) {
                     return Either.left(res3.getLeft());
                 }

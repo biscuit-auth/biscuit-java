@@ -90,14 +90,14 @@ public class Block {
         s.append(this.symbols.symbols);
         s.append("\n\t\tcontext: ");
         s.append(this.context);
+        if(this.externalKey.isDefined()) {
+            s.append("\n\t\texternal key: ");
+            s.append(this.externalKey.get().toString());
+        }
         s.append("\n\t\tscopes: [");
         for (Scope scope : this.scopes) {
             s.append("\n\t\t\t");
             s.append(symbol_table.print_scope(scope));
-        }
-        if(this.externalKey.isDefined()) {
-            s.append("\n\t\texternal key: ");
-            s.append(this.externalKey.get().toString());
         }
         s.append("\n\t\t]\n\t\tfacts: [");
         for (Fact f : this.facts) {
