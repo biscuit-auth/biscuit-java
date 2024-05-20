@@ -16,6 +16,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 
 /**
@@ -115,7 +116,7 @@ public class Biscuit extends UnverifiedBiscuit {
         KeyPair next;
         try {
             next = KeyPair.generate(root.public_key().algorithm, rng);
-        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
+        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException | InvalidKeySpecException e) {
             throw new Error.FormatError.AlgorithmError(e.getMessage());
         }
 

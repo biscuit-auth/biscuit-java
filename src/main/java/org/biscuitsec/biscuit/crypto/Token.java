@@ -6,6 +6,7 @@ import io.vavr.control.Either;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.*;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 
 import static io.vavr.API.Left;
@@ -17,7 +18,7 @@ class Token {
     public final ArrayList<byte[]> signatures;
     public final KeyPair next;
 
-    public Token(KeyPair rootKeyPair, byte[] message, KeyPair next) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    public Token(KeyPair rootKeyPair, byte[] message, KeyPair next) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException {
         Signature sgr = KeyPair.generateSignature(next.public_key().algorithm);
         ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
         algo_buf.putInt(Integer.valueOf(next.public_key().algorithm.getNumber()));
@@ -46,7 +47,7 @@ class Token {
         this.next = next;
     }
 
-    public Token append(KeyPair keyPair, byte[] message) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public Token append(KeyPair keyPair, byte[] message) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, InvalidKeySpecException {
         Signature sgr = KeyPair.generateSignature(next.public_key().algorithm);
         sgr.initSign(this.next.private_key());
         ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
@@ -67,7 +68,7 @@ class Token {
     }
 
     // FIXME: rust version returns a Result<(), error::Signature>
-    public Either<Error, Void> verify(PublicKey root) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    public Either<Error, Void> verify(PublicKey root) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException {
         PublicKey current_key = root;
         for(int i = 0; i < this.blocks.size(); i++) {
             byte[] block = this.blocks.get(i);

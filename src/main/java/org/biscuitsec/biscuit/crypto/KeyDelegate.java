@@ -4,6 +4,7 @@ import io.vavr.control.Option;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 
 
 /**
@@ -13,5 +14,5 @@ import java.security.NoSuchAlgorithmException;
  * Tokens can carry a root key id, that can be used to indicate which key will verify it.
  */
 public interface KeyDelegate {
-    public Option<PublicKey> root_key(Option<Integer> key_id) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException;
+    public Option<PublicKey> root_key(Option<Integer> key_id) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException;
 }

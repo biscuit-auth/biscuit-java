@@ -23,10 +23,6 @@ class Ed25519KeyPair extends KeyPair {
 
     private static final EdDSANamedCurveSpec ed25519 = EdDSANamedCurveTable.getByName(EdDSANamedCurveTable.ED_25519);
 
-    public Ed25519KeyPair() {
-        this(new SecureRandom());
-    }
-
     public Ed25519KeyPair(byte[] bytes) {
         EdDSAPrivateKeySpec privKeySpec = new EdDSAPrivateKeySpec(bytes, ed25519);
         EdDSAPrivateKey privKey = new EdDSAPrivateKey(privKeySpec);
@@ -53,16 +49,7 @@ class Ed25519KeyPair extends KeyPair {
     }
 
     public Ed25519KeyPair(String hex) {
-        byte[] b = Utils.hexStringToByteArray(hex);
-
-        EdDSAPrivateKeySpec privKeySpec = new EdDSAPrivateKeySpec(b, ed25519);
-        EdDSAPrivateKey privKey = new EdDSAPrivateKey(privKeySpec);
-
-        EdDSAPublicKeySpec pubKeySpec = new EdDSAPublicKeySpec(privKey.getA(), ed25519);
-        EdDSAPublicKey pubKey = new EdDSAPublicKey(pubKeySpec);
-
-        this.privateKey = privKey;
-        this.publicKey = pubKey;
+        this(Utils.hexStringToByteArray(hex));
     }
 
     public static java.security.PublicKey generatePublicKey(byte[] data) {

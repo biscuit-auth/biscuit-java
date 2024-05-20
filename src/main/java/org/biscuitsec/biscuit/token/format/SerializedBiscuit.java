@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.*;
+import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 
 import static io.vavr.API.Left;
@@ -72,7 +73,7 @@ public class SerializedBiscuit {
             }
 
             return from_bytes_inner(data, root.get());
-        } catch (InvalidProtocolBufferException | InvalidAlgorithmParameterException e) {
+        } catch (InvalidProtocolBufferException | InvalidAlgorithmParameterException | InvalidKeySpecException e) {
             throw new Error.FormatError.DeserializationError(e.toString());
         }
     }
@@ -259,7 +260,8 @@ public class SerializedBiscuit {
             Proof proof = new Proof(next);
 
             return Right(new SerializedBiscuit(signedBlock, new ArrayList<>(), proof, root_key_id));
-        } catch (IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
+        } catch (IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException |
+                 InvalidKeySpecException e) {
             return Left(new Error.FormatError.SerializationError(e.toString()));
         }
     }
@@ -299,7 +301,8 @@ public class SerializedBiscuit {
             Proof proof = new Proof(next);
 
             return Right(new SerializedBiscuit(this.authority, blocks, proof, root_key_id));
-        } catch (IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
+        } catch (IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException |
+                 InvalidKeySpecException e) {
             return Left(new Error.FormatError.SerializationError(e.toString()));
         }
     }
@@ -372,14 +375,18 @@ public class SerializedBiscuit {
             //System.out.println("checking secret key");
             //System.out.println("current key: "+current_key.toHex());
             //System.out.println("key from proof: "+this.proof.secretKey.get().public_key().toHex());
-            if (this.proof.secretKey.get().public_key().equals(current_key)) {
-                //System.out.println("public keys are equal");
+            try {
+                if (this.proof.secretKey.get().public_key().equals(current_key)) {
+                    //System.out.println("public keys are equal");
 
-                return Right(null);
-            } else {
-                //System.out.println("public keys are not equal");
+                    return Right(null);
+                } else {
+                    //System.out.println("public keys are not equal");
 
-                return Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"));
+                    return Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"));
+                }
+            } catch (InvalidKeySpecException e) {
+                return Left(new Error.FormatError.Signature.InvalidSignature("signature error: Invalid key spec"));
             }
         } else {
             //System.out.println("checking final signature");

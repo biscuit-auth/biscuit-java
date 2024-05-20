@@ -1,5 +1,6 @@
 package org.biscuitsec.biscuit.crypto;
 
+import biscuit.format.schema.Schema;
 import org.biscuitsec.biscuit.token.builder.Utils;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -13,62 +14,62 @@ import java.security.spec.ECGenParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
-class P256KeyPair extends KeyPair {
+class SECP256R1KeyPair extends KeyPair {
 
     private final java.security.KeyPair keyPair;
 
-    public P256KeyPair() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
-        this(new SecureRandom());
-    }
-
-    public P256KeyPair(byte[] seed) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+    public SECP256R1KeyPair(byte[] bytes) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         var kpg = KeyPairGenerator.getInstance("EC");
         var spec = new ECGenParameterSpec("secp256r1");
-        kpg.initialize(spec, new SecureRandom(seed));
+        kpg.initialize(spec, new SecureRandom(bytes));
         keyPair = kpg.generateKeyPair();
     }
 
-    public P256KeyPair(SecureRandom rng) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+    public SECP256R1KeyPair(SecureRandom rng) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+        byte[] bytes = new byte[32];
+        rng.nextBytes(bytes);
         var kpg = KeyPairGenerator.getInstance("EC");
         var spec = new ECGenParameterSpec("secp256r1");
-        kpg.initialize(spec, rng);
+        kpg.initialize(spec, new SecureRandom(bytes));
         keyPair = kpg.generateKeyPair();
     }
 
-    public P256KeyPair(String hex) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+    public SECP256R1KeyPair(String hex) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         this(Utils.hexStringToByteArray(hex));
     }
 
     public static java.security.PublicKey generatePublicKey(byte[] data) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        return KeyFactory.getInstance("EC").generatePublic(new X509EncodedKeySpec(data, "SHA256withECDSA"));
+        var kf = KeyFactory.getInstance("EC");
+        var spec = new X509EncodedKeySpec(data, "SHA256withECDSA");
+        return kf.generatePublic(spec);
     }
 
-    public static Signature getSignature() {
-        throw new RuntimeException("not yet implemented");
+    public static Signature getSignature() throws NoSuchAlgorithmException {
+        return Signature.getInstance("SHA256withECDSA");
     }
 
     @Override
     public byte[] toBytes() {
-        throw new RuntimeException("not yet implemented");
+        return keyPair.getPublic().getEncoded();
     }
 
     @Override
     public String toHex() {
-        return Utils.byteArrayToHexString(this.toBytes());
+        return Utils.byteArrayToHexString(toBytes());
     }
 
     @Override
     public java.security.PublicKey publicKey() {
-        throw new RuntimeException("not yet implemented");
+        return keyPair.getPublic();
     }
 
     @Override
     public PrivateKey private_key() {
-        throw new RuntimeException("not yet implemented");
+        return keyPair.getPrivate();
     }
 
     @Override
     public PublicKey public_key() {
-        throw new RuntimeException("not yet implemented");
+        return new PublicKey(Schema.PublicKey.Algorithm.SECP256R1, keyPair.getPublic());
     }
 }

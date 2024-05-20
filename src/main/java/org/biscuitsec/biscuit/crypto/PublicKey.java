@@ -9,12 +9,15 @@ import com.google.protobuf.ByteString;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.List;
 
 
 public class PublicKey {
 
     public final java.security.PublicKey key;
     public final Algorithm algorithm;
+
+    private static final List<Algorithm> SUPPORTED_ALGORITHMS = List.of(Algorithm.Ed25519, Algorithm.SECP256R1);
 
     public PublicKey(Algorithm algorithm, java.security.PublicKey public_key) {
         this.key = public_key;
@@ -24,8 +27,8 @@ public class PublicKey {
     public PublicKey(Algorithm algorithm, byte[] data) throws NoSuchAlgorithmException, InvalidKeySpecException {
         if (algorithm == Algorithm.Ed25519) {
             this.key = Ed25519KeyPair.generatePublicKey(data);
-        } else if (algorithm == Algorithm.P256) {
-            this.key = P256KeyPair.generatePublicKey(data);
+        } else if (algorithm == Algorithm.SECP256R1) {
+            this.key = SECP256R1KeyPair.generatePublicKey(data);
         } else {
             throw new IllegalArgumentException("Invalid algorithm");
         }
@@ -47,8 +50,8 @@ public class PublicKey {
         byte[] data = Utils.hexStringToByteArray(hex);
         if (algorithm == Algorithm.Ed25519) {
             this.key = Ed25519KeyPair.generatePublicKey(data);
-        } else if (algorithm == Algorithm.P256) {
-            this.key = P256KeyPair.generatePublicKey(data);
+        } else if (algorithm == Algorithm.SECP256R1) {
+            this.key = SECP256R1KeyPair.generatePublicKey(data);
         } else {
             throw new IllegalArgumentException("Invalid algorithm");
         }
@@ -66,7 +69,7 @@ public class PublicKey {
         if(!pk.hasAlgorithm() || !pk.hasKey()) {
             throw new Error.FormatError.DeserializationError("Invalid public key");
         }
-        if (pk.getAlgorithm() != Algorithm.Ed25519 && pk.getAlgorithm() != Algorithm.P256) {
+        if (!SUPPORTED_ALGORITHMS.contains(pk.getAlgorithm())) {
             throw new Error.FormatError.DeserializationError("Invalid public key algorithm");
         }
         try {
@@ -97,8 +100,8 @@ public class PublicKey {
     public String toString() {
         if (algorithm == Algorithm.Ed25519) {
             return "ed25519/" + toHex().toLowerCase();
-        } else if (algorithm == Algorithm.P256) {
-            return "p256/" + toHex().toLowerCase();
+        } else if (algorithm == Algorithm.SECP256R1) {
+            return "secp256r1/" + toHex().toLowerCase();
         } else {
             return null;
         }
