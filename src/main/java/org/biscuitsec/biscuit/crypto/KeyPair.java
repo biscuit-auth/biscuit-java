@@ -2,6 +2,7 @@ package org.biscuitsec.biscuit.crypto;
 
 
 import biscuit.format.schema.Schema.PublicKey.Algorithm;
+import net.i2p.crypto.eddsa.Utils;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
@@ -13,7 +14,11 @@ import java.security.Signature;
  */
 public abstract class KeyPair {
 
-    public static KeyPair generateForAlgorithm(Algorithm algorithm, byte[] bytes) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+    public static KeyPair generate(Algorithm algorithm, String hex) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+        return generate(algorithm, Utils.hexToBytes(hex));
+    }
+
+    public static KeyPair generate(Algorithm algorithm, byte[] bytes) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         if (algorithm == Algorithm.Ed25519) {
             return new Ed25519KeyPair(bytes);
         } else if (algorithm == Algorithm.P256) {
@@ -23,7 +28,7 @@ public abstract class KeyPair {
         }
     }
 
-    public static KeyPair generateForAlgorithm(Algorithm algorithm, SecureRandom rng) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+    public static KeyPair generate(Algorithm algorithm, SecureRandom rng) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         if (algorithm == Algorithm.Ed25519) {
             return new Ed25519KeyPair(rng);
         } else if (algorithm == Algorithm.P256) {
@@ -33,7 +38,7 @@ public abstract class KeyPair {
         }
     }
 
-    public static Signature getSignatureForAlgorithm(Algorithm algorithm) throws NoSuchAlgorithmException {
+    public static Signature generateSignature(Algorithm algorithm) throws NoSuchAlgorithmException {
         if (algorithm == Algorithm.Ed25519) {
             return Ed25519KeyPair.getSignature();
         } else if (algorithm == Algorithm.P256) {

@@ -18,7 +18,7 @@ class Token {
     public final KeyPair next;
 
     public Token(KeyPair rootKeyPair, byte[] message, KeyPair next) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-        Signature sgr = KeyPair.getSignatureForAlgorithm(next.public_key().algorithm);
+        Signature sgr = KeyPair.generateSignature(next.public_key().algorithm);
         ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
         algo_buf.putInt(Integer.valueOf(next.public_key().algorithm.getNumber()));
         algo_buf.flip();
@@ -47,7 +47,7 @@ class Token {
     }
 
     public Token append(KeyPair keyPair, byte[] message) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        Signature sgr = KeyPair.getSignatureForAlgorithm(next.public_key().algorithm);
+        Signature sgr = KeyPair.generateSignature(next.public_key().algorithm);
         sgr.initSign(this.next.private_key());
         ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
         algo_buf.putInt(Integer.valueOf(next.public_key().algorithm.getNumber()));
@@ -77,7 +77,7 @@ class Token {
             ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
             algo_buf.putInt(Integer.valueOf(next.public_key().algorithm.getNumber()));
             algo_buf.flip();
-            Signature sgr = KeyPair.getSignatureForAlgorithm(next.public_key().algorithm);
+            Signature sgr = KeyPair.generateSignature(next.public_key().algorithm);
             sgr.initVerify(current_key.key);
             sgr.update(block);
             sgr.update(algo_buf);

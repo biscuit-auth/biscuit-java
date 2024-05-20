@@ -15,7 +15,6 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.Signature;
 import java.security.SignatureException;
 import java.util.*;
 
@@ -115,7 +114,7 @@ public class Biscuit extends UnverifiedBiscuit {
 
         KeyPair next;
         try {
-            next = KeyPair.generateForAlgorithm(root.public_key().algorithm, rng);
+            next = KeyPair.generate(root.public_key().algorithm, rng);
         } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
             throw new Error.FormatError.AlgorithmError(e.getMessage());
         }
@@ -334,7 +333,7 @@ public class Biscuit extends UnverifiedBiscuit {
         SecureRandom rng = new SecureRandom();
         KeyPair keypair;
         try {
-            keypair = KeyPair.generateForAlgorithm(Schema.PublicKey.Algorithm.Ed25519, rng); // todo figure out how to get the algorithm
+            keypair = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng); // todo figure out how to get the algorithm
         } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
             throw new Error.FormatError.AlgorithmError(e.getMessage());
         }

@@ -24,6 +24,9 @@ import org.junit.jupiter.api.TestFactory;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,13 +38,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class SamplesTest {
     final RunLimits runLimits = new RunLimits(500,100, Duration.ofMillis(500));
     @TestFactory
-    Stream<DynamicTest> jsonTest() {
+    Stream<DynamicTest> jsonTest() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException {
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("samples/samples.json");
         Gson gson = new Gson();
         Sample sample = gson.fromJson(new InputStreamReader(new BufferedInputStream(inputStream)), Sample.class);
         PublicKey publicKey = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, sample.root_public_key);
-        KeyPair keyPair = new KeyPair(sample.root_private_key);
+        KeyPair keyPair = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, sample.root_private_key);
         return sample.testcases.stream().map(t -> process_testcase(t, publicKey, keyPair));
     }
 

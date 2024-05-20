@@ -1,5 +1,6 @@
 package org.biscuitsec.biscuit.token;
 
+import biscuit.format.schema.Schema;
 import org.biscuitsec.biscuit.crypto.KeyDelegate;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.crypto.PublicKey;
@@ -16,6 +17,7 @@ import io.vavr.control.Try;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -30,13 +32,13 @@ import static org.biscuitsec.biscuit.token.builder.Utils.*;
 public class BiscuitTest {
 
     @Test
-    public void testBasic() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, CloneNotSupportedException, Error {
+    public void testBasic() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, InvalidAlgorithmParameterException {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
         System.out.println("preparing the authority block");
 
-        KeyPair root = new KeyPair(rng);
+        KeyPair root = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
 
         SymbolTable symbols = Biscuit.default_symbol_table();
         Block authority_builder = new Block(0, symbols);
@@ -65,7 +67,7 @@ public class BiscuitTest {
         // SECOND BLOCK
         System.out.println("preparing the second block");
 
-        KeyPair keypair2 = new KeyPair(rng);
+        KeyPair keypair2 = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
 
         Block builder = deser.create_block();
         builder.add_check(check(rule(
@@ -98,7 +100,7 @@ public class BiscuitTest {
         // THIRD BLOCK
         System.out.println("preparing the third block");
 
-        KeyPair keypair3 = new KeyPair(rng);
+        KeyPair keypair3 = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
 
         Block builder3 = deser2.create_block();
         builder3.add_check(check(rule(
@@ -156,13 +158,13 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testFolders() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+    public void testFolders() throws NoSuchAlgorithmException, Error, InvalidAlgorithmParameterException {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
         System.out.println("preparing the authority block");
 
-        KeyPair root = new KeyPair(rng);
+        KeyPair root = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
 
         org.biscuitsec.biscuit.token.builder.Biscuit builder = Biscuit.builder(rng, root);
 
@@ -181,7 +183,7 @@ public class BiscuitTest {
         block2.resource_prefix("/folder1/");
         block2.check_right("read");
 
-        KeyPair keypair2 = new KeyPair(rng);
+        KeyPair keypair2 = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
         Biscuit b2 = b.attenuate(rng, keypair2, block2.build());
 
         Authorizer v1 = b2.authorizer();
@@ -223,9 +225,9 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testMultipleAttenuation() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+    public void testMultipleAttenuation() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, InvalidAlgorithmParameterException {
         SecureRandom rng = new SecureRandom();
-        KeyPair root = new KeyPair(rng);
+        KeyPair root = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
 
         SymbolTable symbols = Biscuit.default_symbol_table();
         Block authority_builder = new Block(0, symbols);
@@ -240,25 +242,25 @@ public class BiscuitTest {
                 Arrays.asList(s("topic"), s("tenant"), s("namespace"), s("topic"), s("produce"))
         ));
 
-        String attenuatedB64 = biscuit.attenuate(rng, new KeyPair(rng), builder.build()).serialize_b64url();
+        String attenuatedB64 = biscuit.attenuate(rng, KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng), builder.build()).serialize_b64url();
 
         System.out.println("attenuated: " + attenuatedB64);
 
         Biscuit.from_b64url(attenuatedB64, root.public_key());
-        String attenuated2B64 = biscuit.attenuate(rng, new KeyPair(rng), builder.build()).serialize_b64url();
+        String attenuated2B64 = biscuit.attenuate(rng, KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng), builder.build()).serialize_b64url();
 
         System.out.println("attenuated2: " + attenuated2B64);
         Biscuit.from_b64url(attenuated2B64, root.public_key());
     }
 
     @Test
-    public void testReset() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+    public void testReset() throws NoSuchAlgorithmException, Error, InvalidAlgorithmParameterException {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
         System.out.println("preparing the authority block");
 
-        KeyPair root = new KeyPair(rng);
+        KeyPair root = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
 
         org.biscuitsec.biscuit.token.builder.Biscuit builder = Biscuit.builder(rng, root);
 
@@ -277,7 +279,7 @@ public class BiscuitTest {
         block2.resource_prefix("/folder1/");
         block2.check_right("read");
 
-        KeyPair keypair2 = new KeyPair(rng);
+        KeyPair keypair2 = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
         Biscuit b2 = b.attenuate(rng, keypair2, block2.build());
 
         Authorizer v1 = b2.authorizer();
@@ -321,13 +323,13 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testEmptyAuthorizer() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+    public void testEmptyAuthorizer() throws NoSuchAlgorithmException, Error, InvalidAlgorithmParameterException {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
         System.out.println("preparing the authority block");
 
-        KeyPair root = new KeyPair(rng);
+        KeyPair root = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
 
         org.biscuitsec.biscuit.token.builder.Biscuit builder = Biscuit.builder(rng, root);
 
@@ -346,7 +348,7 @@ public class BiscuitTest {
         block2.resource_prefix("/folder1/");
         block2.check_right("read");
 
-        KeyPair keypair2 = new KeyPair(rng);
+        KeyPair keypair2 = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
         Biscuit b2 = b.attenuate(rng, keypair2, block2.build());
 
         Authorizer v1 = new Authorizer();
@@ -363,13 +365,13 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testBasicWithNamespaces() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, CloneNotSupportedException, Error {
+    public void testBasicWithNamespaces() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, InvalidAlgorithmParameterException {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
         System.out.println("preparing the authority block");
 
-        KeyPair root = new KeyPair(rng);
+        KeyPair root = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
 
         SymbolTable symbols = Biscuit.default_symbol_table();
         Block authority_builder = new Block(0, symbols);
@@ -397,7 +399,7 @@ public class BiscuitTest {
         // SECOND BLOCK
         System.out.println("preparing the second block");
 
-        KeyPair keypair2 = new KeyPair(rng);
+        KeyPair keypair2 = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
 
         Block builder = deser.create_block();
         builder.add_check(check(rule(
@@ -430,7 +432,7 @@ public class BiscuitTest {
         // THIRD BLOCK
         System.out.println("preparing the third block");
 
-        KeyPair keypair3 = new KeyPair(rng);
+        KeyPair keypair3 = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
 
         Block builder3 = deser2.create_block();
         builder3.add_check(check(rule(
@@ -488,13 +490,13 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testBasicWithNamespacesWithAddAuthorityFact() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, CloneNotSupportedException, Error {
+    public void testBasicWithNamespacesWithAddAuthorityFact() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, InvalidAlgorithmParameterException {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
         System.out.println("preparing the authority block");
 
-        KeyPair root = new KeyPair(rng);
+        KeyPair root = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
 
         SymbolTable symbols = Biscuit.default_symbol_table();
         org.biscuitsec.biscuit.token.builder.Biscuit o = new org.biscuitsec.biscuit.token.builder.Biscuit(rng, root, symbols);
@@ -521,7 +523,7 @@ public class BiscuitTest {
         // SECOND BLOCK
         System.out.println("preparing the second block");
 
-        KeyPair keypair2 = new KeyPair(rng);
+        KeyPair keypair2 = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
 
         Block builder = deser.create_block();
         builder.add_check(check(rule(
@@ -554,7 +556,7 @@ public class BiscuitTest {
         // THIRD BLOCK
         System.out.println("preparing the third block");
 
-        KeyPair keypair3 = new KeyPair(rng);
+        KeyPair keypair3 = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
 
         Block builder3 = deser2.create_block();
         builder3.add_check(check(rule(
@@ -611,13 +613,13 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testRootKeyId() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, CloneNotSupportedException, Error {
+    public void testRootKeyId() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, InvalidAlgorithmParameterException {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
         System.out.println("preparing the authority block");
 
-        KeyPair root = new KeyPair(rng);
+        KeyPair root = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
 
         SymbolTable symbols = Biscuit.default_symbol_table();
         Block authority_builder = new Block(0, symbols);
@@ -653,9 +655,9 @@ public class BiscuitTest {
         assertThrows(Error.FormatError.Signature.InvalidSignature.class, () -> {
             Biscuit deser = Biscuit.from_bytes(data, new KeyDelegate() {
                 @Override
-                public Option<PublicKey> root_key(Option<Integer> key_id) {
+                public Option<PublicKey> root_key(Option<Integer> key_id) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
 
-                    KeyPair root = new KeyPair(rng);
+                    KeyPair root = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
                     return Option.some(root.public_key());
                 }
             });
@@ -675,13 +677,13 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testCheckAll() throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void testCheckAll() throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException, InvalidAlgorithmParameterException {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
         System.out.println("preparing the authority block");
 
-        KeyPair root = new KeyPair(rng);
+        KeyPair root = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
 
         Biscuit biscuit = Biscuit.builder(root)
                 .add_authority_check("check all operation($op), allowed_operations($allowed), $allowed.contains($op)")

@@ -1,5 +1,6 @@
 package org.biscuitsec.biscuit.builder;
 
+import biscuit.format.schema.Schema;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.error.Error;
@@ -11,6 +12,8 @@ import org.biscuitsec.biscuit.token.builder.Utils;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Arrays;
@@ -23,9 +26,9 @@ import static org.junit.jupiter.api.Assertions.*;
 public class BuilderTest {
 
     @Test
-    public void testBuild() throws Error.Language, Error.SymbolTableOverlap, Error.FormatError {
+    public void testBuild() throws Error.Language, Error.SymbolTableOverlap, Error.FormatError, InvalidAlgorithmParameterException, NoSuchAlgorithmException {
         SecureRandom rng = new SecureRandom();
-        KeyPair root = new KeyPair(rng);
+        KeyPair root = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
         SymbolTable symbols = Biscuit.default_symbol_table();
 
         Block authority_builder = new Block(0, symbols);

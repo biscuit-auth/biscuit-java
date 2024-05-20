@@ -1,19 +1,22 @@
 package org.biscuitsec.biscuit.token;
 
+import biscuit.format.schema.Schema;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.token.builder.Block;
 
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.SignatureException;
 
 /* example code for the documentation at https://www.biscuitsec.org
  * if these functions change, please send a PR to update them at https://github.com/biscuit-auth/website
  */
 public class ExampleTest {
-    public KeyPair root() {
-        return new KeyPair();
+    public KeyPair root() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
+        return KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, new SecureRandom());
     }
 
     public Biscuit createToken(KeyPair root) throws Error {

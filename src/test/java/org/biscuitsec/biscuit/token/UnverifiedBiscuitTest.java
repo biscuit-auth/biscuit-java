@@ -1,5 +1,6 @@
 package org.biscuitsec.biscuit.token;
 
+import biscuit.format.schema.Schema;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.datalog.RunLimits;
 import org.biscuitsec.biscuit.datalog.SymbolTable;
@@ -10,6 +11,7 @@ import org.biscuitsec.biscuit.token.builder.Block;
 import org.biscuitsec.biscuit.token.builder.Utils;
 import org.junit.jupiter.api.Test;
 
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -24,13 +26,13 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class UnverifiedBiscuitTest {
 
     @Test
-    public void testBasic() throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void testBasic() throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException, InvalidAlgorithmParameterException {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
         System.out.println("preparing the authority block, block0");
 
-        KeyPair keypair0 = new KeyPair(rng);
+        KeyPair keypair0 = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
 
         SymbolTable symbols = Biscuit.default_symbol_table();
         org.biscuitsec.biscuit.token.builder.Block block0 = new org.biscuitsec.biscuit.token.builder.Block(0, symbols);
@@ -56,7 +58,7 @@ public class UnverifiedBiscuitTest {
         // SECOND BLOCK
         System.out.println("preparing the second block");
 
-        KeyPair keypair1 = new KeyPair(rng);
+        KeyPair keypair1 = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
         org.biscuitsec.biscuit.token.builder.Block block1 = deser0.create_block();
         block1.add_check(Utils.check(Utils.rule(
                 "caveat1",
@@ -87,7 +89,7 @@ public class UnverifiedBiscuitTest {
         // THIRD BLOCK
         System.out.println("preparing the third block");
 
-        KeyPair keypair2 = new KeyPair(rng);
+        KeyPair keypair2 = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
 
         Block block2 = unverifiedBiscuit1.create_block();
         block2.add_check(Utils.check(Utils.rule(

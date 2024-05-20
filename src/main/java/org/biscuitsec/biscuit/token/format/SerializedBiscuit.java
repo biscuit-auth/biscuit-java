@@ -72,7 +72,7 @@ public class SerializedBiscuit {
             }
 
             return from_bytes_inner(data, root.get());
-        } catch (InvalidProtocolBufferException e) {
+        } catch (InvalidProtocolBufferException | InvalidAlgorithmParameterException e) {
             throw new Error.FormatError.DeserializationError(e.toString());
         }
     }
@@ -151,7 +151,7 @@ public class SerializedBiscuit {
         Option<org.biscuitsec.biscuit.crypto.KeyPair> secretKey = Option.none();
         if (data.getProof().hasNextSecret()) {
             try {
-                secretKey = Option.some(KeyPair.generateForAlgorithm(Schema.PublicKey.Algorithm.Ed25519, data.getProof().getNextSecret().toByteArray()));
+                secretKey = Option.some(KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, data.getProof().getNextSecret().toByteArray()));
             } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
                 throw new Error.FormatError.AlgorithmError(e.getMessage());
             }
@@ -248,7 +248,7 @@ public class SerializedBiscuit {
             algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
             algo_buf.flip();
 
-            Signature sgr = KeyPair.getSignatureForAlgorithm(next_key.algorithm);
+            Signature sgr = KeyPair.generateSignature(next_key.algorithm);
             sgr.initSign(root.private_key());
             sgr.update(block);
             sgr.update(algo_buf);
@@ -281,7 +281,7 @@ public class SerializedBiscuit {
             algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
             algo_buf.flip();
 
-            Signature sgr = KeyPair.getSignatureForAlgorithm(next_key.algorithm);
+            Signature sgr = KeyPair.generateSignature(next_key.algorithm);
             sgr.initSign(this.proof.secretKey.get().private_key());
             sgr.update(block);
             sgr.update(algo_buf);
@@ -400,7 +400,7 @@ public class SerializedBiscuit {
             algo_buf.putInt(next_key.algorithm.getNumber());
             algo_buf.flip();
 
-            Signature sgr = KeyPair.getSignatureForAlgorithm(next_key.algorithm);
+            Signature sgr = KeyPair.generateSignature(next_key.algorithm);
 
             sgr.initVerify(current_key.key);
             sgr.update(block);
@@ -430,7 +430,7 @@ public class SerializedBiscuit {
         algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
         algo_buf.flip();
 
-        Signature sgr = KeyPair.getSignatureForAlgorithm(next_key.algorithm);
+        Signature sgr = KeyPair.generateSignature(next_key.algorithm);
 
         sgr.initVerify(publicKey.key);
         sgr.update(block);
@@ -448,7 +448,7 @@ public class SerializedBiscuit {
             algo_buf2.putInt(Integer.valueOf(publicKey.algorithm.getNumber()));
             algo_buf2.flip();
 
-            Signature sgr2 = KeyPair.getSignatureForAlgorithm(publicKey.algorithm);
+            Signature sgr2 = KeyPair.generateSignature(publicKey.algorithm);
             sgr2.initVerify(signedBlock.externalSignature.get().key.key);
             sgr2.update(block);
             sgr2.update(algo_buf2);
@@ -533,7 +533,7 @@ public class SerializedBiscuit {
             block = this.blocks.get(this.blocks.size() - 1);
         }
 
-        Signature sgr = KeyPair.getSignatureForAlgorithm(block.key.algorithm);
+        Signature sgr = KeyPair.generateSignature(block.key.algorithm);
         ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
         algo_buf.putInt(Integer.valueOf(block.key.algorithm.getNumber()));
         algo_buf.flip();

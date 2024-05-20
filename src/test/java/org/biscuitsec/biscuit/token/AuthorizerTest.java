@@ -1,5 +1,6 @@
 package org.biscuitsec.biscuit.token;
 
+import biscuit.format.schema.Schema;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.error.Error.Parser;
@@ -7,6 +8,7 @@ import org.biscuitsec.biscuit.token.builder.Expression;
 import org.biscuitsec.biscuit.token.builder.Term;
 import org.junit.jupiter.api.Test;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,7 +45,7 @@ public class AuthorizerTest {
     @Test
     public void testPuttingSomeFactsInABiscuitAndGettingThemBackOutAgain() throws Exception {
 
-        KeyPair keypair = new KeyPair();
+        KeyPair keypair = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, new SecureRandom());
 
         Biscuit token = Biscuit.builder(keypair)
                 .add_authority_fact("email(\"bob@example.com\")")

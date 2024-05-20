@@ -2,6 +2,7 @@ package org.biscuitsec.biscuit.crypto;
 
 import biscuit.format.schema.Schema;
 import biscuit.format.schema.Schema.PublicKey.Algorithm;
+import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.token.builder.Utils;
 import com.google.protobuf.ByteString;
@@ -32,9 +33,9 @@ public class PublicKey {
     }
 
     public byte[] toBytes() {
-        // wtf is this?
-        // return this.key.getAbyte();
-
+        if (key instanceof EdDSAPublicKey) {
+            return ((EdDSAPublicKey) key).getAbyte();
+        }
         return key.getEncoded();
     }
 

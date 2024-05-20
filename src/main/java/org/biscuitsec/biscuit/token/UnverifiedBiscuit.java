@@ -142,7 +142,7 @@ public class UnverifiedBiscuit {
      */
     public UnverifiedBiscuit attenuate(org.biscuitsec.biscuit.token.builder.Block block) throws NoSuchAlgorithmException, Error, InvalidAlgorithmParameterException {
         SecureRandom rng = new SecureRandom();
-        KeyPair keypair = KeyPair.generateForAlgorithm(Schema.PublicKey.Algorithm.Ed25519, rng); // todo, figure out how to get the algorithm
+        KeyPair keypair = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng); // todo, figure out how to get the algorithm
         return attenuate(rng, keypair, block.build());
     }
 
@@ -272,7 +272,7 @@ public class UnverifiedBiscuit {
         return Biscuit.from_serialized_biscuit(serializedBiscuit, this.symbols);
     }
 
-    public Biscuit verify(KeyDelegate delegate) throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public Biscuit verify(KeyDelegate delegate) throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException, InvalidAlgorithmParameterException {
         SerializedBiscuit serializedBiscuit = this.serializedBiscuit;
 
 

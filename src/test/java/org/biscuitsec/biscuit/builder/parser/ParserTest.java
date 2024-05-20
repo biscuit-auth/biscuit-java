@@ -18,6 +18,8 @@ import org.junit.jupiter.api.Test;
 import static org.biscuitsec.biscuit.datalog.Check.Kind.One;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 
 class ParserTest {
@@ -183,7 +185,7 @@ class ParserTest {
     }
 
     @Test
-    void testRuleWithScope() {
+    void testRuleWithScope() throws NoSuchAlgorithmException, InvalidKeySpecException {
         Either<Error, Tuple2<String, Rule>> res =
                 Parser.rule("valid_date(\"file1\") <- resource(\"file1\")  trusting ed25519/6e9e6d5a75cf0c0e87ec1256b4dfed0ca3ba452912d213fcc70f8516583db9db, authority ");
         assertEquals(Either.right(new Tuple2<>("",
