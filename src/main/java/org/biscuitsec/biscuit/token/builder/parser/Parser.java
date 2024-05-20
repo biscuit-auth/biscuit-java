@@ -10,6 +10,8 @@ import io.vavr.Tuple4;
 import io.vavr.control.Either;
 import org.biscuitsec.biscuit.token.builder.*;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.*;
@@ -319,13 +321,21 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<String, PublicKey>> publicKey(String s) {
-        if (!s.startsWith("ed25519/")) {
-            return Either.left(new Error(s, "unrecognized public key prefix"));
+        try {
+            if (s.startsWith("ed25519/")) {
+                s = s.substring("ed25519/".length());
+                Tuple2<String, byte[]> t = hex(s);
+                return Either.right(new Tuple2(t._1, new PublicKey(Schema.PublicKey.Algorithm.Ed25519, t._2)));
+            } else if (s.startsWith("p256/")) {
+                s = s.substring("p256/".length());
+                Tuple2<String, byte[]> t = hex(s);
+                return Either.right(new Tuple2(t._1, new PublicKey(Schema.PublicKey.Algorithm.P256, t._2)));
+            } else {
+                return Either.left(new Error(s, "unrecognized public key prefix"));
+            }
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            return Either.left(new Error(s, "error parsing public key"));
         }
-
-        s = s.substring("ed25519/".length());
-        Tuple2<String, byte[]> t = hex(s);
-        return Either.right(new Tuple2(t._1, new PublicKey(Schema.PublicKey.Algorithm.Ed25519, t._2)));
     }
 
     public static Either<Error, Tuple2<String, Predicate>> fact_predicate(String s) {

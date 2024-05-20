@@ -1,77 +1,75 @@
 package org.biscuitsec.biscuit.crypto;
 
 
-import biscuit.format.schema.Schema;
-import org.biscuitsec.biscuit.token.builder.Utils;
-import net.i2p.crypto.eddsa.EdDSAPrivateKey;
-import net.i2p.crypto.eddsa.EdDSAPublicKey;
-import net.i2p.crypto.eddsa.spec.*;
+import biscuit.format.schema.Schema.PublicKey.Algorithm;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.Signature;
 
 /**
- * Private and public key
+ * Private and public key.
  */
-public final class KeyPair {
-    public final EdDSAPrivateKey private_key;
-    public final EdDSAPublicKey public_key;
+public abstract class KeyPair {
 
-    private static final int ED25519_PUBLIC_KEYSIZE = 32;
-    private static final int ED25519_PRIVATE_KEYSIZE = 64;
-    private static final int ED25519_SEED_SIZE = 32;
-    public static final EdDSANamedCurveSpec ed25519 = EdDSANamedCurveTable.getByName(EdDSANamedCurveTable.ED_25519);
-
-    public KeyPair() {
-        this(new SecureRandom());
+    public static KeyPair generateForAlgorithm(Algorithm algorithm, byte[] bytes) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+        if (algorithm == Algorithm.Ed25519) {
+            return new Ed25519KeyPair(bytes);
+        } else if (algorithm == Algorithm.P256) {
+            return new P256KeyPair(bytes);
+        } else {
+            throw new NoSuchAlgorithmException("Unsupported algorithm");
+        }
     }
 
-    public KeyPair(final SecureRandom rng) {
-        byte[] b = new byte[32];
-        rng.nextBytes(b);
-
-        EdDSAPrivateKeySpec privKeySpec = new EdDSAPrivateKeySpec(b, ed25519);
-        EdDSAPrivateKey privKey = new EdDSAPrivateKey(privKeySpec);
-
-        EdDSAPublicKeySpec pubKeySpec = new EdDSAPublicKeySpec(privKey.getA(), ed25519);
-        EdDSAPublicKey pubKey = new EdDSAPublicKey(pubKeySpec);
-
-        this.private_key = privKey;
-        this.public_key = pubKey;
+    public static KeyPair generateForAlgorithm(Algorithm algorithm, SecureRandom rng) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+        if (algorithm == Algorithm.Ed25519) {
+            return new Ed25519KeyPair(rng);
+        } else if (algorithm == Algorithm.P256) {
+            return new P256KeyPair(rng);
+        } else {
+            throw new NoSuchAlgorithmException("Unsupported algorithm");
+        }
     }
 
-    public byte[] toBytes() {
-        return this.private_key.getSeed();
+    public static Signature getSignatureForAlgorithm(Algorithm algorithm) throws NoSuchAlgorithmException {
+        if (algorithm == Algorithm.Ed25519) {
+            return Ed25519KeyPair.getSignature();
+        } else if (algorithm == Algorithm.P256) {
+            return P256KeyPair.getSignature();
+        } else {
+            throw new NoSuchAlgorithmException("Unsupported algorithm");
+        }
     }
 
-    public KeyPair(byte[] b) {
-        EdDSAPrivateKeySpec privKeySpec = new EdDSAPrivateKeySpec(b, ed25519);
-        EdDSAPrivateKey privKey = new EdDSAPrivateKey(privKeySpec);
+    /**
+     * Returns the seed bytes of the private key. Returns null if the key was not created from a seed.
+     * @return seed bytes.
+     */
+    public abstract byte[] toBytes(); // todo: rename to getSeedBytes()
 
-        EdDSAPublicKeySpec pubKeySpec = new EdDSAPublicKeySpec(privKey.getA(), ed25519);
-        EdDSAPublicKey pubKey = new EdDSAPublicKey(pubKeySpec);
+    /**
+     * Returns the hex representation of the seed bytes of the private key. Null if the key was not created from a seed.
+     * @return hex representation of the seed bytes.
+     */
+    public abstract String toHex(); // todo: rename to getHex()
 
-        this.private_key = privKey;
-        this.public_key = pubKey;
-    }
+    /**
+     * Returns the java.security.PublicKey.
+     * @return
+     */
+    public abstract java.security.PublicKey publicKey();
 
-    public String toHex() {
-        return Utils.byteArrayToHexString(this.toBytes());
-    }
+    /**
+     * Returns the java.security.PrivateKey.
+     * @return
+     */
+    public abstract java.security.PrivateKey private_key();
 
-    public KeyPair(String hex) {
-        byte[] b = Utils.hexStringToByteArray(hex);
-
-        EdDSAPrivateKeySpec privKeySpec = new EdDSAPrivateKeySpec(b, ed25519);
-        EdDSAPrivateKey privKey = new EdDSAPrivateKey(privKeySpec);
-
-        EdDSAPublicKeySpec pubKeySpec = new EdDSAPublicKeySpec(privKey.getA(), ed25519);
-        EdDSAPublicKey pubKey = new EdDSAPublicKey(pubKeySpec);
-
-        this.private_key = privKey;
-        this.public_key = pubKey;
-    }
-
-    public PublicKey public_key() {
-        return new PublicKey(Schema.PublicKey.Algorithm.Ed25519, this.public_key);
-    }
+    /**
+     * Returns the biscuit.crypto.PublicKey.
+     * @return
+     */
+    public abstract PublicKey public_key();
 }

@@ -5,41 +5,52 @@ import biscuit.format.schema.Schema.PublicKey.Algorithm;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.token.builder.Utils;
 import com.google.protobuf.ByteString;
-import net.i2p.crypto.eddsa.EdDSAPublicKey;
-import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
 
-import static org.biscuitsec.biscuit.crypto.KeyPair.ed25519;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+
 
 public class PublicKey {
 
-    public final EdDSAPublicKey key;
+    public final java.security.PublicKey key;
     public final Algorithm algorithm;
 
-    public PublicKey(Algorithm algorithm, EdDSAPublicKey public_key) {
+    public PublicKey(Algorithm algorithm, java.security.PublicKey public_key) {
         this.key = public_key;
         this.algorithm = algorithm;
     }
 
-    public PublicKey(Algorithm algorithm, byte[] data) {
-        EdDSAPublicKeySpec pubKeySpec = new EdDSAPublicKeySpec(data, ed25519);
-        EdDSAPublicKey pubKey = new EdDSAPublicKey(pubKeySpec);
-        this.key = pubKey;
+    public PublicKey(Algorithm algorithm, byte[] data) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        if (algorithm == Algorithm.Ed25519) {
+            this.key = Ed25519KeyPair.generatePublicKey(data);
+        } else if (algorithm == Algorithm.P256) {
+            this.key = P256KeyPair.generatePublicKey(data);
+        } else {
+            throw new IllegalArgumentException("Invalid algorithm");
+        }
         this.algorithm = algorithm;
     }
 
     public byte[] toBytes() {
-        return this.key.getAbyte();
+        // wtf is this?
+        // return this.key.getAbyte();
+
+        return key.getEncoded();
     }
 
     public String toHex() {
         return Utils.byteArrayToHexString(this.toBytes());
     }
 
-    public PublicKey(Algorithm algorithm, String hex) {
+    public PublicKey(Algorithm algorithm, String hex) throws NoSuchAlgorithmException, InvalidKeySpecException {
         byte[] data = Utils.hexStringToByteArray(hex);
-        EdDSAPublicKeySpec pubKeySpec = new EdDSAPublicKeySpec(data, ed25519);
-        EdDSAPublicKey pubKey = new EdDSAPublicKey(pubKeySpec);
-        this.key = pubKey;
+        if (algorithm == Algorithm.Ed25519) {
+            this.key = Ed25519KeyPair.generatePublicKey(data);
+        } else if (algorithm == Algorithm.P256) {
+            this.key = P256KeyPair.generatePublicKey(data);
+        } else {
+            throw new IllegalArgumentException("Invalid algorithm");
+        }
         this.algorithm = algorithm;
     }
 
@@ -51,11 +62,19 @@ public class PublicKey {
     }
 
     static public PublicKey deserialize(Schema.PublicKey pk) throws Error.FormatError.DeserializationError {
-        if(!pk.hasAlgorithm() || !pk.hasKey() || pk.getAlgorithm() != Algorithm.Ed25519) {
+        if(!pk.hasAlgorithm() || !pk.hasKey()) {
             throw new Error.FormatError.DeserializationError("Invalid public key");
         }
-
-        return new PublicKey(pk.getAlgorithm(), pk.getKey().toByteArray());
+        if (pk.getAlgorithm() != Algorithm.Ed25519 && pk.getAlgorithm() != Algorithm.P256) {
+            throw new Error.FormatError.DeserializationError("Invalid public key algorithm");
+        }
+        try {
+            return new PublicKey(pk.getAlgorithm(), pk.getKey().toByteArray());
+        } catch (NoSuchAlgorithmException e) {
+            throw new Error.FormatError.DeserializationError("No such algorithm");
+        } catch (InvalidKeySpecException e) {
+            throw new Error.FormatError.DeserializationError("Invalid key spec");
+        }
     }
 
     @Override
@@ -75,6 +94,12 @@ public class PublicKey {
 
     @Override
     public String toString() {
-        return "ed25519/" + toHex().toLowerCase();
+        if (algorithm == Algorithm.Ed25519) {
+            return "ed25519/" + toHex().toLowerCase();
+        } else if (algorithm == Algorithm.P256) {
+            return "p256/" + toHex().toLowerCase();
+        } else {
+            return null;
+        }
     }
 }

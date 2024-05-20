@@ -1,5 +1,6 @@
 package org.biscuitsec.biscuit.token;
 
+import biscuit.format.schema.Schema;
 import org.biscuitsec.biscuit.crypto.KeyDelegate;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.crypto.PublicKey;
@@ -10,9 +11,11 @@ import io.vavr.Tuple3;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.Signature;
 import java.security.SignatureException;
 import java.util.*;
 
@@ -110,7 +113,12 @@ public class Biscuit extends UnverifiedBiscuit {
         symbols.symbols.addAll(authority.symbols.symbols);
         ArrayList<Block> blocks = new ArrayList<>();
 
-        KeyPair next = new KeyPair(rng);
+        KeyPair next;
+        try {
+            next = KeyPair.generateForAlgorithm(root.public_key().algorithm, rng);
+        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
+            throw new Error.FormatError.AlgorithmError(e.getMessage());
+        }
 
         Either<Error.FormatError, SerializedBiscuit> container = SerializedBiscuit.make(root, root_key_id, authority, next);
         if (container.isLeft()) {
@@ -324,7 +332,12 @@ public class Biscuit extends UnverifiedBiscuit {
      */
     public Biscuit attenuate(org.biscuitsec.biscuit.token.builder.Block block) throws Error {
         SecureRandom rng = new SecureRandom();
-        KeyPair keypair = new KeyPair(rng);
+        KeyPair keypair;
+        try {
+            keypair = KeyPair.generateForAlgorithm(Schema.PublicKey.Algorithm.Ed25519, rng); // todo figure out how to get the algorithm
+        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
+            throw new Error.FormatError.AlgorithmError(e.getMessage());
+        }
         return attenuate(rng, keypair, block.build());
     }
 

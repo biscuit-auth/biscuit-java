@@ -1,5 +1,6 @@
 package org.biscuitsec.biscuit.token;
 
+import biscuit.format.schema.Schema;
 import org.biscuitsec.biscuit.crypto.KeyDelegate;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.crypto.PublicKey;
@@ -11,6 +12,7 @@ import io.vavr.control.Option;
 import org.biscuitsec.biscuit.datalog.Check;
 import org.biscuitsec.biscuit.datalog.SymbolTable;
 
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -138,9 +140,9 @@ public class UnverifiedBiscuit {
      * @param block new block (should be generated from a Block builder)
      * @return
      */
-    public UnverifiedBiscuit attenuate(org.biscuitsec.biscuit.token.builder.Block block) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+    public UnverifiedBiscuit attenuate(org.biscuitsec.biscuit.token.builder.Block block) throws NoSuchAlgorithmException, Error, InvalidAlgorithmParameterException {
         SecureRandom rng = new SecureRandom();
-        KeyPair keypair = new KeyPair(rng);
+        KeyPair keypair = KeyPair.generateForAlgorithm(Schema.PublicKey.Algorithm.Ed25519, rng); // todo, figure out how to get the algorithm
         return attenuate(rng, keypair, block.build());
     }
 
