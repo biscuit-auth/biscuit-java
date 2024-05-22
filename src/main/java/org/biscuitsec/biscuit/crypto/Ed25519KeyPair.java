@@ -52,7 +52,7 @@ class Ed25519KeyPair extends KeyPair {
         this(Utils.hexStringToByteArray(hex));
     }
 
-    public static java.security.PublicKey generatePublicKey(byte[] data) {
+    public static java.security.PublicKey decode(byte[] data) {
         return new EdDSAPublicKey(new EdDSAPublicKeySpec(data, ed25519));
     }
 

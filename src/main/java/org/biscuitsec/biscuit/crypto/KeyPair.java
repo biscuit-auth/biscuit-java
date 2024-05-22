@@ -8,7 +8,6 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.Signature;
-import java.security.spec.InvalidKeySpecException;
 
 /**
  * Private and public key.
@@ -49,33 +48,13 @@ public abstract class KeyPair {
         }
     }
 
-    /**
-     * Returns the seed bytes of the private key. Returns null if the key was not created from a seed.
-     * @return seed bytes.
-     */
     public abstract byte[] toBytes();
 
-    /**
-     * Returns the hex representation of the seed bytes of the private key. Returns null if the key was not created from a seed.
-     * @return hex representation of the seed bytes.
-     */
     public abstract String toHex();
 
-    /**
-     * Returns the java.security.PublicKey.
-     * @return java public key.
-     */
     public abstract java.security.PublicKey publicKey();
 
-    /**
-     * Returns the java.security.PrivateKey.
-     * @return private key.
-     */
     public abstract java.security.PrivateKey private_key();
 
-    /**
-     * Returns the biscuit.crypto.PublicKey wrapper.
-     * @return biscuit public key.
-     */
-    public abstract PublicKey public_key() throws NoSuchAlgorithmException, InvalidKeySpecException;
+    public abstract PublicKey public_key();
 }

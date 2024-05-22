@@ -260,8 +260,7 @@ public class SerializedBiscuit {
             Proof proof = new Proof(next);
 
             return Right(new SerializedBiscuit(signedBlock, new ArrayList<>(), proof, root_key_id));
-        } catch (IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException |
-                 InvalidKeySpecException e) {
+        } catch (IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
             return Left(new Error.FormatError.SerializationError(e.toString()));
         }
     }
@@ -301,8 +300,7 @@ public class SerializedBiscuit {
             Proof proof = new Proof(next);
 
             return Right(new SerializedBiscuit(this.authority, blocks, proof, root_key_id));
-        } catch (IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException |
-                 InvalidKeySpecException e) {
+        } catch (IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
             return Left(new Error.FormatError.SerializationError(e.toString()));
         }
     }
@@ -375,18 +373,14 @@ public class SerializedBiscuit {
             //System.out.println("checking secret key");
             //System.out.println("current key: "+current_key.toHex());
             //System.out.println("key from proof: "+this.proof.secretKey.get().public_key().toHex());
-            try {
-                if (this.proof.secretKey.get().public_key().equals(current_key)) {
-                    //System.out.println("public keys are equal");
+            if (this.proof.secretKey.get().public_key().equals(current_key)) {
+                //System.out.println("public keys are equal");
 
-                    return Right(null);
-                } else {
-                    //System.out.println("public keys are not equal");
+                return Right(null);
+            } else {
+                //System.out.println("public keys are not equal");
 
-                    return Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"));
-                }
-            } catch (InvalidKeySpecException e) {
-                return Left(new Error.FormatError.Signature.InvalidSignature("signature error: Invalid key spec"));
+                return Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"));
             }
         } else {
             //System.out.println("checking final signature");

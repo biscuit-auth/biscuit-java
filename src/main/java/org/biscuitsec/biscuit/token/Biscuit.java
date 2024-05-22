@@ -116,7 +116,7 @@ public class Biscuit extends UnverifiedBiscuit {
         KeyPair next;
         try {
             next = KeyPair.generate(root.public_key().algorithm, rng);
-        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException | InvalidKeySpecException e) {
+        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
             throw new Error.FormatError.AlgorithmError(e.getMessage());
         }
 

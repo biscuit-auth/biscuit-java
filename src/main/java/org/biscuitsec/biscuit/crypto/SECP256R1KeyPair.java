@@ -2,55 +2,82 @@ package org.biscuitsec.biscuit.crypto;
 
 import biscuit.format.schema.Schema;
 import org.biscuitsec.biscuit.token.builder.Utils;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
+import org.bouncycastle.jcajce.provider.asymmetric.util.EC5Util;
+import org.bouncycastle.jce.ECNamedCurveTable;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECPublicKeySpec;
 
 import java.security.InvalidAlgorithmParameterException;
-import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.security.Signature;
+import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECGenParameterSpec;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 
 class SECP256R1KeyPair extends KeyPair {
 
-    private final java.security.KeyPair keyPair;
+    private final BCECPrivateKey privateKey;
+    private final BCECPublicKey publicKey;
+
+    static {
+        Security.addProvider(new BouncyCastleProvider());
+    }
 
     public SECP256R1KeyPair(byte[] bytes) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
-        var kpg = KeyPairGenerator.getInstance("EC");
+        var kpg = getBcKeyPairGenerator();
         var spec = new ECGenParameterSpec("secp256r1");
         kpg.initialize(spec, new SecureRandom(bytes));
-        keyPair = kpg.generateKeyPair();
+        var keyPair = kpg.generateKeyPair();
+        privateKey = (BCECPrivateKey) keyPair.getPrivate();
+        publicKey = (BCECPublicKey) keyPair.getPublic();
     }
 
     public SECP256R1KeyPair(SecureRandom rng) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         byte[] bytes = new byte[32];
         rng.nextBytes(bytes);
-        var kpg = KeyPairGenerator.getInstance("EC");
+        var kpg = getBcKeyPairGenerator();
         var spec = new ECGenParameterSpec("secp256r1");
         kpg.initialize(spec, new SecureRandom(bytes));
-        keyPair = kpg.generateKeyPair();
+        var keyPair = kpg.generateKeyPair();
+        privateKey = (BCECPrivateKey) keyPair.getPrivate();
+        publicKey = (BCECPublicKey) keyPair.getPublic();
     }
 
     public SECP256R1KeyPair(String hex) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         this(Utils.hexStringToByteArray(hex));
     }
 
-    public static java.security.PublicKey generatePublicKey(byte[] data) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        var kf = KeyFactory.getInstance("EC");
-        var spec = new X509EncodedKeySpec(data, "SHA256withECDSA");
-        return kf.generatePublic(spec);
+    public static java.security.PublicKey decode(byte[] data) {
+        var params = ECNamedCurveTable.getParameterSpec("secp256r1");
+        var spec = new ECPublicKeySpec(params.getCurve().decodePoint(data), params);
+        return new BCECPublicKey("ECDSA", spec, BouncyCastleProvider.CONFIGURATION);
+    }
+
+    public static byte[] encode(ECPublicKey ecPublicKey) {
+        var params = ecPublicKey.getParams();
+        var w = ecPublicKey.getW();
+        var bcSpec = EC5Util.convertSpec(params);
+        var bcPoint = bcSpec.getCurve().createPoint(w.getAffineX(), w.getAffineY());
+        return bcPoint.getEncoded(true); // true for compressed
     }
 
     public static Signature getSignature() throws NoSuchAlgorithmException {
-        return Signature.getInstance("SHA256withECDSA");
+        try {
+            return Signature.getInstance("SHA256withECDSA", "BC");
+        } catch (NoSuchProviderException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public byte[] toBytes() {
-        return keyPair.getPublic().getEncoded();
+        return encode(publicKey);
     }
 
     @Override
@@ -60,16 +87,24 @@ class SECP256R1KeyPair extends KeyPair {
 
     @Override
     public java.security.PublicKey publicKey() {
-        return keyPair.getPublic();
+        return publicKey;
     }
 
     @Override
     public PrivateKey private_key() {
-        return keyPair.getPrivate();
+        return privateKey;
     }
 
     @Override
     public PublicKey public_key() {
-        return new PublicKey(Schema.PublicKey.Algorithm.SECP256R1, keyPair.getPublic());
+        return new PublicKey(Schema.PublicKey.Algorithm.SECP256R1, publicKey);
+    }
+
+    private static KeyPairGenerator getBcKeyPairGenerator() throws NoSuchAlgorithmException {
+        try {
+            return KeyPairGenerator.getInstance("EC", "BC");
+        } catch (NoSuchProviderException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
