@@ -16,6 +16,8 @@ import static io.vavr.API.Right;
 
 import org.biscuitsec.biscuit.error.Error;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -37,9 +39,8 @@ public class SignatureTest {
 
     @Test
     public void testChangeMessages() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, InvalidAlgorithmParameterException, InvalidKeySpecException {
-       testChangeMessages(Ed25519);
+        testChangeMessages(Ed25519);
         testChangeMessages(SECP256R1);
-
     }
 
     private static void testSerialize(Schema.PublicKey.Algorithm algorithm, int expectedPublicKeyLength) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
@@ -60,7 +61,8 @@ public class SignatureTest {
 
         System.out.println(keypair.toHex());
         System.out.println(deserializedSecretKey.toHex());
-        assertEquals(keypair.toBytes(), deserializedSecretKey.toBytes());
+        assertArrayEquals(keypair.toBytes(), deserializedSecretKey.toBytes());
+
         System.out.println(pubkey.toHex());
         System.out.println(deserializedPublicKey.toHex());
         assertEquals(pubkey.toHex(), deserializedPublicKey.toHex());
