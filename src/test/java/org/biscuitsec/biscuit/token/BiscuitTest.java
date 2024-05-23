@@ -22,7 +22,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -33,7 +32,7 @@ import static org.biscuitsec.biscuit.token.builder.Utils.*;
 public class BiscuitTest {
 
     @Test
-    public void testBasic() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, InvalidAlgorithmParameterException, InvalidKeySpecException {
+    public void testBasic() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, InvalidAlgorithmParameterException {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
@@ -226,7 +225,7 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testMultipleAttenuation() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, InvalidAlgorithmParameterException, InvalidKeySpecException {
+    public void testMultipleAttenuation() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, InvalidAlgorithmParameterException {
         SecureRandom rng = new SecureRandom();
         KeyPair root = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
 
@@ -366,7 +365,7 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testBasicWithNamespaces() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, InvalidAlgorithmParameterException, InvalidKeySpecException {
+    public void testBasicWithNamespaces() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, InvalidAlgorithmParameterException {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
@@ -491,7 +490,7 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testBasicWithNamespacesWithAddAuthorityFact() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, InvalidAlgorithmParameterException, InvalidKeySpecException {
+    public void testBasicWithNamespacesWithAddAuthorityFact() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, InvalidAlgorithmParameterException {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
@@ -656,7 +655,7 @@ public class BiscuitTest {
         assertThrows(Error.FormatError.Signature.InvalidSignature.class, () -> {
             Biscuit deser = Biscuit.from_bytes(data, new KeyDelegate() {
                 @Override
-                public Option<PublicKey> root_key(Option<Integer> key_id) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException {
+                public Option<PublicKey> root_key(Option<Integer> key_id) throws NoSuchAlgorithmException {
 
                     KeyPair root = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
                     return Option.some(root.public_key());
@@ -666,7 +665,7 @@ public class BiscuitTest {
 
         Biscuit deser = Biscuit.from_bytes(data, new KeyDelegate() {
             @Override
-            public Option<PublicKey> root_key(Option<Integer> key_id) throws NoSuchAlgorithmException, InvalidKeySpecException {
+            public Option<PublicKey> root_key(Option<Integer> key_id) {
                 if (key_id.get() == 1) {
                     return Option.some(root.public_key());
                 } else {
@@ -678,7 +677,7 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testCheckAll() throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException, InvalidAlgorithmParameterException, InvalidKeySpecException {
+    public void testCheckAll() throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException, InvalidAlgorithmParameterException {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 

@@ -5,18 +5,16 @@ import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.token.builder.Block;
 
-import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
 
 /* example code for the documentation at https://www.biscuitsec.org
  * if these functions change, please send a PR to update them at https://github.com/biscuit-auth/website
  */
 public class ExampleTest {
-    public KeyPair root() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
+    public KeyPair root() throws NoSuchAlgorithmException {
         return KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, new SecureRandom());
     }
 
@@ -27,7 +25,7 @@ public class ExampleTest {
                 .build();
     }
 
-    public Long authorize(KeyPair root, byte[] serializedToken) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, InvalidKeySpecException {
+    public Long authorize(KeyPair root, byte[] serializedToken) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         return Biscuit.from_bytes(serializedToken, root.public_key()).authorizer()
                 .add_fact("resource(\"/folder1/file1\")")
                 .add_fact("operation(\"read\")")
@@ -35,7 +33,7 @@ public class ExampleTest {
                 .authorize();
     }
 
-    public Biscuit attenuate(KeyPair root, byte[] serializedToken) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, InvalidKeySpecException {
+    public Biscuit attenuate(KeyPair root, byte[] serializedToken) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         Biscuit token = Biscuit.from_bytes(serializedToken, root.public_key());
         Block block = token.create_block().add_check("check if operation(\"read\")");
         return token.attenuate(block);

@@ -2,21 +2,16 @@ package org.biscuitsec.biscuit.token;
 
 import biscuit.format.schema.Schema;
 import com.google.gson.*;
-import com.google.protobuf.MapEntry;
 import io.vavr.Tuple2;
 import io.vavr.control.Option;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.datalog.Rule;
 import org.biscuitsec.biscuit.datalog.RunLimits;
-import org.biscuitsec.biscuit.datalog.SymbolTable;
-import org.biscuitsec.biscuit.datalog.TrustedOrigins;
 import org.biscuitsec.biscuit.error.Error;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 import org.biscuitsec.biscuit.token.builder.Check;
-import org.biscuitsec.biscuit.token.builder.Expression;
-import org.biscuitsec.biscuit.token.builder.parser.ExpressionParser;
 import org.biscuitsec.biscuit.token.builder.parser.Parser;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -24,13 +19,10 @@ import org.junit.jupiter.api.TestFactory;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class SamplesTest {
     final RunLimits runLimits = new RunLimits(500,100, Duration.ofMillis(500));
     @TestFactory
-    Stream<DynamicTest> jsonTest() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException {
+    Stream<DynamicTest> jsonTest() throws NoSuchAlgorithmException {
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("samples/samples.json");
         Gson gson = new Gson();

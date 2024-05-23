@@ -1,17 +1,13 @@
 package org.biscuitsec.biscuit.token.builder.parser;
 
 import biscuit.format.schema.Schema;
-import io.vavr.collection.Stream;
 import org.biscuitsec.biscuit.crypto.PublicKey;
-import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.token.Policy;
 import io.vavr.Tuple2;
 import io.vavr.Tuple4;
 import io.vavr.control.Either;
 import org.biscuitsec.biscuit.token.builder.*;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.*;

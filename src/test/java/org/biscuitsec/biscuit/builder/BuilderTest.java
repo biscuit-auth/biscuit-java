@@ -12,7 +12,6 @@ import org.biscuitsec.biscuit.token.builder.Utils;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -26,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class BuilderTest {
 
     @Test
-    public void testBuild() throws Error.Language, Error.SymbolTableOverlap, Error.FormatError, InvalidAlgorithmParameterException, NoSuchAlgorithmException {
+    public void testBuild() throws Error.Language, Error.SymbolTableOverlap, Error.FormatError, NoSuchAlgorithmException {
         SecureRandom rng = new SecureRandom();
         KeyPair root = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
         SymbolTable symbols = Biscuit.default_symbol_table();

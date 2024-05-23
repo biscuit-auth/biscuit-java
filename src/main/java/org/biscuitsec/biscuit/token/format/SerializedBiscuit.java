@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.*;
-import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 
 import static io.vavr.API.Left;
@@ -73,7 +72,7 @@ public class SerializedBiscuit {
             }
 
             return from_bytes_inner(data, root.get());
-        } catch (InvalidProtocolBufferException | InvalidAlgorithmParameterException | InvalidKeySpecException e) {
+        } catch (InvalidProtocolBufferException e) {
             throw new Error.FormatError.DeserializationError(e.toString());
         }
     }
@@ -153,7 +152,7 @@ public class SerializedBiscuit {
         if (data.getProof().hasNextSecret()) {
             try {
                 secretKey = Option.some(KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, data.getProof().getNextSecret().toByteArray()));
-            } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
+            } catch (NoSuchAlgorithmException e) {
                 throw new Error.FormatError.AlgorithmError(e.getMessage());
             }
         }

@@ -5,12 +5,10 @@ import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.datalog.TemporarySymbolTable;
 import org.biscuitsec.biscuit.datalog.expressions.Op;
-import org.biscuitsec.biscuit.token.Biscuit;
 import org.biscuitsec.biscuit.token.builder.parser.Error;
 import org.biscuitsec.biscuit.token.builder.parser.Parser;
 import io.vavr.Tuple2;
 import io.vavr.control.Either;
-import io.vavr.control.Option;
 import org.biscuitsec.biscuit.token.builder.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -18,8 +16,6 @@ import org.junit.jupiter.api.Test;
 import static org.biscuitsec.biscuit.datalog.Check.Kind.One;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 
 class ParserTest {
@@ -185,7 +181,7 @@ class ParserTest {
     }
 
     @Test
-    void testRuleWithScope() throws NoSuchAlgorithmException, InvalidKeySpecException {
+    void testRuleWithScope() {
         Either<Error, Tuple2<String, Rule>> res =
                 Parser.rule("valid_date(\"file1\") <- resource(\"file1\")  trusting ed25519/6e9e6d5a75cf0c0e87ec1256b4dfed0ca3ba452912d213fcc70f8516583db9db, authority ");
         assertEquals(Either.right(new Tuple2<>("",

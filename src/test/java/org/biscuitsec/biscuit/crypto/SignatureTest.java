@@ -2,13 +2,10 @@ package org.biscuitsec.biscuit.crypto;
 
 import biscuit.format.schema.Schema;
 
-import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
-import java.util.Arrays;
 
 import static biscuit.format.schema.Schema.PublicKey.Algorithm.*;
 import static io.vavr.API.Left;
@@ -26,24 +23,24 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SignatureTest {
 
     @Test
-    public void testSerialize() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+    public void testSerialize() throws NoSuchAlgorithmException {
         testSerialize(Ed25519, 32);
         testSerialize(SECP256R1, 33);
     }
 
     @Test
-    public void testThreeMessages() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, InvalidAlgorithmParameterException, InvalidKeySpecException {
+    public void testThreeMessages() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         testThreeMessages(Ed25519);
         testThreeMessages(SECP256R1);
     }
 
     @Test
-    public void testChangeMessages() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, InvalidAlgorithmParameterException, InvalidKeySpecException {
+    public void testChangeMessages() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         testChangeMessages(Ed25519);
         testChangeMessages(SECP256R1);
     }
 
-    private static void testSerialize(Schema.PublicKey.Algorithm algorithm, int expectedPublicKeyLength) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
+    private static void testSerialize(Schema.PublicKey.Algorithm algorithm, int expectedPublicKeyLength) throws NoSuchAlgorithmException {
         byte[] seed = {1, 2, 3, 4};
         SecureRandom rng = new SecureRandom(seed);
 
@@ -68,7 +65,7 @@ public class SignatureTest {
         assertEquals(pubkey.toHex(), deserializedPublicKey.toHex());
     }
 
-    private static void testChangeMessages(Schema.PublicKey.Algorithm algorithm) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException, InvalidKeyException {
+    private static void testChangeMessages(Schema.PublicKey.Algorithm algorithm) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
@@ -92,7 +89,7 @@ public class SignatureTest {
                 token3.verify(new PublicKey(algorithm, root.publicKey())));
     }
 
-    private static void testThreeMessages(Schema.PublicKey.Algorithm algorithm) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, SignatureException, InvalidKeyException {
+    private static void testThreeMessages(Schema.PublicKey.Algorithm algorithm) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
