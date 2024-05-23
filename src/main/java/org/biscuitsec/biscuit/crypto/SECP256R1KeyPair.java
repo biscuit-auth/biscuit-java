@@ -24,6 +24,7 @@ class SECP256R1KeyPair extends KeyPair {
 
     private final BCECPrivateKey privateKey;
     private final BCECPublicKey publicKey;
+    private final byte[] seed;
 
     static {
         Security.addProvider(new BouncyCastleProvider());
@@ -36,6 +37,7 @@ class SECP256R1KeyPair extends KeyPair {
         var keyPair = kpg.generateKeyPair();
         privateKey = (BCECPrivateKey) keyPair.getPrivate();
         publicKey = (BCECPublicKey) keyPair.getPublic();
+        seed = bytes;
     }
 
     public SECP256R1KeyPair(SecureRandom rng) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
@@ -47,6 +49,7 @@ class SECP256R1KeyPair extends KeyPair {
         var keyPair = kpg.generateKeyPair();
         privateKey = (BCECPrivateKey) keyPair.getPrivate();
         publicKey = (BCECPublicKey) keyPair.getPublic();
+        seed = bytes;
     }
 
     public SECP256R1KeyPair(String hex) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
@@ -59,14 +62,6 @@ class SECP256R1KeyPair extends KeyPair {
         return new BCECPublicKey("ECDSA", spec, BouncyCastleProvider.CONFIGURATION);
     }
 
-    public static byte[] encode(ECPublicKey ecPublicKey) {
-        var params = ecPublicKey.getParams();
-        var w = ecPublicKey.getW();
-        var bcSpec = EC5Util.convertSpec(params);
-        var bcPoint = bcSpec.getCurve().createPoint(w.getAffineX(), w.getAffineY());
-        return bcPoint.getEncoded(true); // true for compressed
-    }
-
     public static Signature getSignature() throws NoSuchAlgorithmException {
         try {
             return Signature.getInstance("SHA256withECDSA", "BC");
@@ -77,7 +72,7 @@ class SECP256R1KeyPair extends KeyPair {
 
     @Override
     public byte[] toBytes() {
-        return encode(publicKey);
+        return seed;
     }
 
     @Override

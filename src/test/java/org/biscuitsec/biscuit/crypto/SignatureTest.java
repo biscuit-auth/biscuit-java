@@ -8,6 +8,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
 
 import static biscuit.format.schema.Schema.PublicKey.Algorithm.*;
 import static io.vavr.API.Left;
@@ -41,7 +42,7 @@ public class SignatureTest {
 
     }
 
-    private static void testSerialize(Schema.PublicKey.Algorithm algorithm, int expectedKeyLength) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
+    private static void testSerialize(Schema.PublicKey.Algorithm algorithm, int expectedPublicKeyLength) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
         byte[] seed = {1, 2, 3, 4};
         SecureRandom rng = new SecureRandom(seed);
 
@@ -54,8 +55,8 @@ public class SignatureTest {
         KeyPair deserializedSecretKey = KeyPair.generate(algorithm, serializedSecretKey);
         PublicKey deserializedPublicKey = new PublicKey(algorithm, serializedPublicKey);
 
-        assertEquals(expectedKeyLength, serializedSecretKey.length);
-        assertEquals(expectedKeyLength, serializedPublicKey.length);
+        assertEquals(32, serializedSecretKey.length);
+        assertEquals(expectedPublicKeyLength, serializedPublicKey.length);
 
         System.out.println(keypair.toHex());
         System.out.println(deserializedSecretKey.toHex());
