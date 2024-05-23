@@ -12,7 +12,6 @@ import io.vavr.control.Option;
 import org.biscuitsec.biscuit.datalog.Check;
 import org.biscuitsec.biscuit.datalog.SymbolTable;
 
-import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;

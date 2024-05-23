@@ -17,7 +17,6 @@ import io.vavr.control.Try;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -32,7 +31,7 @@ import static org.biscuitsec.biscuit.token.builder.Utils.*;
 public class BiscuitTest {
 
     @Test
-    public void testBasic() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, InvalidAlgorithmParameterException {
+    public void testBasic() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
@@ -158,7 +157,7 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testFolders() throws NoSuchAlgorithmException, Error, InvalidAlgorithmParameterException {
+    public void testFolders() throws NoSuchAlgorithmException, Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
@@ -225,7 +224,7 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testMultipleAttenuation() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, InvalidAlgorithmParameterException {
+    public void testMultipleAttenuation() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         SecureRandom rng = new SecureRandom();
         KeyPair root = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
 
@@ -254,7 +253,7 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testReset() throws NoSuchAlgorithmException, Error, InvalidAlgorithmParameterException {
+    public void testReset() throws NoSuchAlgorithmException, Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
@@ -323,7 +322,7 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testEmptyAuthorizer() throws NoSuchAlgorithmException, Error, InvalidAlgorithmParameterException {
+    public void testEmptyAuthorizer() throws NoSuchAlgorithmException, Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
@@ -365,7 +364,7 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testBasicWithNamespaces() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, InvalidAlgorithmParameterException {
+    public void testBasicWithNamespaces() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
@@ -490,7 +489,7 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testBasicWithNamespacesWithAddAuthorityFact() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, InvalidAlgorithmParameterException {
+    public void testBasicWithNamespacesWithAddAuthorityFact() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
@@ -613,7 +612,7 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testRootKeyId() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error, InvalidAlgorithmParameterException {
+    public void testRootKeyId() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
@@ -677,7 +676,7 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testCheckAll() throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException, InvalidAlgorithmParameterException {
+    public void testCheckAll() throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 

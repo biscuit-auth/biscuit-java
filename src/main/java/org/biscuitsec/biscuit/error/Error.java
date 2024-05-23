@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import io.vavr.control.Option;
 
-import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Objects;
 
