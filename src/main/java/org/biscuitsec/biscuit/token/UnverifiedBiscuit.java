@@ -139,7 +139,7 @@ public class UnverifiedBiscuit {
      * @param block new block (should be generated from a Block builder)
      * @return
      */
-    public UnverifiedBiscuit attenuate(org.biscuitsec.biscuit.token.builder.Block block) throws NoSuchAlgorithmException, Error {
+    public UnverifiedBiscuit attenuate(org.biscuitsec.biscuit.token.builder.Block block) throws Error {
         SecureRandom rng = new SecureRandom();
         KeyPair keypair = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng); // todo, figure out how to get the algorithm
         return attenuate(rng, keypair, block.build());

@@ -101,7 +101,7 @@ public class SerializedBiscuit {
      * @return SerializedBiscuit
      * @throws Error.FormatError.DeserializationError
      */
-    static public SerializedBiscuit unsafe_deserialize(byte[] slice) throws Error.FormatError.DeserializationError, Error.FormatError.AlgorithmError {
+    static public SerializedBiscuit unsafe_deserialize(byte[] slice) throws Error.FormatError.DeserializationError {
         try {
             Schema.Biscuit data = Schema.Biscuit.parseFrom(slice);
             return SerializedBiscuit.deserialize(data);
@@ -117,7 +117,7 @@ public class SerializedBiscuit {
      * @return SerializedBiscuit
      * @throws Error.FormatError.DeserializationError
      */
-    static private SerializedBiscuit deserialize(Schema.Biscuit data) throws Error.FormatError.DeserializationError, Error.FormatError.AlgorithmError {
+    static private SerializedBiscuit deserialize(Schema.Biscuit data) throws Error.FormatError.DeserializationError {
         if(data.getAuthority().hasExternalSignature()) {
             throw new Error.FormatError.DeserializationError("the authority block must not contain an external signature");
         }
@@ -150,11 +150,7 @@ public class SerializedBiscuit {
 
         Option<org.biscuitsec.biscuit.crypto.KeyPair> secretKey = Option.none();
         if (data.getProof().hasNextSecret()) {
-            try {
-                secretKey = Option.some(KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, data.getProof().getNextSecret().toByteArray()));
-            } catch (NoSuchAlgorithmException e) {
-                throw new Error.FormatError.AlgorithmError(e.getMessage());
-            }
+            secretKey = Option.some(KeyPair.generate(authority.key.algorithm, data.getProof().getNextSecret().toByteArray()));
         }
 
         Option<byte[]> signature = Option.none();
@@ -401,7 +397,6 @@ public class SerializedBiscuit {
             algo_buf.flip();
 
             Signature sgr = KeyPair.generateSignature(next_key.algorithm);
-
             sgr.initVerify(current_key.key);
             sgr.update(block);
             sgr.update(algo_buf);
@@ -423,15 +418,24 @@ public class SerializedBiscuit {
         byte[] block = signedBlock.block;
         org.biscuitsec.biscuit.crypto.PublicKey next_key = signedBlock.key;
         byte[] signature = signedBlock.signature;
-        if (signature.length != 64) {
-            return Either.left(new Error.FormatError.Signature.InvalidSignatureSize(signature.length));
+
+        if (publicKey.algorithm == Schema.PublicKey.Algorithm.Ed25519) {
+            if (signature.length != 64) {
+                return Either.left(new Error.FormatError.Signature.InvalidSignatureSize(signature.length));
+            }
+        } else if (publicKey.algorithm == Schema.PublicKey.Algorithm.SECP256R1) {
+            if (signature.length != 70) {
+                return Either.left(new Error.FormatError.Signature.InvalidSignatureSize(signature.length));
+            }
+        } else {
+            return Left(new Error.FormatError.Signature.InvalidSignature("unsupported algorithm"));
         }
+
         ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
         algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
         algo_buf.flip();
 
-        Signature sgr = KeyPair.generateSignature(next_key.algorithm);
-
+        Signature sgr = KeyPair.generateSignature(publicKey.algorithm);
         sgr.initVerify(publicKey.key);
         sgr.update(block);
         if(signedBlock.externalSignature.isDefined()) {

@@ -13,27 +13,27 @@ import java.security.Signature;
  */
 public abstract class KeyPair {
 
-    public static KeyPair generate(Algorithm algorithm, String hex) throws NoSuchAlgorithmException {
+    public static KeyPair generate(Algorithm algorithm, String hex) {
         return generate(algorithm, Utils.hexToBytes(hex));
     }
 
-    public static KeyPair generate(Algorithm algorithm, byte[] bytes) throws NoSuchAlgorithmException {
+    public static KeyPair generate(Algorithm algorithm, byte[] bytes) {
         if (algorithm == Algorithm.Ed25519) {
             return new Ed25519KeyPair(bytes);
         } else if (algorithm == Algorithm.SECP256R1) {
             return new SECP256R1KeyPair(bytes);
         } else {
-            throw new NoSuchAlgorithmException("Unsupported algorithm");
+            throw new IllegalArgumentException("Unsupported algorithm");
         }
     }
 
-    public static KeyPair generate(Algorithm algorithm, SecureRandom rng) throws NoSuchAlgorithmException {
+    public static KeyPair generate(Algorithm algorithm, SecureRandom rng) {
         if (algorithm == Algorithm.Ed25519) {
             return new Ed25519KeyPair(rng);
         } else if (algorithm == Algorithm.SECP256R1) {
             return new SECP256R1KeyPair(rng);
         } else {
-            throw new NoSuchAlgorithmException("Unsupported algorithm");
+            throw new IllegalArgumentException("Unsupported algorithm");
         }
     }
 

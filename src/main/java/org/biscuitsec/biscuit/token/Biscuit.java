@@ -111,12 +111,7 @@ public class Biscuit extends UnverifiedBiscuit {
         symbols.symbols.addAll(authority.symbols.symbols);
         ArrayList<Block> blocks = new ArrayList<>();
 
-        KeyPair next;
-        try {
-            next = KeyPair.generate(root.public_key().algorithm, rng);
-        } catch (NoSuchAlgorithmException e) {
-            throw new Error.FormatError.AlgorithmError(e.getMessage());
-        }
+        var next = KeyPair.generate(root.public_key().algorithm, rng);
 
         Either<Error.FormatError, SerializedBiscuit> container = SerializedBiscuit.make(root, root_key_id, authority, next);
         if (container.isLeft()) {
@@ -330,12 +325,7 @@ public class Biscuit extends UnverifiedBiscuit {
      */
     public Biscuit attenuate(org.biscuitsec.biscuit.token.builder.Block block) throws Error {
         SecureRandom rng = new SecureRandom();
-        KeyPair keypair;
-        try {
-            keypair = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng); // todo figure out how to get the algorithm
-        } catch (NoSuchAlgorithmException e) {
-            throw new Error.FormatError.AlgorithmError(e.getMessage());
-        }
+        KeyPair keypair = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng); // todo, figure out how to get the algorithm
         return attenuate(rng, keypair, block.build());
     }
 

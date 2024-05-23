@@ -38,7 +38,7 @@ public class PublicKey {
         if (algorithm == Algorithm.Ed25519) {
             return ((EdDSAPublicKey) key).getAbyte();
         } else if (algorithm == Algorithm.SECP256R1) {
-            return ((BCECPublicKey) key).getQ().getEncoded(true);
+            return ((BCECPublicKey) key).getQ().getEncoded(true); // true = compressed
         } else {
             throw new IllegalArgumentException("Invalid algorithm");
         }

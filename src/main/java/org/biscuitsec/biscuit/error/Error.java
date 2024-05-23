@@ -332,39 +332,6 @@ public class Error extends Exception {
                 return FormatError.jsonWrapper(jo);
             }
         }
-
-        public static class AlgorithmError extends FormatError {
-            final public String e;
-
-            public AlgorithmError(String e) {
-                this.e = e;
-            }
-
-            @Override
-            public boolean equals(Object o) {
-                if (this == o) return true;
-                if (o == null || getClass() != o.getClass()) return false;
-                AlgorithmError other = (AlgorithmError) o;
-                return e.equals(other.e);
-            }
-
-            @Override
-            public int hashCode() {
-                return Objects.hash(e);
-            }
-
-            @Override
-            public String toString() {
-                return "Err(FormatError.AlgorithmError{ error: "+  e + " }";
-            }
-
-            @Override
-            public JsonElement toJson() {
-                JsonObject jo = new JsonObject();
-                jo.addProperty("AlgorithmError", this.e);
-                return FormatError.jsonWrapper(jo);
-            }
-        }
     }
     public static class InvalidAuthorityIndex extends Error {
         final public long index;
