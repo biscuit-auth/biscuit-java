@@ -4,10 +4,10 @@ import biscuit.format.schema.Schema;
 import org.biscuitsec.biscuit.token.builder.Utils;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
-import org.bouncycastle.jcajce.provider.asymmetric.util.EC5Util;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
+import org.bouncycastle.util.BigIntegers;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPairGenerator;
@@ -17,7 +17,6 @@ import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
-import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECGenParameterSpec;
 
 class SECP256R1KeyPair extends KeyPair {
@@ -72,7 +71,7 @@ class SECP256R1KeyPair extends KeyPair {
 
     @Override
     public byte[] toBytes() {
-        return seed;
+        return BigIntegers.asUnsignedByteArray(privateKey.getD());
     }
 
     @Override
