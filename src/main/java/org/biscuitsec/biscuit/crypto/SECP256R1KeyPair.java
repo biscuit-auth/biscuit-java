@@ -12,7 +12,6 @@ import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.util.BigIntegers;
 
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Security;
@@ -67,11 +66,7 @@ class SECP256R1KeyPair extends KeyPair {
     }
 
     public static Signature getSignature() throws NoSuchAlgorithmException {
-        try {
-            return Signature.getInstance("SHA256withECDSA", "BC");
-        } catch (NoSuchProviderException e) {
-            throw new RuntimeException(e);
-        }
+        return Signature.getInstance("SHA256withECDSA", new BouncyCastleProvider());
     }
 
     @Override

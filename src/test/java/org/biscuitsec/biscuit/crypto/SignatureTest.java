@@ -25,7 +25,7 @@ public class SignatureTest {
     @Test
     public void testSerialize() throws NoSuchAlgorithmException {
         testSerialize(Ed25519, 32);
-        testSerialize(SECP256R1, 33);
+        testSerialize(SECP256R1, 33); // compressed - 0x02 or 0x03 prefix byte, 32 bytes for X coordinate
     }
 
     @Test
