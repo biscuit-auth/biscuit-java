@@ -13,6 +13,10 @@ import java.security.Signature;
  */
 public abstract class KeyPair {
 
+    public static KeyPair generate(Algorithm algorithm) {
+        return generate(algorithm, new SecureRandom());
+    }
+
     public static KeyPair generate(Algorithm algorithm, String hex) {
         return generate(algorithm, Utils.hexToBytes(hex));
     }

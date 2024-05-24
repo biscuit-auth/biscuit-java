@@ -19,7 +19,6 @@ import org.junit.jupiter.api.TestFactory;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class SamplesTest {
     final RunLimits runLimits = new RunLimits(500,100, Duration.ofMillis(500));
     @TestFactory
-    Stream<DynamicTest> jsonTest() throws NoSuchAlgorithmException {
+    Stream<DynamicTest> jsonTest() {
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("samples/samples.json");
         Gson gson = new Gson();

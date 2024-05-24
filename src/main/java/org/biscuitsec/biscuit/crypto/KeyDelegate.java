@@ -2,8 +2,6 @@ package org.biscuitsec.biscuit.crypto;
 
 import io.vavr.control.Option;
 
-import java.security.NoSuchAlgorithmException;
-
 
 /**
  * Used to find the key associated with a key id
@@ -12,5 +10,5 @@ import java.security.NoSuchAlgorithmException;
  * Tokens can carry a root key id, that can be used to indicate which key will verify it.
  */
 public interface KeyDelegate {
-    public Option<PublicKey> root_key(Option<Integer> key_id) throws NoSuchAlgorithmException;
+    public Option<PublicKey> root_key(Option<Integer> key_id);
 }

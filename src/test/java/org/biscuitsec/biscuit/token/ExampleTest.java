@@ -7,15 +7,14 @@ import org.biscuitsec.biscuit.token.builder.Block;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.SignatureException;
 
 /* example code for the documentation at https://www.biscuitsec.org
  * if these functions change, please send a PR to update them at https://github.com/biscuit-auth/website
  */
 public class ExampleTest {
-    public KeyPair root() throws NoSuchAlgorithmException {
-        return KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, new SecureRandom());
+    public KeyPair root() {
+        return KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519);
     }
 
     public Biscuit createToken(KeyPair root) throws Error {

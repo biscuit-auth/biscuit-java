@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SignatureTest {
 
     @Test
-    public void testSerialize() throws NoSuchAlgorithmException {
+    public void testSerialize() {
         testSerialize(Ed25519, 32);
         testSerialize(SECP256R1, 33); // compressed - 0x02 or 0x03 prefix byte, 32 bytes for X coordinate
     }
@@ -40,7 +40,7 @@ public class SignatureTest {
         testChangeMessages(SECP256R1);
     }
 
-    private static void testSerialize(Schema.PublicKey.Algorithm algorithm, int expectedPublicKeyLength) throws NoSuchAlgorithmException {
+    private static void testSerialize(Schema.PublicKey.Algorithm algorithm, int expectedPublicKeyLength) {
         byte[] seed = {1, 2, 3, 4};
         SecureRandom rng = new SecureRandom(seed);
 

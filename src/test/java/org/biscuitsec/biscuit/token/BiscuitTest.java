@@ -253,7 +253,7 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testReset() throws NoSuchAlgorithmException, Error {
+    public void testReset() throws Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
@@ -322,7 +322,7 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testEmptyAuthorizer() throws NoSuchAlgorithmException, Error {
+    public void testEmptyAuthorizer() throws Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
@@ -654,7 +654,7 @@ public class BiscuitTest {
         assertThrows(Error.FormatError.Signature.InvalidSignature.class, () -> {
             Biscuit deser = Biscuit.from_bytes(data, new KeyDelegate() {
                 @Override
-                public Option<PublicKey> root_key(Option<Integer> key_id) throws NoSuchAlgorithmException {
+                public Option<PublicKey> root_key(Option<Integer> key_id) {
 
                     KeyPair root = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
                     return Option.some(root.public_key());
