@@ -9,36 +9,19 @@ import java.security.SignatureException;
 
 public class PrivateKeySigner implements Signer {
 
+    private final Algorithm algorithm;
     private final PrivateKey privateKey;
 
-    public PrivateKeySigner(PrivateKey privateKey) {
+    public PrivateKeySigner(Algorithm algorithm, PrivateKey privateKey) {
+        this.algorithm = algorithm;
         this.privateKey = privateKey;
     }
 
     @Override
-    public byte[] sign(byte[] block, Algorithm algorithm, byte[] publicKey)
-            throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-
-        var algorithmBuffer = Signer.getAlgorithmBuffer(algorithm);
-        var signature = KeyPair.generateSignature(algorithm);
-        signature.initSign(privateKey);
-        signature.update(block);
-        signature.update(algorithmBuffer);
-        signature.update(publicKey);
-        return signature.sign();
-    }
-
-    @Override
-    public byte[] sign(byte[] block, Algorithm algorithm, byte[] publicKey, byte[] seal)
-            throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-
-        var algorithmBuffer = Signer.getAlgorithmBuffer(algorithm);
-        var signature = KeyPair.generateSignature(algorithm);
-        signature.initSign(privateKey);
-        signature.update(block);
-        signature.update(algorithmBuffer);
-        signature.update(publicKey);
-        signature.update(seal);
-        return signature.sign();
+    public byte[] sign(byte[] bytes) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        var sgr = KeyPair.generateSignature(algorithm);
+        sgr.initSign(privateKey);
+        sgr.update(bytes);
+        return sgr.sign();
     }
 }

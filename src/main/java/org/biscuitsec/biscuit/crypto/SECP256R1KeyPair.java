@@ -16,6 +16,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.util.Optional;
 
 final class SECP256R1KeyPair extends KeyPair {
 
@@ -28,33 +29,33 @@ final class SECP256R1KeyPair extends KeyPair {
 
     private static final String ALGORITHM = "ECDSA";
     private static final String CURVE = "secp256r1";
-    private static final ECNamedCurveParameterSpec SECP256R1 = ECNamedCurveTable.getParameterSpec(CURVE);
+    private static final ECNamedCurveParameterSpec CURVE_SPEC = ECNamedCurveTable.getParameterSpec(CURVE);
 
     public SECP256R1KeyPair(byte[] bytes) {
-        var privateKeySpec = new ECPrivateKeySpec(BigIntegers.fromUnsignedByteArray(bytes), SECP256R1);
+        var privateKeySpec = new ECPrivateKeySpec(BigIntegers.fromUnsignedByteArray(bytes), CURVE_SPEC);
         var privateKey = new BCECPrivateKey(ALGORITHM, privateKeySpec, BouncyCastleProvider.CONFIGURATION);
 
-        var publicKeySpec = new ECPublicKeySpec(SECP256R1.getG().multiply(privateKeySpec.getD()), SECP256R1);
+        var publicKeySpec = new ECPublicKeySpec(CURVE_SPEC.getG().multiply(privateKeySpec.getD()), CURVE_SPEC);
         var publicKey = new BCECPublicKey(ALGORITHM, publicKeySpec, BouncyCastleProvider.CONFIGURATION);
 
         this.privateKey = privateKey;
         this.publicKey = publicKey;
-        this.signer = new PrivateKeySigner(privateKey);
+        this.signer = new PrivateKeySigner(Algorithm.SECP256R1, privateKey);
     }
 
     public SECP256R1KeyPair(SecureRandom rng) {
         byte[] bytes = new byte[32];
         rng.nextBytes(bytes);
 
-        var privateKeySpec = new ECPrivateKeySpec(BigIntegers.fromUnsignedByteArray(bytes), SECP256R1);
+        var privateKeySpec = new ECPrivateKeySpec(BigIntegers.fromUnsignedByteArray(bytes), CURVE_SPEC);
         var privateKey = new BCECPrivateKey(ALGORITHM, privateKeySpec, BouncyCastleProvider.CONFIGURATION);
 
-        var publicKeySpec = new ECPublicKeySpec(SECP256R1.getG().multiply(privateKeySpec.getD()), SECP256R1);
+        var publicKeySpec = new ECPublicKeySpec(CURVE_SPEC.getG().multiply(privateKeySpec.getD()), CURVE_SPEC);
         var publicKey = new BCECPublicKey(ALGORITHM, publicKeySpec, BouncyCastleProvider.CONFIGURATION);
 
         this.privateKey = privateKey;
         this.publicKey = publicKey;
-        this.signer = new PrivateKeySigner(privateKey);
+        this.signer = new PrivateKeySigner(Algorithm.SECP256R1, privateKey);
     }
 
     public SECP256R1KeyPair(String hex) {
@@ -88,12 +89,14 @@ final class SECP256R1KeyPair extends KeyPair {
 
     @Override
     public byte[] sign(byte[] block, byte[] publicKey) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        return signer.sign(block, Algorithm.SECP256R1, publicKey);
+        var bytes = toSigningFormat(block, Algorithm.SECP256R1, publicKey, Optional.empty());
+        return signer.sign(bytes);
     }
 
     @Override
-    public byte[] sign(byte[] block, byte[] publicKey, byte[] signature) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        return signer.sign(block, Algorithm.SECP256R1, publicKey, signature);
+    public byte[] sign(byte[] block, byte[] publicKey, byte[] seal) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        var bytes = toSigningFormat(block, Algorithm.SECP256R1, publicKey, Optional.of(seal));
+        return signer.sign(bytes);
     }
 
     @Override
