@@ -1,6 +1,6 @@
 package org.biscuitsec.biscuit.crypto;
 
-import biscuit.format.schema.Schema;
+import biscuit.format.schema.Schema.PublicKey.Algorithm;
 import org.biscuitsec.biscuit.token.builder.Utils;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
@@ -11,11 +11,11 @@ import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.util.BigIntegers;
 
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.security.Signature;
+import java.security.SignatureException;
 
 final class SECP256R1KeyPair extends KeyPair {
 
@@ -24,14 +24,11 @@ final class SECP256R1KeyPair extends KeyPair {
 
     private final BCECPrivateKey privateKey;
     private final BCECPublicKey publicKey;
+    private final Signer signer;
 
     private static final String ALGORITHM = "ECDSA";
     private static final String CURVE = "secp256r1";
     private static final ECNamedCurveParameterSpec SECP256R1 = ECNamedCurveTable.getParameterSpec(CURVE);
-
-    static {
-        Security.addProvider(new BouncyCastleProvider());
-    }
 
     public SECP256R1KeyPair(byte[] bytes) {
         var privateKeySpec = new ECPrivateKeySpec(BigIntegers.fromUnsignedByteArray(bytes), SECP256R1);
@@ -42,6 +39,7 @@ final class SECP256R1KeyPair extends KeyPair {
 
         this.privateKey = privateKey;
         this.publicKey = publicKey;
+        this.signer = new PrivateKeySigner(privateKey);
     }
 
     public SECP256R1KeyPair(SecureRandom rng) {
@@ -56,6 +54,7 @@ final class SECP256R1KeyPair extends KeyPair {
 
         this.privateKey = privateKey;
         this.publicKey = publicKey;
+        this.signer = new PrivateKeySigner(privateKey);
     }
 
     public SECP256R1KeyPair(String hex) {
@@ -88,12 +87,17 @@ final class SECP256R1KeyPair extends KeyPair {
     }
 
     @Override
-    public PrivateKey private_key() {
-        return privateKey;
+    public byte[] sign(byte[] block, byte[] publicKey) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        return signer.sign(block, Algorithm.SECP256R1, publicKey);
+    }
+
+    @Override
+    public byte[] sign(byte[] block, byte[] publicKey, byte[] signature) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        return signer.sign(block, Algorithm.SECP256R1, publicKey, signature);
     }
 
     @Override
     public PublicKey public_key() {
-        return new PublicKey(Schema.PublicKey.Algorithm.SECP256R1, publicKey);
+        return new PublicKey(Algorithm.SECP256R1, publicKey);
     }
 }

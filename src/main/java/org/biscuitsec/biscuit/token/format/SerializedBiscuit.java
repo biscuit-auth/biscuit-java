@@ -236,17 +236,8 @@ public class SerializedBiscuit {
             b.writeTo(stream);
             byte[] block = stream.toByteArray();
             org.biscuitsec.biscuit.crypto.PublicKey next_key = next.public_key();
-            ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-            algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
-            algo_buf.flip();
 
-            Signature sgr = KeyPair.generateSignature(root.public_key().algorithm);
-            sgr.initSign(root.private_key());
-            sgr.update(block);
-            sgr.update(algo_buf);
-            sgr.update(next_key.toBytes());
-            byte[] signature = sgr.sign();
-
+            byte[] signature = root.sign(block, next_key.toBytes());
             SignedBlock signedBlock = new SignedBlock(block, next_key, signature, Option.none());
             Proof proof = new Proof(next);
 
@@ -269,21 +260,9 @@ public class SerializedBiscuit {
 
             byte[] block = stream.toByteArray();
             org.biscuitsec.biscuit.crypto.PublicKey next_key = next.public_key();
-            ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-            algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
-            algo_buf.flip();
 
-            Signature sgr = KeyPair.generateSignature(next_key.algorithm);
-            sgr.initSign(this.proof.secretKey.get().private_key());
-            sgr.update(block);
-            if(externalSignature.isDefined()) {
-                sgr.update(externalSignature.get().signature);
-            }
-            sgr.update(algo_buf);
-            sgr.update(next_key.toBytes());
-            byte[] signature = sgr.sign();
-
-            SignedBlock signedBlock = new SignedBlock(block, next_key, signature, externalSignature);
+            byte[] signature = proof.secretKey.get().sign(block, next_key.toBytes());
+            SignedBlock signedBlock = new SignedBlock(block, next_key, signature, Option.none());
 
             ArrayList<SignedBlock> blocks = new ArrayList<>();
             for (SignedBlock bl : this.blocks) {
@@ -477,19 +456,7 @@ public class SerializedBiscuit {
             block = this.blocks.get(this.blocks.size() - 1);
         }
 
-        Signature sgr = KeyPair.generateSignature(block.key.algorithm);
-        ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-        algo_buf.putInt(Integer.valueOf(block.key.algorithm.getNumber()));
-        algo_buf.flip();
-
-
-        sgr.initSign(this.proof.secretKey.get().private_key());
-        sgr.update(block.block);
-        sgr.update(algo_buf);
-        sgr.update(block.key.toBytes());
-        sgr.update(block.signature);
-
-        byte[] signature = sgr.sign();
+        byte[] signature = proof.secretKey.get().sign(block.block, block.key.toBytes(), block.signature);
 
         this.proof.secretKey = Option.none();
         this.proof.signature = Option.some(signature);
