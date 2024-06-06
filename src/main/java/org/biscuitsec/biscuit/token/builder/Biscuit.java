@@ -1,7 +1,6 @@
 package org.biscuitsec.biscuit.token.builder;
 
 import org.biscuitsec.biscuit.crypto.KeyPair;
-import org.biscuitsec.biscuit.crypto.PrivateKeySigner;
 import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.crypto.Signer;
 import org.biscuitsec.biscuit.datalog.SchemaVersion;
