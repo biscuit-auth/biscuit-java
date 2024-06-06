@@ -26,6 +26,7 @@ import java.util.function.Function;
 
 import static java.lang.ProcessBuilder.Redirect;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class KmsSignerExampleTest {
@@ -83,6 +84,10 @@ public class KmsSignerExampleTest {
                     sgr.update(bytes);
                     var verified = sgr.verify(signature);
                     System.out.println("Verified: " + verified);
+
+                    if (!verified) {
+                        fail("Signature verification failed");
+                    }
 
                     return signature;
                 } catch (NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
