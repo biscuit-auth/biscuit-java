@@ -18,6 +18,9 @@ import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.util.function.Function;
 
 import static java.lang.ProcessBuilder.Redirect;
@@ -81,7 +84,7 @@ public class KmsSignerExampleTest {
                     System.out.println("Verified: " + verified);
 
                     return signature;
-                } catch (Exception e) {
+                } catch (NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
                     throw new RuntimeException(e);
                 }
             }
