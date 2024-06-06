@@ -52,7 +52,7 @@ public class KmsSignerExampleTest {
         Function<String, byte[]> getPublicKeyBytes = (keyId) -> {
             try (var kmsClient = KmsClient.create()) {
                 var publicKeyResponse = kmsClient.getPublicKey(b -> b.keyId(keyId).build());
-                return Convert.DEREncodedX509PkToSEC1CompressedEncodedPk(publicKeyResponse.publicKey().asByteArray());
+                return convertDEREncodedX509PublicKeyToSEC1CompressedEncodedPublicKey(publicKeyResponse.publicKey().asByteArray());
             }
         };
 
@@ -103,27 +103,23 @@ public class KmsSignerExampleTest {
         assertDoesNotThrow(biscuit::serialize);
     }
 
-    private static class Convert {
+    static byte[] convertDEREncodedX509PublicKeyToSEC1CompressedEncodedPublicKey(byte[] publicKeyBytes) {
+        try (ASN1InputStream asn1InputStream = new ASN1InputStream(new ByteArrayInputStream(publicKeyBytes))) {
 
-        // converts DER-encoded X.509 public key to SEC1 compressed encoded format
-        static byte[] DEREncodedX509PkToSEC1CompressedEncodedPk(byte[] publicKeyBytes) {
-            try (ASN1InputStream asn1InputStream = new ASN1InputStream(new ByteArrayInputStream(publicKeyBytes))) {
-                // Parse the ASN.1 encoded public key bytes
-                var asn1Primitive = asn1InputStream.readObject();
-                var subjectPublicKeyInfo = SubjectPublicKeyInfo.getInstance(asn1Primitive);
+            // Parse the ASN.1 encoded public key bytes
+            var asn1Primitive = asn1InputStream.readObject();
+            var subjectPublicKeyInfo = SubjectPublicKeyInfo.getInstance(asn1Primitive);
 
-                // Extract the public key data
-                var publicKeyDataBitString = subjectPublicKeyInfo.getPublicKeyData();
-                byte[] publicKeyData = publicKeyDataBitString.getBytes();
+            // Extract the public key data
+            var publicKeyDataBitString = subjectPublicKeyInfo.getPublicKeyData();
+            byte[] publicKeyData = publicKeyDataBitString.getBytes();
 
-                // Parse the public key data to get the elliptic curve point
-                var ecParameters = ECNamedCurveTable.getByName("secp256r1");
-                var ecPoint = ecParameters.getCurve().decodePoint(publicKeyData);
-                return ecPoint.getEncoded(true);
-
-            } catch (IOException e) {
-                throw new RuntimeException("Error converting DER-encoded X.509 to SEC1 compressed format", e);
-            }
+            // Parse the public key data to get the elliptic curve point
+            var ecParameters = ECNamedCurveTable.getByName("secp256r1");
+            var ecPoint = ecParameters.getCurve().decodePoint(publicKeyData);
+            return ecPoint.getEncoded(true);
+        } catch (IOException e) {
+            throw new RuntimeException("Error converting DER-encoded X.509 to SEC1 compressed format", e);
         }
     }
 
