@@ -53,7 +53,6 @@ class Token {
             PublicKey next_key  = this.keys.get(i);
             byte[] signature = this.signatures.get(i);
 
-            // todo have a think
             ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
             algo_buf.putInt(Integer.valueOf(next.public_key().algorithm.getNumber()));
             algo_buf.flip();

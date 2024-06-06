@@ -274,12 +274,6 @@
         </dependency>
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
-            <artifactId>utils</artifactId>
-            <version>2.25.65</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>software.amazon.awssdk</groupId>
             <artifactId>sso</artifactId>
             <version>2.25.65</version>
             <scope>test</scope>
