@@ -5,6 +5,7 @@ import net.i2p.crypto.eddsa.Utils;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.crypto.Signer;
+import org.biscuitsec.biscuit.error.Error;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.ECNamedCurveTable;
@@ -46,7 +47,7 @@ public class KmsSignerExampleTest {
     }
 
 //    @Test
-    public void createWithRemoteSigner() throws Exception {
+    public void createWithRemoteSigner() throws Error {
         Function<String, byte[]> getPublicKeyBytes = (keyId) -> {
             try (var kmsClient = KmsClient.create()) {
                 var publicKeyResponse = kmsClient.getPublicKey(b -> b.keyId(keyId).build());
