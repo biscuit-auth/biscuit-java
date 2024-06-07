@@ -81,11 +81,11 @@ public class KmsSignerExampleTest {
                 .add_authority_fact("user(\"1234\")")
                 .add_authority_check("check if operation(\"read\")")
                 .build();
-        var serializedBiscuit = assertDoesNotThrow(biscuit::serialize);
-        var unverifiedBiscuit = Biscuit.from_bytes(serializedBiscuit);
-        var deserializedBiscuit = unverifiedBiscuit.verify(publicKey);
+        var serializedBiscuit = biscuit.serialize();
+        var deserializedUnverifiedBiscuit = Biscuit.from_bytes(serializedBiscuit);
+        var verifiedBiscuit = deserializedUnverifiedBiscuit.verify(publicKey);
 
-        System.out.println(deserializedBiscuit.print());
+        System.out.println(verifiedBiscuit.print());
     }
 
     private static byte[] convertDEREncodedX509PublicKeyToSEC1CompressedEncodedPublicKey(byte[] publicKeyBytes) {
