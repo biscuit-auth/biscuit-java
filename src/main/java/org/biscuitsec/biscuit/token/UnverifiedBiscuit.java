@@ -1,6 +1,7 @@
 package org.biscuitsec.biscuit.token;
 
 import biscuit.format.schema.Schema;
+import biscuit.format.schema.Schema.PublicKey.Algorithm;
 import org.biscuitsec.biscuit.crypto.KeyDelegate;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.crypto.PublicKey;
@@ -137,11 +138,12 @@ public class UnverifiedBiscuit {
      * Generates a new token from an existing one and a new block
      *
      * @param block new block (should be generated from a Block builder)
+     * @param algorithm algorithm to use for the ephemeral key pair
      * @return
      */
-    public UnverifiedBiscuit attenuate(org.biscuitsec.biscuit.token.builder.Block block) throws Error {
+    public UnverifiedBiscuit attenuate(org.biscuitsec.biscuit.token.builder.Block block, Algorithm algorithm) throws Error {
         SecureRandom rng = new SecureRandom();
-        KeyPair keypair = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng); // todo, figure out how to get the algorithm
+        var keypair = KeyPair.generate(algorithm, rng);
         return attenuate(rng, keypair, block.build());
     }
 
