@@ -61,7 +61,7 @@ public class KmsSignerExampleTest {
     }
 
     @Test
-    public void testCreateBiscuitWithRemoteSigner() throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void testCreateBiscuitWithRemoteSigner() throws Error {
         var getPublicKeyResponse = kmsClient.getPublicKey(b -> b.keyId(kmsKeyId).build());
         var x509EncodedPublicKey = getPublicKeyResponse.publicKey().asByteArray();
         var sec1CompressedEncodedPublicKey = convertDEREncodedX509PublicKeyToSEC1CompressedEncodedPublicKey(x509EncodedPublicKey);
@@ -83,7 +83,7 @@ public class KmsSignerExampleTest {
                 .build();
         var serializedBiscuit = biscuit.serialize();
         var deserializedUnverifiedBiscuit = Biscuit.from_bytes(serializedBiscuit);
-        var verifiedBiscuit = deserializedUnverifiedBiscuit.verify(publicKey);
+        var verifiedBiscuit = assertDoesNotThrow(() -> deserializedUnverifiedBiscuit.verify(publicKey));
 
         System.out.println(verifiedBiscuit.print());
     }
