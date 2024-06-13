@@ -269,20 +269,25 @@ public class UnverifiedBiscuit {
 
     public Biscuit verify(PublicKey publicKey) throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         SerializedBiscuit serializedBiscuit = this.serializedBiscuit;
-        serializedBiscuit.verify(publicKey);
+        var result = serializedBiscuit.verify(publicKey);
+        if (result.isLeft()) {
+            throw result.getLeft();
+        }
         return Biscuit.from_serialized_biscuit(serializedBiscuit, this.symbols);
     }
 
     public Biscuit verify(KeyDelegate delegate) throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         SerializedBiscuit serializedBiscuit = this.serializedBiscuit;
 
-
         Option<PublicKey> root = delegate.root_key(root_key_id);
         if(root.isEmpty()) {
             throw new InvalidKeyException("unknown root key id");
         }
 
-        serializedBiscuit.verify(root.get());
+        var result = serializedBiscuit.verify(root.get());
+        if (result.isLeft()) {
+            throw result.getLeft();
+        }
         return Biscuit.from_serialized_biscuit(serializedBiscuit, this.symbols);
     }
 }

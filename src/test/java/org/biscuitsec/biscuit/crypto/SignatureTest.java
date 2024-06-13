@@ -12,9 +12,11 @@ import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
 import org.biscuitsec.biscuit.error.Error;
+import org.biscuitsec.biscuit.token.Biscuit;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -113,5 +115,17 @@ public class SignatureTest {
         KeyPair keypair4 = KeyPair.generate(algorithm, rng);
         Token token3 = token2.append(keypair4, message3.getBytes());
         assertEquals(Right(null), token3.verify(root.public_key()));
+    }
+
+    @Test
+    public void testSerializeBiscuit() throws Error {
+        var root = KeyPair.generate(SECP256R1);
+        var biscuit = Biscuit.builder(root)
+            .add_authority_fact("user(\"1234\")")
+            .add_authority_check("check if operation(\"read\")")
+            .build();
+        var serialized = biscuit.serialize();
+        var unverified = Biscuit.from_bytes(serialized);
+        assertDoesNotThrow(() -> unverified.verify(root.public_key()));
     }
 }
