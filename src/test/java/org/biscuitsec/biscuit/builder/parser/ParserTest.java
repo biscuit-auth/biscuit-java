@@ -401,7 +401,6 @@ class ParserTest {
 
     @Test
     void testDatalogSucceeds() throws org.biscuitsec.biscuit.error.Error.Parser {
-        SymbolTable symbols = Biscuit.default_symbol_table();
 
         String l1 = "fact1(1, 2)";
         String l2 = "fact2(\"2\")";
@@ -409,17 +408,17 @@ class ParserTest {
         String l4 = "check if rule1(2)";
         String toParse = String.join(";", Arrays.asList(l1, l2, l3, l4));
 
-        Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1, symbols, toParse);
+        Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1, toParse);
         assertTrue(output.isRight());
 
-        Block validBlock = new Block(1, symbols);
+        Block validBlock = new Block(1);
         validBlock.add_fact(l1);
         validBlock.add_fact(l2);
         validBlock.add_rule(l3);
         validBlock.add_check(l4);
 
         output.forEach(block ->
-            assertArrayEquals(block.build().to_bytes().get(), validBlock.build().to_bytes().get())
+                assertEquals(block, validBlock)
         );
     }
 
@@ -430,14 +429,14 @@ class ParserTest {
         String l1 = "check if [2, 3].union([2])";
         String toParse = String.join(";", List.of(l1));
 
-        Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1, symbols, toParse);
+        Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1, toParse);
         assertTrue(output.isRight());
 
-        Block validBlock = new Block(1, symbols);
+        Block validBlock = new Block(1);
         validBlock.add_check(l1);
 
         output.forEach(block ->
-                assertArrayEquals(block.build().to_bytes().get(), validBlock.build().to_bytes().get())
+                assertEquals(block, validBlock)
         );
     }
 
@@ -448,14 +447,14 @@ class ParserTest {
         String l1 = "check if [2019-12-04T09:46:41Z, 2020-12-04T09:46:41Z].contains(2020-12-04T09:46:41Z)";
         String toParse = String.join(";", List.of(l1));
 
-        Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1, symbols, toParse);
+        Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1,  toParse);
         assertTrue(output.isRight());
 
-        Block validBlock = new Block(1, symbols);
+        Block validBlock = new Block(1);
         validBlock.add_check(l1);
 
         output.forEach(block ->
-                assertArrayEquals(block.build().to_bytes().get(), validBlock.build().to_bytes().get())
+                assertEquals(block, validBlock)
         );
     }
 
@@ -467,7 +466,7 @@ class ParserTest {
         String l2 = "check fact(1)"; // typo missing "if"
         String toParse = String.join(";", Arrays.asList(l1, l2));
 
-        Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1, symbols, toParse);
+        Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1, toParse);
         assertTrue(output.isLeft());
     }
 
@@ -486,7 +485,7 @@ class ParserTest {
         String l8 = "comment */";
         String toParse = String.join("", Arrays.asList(l0, l1, l2, l3, l4, l5, l6, l7, l8));
 
-        Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1, symbols, toParse);
+        Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1, toParse);
         assertTrue(output.isRight());
     }
 }
