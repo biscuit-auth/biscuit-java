@@ -83,4 +83,22 @@ public class Scope {
                 ", publicKey=" + publicKey +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Scope scope = (Scope) o;
+
+        if (publicKey != scope.publicKey) return false;
+        return kind == scope.kind;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = kind != null ? kind.hashCode() : 0;
+        result = 31 * result + (int) (publicKey ^ (publicKey >>> 32));
+        return result;
+    }
 }

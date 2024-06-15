@@ -16,10 +16,6 @@ import java.util.*;
 import java.util.function.Function;
 
 public class Parser {
-    public static Either<Map<Integer, List<Error>>, Block> datalog(long index, SymbolTable baseSymbols, String s) {
-        return datalog(index, baseSymbols, null, s);
-    }
-
     /**
      * Takes a datalog string with <code>\n</code> as datalog line separator. It tries to parse
      * each line using fact, rule, check and scope sequentially.
@@ -28,21 +24,15 @@ public class Parser {
      * else it returns a Map[lineNumber, List[Error]]
      *
      * @param index block index
-     * @param baseSymbols symbols table
-     * @param blockSymbols block's custom symbols table (added to baseSymbols)
      * @param s datalog string to parse
      * @return Either<Map<Integer, List<Error>>, Block>
      */
-    public static Either<Map<Integer, List<Error>>, Block> datalog(long index, SymbolTable baseSymbols, SymbolTable blockSymbols, String s) {
-        Block blockBuilder = new Block(index, baseSymbols);
+    public static Either<Map<Integer, List<Error>>, Block> datalog(long index, String s) {
+        Block blockBuilder = new Block(index);
 
         // empty block code
         if (s.isEmpty()) {
             return Either.right(blockBuilder);
-        }
-
-        if (blockSymbols != null) {
-            blockSymbols.symbols.forEach(blockBuilder::addSymbol);
         }
 
         Map<Integer, List<Error>> errors = new HashMap<>();
@@ -69,16 +59,6 @@ public class Parser {
                });
 
                if (!parsed) {
-                   parsed = scope(code).fold(e -> {
-                       lineErrors.add(e);
-                       return false;
-                   }, r -> {
-                       blockBuilder.add_scope(r._2);
-                       return true;
-                   });
-               }
-
-               if (!parsed) {
                    parsed = fact(code).fold(e -> {
                        lineErrors.add(e);
                        return false;
@@ -94,6 +74,16 @@ public class Parser {
                        return false;
                    }, r -> {
                        blockBuilder.add_check(r._2);
+                       return true;
+                   });
+               }
+
+               if (!parsed) {
+                   parsed = scope(code).fold(e -> {
+                       lineErrors.add(e);
+                       return false;
+                   }, r -> {
+                       blockBuilder.add_scope(r._2);
                        return true;
                    });
                }

@@ -38,14 +38,13 @@ public class BiscuitTest {
 
         KeyPair root = new KeyPair(rng);
 
-        SymbolTable symbols = Biscuit.default_symbol_table();
-        Block authority_builder = new Block(0, symbols);
+        Block authority_builder = new Block(0);
 
         authority_builder.add_fact(fact("right", Arrays.asList(s("file1"), s("read"))));
         authority_builder.add_fact(fact("right", Arrays.asList(s("file2"), s("read"))));
         authority_builder.add_fact(fact("right", Arrays.asList(s("file1"), s("write"))));
 
-        Biscuit b = Biscuit.make(rng, root, Biscuit.default_symbol_table(), authority_builder.build());
+        Biscuit b = Biscuit.make(rng, root, authority_builder.build());
 
         System.out.println(b.print());
 
@@ -78,7 +77,7 @@ public class BiscuitTest {
                 )
         )));
 
-        Biscuit b2 = deser.attenuate(rng, keypair2, builder.build());
+        Biscuit b2 = deser.attenuate(rng, keypair2, builder);
 
         System.out.println(b2.print());
 
@@ -109,7 +108,7 @@ public class BiscuitTest {
                 )
         )));
 
-        Biscuit b3 = deser2.attenuate(rng, keypair3, builder3.build());
+        Biscuit b3 = deser2.attenuate(rng, keypair3, builder3);
 
         System.out.println(b3.print());
 
@@ -182,7 +181,7 @@ public class BiscuitTest {
         block2.check_right("read");
 
         KeyPair keypair2 = new KeyPair(rng);
-        Biscuit b2 = b.attenuate(rng, keypair2, block2.build());
+        Biscuit b2 = b.attenuate(rng, keypair2, block2);
 
         Authorizer v1 = b2.authorizer();
         v1.add_fact("resource(\"/folder1/file1\")");
@@ -227,12 +226,11 @@ public class BiscuitTest {
         SecureRandom rng = new SecureRandom();
         KeyPair root = new KeyPair(rng);
 
-        SymbolTable symbols = Biscuit.default_symbol_table();
-        Block authority_builder = new Block(0, symbols);
+        Block authority_builder = new Block(0);
         Date date = Date.from(Instant.now());
         authority_builder.add_fact(fact("revocation_id", Arrays.asList(date(date))));
 
-        Biscuit biscuit = Biscuit.make(rng, root, Biscuit.default_symbol_table(), authority_builder.build());
+        Biscuit biscuit = Biscuit.make(rng, root, authority_builder.build());
 
         Block builder = biscuit.create_block();
         builder.add_fact(fact(
@@ -240,12 +238,12 @@ public class BiscuitTest {
                 Arrays.asList(s("topic"), s("tenant"), s("namespace"), s("topic"), s("produce"))
         ));
 
-        String attenuatedB64 = biscuit.attenuate(rng, new KeyPair(rng), builder.build()).serialize_b64url();
+        String attenuatedB64 = biscuit.attenuate(rng, new KeyPair(rng), builder).serialize_b64url();
 
         System.out.println("attenuated: " + attenuatedB64);
 
         Biscuit.from_b64url(attenuatedB64, root.public_key());
-        String attenuated2B64 = biscuit.attenuate(rng, new KeyPair(rng), builder.build()).serialize_b64url();
+        String attenuated2B64 = biscuit.attenuate(rng, new KeyPair(rng), builder).serialize_b64url();
 
         System.out.println("attenuated2: " + attenuated2B64);
         Biscuit.from_b64url(attenuated2B64, root.public_key());
@@ -278,7 +276,7 @@ public class BiscuitTest {
         block2.check_right("read");
 
         KeyPair keypair2 = new KeyPair(rng);
-        Biscuit b2 = b.attenuate(rng, keypair2, block2.build());
+        Biscuit b2 = b.attenuate(rng, keypair2, block2);
 
         Authorizer v1 = b2.authorizer();
         v1.allow();
@@ -347,7 +345,7 @@ public class BiscuitTest {
         block2.check_right("read");
 
         KeyPair keypair2 = new KeyPair(rng);
-        Biscuit b2 = b.attenuate(rng, keypair2, block2.build());
+        Biscuit b2 = b.attenuate(rng, keypair2, block2);
 
         Authorizer v1 = new Authorizer();
         v1.allow();
@@ -371,13 +369,12 @@ public class BiscuitTest {
 
         KeyPair root = new KeyPair(rng);
 
-        SymbolTable symbols = Biscuit.default_symbol_table();
-        Block authority_builder = new Block(0, symbols);
+        Block authority_builder = new Block(0);
 
         authority_builder.add_fact(fact("namespace:right", Arrays.asList(s("file1"), s("read"))));
         authority_builder.add_fact(fact("namespace:right", Arrays.asList(s("file1"), s("write"))));
         authority_builder.add_fact(fact("namespace:right", Arrays.asList(s("file2"), s("read"))));
-        Biscuit b = Biscuit.make(rng, root, Biscuit.default_symbol_table(), authority_builder.build());
+        Biscuit b = Biscuit.make(rng, root, authority_builder.build());
 
         System.out.println(b.print());
 
@@ -410,7 +407,7 @@ public class BiscuitTest {
                 )
         )));
 
-        Biscuit b2 = deser.attenuate(rng, keypair2, builder.build());
+        Biscuit b2 = deser.attenuate(rng, keypair2, builder);
 
         System.out.println(b2.print());
 
@@ -441,7 +438,7 @@ public class BiscuitTest {
                 )
         )));
 
-        Biscuit b3 = deser2.attenuate(rng, keypair3, builder3.build());
+        Biscuit b3 = deser2.attenuate(rng, keypair3, builder3);
 
         System.out.println(b3.print());
 
@@ -497,7 +494,7 @@ public class BiscuitTest {
         KeyPair root = new KeyPair(rng);
 
         SymbolTable symbols = Biscuit.default_symbol_table();
-        org.biscuitsec.biscuit.token.builder.Biscuit o = new org.biscuitsec.biscuit.token.builder.Biscuit(rng, root, symbols);
+        org.biscuitsec.biscuit.token.builder.Biscuit o = new org.biscuitsec.biscuit.token.builder.Biscuit(rng, root);
         o.add_authority_fact("namespace:right(\"file1\",\"read\")");
         o.add_authority_fact("namespace:right(\"file1\",\"write\")");
         o.add_authority_fact("namespace:right(\"file2\",\"read\")");
@@ -534,7 +531,7 @@ public class BiscuitTest {
                 )
         )));
 
-        Biscuit b2 = deser.attenuate(rng, keypair2, builder.build());
+        Biscuit b2 = deser.attenuate(rng, keypair2, builder);
 
         System.out.println(b2.print());
 
@@ -565,7 +562,7 @@ public class BiscuitTest {
                 )
         )));
 
-        Biscuit b3 = deser2.attenuate(rng, keypair3, builder3.build());
+        Biscuit b3 = deser2.attenuate(rng, keypair3, builder3);
 
         System.out.println(b3.print());
 
@@ -619,14 +616,13 @@ public class BiscuitTest {
 
         KeyPair root = new KeyPair(rng);
 
-        SymbolTable symbols = Biscuit.default_symbol_table();
-        Block authority_builder = new Block(0, symbols);
+        Block authority_builder = new Block(0);
 
         authority_builder.add_fact(fact("right", Arrays.asList(s("file1"), s("read"))));
         authority_builder.add_fact(fact("right", Arrays.asList(s("file2"), s("read"))));
         authority_builder.add_fact(fact("right", Arrays.asList(s("file1"), s("write"))));
 
-        Biscuit b = Biscuit.make(rng, root, 1, Biscuit.default_symbol_table(), authority_builder.build());
+        Biscuit b = Biscuit.make(rng, root, 1, authority_builder.build());
 
         System.out.println(b.print());
 

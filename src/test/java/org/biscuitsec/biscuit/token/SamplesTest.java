@@ -65,30 +65,35 @@ class SamplesTest {
         Option<PublicKey> sampleExternalKey = sampleBlock.getExternalKey();
         List<PublicKey> samplePublicKeys = sampleBlock.getPublicKeys();
         String sampleDatalog = sampleBlock.getCode().replace("\"","\\\"");
-        SymbolTable sampleSymbols = new SymbolTable(sampleBlock.symbols);
 
-        Either<Map<Integer, List<org.biscuitsec.biscuit.token.builder.parser.Error>>, org.biscuitsec.biscuit.token.builder.Block> outputSample = Parser.datalog(sampleBlockIndex, baseSymbols, sampleDatalog);
-        assertTrue(outputSample.isRight());
+        Either<Map<Integer, List<org.biscuitsec.biscuit.token.builder.parser.Error>>, org.biscuitsec.biscuit.token.builder.Block> outputSample = Parser.datalog(sampleBlockIndex, sampleDatalog);
 
-        if (!block.publicKeys.isEmpty()) {
-            outputSample.get().addPublicKeys(samplePublicKeys);
+        // the invalid block rule with unbound variable cannot be parsed
+        if(outputSample.isLeft()) {
+            return;
         }
 
+        SymbolTable sampleSymbols;
         if (!block.externalKey.isDefined()) {
-            sampleSymbols.symbols.forEach(baseSymbols::add);
+            sampleSymbols = new SymbolTable(baseSymbols);
         } else {
-            SymbolTable freshSymbols = new SymbolTable();
-            sampleSymbols.symbols.forEach(freshSymbols::add);
-            outputSample.get().setExternalKey(sampleExternalKey);
+            sampleSymbols = new SymbolTable();
         }
 
-        org.biscuitsec.biscuit.token.Block generatedSampleBlock = outputSample.get().build();
+        org.biscuitsec.biscuit.token.Block generatedSampleBlock = outputSample.get().build(sampleSymbols);
         System.out.println(generatedSampleBlock.symbols.symbols);
         System.out.println(block.symbols.symbols);
+        System.out.println(sampleSymbols.symbols);
+        if(!block.externalKey.isDefined()) {
+            generatedSampleBlock.symbols.symbols.forEach(baseSymbols::add);
+        }
+        System.out.println(baseSymbols.symbols);
 
-        System.out.println(outputSample.get().build().print(sampleSymbols));
-        System.out.println(block.print(sampleSymbols));
-        assertArrayEquals(outputSample.get().build().to_bytes().get(), block.to_bytes().get());
+        System.out.println(generatedSampleBlock.print(baseSymbols));
+        System.out.println(block.print(baseSymbols));
+        assertEquals(generatedSampleBlock.print(baseSymbols), block.print(baseSymbols));
+        assertEquals(generatedSampleBlock, block);
+        assertArrayEquals(generatedSampleBlock.to_bytes().get(), block.to_bytes().get());
     }
 
     DynamicTest process_testcase(final TestCase testCase, final PublicKey publicKey, final KeyPair privateKey) {

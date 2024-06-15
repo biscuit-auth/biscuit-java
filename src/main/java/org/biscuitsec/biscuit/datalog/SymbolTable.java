@@ -280,4 +280,32 @@ public final class SymbolTable implements Serializable {
         allSymbols.addAll(symbols);
         return allSymbols;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SymbolTable that = (SymbolTable) o;
+
+        if (!dateTimeFormatter.equals(that.dateTimeFormatter)) return false;
+        if (!symbols.equals(that.symbols)) return false;
+        return publicKeys.equals(that.publicKeys);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = dateTimeFormatter.hashCode();
+        result = 31 * result + symbols.hashCode();
+        result = 31 * result + publicKeys.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "SymbolTable{" +
+                "symbols=" + symbols +
+                ", publicKeys=" + publicKeys +
+                '}';
+    }
 }

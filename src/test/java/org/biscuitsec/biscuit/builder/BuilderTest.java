@@ -28,7 +28,7 @@ public class BuilderTest {
         KeyPair root = new KeyPair(rng);
         SymbolTable symbols = Biscuit.default_symbol_table();
 
-        Block authority_builder = new Block(0, symbols);
+        Block authority_builder = new Block(0);
         authority_builder.add_fact(Utils.fact("revocation_id", Arrays.asList(Utils.date(Date.from(Instant.now())))));
         authority_builder.add_fact(Utils.fact("right", Arrays.asList(Utils.s("admin"))));
         authority_builder.add_rule(Utils.constrained_rule("right",
@@ -57,7 +57,9 @@ public class BuilderTest {
                                 )))))
                 )
         ));
-        Biscuit rootBiscuit = Biscuit.make(rng, root, symbols, authority_builder.build());
+
+        org.biscuitsec.biscuit.token.Block authority = authority_builder.build(symbols);
+        Biscuit rootBiscuit = Biscuit.make(rng, root, authority);
 
         System.out.println(rootBiscuit.print());
 
