@@ -398,4 +398,95 @@ class ParserTest {
         assertEquals(new org.biscuitsec.biscuit.datalog.Term.Integer(9), value2);
         assertEquals("(1 + 2) * 3", ex2.print(s2).get());
     }
+
+    @Test
+    void testDatalogSucceeds() throws org.biscuitsec.biscuit.error.Error.Parser {
+        SymbolTable symbols = Biscuit.default_symbol_table();
+
+        String l1 = "fact1(1, 2)";
+        String l2 = "fact2(\"2\")";
+        String l3 = "rule1(2) <- fact2(\"2\")";
+        String l4 = "check if rule1(2)";
+        String toParse = String.join(";", Arrays.asList(l1, l2, l3, l4));
+
+        Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1, symbols, toParse);
+        assertTrue(output.isRight());
+
+        Block validBlock = new Block(1, symbols);
+        validBlock.add_fact(l1);
+        validBlock.add_fact(l2);
+        validBlock.add_rule(l3);
+        validBlock.add_check(l4);
+
+        output.forEach(block ->
+            assertArrayEquals(block.build().to_bytes().get(), validBlock.build().to_bytes().get())
+        );
+    }
+
+    @Test
+    void testDatalogSucceedsArrays() throws org.biscuitsec.biscuit.error.Error.Parser {
+        SymbolTable symbols = Biscuit.default_symbol_table();
+
+        String l1 = "check if [2, 3].union([2])";
+        String toParse = String.join(";", List.of(l1));
+
+        Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1, symbols, toParse);
+        assertTrue(output.isRight());
+
+        Block validBlock = new Block(1, symbols);
+        validBlock.add_check(l1);
+
+        output.forEach(block ->
+                assertArrayEquals(block.build().to_bytes().get(), validBlock.build().to_bytes().get())
+        );
+    }
+
+    @Test
+    void testDatalogSucceedsArraysContains() throws org.biscuitsec.biscuit.error.Error.Parser {
+        SymbolTable symbols = Biscuit.default_symbol_table();
+
+        String l1 = "check if [2019-12-04T09:46:41Z, 2020-12-04T09:46:41Z].contains(2020-12-04T09:46:41Z)";
+        String toParse = String.join(";", List.of(l1));
+
+        Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1, symbols, toParse);
+        assertTrue(output.isRight());
+
+        Block validBlock = new Block(1, symbols);
+        validBlock.add_check(l1);
+
+        output.forEach(block ->
+                assertArrayEquals(block.build().to_bytes().get(), validBlock.build().to_bytes().get())
+        );
+    }
+
+    @Test
+    void testDatalogFailed() {
+        SymbolTable symbols = Biscuit.default_symbol_table();
+
+        String l1 = "fact(1)";
+        String l2 = "check fact(1)"; // typo missing "if"
+        String toParse = String.join(";", Arrays.asList(l1, l2));
+
+        Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1, symbols, toParse);
+        assertTrue(output.isLeft());
+    }
+
+    @Test
+    void testDatalogRemoveComment() throws org.biscuitsec.biscuit.error.Error.Parser {
+        SymbolTable symbols = Biscuit.default_symbol_table();
+
+        String l0 = "// test comment";
+        String l1 = "fact1(1, 2);";
+        String l2 = "fact2(\"2\");";
+        String l3 = "rule1(2) <- fact2(\"2\");";
+        String l4 = "// another comment";
+        String l5 = "/* test multiline";
+        String l6 = "comment */ check if rule1(2);";
+        String l7 = "  /* another multiline";
+        String l8 = "comment */";
+        String toParse = String.join("", Arrays.asList(l0, l1, l2, l3, l4, l5, l6, l7, l8));
+
+        Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1, symbols, toParse);
+        assertTrue(output.isRight());
+    }
 }
