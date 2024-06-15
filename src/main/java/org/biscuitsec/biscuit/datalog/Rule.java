@@ -243,4 +243,36 @@ public final class Rule implements Serializable {
          return Right(new Rule(res.get(), body, expressions, scopes));
       }
    }
+
+   @Override
+   public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+
+      Rule rule = (Rule) o;
+
+      if (!Objects.equals(head, rule.head)) return false;
+      if (!Objects.equals(body, rule.body)) return false;
+      if (!Objects.equals(expressions, rule.expressions)) return false;
+       return Objects.equals(scopes, rule.scopes);
+   }
+
+   @Override
+   public int hashCode() {
+      int result = head != null ? head.hashCode() : 0;
+      result = 31 * result + (body != null ? body.hashCode() : 0);
+      result = 31 * result + (expressions != null ? expressions.hashCode() : 0);
+      result = 31 * result + (scopes != null ? scopes.hashCode() : 0);
+      return result;
+   }
+
+   @Override
+   public String toString() {
+      return "Rule{" +
+              "head=" + head +
+              ", body=" + body +
+              ", expressions=" + expressions +
+              ", scopes=" + scopes +
+              '}';
+   }
 }

@@ -345,5 +345,20 @@ public class Block {
         result = 31 * result + (int) (version ^ (version >>> 32));
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "Block{" +
+                "symbols=" + symbols +
+                ", context='" + context + '\'' +
+                ", facts=" + facts +
+                ", rules=" + rules +
+                ", checks=" + checks +
+                ", scopes=" + scopes +
+                ", publicKeys=" + publicKeys +
+                ", externalKey=" + externalKey +
+                ", version=" + version +
+                '}';
+    }
 }
 
