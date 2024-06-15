@@ -453,7 +453,7 @@ public class ExpressionParser {
         return Either.right(new Tuple2<>(s, e));
     }
 
-        public static Either<Error, Tuple2<String, Expression>> expr_term(String s) {
+    public static Either<Error, Tuple2<String, Expression>> expr_term(String s) {
         Either<Error, Tuple2<String, Expression>> res1 = unary_parens(s);
         if (res1.isRight()) {
             return res1;

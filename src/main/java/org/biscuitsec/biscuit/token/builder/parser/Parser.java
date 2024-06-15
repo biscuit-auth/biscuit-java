@@ -59,16 +59,6 @@ public class Parser {
                });
 
                if (!parsed) {
-                   parsed = scope(code).fold(e -> {
-                       lineErrors.add(e);
-                       return false;
-                   }, r -> {
-                       blockBuilder.add_scope(r._2);
-                       return true;
-                   });
-               }
-
-               if (!parsed) {
                    parsed = fact(code).fold(e -> {
                        lineErrors.add(e);
                        return false;
@@ -84,6 +74,16 @@ public class Parser {
                        return false;
                    }, r -> {
                        blockBuilder.add_check(r._2);
+                       return true;
+                   });
+               }
+
+               if (!parsed) {
+                   parsed = scope(code).fold(e -> {
+                       lineErrors.add(e);
+                       return false;
+                   }, r -> {
+                       blockBuilder.add_scope(r._2);
                        return true;
                    });
                }
