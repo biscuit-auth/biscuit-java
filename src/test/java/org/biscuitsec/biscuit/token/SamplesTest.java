@@ -82,8 +82,11 @@ class SamplesTest {
             outputSample.get().setExternalKey(sampleExternalKey);
         }
 
-        System.out.println(outputSample.get().build().print(sampleSymbols));
+        org.biscuitsec.biscuit.token.Block generatedSampleBlock = outputSample.get().build();
+        System.out.println(generatedSampleBlock.symbols.symbols);
         System.out.println(block.symbols.symbols);
+
+        System.out.println(outputSample.get().build().print(sampleSymbols));
         System.out.println(block.print(sampleSymbols));
         assertArrayEquals(outputSample.get().build().to_bytes().get(), block.to_bytes().get());
     }
@@ -106,11 +109,12 @@ class SamplesTest {
                     Biscuit token = Biscuit.from_bytes(data, publicKey);
                     assertArrayEquals(token.serialize(), data);
 
-                    /*List<org.biscuitsec.biscuit.token.Block> allBlocks = new ArrayList<>();
+                    List<org.biscuitsec.biscuit.token.Block> allBlocks = new ArrayList<>();
                     allBlocks.add(token.authority);
                     allBlocks.addAll(token.blocks);
 
-                    compareBlocks(testCase.token, allBlocks);*/
+                    compareBlocks(testCase.token, allBlocks);
+
                     byte[] ser_block_authority = token.authority.to_bytes().get();
                     System.out.println(Arrays.toString(ser_block_authority));
                     System.out.println(Arrays.toString(token.serializedBiscuit.authority.block));

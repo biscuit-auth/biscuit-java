@@ -57,8 +57,6 @@ public class Parser {
 
            if (!code.isEmpty()) {
                int lineNumber = indexedLine._2;
-               System.out.println("NEW CODE LINE");
-               System.out.println(code);
                List<Error> lineErrors = new ArrayList<>();
 
                boolean parsed = false;
