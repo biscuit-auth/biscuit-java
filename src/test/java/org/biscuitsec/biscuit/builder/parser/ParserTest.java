@@ -171,6 +171,29 @@ class ParserTest {
     }
 
     @Test
+    void testNegatePrecedence() {
+        Either<Error, Tuple2<String, Check>> res =
+                Parser.check("check if !false && true");
+        assertEquals(Either.right(new Tuple2<>("",
+                        Utils.check(
+                        Utils.constrained_rule("query",
+                                new ArrayList<>(),
+                                new ArrayList<>(),
+                                List.of(
+                                        new Expression.Binary(
+                                                Expression.Op.And,
+                                                new Expression.Unary(
+                                                        Expression.Op.Negate,
+                                                        new Expression.Value(new Term.Bool(false))
+                                                ),
+                                                new Expression.Value(new Term.Bool(true))
+                                        )
+                                )
+                        )))),
+                res);
+    }
+
+    @Test
     void ruleWithFreeExpressionVariables() {
         Either<Error, Tuple2<String, Rule>> res =
                 Parser.rule("right($0) <- resource($0), operation(\"read\"), $test");
