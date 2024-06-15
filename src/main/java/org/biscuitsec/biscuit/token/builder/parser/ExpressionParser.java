@@ -128,7 +128,7 @@ public class ExpressionParser {
 
         Either<Error, Tuple2<String, Expression.Op>> res2 = binary_op2(s);
         if (res2.isLeft()) {
-            return Either.left(res2.getLeft());
+            return Either.right(t1);
 
         }
         Tuple2<String, Expression.Op> t2 = res2.get();
