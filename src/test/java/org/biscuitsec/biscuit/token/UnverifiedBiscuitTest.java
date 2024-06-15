@@ -99,7 +99,7 @@ public class UnverifiedBiscuitTest {
                 )
         )));
 
-        UnverifiedBiscuit unverifiedBiscuit2 = unverifiedBiscuit1.attenuate(rng, keypair2, block2.build());
+        UnverifiedBiscuit unverifiedBiscuit2 = unverifiedBiscuit1.attenuate(rng, keypair2, block2);
 
         System.out.println(unverifiedBiscuit2.print());
 

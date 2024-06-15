@@ -156,7 +156,7 @@ public class Biscuit {
             publicKeys.add(symbols.publicKeys().get(i));
         }
 
-        Block authority_block = new Block(symbols, context, facts, rules,
+        Block authority_block = new Block(block_symbols, context, facts, rules,
                 checks, scopes, publicKeys, Option.none(), schemaVersion.version());
 
         if (this.root_key_id.isDefined()) {

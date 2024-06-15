@@ -145,6 +145,11 @@ public class UnverifiedBiscuit {
         return attenuate(rng, keypair, block.build(builderSymbols));
     }
 
+    public UnverifiedBiscuit attenuate(final SecureRandom rng, final KeyPair keypair, org.biscuitsec.biscuit.token.builder.Block block) throws Error {
+        SymbolTable builderSymbols = new SymbolTable(this.symbols);
+        return attenuate(rng, keypair, block.build(builderSymbols));
+    }
+
     /**
      * Generates a new token from an existing one and a new block
      *

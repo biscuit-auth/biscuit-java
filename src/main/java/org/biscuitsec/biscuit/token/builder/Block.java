@@ -99,10 +99,18 @@ public class Block {
     }
 
     public org.biscuitsec.biscuit.token.Block build() {
-        return build(default_symbol_table());
+        return build(default_symbol_table(), Option.none());
+    }
+
+    public org.biscuitsec.biscuit.token.Block build(final Option<PublicKey> externalKey) {
+        return build(default_symbol_table(), externalKey);
     }
 
     public org.biscuitsec.biscuit.token.Block build(SymbolTable symbols) {
+        return build(symbols, Option.none());
+    }
+
+    public org.biscuitsec.biscuit.token.Block build(SymbolTable symbols, final Option<PublicKey> externalKey) {
         int symbol_start = symbols.currentOffset();
         int publicKeyStart = symbols.currentPublicKeyOffset();
 
@@ -130,13 +138,14 @@ public class Block {
             block_symbols.add(symbols.symbols.get(i));
         }
 
+
         List<PublicKey> publicKeys = new ArrayList<>();
         for (int i = publicKeyStart; i < symbols.currentPublicKeyOffset(); i++) {
             publicKeys.add(symbols.publicKeys().get(i));
         }
 
         return new org.biscuitsec.biscuit.token.Block(block_symbols, this.context, facts, rules, checks,
-                scopes, publicKeys, Option.none(), schemaVersion.version());
+                scopes, publicKeys, externalKey, schemaVersion.version());
     }
 
     @Override

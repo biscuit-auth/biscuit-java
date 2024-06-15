@@ -313,5 +313,37 @@ public class Block {
             return Left(new Error.FormatError.SerializationError(e.toString()));
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Block block = (Block) o;
+
+        if (version != block.version) return false;
+        if (!Objects.equals(symbols, block.symbols)) return false;
+        if (!Objects.equals(context, block.context)) return false;
+        if (!Objects.equals(facts, block.facts)) return false;
+        if (!Objects.equals(rules, block.rules)) return false;
+        if (!Objects.equals(checks, block.checks)) return false;
+        if (!Objects.equals(scopes, block.scopes)) return false;
+        if (!Objects.equals(publicKeys, block.publicKeys)) return false;
+        return Objects.equals(externalKey, block.externalKey);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = symbols != null ? symbols.hashCode() : 0;
+        result = 31 * result + (context != null ? context.hashCode() : 0);
+        result = 31 * result + (facts != null ? facts.hashCode() : 0);
+        result = 31 * result + (rules != null ? rules.hashCode() : 0);
+        result = 31 * result + (checks != null ? checks.hashCode() : 0);
+        result = 31 * result + (scopes != null ? scopes.hashCode() : 0);
+        result = 31 * result + (publicKeys != null ? publicKeys.hashCode() : 0);
+        result = 31 * result + (externalKey != null ? externalKey.hashCode() : 0);
+        result = 31 * result + (int) (version ^ (version >>> 32));
+        return result;
+    }
 }
 
