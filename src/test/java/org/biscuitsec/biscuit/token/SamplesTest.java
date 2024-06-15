@@ -18,6 +18,7 @@ import org.biscuitsec.biscuit.token.builder.Check;
 import org.biscuitsec.biscuit.token.builder.Expression;
 import org.biscuitsec.biscuit.token.builder.parser.ExpressionParser;
 import org.biscuitsec.biscuit.token.builder.parser.Parser;
+import org.biscuitsec.biscuit.token.format.SignedBlock;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static org.biscuitsec.biscuit.token.Block.from_bytes;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SamplesTest {
@@ -104,11 +106,26 @@ class SamplesTest {
                     Biscuit token = Biscuit.from_bytes(data, publicKey);
                     assertArrayEquals(token.serialize(), data);
 
-                    List<org.biscuitsec.biscuit.token.Block> allBlocks = new ArrayList<>();
+                    /*List<org.biscuitsec.biscuit.token.Block> allBlocks = new ArrayList<>();
                     allBlocks.add(token.authority);
                     allBlocks.addAll(token.blocks);
 
-                    compareBlocks(testCase.token, allBlocks);
+                    compareBlocks(testCase.token, allBlocks);*/
+                    byte[] ser_block_authority = token.authority.to_bytes().get();
+                    System.out.println(Arrays.toString(ser_block_authority));
+                    System.out.println(Arrays.toString(token.serializedBiscuit.authority.block));
+                    org.biscuitsec.biscuit.token.Block deser_block_authority = from_bytes(ser_block_authority, token.authority.externalKey).get();
+                    assertEquals(token.authority.print(token.symbols), deser_block_authority.print(token.symbols));
+                    assert(Arrays.equals(ser_block_authority, token.serializedBiscuit.authority.block));
+
+                    for(int i = 0; i < token.blocks.size() - 1; i++) {
+                        org.biscuitsec.biscuit.token.Block block = token.blocks.get(i);
+                        SignedBlock signed_block = token.serializedBiscuit.blocks.get(i);
+                        byte[] ser_block = block.to_bytes().get();
+                        org.biscuitsec.biscuit.token.Block deser_block = from_bytes(ser_block,block.externalKey).get();
+                        assertEquals(block.print(token.symbols), deser_block.print(token.symbols));
+                        assert(Arrays.equals(ser_block, signed_block.block));
+                    }
 
                     List<RevocationIdentifier> revocationIds = token.revocation_identifiers();
                     JsonArray validationRevocationIds = validation.getAsJsonArray("revocation_ids");

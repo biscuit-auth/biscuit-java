@@ -2,6 +2,8 @@ package org.biscuitsec.biscuit.token;
 
 import biscuit.format.schema.Schema;
 import org.biscuitsec.biscuit.crypto.PublicKey;
+import org.biscuitsec.biscuit.datalog.expressions.Expression;
+import org.biscuitsec.biscuit.datalog.expressions.Op;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.datalog.*;
 import org.biscuitsec.biscuit.token.format.SerializedBiscuit;
@@ -13,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
@@ -155,8 +158,50 @@ public class Block {
             b.addPublicKeys(pk.serialize());
         }
 
-        b.setVersion(SerializedBiscuit.MAX_SCHEMA_VERSION);
+        b.setVersion(getSchemaVersion());
         return b.build();
+    }
+
+    int getSchemaVersion() {
+        boolean containsScopes = !this.scopes.isEmpty();
+        boolean containsCheckAll = false;
+        boolean containsV4 = false;
+
+        for (Rule r: this.rules) {
+            containsScopes |= !r.scopes().isEmpty();
+            for(Expression e: r.expressions()) {
+                containsV4 |= containsV4Op(e);
+            }
+        }
+        for(Check c: this.checks) {
+            containsCheckAll |= c.kind() == Check.Kind.All;
+
+            for (Rule q: c.queries()) {
+                containsScopes |= !q.scopes().isEmpty();
+                for(Expression e: q.expressions()) {
+                    containsV4 |= containsV4Op(e);
+                }
+            }
+        }
+
+        if(containsScopes || containsCheckAll || containsV4) {
+            return SerializedBiscuit.MAX_SCHEMA_VERSION;
+        } else {
+            return SerializedBiscuit.MIN_SCHEMA_VERSION;
+        }
+    }
+
+    boolean containsV4Op(Expression e) {
+        for (Op op: e.getOps()) {
+            if (op instanceof Op.Binary) {
+                Op.BinaryOp o = ((Op.Binary) op).getOp();
+                if (o == Op.BinaryOp.BitwiseAnd || o == Op.BinaryOp.BitwiseOr || o == Op.BinaryOp.BitwiseXor || o == Op.BinaryOp.NotEqual) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
