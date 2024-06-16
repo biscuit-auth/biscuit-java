@@ -1,19 +1,21 @@
 package org.biscuitsec.biscuit.token;
 
+import biscuit.format.schema.Schema;
+import net.i2p.crypto.eddsa.EdDSAEngine;
 import org.biscuitsec.biscuit.crypto.KeyDelegate;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.error.Error;
+import org.biscuitsec.biscuit.token.format.ExternalSignature;
 import org.biscuitsec.biscuit.token.format.SerializedBiscuit;
 import io.vavr.Tuple3;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.SignatureException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.security.*;
 import java.util.*;
 
 /**
@@ -88,7 +90,7 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param authority authority block
      * @return Biscuit
      */
-    static private Biscuit make(final SecureRandom rng, final KeyPair root, final Option<Integer> root_key_id, final Block authority) throws Error.FormatError {
+    static Biscuit make(final SecureRandom rng, final KeyPair root, final Option<Integer> root_key_id, final Block authority) throws Error.FormatError {
         ArrayList<Block> blocks = new ArrayList<>();
 
         KeyPair next = new KeyPair(rng);
@@ -330,7 +332,7 @@ public class Biscuit extends UnverifiedBiscuit {
             throw new Error.SymbolTableOverlap();
         }
 
-        Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.serializedBiscuit.append(keypair, block);
+        Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.serializedBiscuit.append(keypair, block, Option.none());
         if (containerRes.isLeft()) {
             Error.FormatError error = containerRes.getLeft();
             throw error;
@@ -352,6 +354,97 @@ public class Biscuit extends UnverifiedBiscuit {
 
         HashMap<Long, List<Long>> publicKeyToBlockId = new HashMap<>();
         publicKeyToBlockId.putAll(this.publicKeyToBlockId);
+
+        return new Biscuit(copiedBiscuit.authority, blocks, symbols, container, publicKeyToBlockId, revocation_ids);
+    }
+
+    /**
+     * Generates a third party block request from a token
+     */
+    public ThirdPartyRequest thirdPartyRequest() {
+        PublicKey previousKey;
+        if(this.serializedBiscuit.blocks.isEmpty()) {
+            previousKey = this.serializedBiscuit.authority.key;
+        } else {
+            previousKey = this.serializedBiscuit.blocks.get(this.serializedBiscuit.blocks.size() - 1).key;
+        }
+
+        List<PublicKey> publicKeys = new ArrayList<>(this.symbols.publicKeys());
+        return new ThirdPartyRequest(previousKey, publicKeys);
+    }
+
+    /**
+     * Generates a third party block request from a token
+     */
+    public Biscuit appendThirdPartyBlock(PublicKey externalKey, ThirdPartyBlock blockResponse)
+            throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+        KeyPair nextKeyPair = new KeyPair();
+
+        Signature sgr = new EdDSAEngine(MessageDigest.getInstance(org.biscuitsec.biscuit.crypto.KeyPair.ed25519.getHashAlgorithm()));
+        sgr.initVerify(externalKey.key);
+
+        sgr.update(blockResponse.payload);
+        ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
+        algo_buf.putInt(Integer.valueOf(Schema.PublicKey.Algorithm.Ed25519.getNumber()));
+        algo_buf.flip();
+        sgr.update(algo_buf);
+
+        PublicKey previousKey;
+        if(this.serializedBiscuit.blocks.isEmpty()) {
+            previousKey = this.serializedBiscuit.authority.key;
+        } else {
+            previousKey = this.serializedBiscuit.blocks.get(this.serializedBiscuit.blocks.size() - 1).key;
+        }
+        sgr.update(previousKey.toBytes());
+        if (!sgr.verify(blockResponse.signature)) {
+            throw new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied");
+        }
+
+        Either<Error.FormatError, Block> res = Block.from_bytes(blockResponse.payload, Option.some(externalKey));
+        if(res.isLeft()) {
+            throw res.getLeft();
+        }
+
+        Block block = res.get();
+
+        ExternalSignature externalSignature = new ExternalSignature(externalKey, blockResponse.signature);
+
+        Biscuit copiedBiscuit = this.copy();
+
+        Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.serializedBiscuit.append(nextKeyPair, block, Option.some(externalSignature));
+        if (containerRes.isLeft()) {
+            throw containerRes.getLeft();
+        }
+
+        SerializedBiscuit container = containerRes.get();
+
+        SymbolTable symbols = new SymbolTable(copiedBiscuit.symbols);
+
+        ArrayList<Block> blocks = new ArrayList<>();
+        for (Block b : copiedBiscuit.blocks) {
+            blocks.add(b);
+        }
+        blocks.add(block);
+
+        for(PublicKey pk: block.publicKeys) {
+            symbols.insert(pk);
+        }
+
+        long pkIndex = symbols.insert(externalKey);
+       // if (copiedBiscuit.publicKeyToBlockId.
+
+
+        HashMap<Long, List<Long>> publicKeyToBlockId = new HashMap<>();
+        publicKeyToBlockId.putAll(this.publicKeyToBlockId);
+        if(publicKeyToBlockId.containsKey(pkIndex)) {
+            publicKeyToBlockId.get(pkIndex).add((long)this.blocks.size()+1);
+        } else {
+            List<Long> list = new ArrayList<>();
+            list.add((long)this.blocks.size()+1);
+            publicKeyToBlockId.put(pkIndex, list);
+        }
+
+        List<byte[]> revocation_ids = container.revocation_identifiers();
 
         return new Biscuit(copiedBiscuit.authority, blocks, symbols, container, publicKeyToBlockId, revocation_ids);
     }

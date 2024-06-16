@@ -129,7 +129,7 @@ public class UnverifiedBiscuit {
      * @return
      */
     public org.biscuitsec.biscuit.token.builder.Block create_block() {
-        return new org.biscuitsec.biscuit.token.builder.Block(1 + this.blocks.size());
+        return new org.biscuitsec.biscuit.token.builder.Block();
     }
 
     /**
@@ -165,7 +165,7 @@ public class UnverifiedBiscuit {
             throw new Error.SymbolTableOverlap();
         }
 
-        Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.serializedBiscuit.append(keypair, block);
+        Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.serializedBiscuit.append(keypair, block, Option.none());
         if (containerRes.isLeft()) {
             Error.FormatError error = containerRes.getLeft();
             throw error;

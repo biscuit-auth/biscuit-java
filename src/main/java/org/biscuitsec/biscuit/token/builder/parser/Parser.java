@@ -28,7 +28,7 @@ public class Parser {
      * @return Either<Map<Integer, List<Error>>, Block>
      */
     public static Either<Map<Integer, List<Error>>, Block> datalog(long index, String s) {
-        Block blockBuilder = new Block(index);
+        Block blockBuilder = new Block();
 
         // empty block code
         if (s.isEmpty()) {

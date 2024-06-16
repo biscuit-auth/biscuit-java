@@ -262,7 +262,7 @@ public class SerializedBiscuit {
     }
 
     public Either<Error.FormatError, SerializedBiscuit> append(final org.biscuitsec.biscuit.crypto.KeyPair next,
-                                                               final Block newBlock) {
+                                                               final Block newBlock, Option<ExternalSignature> externalSignature) {
         if (this.proof.secretKey.isEmpty()) {
             return Left(new Error.FormatError.SerializationError("the token is sealed"));
         }
@@ -281,11 +281,14 @@ public class SerializedBiscuit {
             Signature sgr = new EdDSAEngine(MessageDigest.getInstance(org.biscuitsec.biscuit.crypto.KeyPair.ed25519.getHashAlgorithm()));
             sgr.initSign(this.proof.secretKey.get().private_key);
             sgr.update(block);
+            if(externalSignature.isDefined()) {
+                sgr.update(externalSignature.get().signature);
+            }
             sgr.update(algo_buf);
             sgr.update(next_key.toBytes());
             byte[] signature = sgr.sign();
 
-            SignedBlock signedBlock = new SignedBlock(block, next_key, signature, Option.none());
+            SignedBlock signedBlock = new SignedBlock(block, next_key, signature, externalSignature);
 
             ArrayList<SignedBlock> blocks = new ArrayList<>();
             for (SignedBlock bl : this.blocks) {

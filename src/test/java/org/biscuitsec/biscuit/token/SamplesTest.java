@@ -18,6 +18,7 @@ import org.biscuitsec.biscuit.token.builder.Check;
 import org.biscuitsec.biscuit.token.builder.Expression;
 import org.biscuitsec.biscuit.token.builder.parser.ExpressionParser;
 import org.biscuitsec.biscuit.token.builder.parser.Parser;
+import org.biscuitsec.biscuit.token.format.SerializedBiscuit;
 import org.biscuitsec.biscuit.token.format.SignedBlock;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
