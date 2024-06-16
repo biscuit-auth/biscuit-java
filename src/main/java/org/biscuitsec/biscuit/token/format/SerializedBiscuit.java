@@ -448,7 +448,7 @@ public class SerializedBiscuit {
             algo_buf2.putInt(Integer.valueOf(publicKey.algorithm.getNumber()));
             algo_buf2.flip();
 
-            Signature sgr2 = new EdDSAEngine(MessageDigest.getInstance(org.biscuitsec.biscuit.crypto.KeyPair.ed25519.getHashAlgorithm()));
+            Signature sgr2 = new EdDSAEngine(MessageDigest.getInstance(KeyPair.ed25519.getHashAlgorithm()));
             sgr2.initVerify(signedBlock.externalSignature.get().key.key);
             sgr2.update(block);
             sgr2.update(algo_buf2);

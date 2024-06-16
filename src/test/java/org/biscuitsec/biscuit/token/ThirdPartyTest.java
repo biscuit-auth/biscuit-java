@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ThirdPartyTest {
     @Test
-    public void testBasic() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, CloneNotSupportedException, Error {
+    public void testRoundTrip() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, CloneNotSupportedException, Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
@@ -35,10 +35,9 @@ public class ThirdPartyTest {
         KeyPair external = new KeyPair(rng);
         System.out.println("external: ed25519/"+external.public_key().toHex());
 
-
         org.biscuitsec.biscuit.token.builder.Block authority_builder = new Block();
         authority_builder.add_fact("right(\"read\")");
-        authority_builder.add_check("check if group(\"admin\") trusting ed25519/D75712CB4091E53D850E032DFBCD8D003CA9BD1B60BAFF4D92DC98145448BCC5");
+        authority_builder.add_check("check if group(\"admin\") trusting ed25519/"+external.public_key().toHex());
 
         Biscuit b1 = Biscuit.make(rng, root, authority_builder.build());
         ThirdPartyRequest request = b1.thirdPartyRequest();
@@ -63,26 +62,17 @@ public class ThirdPartyTest {
         Authorizer authorizer2 = deser.authorizer();
         authorizer2.add_fact("resource(\"file2\")");
         authorizer2.add_policy("allow if true");
-        authorizer2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
 
-        /*try {
+        try {
             authorizer2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         } catch (Error e) {
             System.out.println(e);
             assertEquals(
                     new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
-                            new FailedCheck.FailedBlock(1, 0, "check if resource($resource), operation(\"read\"), right($resource, \"read\")"),
-                            new FailedCheck.FailedBlock(2, 0, "check if resource(\"file1\")")
+                            new FailedCheck.FailedBlock(1, 0, "check if resource(\"file1\")")
                     ))),
                     e);
         }
-        assertThrows(InvalidKeyException.class, () -> {
-            Biscuit deser = Biscuit.from_bytes(data, new KeyDelegate() {
-                @Override
-                public Option<PublicKey> root_key(Option<Integer> key_id) {
-                    return Option.none();
-                }
-            });
-        });*/
+
     }
 }

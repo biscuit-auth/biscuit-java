@@ -2,6 +2,7 @@ package org.biscuitsec.biscuit.token;
 
 import biscuit.format.schema.Schema;
 import io.vavr.control.Either;
+import io.vavr.control.Option;
 import net.i2p.crypto.eddsa.EdDSAEngine;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.crypto.PublicKey;
@@ -30,7 +31,7 @@ public class ThirdPartyRequest {
             symbols.insert(pk);
         }
 
-        org.biscuitsec.biscuit.token.Block block = blockBuilder.build(symbols);
+        org.biscuitsec.biscuit.token.Block block = blockBuilder.build(symbols, Option.some(keyPair.public_key()));
         block.version = SerializedBiscuit.MAX_SCHEMA_VERSION;
 
         Either<Error.FormatError, byte[]> res = block.to_bytes();
