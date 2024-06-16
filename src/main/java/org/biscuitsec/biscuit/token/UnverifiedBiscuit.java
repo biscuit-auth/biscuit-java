@@ -129,7 +129,7 @@ public class UnverifiedBiscuit {
      * @return
      */
     public org.biscuitsec.biscuit.token.builder.Block create_block() {
-        return new org.biscuitsec.biscuit.token.builder.Block(1 + this.blocks.size(), new SymbolTable(this.symbols));
+        return new org.biscuitsec.biscuit.token.builder.Block(1 + this.blocks.size());
     }
 
     /**
@@ -141,7 +141,13 @@ public class UnverifiedBiscuit {
     public UnverifiedBiscuit attenuate(org.biscuitsec.biscuit.token.builder.Block block) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         SecureRandom rng = new SecureRandom();
         KeyPair keypair = new KeyPair(rng);
-        return attenuate(rng, keypair, block.build());
+        SymbolTable builderSymbols = new SymbolTable(this.symbols);
+        return attenuate(rng, keypair, block.build(builderSymbols));
+    }
+
+    public UnverifiedBiscuit attenuate(final SecureRandom rng, final KeyPair keypair, org.biscuitsec.biscuit.token.builder.Block block) throws Error {
+        SymbolTable builderSymbols = new SymbolTable(this.symbols);
+        return attenuate(rng, keypair, block.build(builderSymbols));
     }
 
     /**

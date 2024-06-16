@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class ExpressionTest {
 
@@ -111,6 +112,29 @@ public class ExpressionTest {
 
         assertEquals(
                 new Term.Bool(false),
+                e.evaluate(new HashMap<>(),  new TemporarySymbolTable(symbols))
+        );
+    }
+
+    @Test
+    public void testIntersectionAndContains() throws Error.Execution {
+        SymbolTable symbols = new SymbolTable();
+
+        Expression e = new Expression(new ArrayList<Op>(Arrays.asList(
+                new Op.Value(new Term.Set(new HashSet<>(Arrays.asList(new Term.Integer(1), new Term.Integer(2), new Term.Integer(3))))),
+                new Op.Value(new Term.Set(new HashSet<>(Arrays.asList(new Term.Integer(1), new Term.Integer(2))))),
+                new Op.Binary(Op.BinaryOp.Intersection),
+                new Op.Value(new Term.Integer(1)),
+                new Op.Binary(Op.BinaryOp.Contains)
+        )));
+
+        assertEquals(
+                "[1, 2, 3].intersection([1, 2]).contains(1)",
+                e.print(symbols).get()
+        );
+
+        assertEquals(
+                new Term.Bool(true),
                 e.evaluate(new HashMap<>(),  new TemporarySymbolTable(symbols))
         );
     }

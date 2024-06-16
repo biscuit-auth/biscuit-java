@@ -1,7 +1,9 @@
 package org.biscuitsec.biscuit.token.builder.parser;
 
 import biscuit.format.schema.Schema;
+import io.vavr.collection.Stream;
 import org.biscuitsec.biscuit.crypto.PublicKey;
+import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.token.Policy;
 import io.vavr.Tuple2;
 import io.vavr.Tuple4;
@@ -10,12 +12,96 @@ import org.biscuitsec.biscuit.token.builder.*;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.HashSet;
+import java.util.*;
 import java.util.function.Function;
 
 public class Parser {
+    /**
+     * Takes a datalog string with <code>\n</code> as datalog line separator. It tries to parse
+     * each line using fact, rule, check and scope sequentially.
+     *
+     * If one succeeds it returns Right(Block)
+     * else it returns a Map[lineNumber, List[Error]]
+     *
+     * @param index block index
+     * @param s datalog string to parse
+     * @return Either<Map<Integer, List<Error>>, Block>
+     */
+    public static Either<Map<Integer, List<Error>>, Block> datalog(long index, String s) {
+        Block blockBuilder = new Block(index);
+
+        // empty block code
+        if (s.isEmpty()) {
+            return Either.right(blockBuilder);
+        }
+
+        Map<Integer, List<Error>> errors = new HashMap<>();
+
+        s = removeCommentsAndWhitespaces(s);
+        String[] codeLines = s.split(";");
+
+        Stream.of(codeLines)
+                .zipWithIndex()
+                .forEach(indexedLine -> {
+           String code = indexedLine._1.strip();
+
+           if (!code.isEmpty()) {
+               int lineNumber = indexedLine._2;
+               List<Error> lineErrors = new ArrayList<>();
+
+               boolean parsed = false;
+               parsed = rule(code).fold(e -> {
+                   lineErrors.add(e);
+                   return false;
+               }, r -> {
+                   blockBuilder.add_rule(r._2);
+                   return true;
+               });
+
+               if (!parsed) {
+                   parsed = fact(code).fold(e -> {
+                       lineErrors.add(e);
+                       return false;
+                   }, r -> {
+                       blockBuilder.add_fact(r._2);
+                       return true;
+                   });
+               }
+
+               if (!parsed) {
+                   parsed = check(code).fold(e -> {
+                       lineErrors.add(e);
+                       return false;
+                   }, r -> {
+                       blockBuilder.add_check(r._2);
+                       return true;
+                   });
+               }
+
+               if (!parsed) {
+                   parsed = scope(code).fold(e -> {
+                       lineErrors.add(e);
+                       return false;
+                   }, r -> {
+                       blockBuilder.add_scope(r._2);
+                       return true;
+                   });
+               }
+
+               if (!parsed) {
+                   lineErrors.forEach(System.out::println);
+                   errors.put(lineNumber, lineErrors);
+               }
+           }
+        });
+
+        if (!errors.isEmpty()) {
+            return Either.left(errors);
+        }
+
+        return Either.right(blockBuilder);
+    }
+
     public static Either<Error, Tuple2<String, Fact>> fact(String s) {
         Either<Error, Tuple2<String, Predicate>> res = fact_predicate(s);
         if (res.isLeft()) {
@@ -524,14 +610,14 @@ public class Parser {
             return Either.left(new Error(s, "not an integer"));
         }
 
-        Integer i = Integer.parseInt(s.substring(0, index2));
+        long i = Long.parseLong(s.substring(0, index2));
         String remaining = s.substring(index2);
 
-        return Either.right(new Tuple2<String, Term.Integer>(remaining, (Term.Integer) Utils.integer(i.intValue())));
+        return Either.right(new Tuple2<String, Term.Integer>(remaining, (Term.Integer) Utils.integer(i)));
     }
 
     public static Either<Error, Tuple2<String, Term.Date>> date(String s) {
-        Tuple2<String, String> t = take_while(s, (c) -> c != ' ' && c != ',' && c != ')');
+        Tuple2<String, String> t = take_while(s, (c) -> c != ' ' && c != ',' && c != ')' && c != ']');
 
         try {
             OffsetDateTime d = OffsetDateTime.parse(t._1);
@@ -670,5 +756,44 @@ public class Parser {
         }
 
         return new Tuple2<>(s.substring(0, index), s.substring(index));
+    }
+
+    public static String removeCommentsAndWhitespaces(String s) {
+        s = removeComments(s);
+        s = s.replace("\n", "").replace("\\\"", "\"").strip();
+        return s;
+    }
+
+    public static String removeComments(String str) {
+        StringBuilder result = new StringBuilder();
+        String remaining = str;
+
+        while (!remaining.isEmpty()) {
+            remaining = space(remaining); // Skip leading whitespace
+            if (remaining.startsWith("/*")) {
+                // Find the end of the multiline comment
+                remaining = remaining.substring(2); // Skip "/*"
+                String finalRemaining = remaining;
+                Tuple2<String, String> split = take_while(remaining, c -> !finalRemaining.startsWith("*/"));
+                remaining = split._2.length() > 2 ? split._2.substring(2) : ""; // Skip "*/"
+            } else if (remaining.startsWith("//")) {
+                // Find the end of the single-line comment
+                remaining = remaining.substring(2); // Skip "//"
+                Tuple2<String, String> split = take_while(remaining, c -> c != '\n' && c != '\r');
+                remaining = split._2;
+                if (!remaining.isEmpty()) {
+                    result.append(remaining.charAt(0)); // Preserve line break
+                    remaining = remaining.substring(1);
+                }
+            } else {
+                // Take non-comment text until the next comment or end of string
+                String finalRemaining = remaining;
+                Tuple2<String, String> split = take_while(remaining, c -> !finalRemaining.startsWith("/*") && !finalRemaining.startsWith("//"));
+                result.append(split._1);
+                remaining = split._2;
+            }
+        }
+
+        return result.toString();
     }
 }

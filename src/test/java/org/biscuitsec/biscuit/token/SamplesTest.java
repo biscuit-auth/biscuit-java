@@ -4,15 +4,21 @@ import biscuit.format.schema.Schema;
 import com.google.gson.*;
 import com.google.protobuf.MapEntry;
 import io.vavr.Tuple2;
+import io.vavr.control.Option;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.datalog.Rule;
 import org.biscuitsec.biscuit.datalog.RunLimits;
+import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.datalog.TrustedOrigins;
 import org.biscuitsec.biscuit.error.Error;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 import org.biscuitsec.biscuit.token.builder.Check;
+import org.biscuitsec.biscuit.token.builder.Expression;
+import org.biscuitsec.biscuit.token.builder.parser.ExpressionParser;
+import org.biscuitsec.biscuit.token.builder.parser.Parser;
+import org.biscuitsec.biscuit.token.format.SignedBlock;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
@@ -22,8 +28,10 @@ import java.io.InputStreamReader;
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static org.biscuitsec.biscuit.token.Block.from_bytes;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SamplesTest {
@@ -37,6 +45,55 @@ class SamplesTest {
         PublicKey publicKey = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, sample.root_public_key);
         KeyPair keyPair = new KeyPair(sample.root_private_key);
         return sample.testcases.stream().map(t -> process_testcase(t, publicKey, keyPair));
+    }
+
+    void compareBlocks(List<Block> sampleBlocks, List<org.biscuitsec.biscuit.token.Block> blocks) {
+        assertEquals(sampleBlocks.size(), blocks.size());
+        List<Tuple2<Block, org.biscuitsec.biscuit.token.Block>> comparisonList = IntStream.range(0, sampleBlocks.size())
+                .mapToObj(i -> new Tuple2<>(sampleBlocks.get(i), blocks.get(i)))
+                .collect(Collectors.toList());
+
+        // for each token we start from the base symbol table
+        SymbolTable baseSymbols = new SymbolTable();
+
+        io.vavr.collection.Stream.ofAll(comparisonList).zipWithIndex().forEach(indexedItem -> {
+            compareBlock(baseSymbols, indexedItem._2, indexedItem._1._1, indexedItem._1._2);
+        });
+    }
+
+    void compareBlock(SymbolTable baseSymbols, long sampleBlockIndex, Block sampleBlock, org.biscuitsec.biscuit.token.Block block) {
+        Option<PublicKey> sampleExternalKey = sampleBlock.getExternalKey();
+        List<PublicKey> samplePublicKeys = sampleBlock.getPublicKeys();
+        String sampleDatalog = sampleBlock.getCode().replace("\"","\\\"");
+
+        Either<Map<Integer, List<org.biscuitsec.biscuit.token.builder.parser.Error>>, org.biscuitsec.biscuit.token.builder.Block> outputSample = Parser.datalog(sampleBlockIndex, sampleDatalog);
+
+        // the invalid block rule with unbound variable cannot be parsed
+        if(outputSample.isLeft()) {
+            return;
+        }
+
+        SymbolTable sampleSymbols;
+        if (!block.externalKey.isDefined()) {
+            sampleSymbols = new SymbolTable(baseSymbols);
+        } else {
+            sampleSymbols = new SymbolTable();
+        }
+
+        org.biscuitsec.biscuit.token.Block generatedSampleBlock = outputSample.get().build(sampleSymbols);
+        System.out.println(generatedSampleBlock.symbols.symbols);
+        System.out.println(block.symbols.symbols);
+        System.out.println(sampleSymbols.symbols);
+        if(!block.externalKey.isDefined()) {
+            generatedSampleBlock.symbols.symbols.forEach(baseSymbols::add);
+        }
+        System.out.println(baseSymbols.symbols);
+
+        System.out.println(generatedSampleBlock.print(baseSymbols));
+        System.out.println(block.print(baseSymbols));
+        assertEquals(generatedSampleBlock.print(baseSymbols), block.print(baseSymbols));
+        assertEquals(generatedSampleBlock, block);
+        assertArrayEquals(generatedSampleBlock.to_bytes().get(), block.to_bytes().get());
     }
 
     DynamicTest process_testcase(final TestCase testCase, final PublicKey publicKey, final KeyPair privateKey) {
@@ -56,6 +113,28 @@ class SamplesTest {
                     inputStream.read(data);
                     Biscuit token = Biscuit.from_bytes(data, publicKey);
                     assertArrayEquals(token.serialize(), data);
+
+                    List<org.biscuitsec.biscuit.token.Block> allBlocks = new ArrayList<>();
+                    allBlocks.add(token.authority);
+                    allBlocks.addAll(token.blocks);
+
+                    compareBlocks(testCase.token, allBlocks);
+
+                    byte[] ser_block_authority = token.authority.to_bytes().get();
+                    System.out.println(Arrays.toString(ser_block_authority));
+                    System.out.println(Arrays.toString(token.serializedBiscuit.authority.block));
+                    org.biscuitsec.biscuit.token.Block deser_block_authority = from_bytes(ser_block_authority, token.authority.externalKey).get();
+                    assertEquals(token.authority.print(token.symbols), deser_block_authority.print(token.symbols));
+                    assert(Arrays.equals(ser_block_authority, token.serializedBiscuit.authority.block));
+
+                    for(int i = 0; i < token.blocks.size() - 1; i++) {
+                        org.biscuitsec.biscuit.token.Block block = token.blocks.get(i);
+                        SignedBlock signed_block = token.serializedBiscuit.blocks.get(i);
+                        byte[] ser_block = block.to_bytes().get();
+                        org.biscuitsec.biscuit.token.Block deser_block = from_bytes(ser_block,block.externalKey).get();
+                        assertEquals(block.print(token.symbols), deser_block.print(token.symbols));
+                        assert(Arrays.equals(ser_block, signed_block.block));
+                    }
 
                     List<RevocationIdentifier> revocationIds = token.revocation_identifiers();
                     JsonArray validationRevocationIds = validation.getAsJsonArray("revocation_ids");
@@ -142,19 +221,11 @@ class SamplesTest {
         });
     }
 
-
     class Block {
         List<String> symbols;
-
-        public String getCode() {
-            return code;
-        }
-
-        public void setCode(String code) {
-            this.code = code;
-        }
-
         String code;
+        List<String> public_keys;
+        String external_key;
 
         public List<String> getSymbols() {
             return symbols;
@@ -163,17 +234,37 @@ class SamplesTest {
         public void setSymbols(List<String> symbols) {
             this.symbols = symbols;
         }
-    }
 
-    class Token {
-        List<Block> blocks;
+        public String getCode() { return code; }
 
-        public List<Block> getBlocks() {
-            return blocks;
+        public void setCode(String code) { this.code = code; }
+
+        public List<PublicKey> getPublicKeys() {
+            return this.public_keys.stream()
+                    .map(pk ->
+                        Parser.publicKey(pk).fold(e -> { throw new IllegalArgumentException(e.toString());}, r -> r._2)
+                    )
+                    .collect(Collectors.toList());
         }
 
-        public void setBlocks(List<Block> blocks) {
-            this.blocks = blocks;
+        public void setPublicKeys(List<PublicKey> publicKeys) {
+            this.public_keys = publicKeys.stream()
+                    .map(PublicKey::toString)
+                    .collect(Collectors.toList());
+        }
+
+        public Option<PublicKey> getExternalKey() {
+            if (this.external_key != null) {
+                PublicKey externalKey = Parser.publicKey(this.external_key)
+                        .fold(e -> { throw new IllegalArgumentException(e.toString());}, r -> r._2);
+                return Option.of(externalKey);
+            } else {
+                return Option.none();
+            }
+        }
+
+        public void setExternalKey(Option<PublicKey> externalKey) {
+            this.external_key = externalKey.map(PublicKey::toString).getOrElse((String) null);
         }
     }
 
@@ -189,7 +280,7 @@ class SamplesTest {
         }
 
         String filename;
-        List<Token> tokens;
+        List<Block> token;
         JsonElement validations;
 
         public String getFilename() {
@@ -200,12 +291,12 @@ class SamplesTest {
             this.filename = filename;
         }
 
-        public List<Token> getTokens() {
-            return tokens;
+        public List<Block> getToken() {
+            return token;
         }
 
-        public void setTokens(List<Token> tokens) {
-            this.tokens = tokens;
+        public void setTokens(List<Block> token) {
+            this.token = token;
         }
 
         public JsonElement getValidations() {
