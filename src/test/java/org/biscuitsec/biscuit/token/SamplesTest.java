@@ -382,18 +382,16 @@ class SamplesTest {
 
             this.rules = rulesets;
 
-            List<CheckSet> checksets = authorizer.checks().stream()
+            this.checks = authorizer.checks().stream()
                     .map((Tuple2<Long, List<Check>> t) -> {
-                        List<String> checks = t._2.stream().map(c -> c.toString()).collect(Collectors.toList());
-                        Collections.sort(checks);
+                        List<String> checks1 = t._2.stream().map(c -> c.toString()).collect(Collectors.toList());
+                        Collections.sort(checks1);
                         if(t._1 == null) {
-                            return new CheckSet(checks);
+                            return new CheckSet(checks1);
                         } else {
-                            return new CheckSet(t._1, checks);
+                            return new CheckSet(t._1, checks1);
                         }
                     }).collect(Collectors.toList());
-
-            this.checks = checksets;
             this.policies = authorizer.policies().stream().map(p -> p.toString()).collect(Collectors.toList());
             Collections.sort(this.rules);
             Collections.sort(this.checks);

@@ -95,8 +95,7 @@ public class Biscuit extends UnverifiedBiscuit {
 
         Either<Error.FormatError, SerializedBiscuit> container = SerializedBiscuit.make(root, root_key_id, authority, next);
         if (container.isLeft()) {
-            Error.FormatError e = container.getLeft();
-            throw e;
+            throw container.getLeft();
         } else {
             SerializedBiscuit s = container.get();
             List<byte[]> revocation_ids = s.revocation_identifiers();
@@ -332,8 +331,7 @@ public class Biscuit extends UnverifiedBiscuit {
 
         Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.serializedBiscuit.append(keypair, block);
         if (containerRes.isLeft()) {
-            Error.FormatError error = containerRes.getLeft();
-            throw error;
+            throw containerRes.getLeft();
         }
         SerializedBiscuit container = containerRes.get();
 
