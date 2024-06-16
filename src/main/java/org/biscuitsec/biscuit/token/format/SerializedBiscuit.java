@@ -86,9 +86,8 @@ public class SerializedBiscuit {
 
         Either<Error, Void> res = b.verify(root);
         if (res.isLeft()) {
-            Error e = res.getLeft();
             //System.out.println("verification error: "+e.toString());
-            throw e;
+            throw res.getLeft();
         } else {
             return b;
         }
@@ -164,8 +163,7 @@ public class SerializedBiscuit {
         }
         Proof proof = new Proof(secretKey, signature);
 
-        SerializedBiscuit b = new SerializedBiscuit(authority, blocks, proof);
-        return b;
+        return new SerializedBiscuit(authority, blocks, proof);
     }
 
 
@@ -219,8 +217,7 @@ public class SerializedBiscuit {
         try {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             biscuit.writeTo(stream);
-            byte[] data = stream.toByteArray();
-            return data;
+            return stream.toByteArray();
         } catch (IOException e) {
             throw new Error.FormatError.SerializationError(e.toString());
         }
@@ -465,8 +462,7 @@ public class SerializedBiscuit {
         ArrayList<Option<org.biscuitsec.biscuit.crypto.PublicKey>> blockExternalKeys = new ArrayList<>();
         Either<Error.FormatError, Block> authRes = Block.from_bytes(this.authority.block, Option.none());
         if (authRes.isLeft()) {
-            Error e = authRes.getLeft();
-            throw e;
+            throw authRes.getLeft();
         }
         Block authority = authRes.get();
         for(org.biscuitsec.biscuit.crypto.PublicKey pk: authority.publicKeys()) {
@@ -486,8 +482,7 @@ public class SerializedBiscuit {
             }
             Either<Error.FormatError, Block> blockRes = Block.from_bytes(bdata.block, externalKey);
             if (blockRes.isLeft()) {
-                Error e = blockRes.getLeft();
-                throw e;
+                throw blockRes.getLeft();
             }
             Block block = blockRes.get();
 

@@ -61,7 +61,7 @@ public final class Rule implements Serializable {
                        if (term instanceof Term.Bool) {
                           Term.Bool b = (Term.Bool) term;
                           if (!b.value()) {
-                             return Either.right(new Tuple3(origin, generatedVariables, false));
+                             return Either.right(new Tuple3<>(origin, generatedVariables, false));
                           }
                           // continue evaluating if true
                        } else {
@@ -72,11 +72,11 @@ public final class Rule implements Serializable {
                     }
 
                  }
-                 return Either.right(new Tuple3(origin, generatedVariables, true));
+                 return Either.right(new Tuple3<>(origin, generatedVariables, true));
               })
               // sometimes we need to make the compiler happy
               .filter((java.util.function.Predicate<? super Either<? extends Object, ? extends Object>>)
-                      res -> res.isRight() & ((Tuple3<Origin, Map<Long, Term>, Boolean>) res.get())._3.booleanValue()).map(res -> {
+                      res -> res.isRight() & ((Tuple3<Origin, Map<Long, Term>, Boolean>) res.get())._3).map(res -> {
                  Tuple3<Origin, Map<Long, Term>, Boolean> t = (Tuple3<Origin, Map<Long, Term>, Boolean>) res.get();
                  Origin origin = t._1;
                  Map<Long, Term> generatedVariables = t._2;

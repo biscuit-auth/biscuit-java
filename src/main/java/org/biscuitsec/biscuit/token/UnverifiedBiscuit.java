@@ -167,8 +167,7 @@ public class UnverifiedBiscuit {
 
         Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.serializedBiscuit.append(keypair, block, Option.none());
         if (containerRes.isLeft()) {
-            Error.FormatError error = containerRes.getLeft();
-            throw error;
+            throw containerRes.getLeft();
         }
         SerializedBiscuit container = containerRes.get();
 

@@ -22,8 +22,7 @@ public class PublicKey {
 
     public PublicKey(Algorithm algorithm, byte[] data) {
         EdDSAPublicKeySpec pubKeySpec = new EdDSAPublicKeySpec(data, ed25519);
-        EdDSAPublicKey pubKey = new EdDSAPublicKey(pubKeySpec);
-        this.key = pubKey;
+        this.key = new EdDSAPublicKey(pubKeySpec);
         this.algorithm = algorithm;
     }
 
@@ -38,8 +37,7 @@ public class PublicKey {
     public PublicKey(Algorithm algorithm, String hex) {
         byte[] data = Utils.hexStringToByteArray(hex);
         EdDSAPublicKeySpec pubKeySpec = new EdDSAPublicKeySpec(data, ed25519);
-        EdDSAPublicKey pubKey = new EdDSAPublicKey(pubKeySpec);
-        this.key = pubKey;
+        this.key = new EdDSAPublicKey(pubKeySpec);
         this.algorithm = algorithm;
     }
 
