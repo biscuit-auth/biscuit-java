@@ -31,8 +31,8 @@ public class Block {
     final List<Check> checks;
     final List<Scope> scopes;
     final List<PublicKey> publicKeys;
-    final Option<PublicKey> externalKey;
-    final long version;
+    Option<PublicKey> externalKey;
+    long version;
 
     /**
      * creates a new block
@@ -48,7 +48,7 @@ public class Block {
         this.scopes = new ArrayList<>();
         this.publicKeys = new ArrayList<>();
         this.externalKey = Option.none();
-        this.version = SerializedBiscuit.MAX_SCHEMA_VERSION;
+        this.version = SerializedBiscuit.MIN_SCHEMA_VERSION;
     }
 
     /**
@@ -77,6 +77,10 @@ public class Block {
 
     public List<PublicKey> publicKeys() {
         return publicKeys;
+    }
+
+    public void setExternalKey(PublicKey externalKey) {
+        this.externalKey = Option.some(externalKey);
     }
 
     /**
@@ -184,7 +188,7 @@ public class Block {
             }
         }
 
-        if(containsScopes || containsCheckAll || containsV4) {
+        if(containsScopes || containsCheckAll || containsV4 || this.externalKey.isDefined()) {
             return SerializedBiscuit.MAX_SCHEMA_VERSION;
         } else {
             return SerializedBiscuit.MIN_SCHEMA_VERSION;
