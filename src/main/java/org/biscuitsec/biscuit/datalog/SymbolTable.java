@@ -25,7 +25,7 @@ public final class SymbolTable implements Serializable {
     }
 
     /**
-     * Due to https://github.com/biscuit-auth/biscuit/blob/master/SPECIFICATIONS.md#symbol-table,
+     * According to <a href="https://github.com/biscuit-auth/biscuit/blob/master/SPECIFICATIONS.md#symbol-table">the specification</a>,
      * We need two symbols tables:
      * * one for the defaults symbols indexed from 0 et 1023 in <code>defaultSymbols</code> list
      * * one for the usages symbols indexed from 1024 in <code>symbols</code> list
@@ -279,5 +279,33 @@ public final class SymbolTable implements Serializable {
         allSymbols.addAll(defaultSymbols);
         allSymbols.addAll(symbols);
         return allSymbols;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SymbolTable that = (SymbolTable) o;
+
+        if (!dateTimeFormatter.equals(that.dateTimeFormatter)) return false;
+        if (!symbols.equals(that.symbols)) return false;
+        return publicKeys.equals(that.publicKeys);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = dateTimeFormatter.hashCode();
+        result = 31 * result + symbols.hashCode();
+        result = 31 * result + publicKeys.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "SymbolTable{" +
+                "symbols=" + symbols +
+                ", publicKeys=" + publicKeys +
+                '}';
     }
 }

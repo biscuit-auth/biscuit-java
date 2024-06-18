@@ -2,80 +2,40 @@ package org.biscuitsec.biscuit.token.builder;
 
 
 import org.biscuitsec.biscuit.crypto.PublicKey;
-import org.biscuitsec.biscuit.datalog.*;
-import org.biscuitsec.biscuit.datalog.Check;
-import org.biscuitsec.biscuit.datalog.Fact;
-import org.biscuitsec.biscuit.datalog.Rule;
+import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.error.Error;
+import org.biscuitsec.biscuit.datalog.SchemaVersion;
 import io.vavr.Tuple2;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
-import org.biscuitsec.biscuit.datalog.Scope;
 import org.biscuitsec.biscuit.token.builder.parser.Parser;
 
 import static org.biscuitsec.biscuit.datalog.Check.Kind.One;
+import static org.biscuitsec.biscuit.token.UnverifiedBiscuit.default_symbol_table;
 import static org.biscuitsec.biscuit.token.builder.Utils.*;
 
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class Block {
     long index;
-    int symbol_start;
-    int publicKeyStart;
-    SymbolTable symbols;
     String context;
     List<Fact> facts;
     List<Rule> rules;
     List<Check> checks;
     List<Scope> scopes;
-    List<PublicKey> publicKeys;
-    Option<PublicKey> externalKey;
 
-    public Block(long index, SymbolTable base_symbols) {
+    public Block(long index) {
         this.index = index;
-        this.symbol_start = base_symbols.currentOffset();
-        this.publicKeyStart = base_symbols.currentPublicKeyOffset();
-        this.symbols = new SymbolTable(base_symbols);
         this.context = "";
         this.facts = new ArrayList<>();
         this.rules = new ArrayList<>();
         this.checks = new ArrayList<>();
         this.scopes = new ArrayList<>();
-        this.publicKeys = new ArrayList<>();
-        this.externalKey = Option.none();
-    }
-
-    public Block setExternalKey(Option<PublicKey> externalKey) {
-        this.externalKey = externalKey;
-        return this;
-    }
-
-    public Block addPublicKey(PublicKey publicKey) {
-        this.publicKeys.add(publicKey);
-        return this;
-    }
-
-    public Block addPublicKeys(List<PublicKey> publicKeys) {
-        this.publicKeys.addAll(publicKeys);
-        return this;
-    }
-
-    public Block setPublicKeys(List<PublicKey> publicKeys) {
-        this.publicKeys = publicKeys;
-        return this;
-    }
-
-    public Block addSymbol(String symbol) {
-        this.symbols.add(symbol);
-        return this;
     }
 
     public Block add_fact(org.biscuitsec.biscuit.token.builder.Fact f) {
-        this.facts.add(f.convert(this.symbols));
+        this.facts.add(f);
         return this;
     }
 
@@ -93,7 +53,7 @@ public class Block {
     }
 
     public Block add_rule(org.biscuitsec.biscuit.token.builder.Rule rule) {
-        this.rules.add(rule.convert(this.symbols));
+        this.rules.add(rule);
         return this;
     }
 
@@ -111,7 +71,7 @@ public class Block {
     }
 
     public Block add_check(org.biscuitsec.biscuit.token.builder.Check check) {
-        this.checks.add(check.convert(this.symbols));
+        this.checks.add(check);
         return this;
     }
 
@@ -129,7 +89,7 @@ public class Block {
     }
 
     public Block add_scope(org.biscuitsec.biscuit.token.builder.Scope scope) {
-        this.scopes.add(scope.convert(this.symbols));
+        this.scopes.add(scope);
         return this;
     }
 
@@ -139,21 +99,79 @@ public class Block {
     }
 
     public org.biscuitsec.biscuit.token.Block build() {
-        SymbolTable symbols = new SymbolTable();
+        return build(default_symbol_table(), Option.none());
+    }
 
-        for (int i = this.symbol_start; i < this.symbols.symbols.size(); i++) {
-            symbols.add(this.symbols.symbols.get(i));
+    public org.biscuitsec.biscuit.token.Block build(final Option<PublicKey> externalKey) {
+        return build(default_symbol_table(), externalKey);
+    }
+
+    public org.biscuitsec.biscuit.token.Block build(SymbolTable symbols) {
+        return build(symbols, Option.none());
+    }
+
+    public org.biscuitsec.biscuit.token.Block build(SymbolTable symbols, final Option<PublicKey> externalKey) {
+        int symbol_start = symbols.currentOffset();
+        int publicKeyStart = symbols.currentPublicKeyOffset();
+
+        List<org.biscuitsec.biscuit.datalog.Fact> facts = new ArrayList<>();
+        for(Fact f: this.facts) {
+            facts.add(f.convert(symbols));
         }
+        List<org.biscuitsec.biscuit.datalog.Rule> rules = new ArrayList<>();
+        for(Rule r: this.rules) {
+            rules.add(r.convert(symbols));
+        }
+        List<org.biscuitsec.biscuit.datalog.Check> checks = new ArrayList<>();
+        for(Check c: this.checks) {
+            checks.add(c.convert(symbols));
+        }
+        List<org.biscuitsec.biscuit.datalog.Scope> scopes = new ArrayList<>();
+        for(Scope s: this.scopes) {
+            scopes.add(s.convert(symbols));
+        }
+        SchemaVersion schemaVersion = new SchemaVersion(facts, rules, checks, scopes);
+
+        SymbolTable block_symbols = new SymbolTable();
+
+        for (int i = symbol_start; i < symbols.symbols.size(); i++) {
+            block_symbols.add(symbols.symbols.get(i));
+        }
+
 
         List<PublicKey> publicKeys = new ArrayList<>();
-        for (int i = this.publicKeyStart; i < this.symbols.currentPublicKeyOffset(); i++) {
-            publicKeys.add(this.symbols.publicKeys().get(i));
+        for (int i = publicKeyStart; i < symbols.currentPublicKeyOffset(); i++) {
+            publicKeys.add(symbols.publicKeys().get(i));
         }
 
-        SchemaVersion schemaVersion = new SchemaVersion(this.facts, this.rules, this.checks, this.scopes);
+        return new org.biscuitsec.biscuit.token.Block(block_symbols, this.context, facts, rules, checks,
+                scopes, publicKeys, externalKey, schemaVersion.version());
+    }
 
-        return new org.biscuitsec.biscuit.token.Block(symbols, this.context, this.facts, this.rules, this.checks,
-                this.scopes, publicKeys, this.externalKey, schemaVersion.version());
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Block block = (Block) o;
+
+        if (index != block.index) return false;
+        if (!Objects.equals(context, block.context)) return false;
+        if (!Objects.equals(facts, block.facts)) return false;
+        if (!Objects.equals(rules, block.rules)) return false;
+        if (!Objects.equals(checks, block.checks)) return false;
+        return Objects.equals(scopes, block.scopes);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (index ^ (index >>> 32));
+        result = 31 * result + (context != null ? context.hashCode() : 0);
+        result = 31 * result + (facts != null ? facts.hashCode() : 0);
+        result = 31 * result + (rules != null ? rules.hashCode() : 0);
+        result = 31 * result + (checks != null ? checks.hashCode() : 0);
+        result = 31 * result + (scopes != null ? scopes.hashCode() : 0);
+        return result;
     }
 
     public Block check_right(String right) {

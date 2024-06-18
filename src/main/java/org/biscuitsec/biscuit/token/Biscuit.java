@@ -29,7 +29,7 @@ public class Biscuit extends UnverifiedBiscuit {
      * @return
      */
     public static org.biscuitsec.biscuit.token.builder.Biscuit builder(final KeyPair root) {
-        return new org.biscuitsec.biscuit.token.builder.Biscuit(new SecureRandom(), root, default_symbol_table());
+        return new org.biscuitsec.biscuit.token.builder.Biscuit(new SecureRandom(), root);
     }
 
     /**
@@ -42,7 +42,7 @@ public class Biscuit extends UnverifiedBiscuit {
      * @return
      */
     public static org.biscuitsec.biscuit.token.builder.Biscuit builder(final SecureRandom rng, final KeyPair root) {
-        return new org.biscuitsec.biscuit.token.builder.Biscuit(rng, root, default_symbol_table());
+        return new org.biscuitsec.biscuit.token.builder.Biscuit(rng, root);
     }
 
     /**
@@ -50,36 +50,10 @@ public class Biscuit extends UnverifiedBiscuit {
      *
      * @param rng     random number generator
      * @param root    root private key
-     * @param symbols symbol table
      * @return
      */
-    public static org.biscuitsec.biscuit.token.builder.Biscuit builder(final SecureRandom rng, final KeyPair root, final Option<Integer> root_key_id, SymbolTable symbols) {
-        return new org.biscuitsec.biscuit.token.builder.Biscuit(rng, root, root_key_id, symbols);
-    }
-
-    /**
-     * Creates a token builder
-     *
-     * @param rng     random number generator
-     * @param root    root private key
-     * @param symbols symbol table
-     * @return
-     */
-    public static org.biscuitsec.biscuit.token.builder.Biscuit builder(final SecureRandom rng, final KeyPair root, SymbolTable symbols) {
-        return new org.biscuitsec.biscuit.token.builder.Biscuit(rng, root, symbols);
-    }
-
-
-    /**
-     * Creates a token
-     *
-     * @param rng       random number generator
-     * @param root      root private key
-     * @param authority authority block
-     * @return Biscuit
-     */
-    static public Biscuit make(final SecureRandom rng, final KeyPair root, final SymbolTable symbols, final Block authority) throws Error.SymbolTableOverlap, Error.FormatError {
-        return Biscuit.make(rng, root, Option.none(), symbols, authority);
+    public static org.biscuitsec.biscuit.token.builder.Biscuit builder(final SecureRandom rng, final KeyPair root, final Option<Integer> root_key_id) {
+        return new org.biscuitsec.biscuit.token.builder.Biscuit(rng, root, root_key_id);
     }
 
     /**
@@ -90,8 +64,8 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param authority authority block
      * @return Biscuit
      */
-    static public Biscuit make(final SecureRandom rng, final KeyPair root, final Integer root_key_id, final SymbolTable symbols, final Block authority) throws Error.SymbolTableOverlap, Error.FormatError {
-        return Biscuit.make(rng, root, Option.of(root_key_id), symbols, authority);
+    public static Biscuit make(final SecureRandom rng, final KeyPair root, final Block authority) throws Error.FormatError {
+        return Biscuit.make(rng, root, Option.none(), authority);
     }
 
     /**
@@ -102,27 +76,33 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param authority authority block
      * @return Biscuit
      */
-    static private Biscuit make(final SecureRandom rng, final KeyPair root, final Option<Integer> root_key_id,  final SymbolTable symbols, final Block authority) throws Error.SymbolTableOverlap, Error.FormatError {
-        if (!Collections.disjoint(symbols.symbols, authority.symbols.symbols)) {
-            throw new Error.SymbolTableOverlap();
-        }
+    public static Biscuit make(final SecureRandom rng, final KeyPair root, final Integer root_key_id, final Block authority) throws Error.FormatError {
+        return Biscuit.make(rng, root, Option.of(root_key_id), authority);
+    }
 
-        symbols.symbols.addAll(authority.symbols.symbols);
+    /**
+     * Creates a token
+     *
+     * @param rng       random number generator
+     * @param root      root private key
+     * @param authority authority block
+     * @return Biscuit
+     */
+    static private Biscuit make(final SecureRandom rng, final KeyPair root, final Option<Integer> root_key_id, final Block authority) throws Error.FormatError {
         ArrayList<Block> blocks = new ArrayList<>();
 
         KeyPair next = new KeyPair(rng);
 
         Either<Error.FormatError, SerializedBiscuit> container = SerializedBiscuit.make(root, root_key_id, authority, next);
         if (container.isLeft()) {
-            Error.FormatError e = container.getLeft();
-            throw e;
+            throw container.getLeft();
         } else {
             SerializedBiscuit s = container.get();
             List<byte[]> revocation_ids = s.revocation_identifiers();
             HashMap<Long, List<Long>> publicKeyToBlockId = new HashMap<>();
 
             Option<SerializedBiscuit> c = Option.some(s);
-            return new Biscuit(authority, blocks, symbols, s, publicKeyToBlockId, revocation_ids, root_key_id);
+            return new Biscuit(authority, blocks, authority.symbols, s, publicKeyToBlockId, revocation_ids, root_key_id);
         }
     }
 
@@ -325,7 +305,13 @@ public class Biscuit extends UnverifiedBiscuit {
     public Biscuit attenuate(org.biscuitsec.biscuit.token.builder.Block block) throws Error {
         SecureRandom rng = new SecureRandom();
         KeyPair keypair = new KeyPair(rng);
-        return attenuate(rng, keypair, block.build());
+        SymbolTable builderSymbols = new SymbolTable(this.symbols);
+        return attenuate(rng, keypair, block.build(builderSymbols));
+    }
+
+    public Biscuit attenuate(final SecureRandom rng, final KeyPair keypair,org.biscuitsec.biscuit.token.builder.Block block) throws Error {
+        SymbolTable builderSymbols = new SymbolTable(this.symbols);
+        return attenuate(rng, keypair, block.build(builderSymbols));
     }
 
     /**
@@ -345,8 +331,7 @@ public class Biscuit extends UnverifiedBiscuit {
 
         Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.serializedBiscuit.append(keypair, block);
         if (containerRes.isLeft()) {
-            Error.FormatError error = containerRes.getLeft();
-            throw error;
+            throw containerRes.getLeft();
         }
         SerializedBiscuit container = containerRes.get();
 
