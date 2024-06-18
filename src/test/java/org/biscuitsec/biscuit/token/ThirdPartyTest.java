@@ -157,4 +157,60 @@ public class ThirdPartyTest {
                     e);
         }
     }
+
+    @Test
+    public void testReusedSymbols() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, CloneNotSupportedException, Error {
+        byte[] seed = {0, 0, 0, 0};
+        SecureRandom rng = new SecureRandom(seed);
+
+        System.out.println("preparing the authority block");
+
+        KeyPair root = new KeyPair(rng);
+        KeyPair external = new KeyPair(rng);
+        System.out.println("external: ed25519/"+external.public_key().toHex());
+
+        Block authority_builder = new Block();
+        authority_builder.add_fact("right(\"read\")");
+        authority_builder.add_check("check if group(\"admin\") trusting ed25519/"+external.public_key().toHex());
+
+        Biscuit b1 = Biscuit.make(rng, root, authority_builder.build());
+        ThirdPartyRequest request = b1.thirdPartyRequest();
+        Block builder = new Block();
+        builder.add_fact("group(\"admin\")");
+        builder.add_fact("resource(\"file2\")");
+        builder.add_check("check if resource(\"file1\")");
+        builder.add_check("check if right(\"read\")");
+
+        ThirdPartyBlock blockResponse = request.createBlock(external, builder).get();
+        Biscuit b2 = b1.appendThirdPartyBlock(external.public_key(), blockResponse);
+
+        byte[] data = b2.serialize();
+        Biscuit deser = Biscuit.from_bytes(data, root.public_key());
+        assertEquals(b2.print(), deser.print());
+
+        System.out.println("will check the token for resource=file1");
+        Authorizer authorizer = deser.authorizer();
+        authorizer.add_fact("resource(\"file1\")");
+        authorizer.add_policy("allow if true");
+        authorizer.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
+        System.out.println("Authorizer world:\n"+authorizer.print_world());
+
+
+        System.out.println("will check the token for resource=file2");
+        Authorizer authorizer2 = deser.authorizer();
+        authorizer2.add_fact("resource(\"file2\")");
+        authorizer2.add_policy("allow if true");
+
+        try {
+            authorizer2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
+        } catch (Error e) {
+            System.out.println(e);
+            assertEquals(
+                    new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
+                            new FailedCheck.FailedBlock(1, 0, "check if resource(\"file1\")")
+                    ))),
+                    e);
+        }
+    }
 }
+
