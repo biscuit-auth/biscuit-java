@@ -424,7 +424,7 @@ public class SerializedBiscuit {
                 return Either.left(new Error.FormatError.Signature.InvalidSignatureSize(signature.length));
             }
         } else if (publicKey.algorithm == Schema.PublicKey.Algorithm.SECP256R1) {
-            if (signature.length < 70 || signature.length > 72) {
+            if (signature.length < 68 || signature.length > 72) {
                 return Either.left(new Error.FormatError.Signature.InvalidSignatureSize(signature.length));
             }
         } else {
