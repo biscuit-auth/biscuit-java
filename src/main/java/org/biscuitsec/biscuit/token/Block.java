@@ -92,9 +92,22 @@ public class Block {
     public String print(SymbolTable symbol_table) {
         StringBuilder s = new StringBuilder();
 
+        SymbolTable local_symbols;
+        if(this.externalKey.isDefined()) {
+            local_symbols = new SymbolTable(this.symbols);
+            for(PublicKey pk: symbol_table.publicKeys()) {
+                local_symbols.insert(pk);
+            }
+        } else {
+            local_symbols = symbol_table;
+        }
         s.append("Block");
         s.append(" {\n\t\tsymbols: ");
         s.append(this.symbols.symbols);
+        s.append("\n\t\tpublic keys: ");
+        s.append(this.publicKeys);
+        s.append("\n\t\tsymbol public keys: ");
+        s.append(this.symbols.publicKeys());
         s.append("\n\t\tcontext: ");
         s.append(this.context);
         if(this.externalKey.isDefined()) {
@@ -109,17 +122,17 @@ public class Block {
         s.append("\n\t\t]\n\t\tfacts: [");
         for (Fact f : this.facts) {
             s.append("\n\t\t\t");
-            s.append(symbol_table.print_fact(f));
+            s.append(local_symbols.print_fact(f));
         }
         s.append("\n\t\t]\n\t\trules: [");
         for (Rule r : this.rules) {
             s.append("\n\t\t\t");
-            s.append(symbol_table.print_rule(r));
+            s.append(local_symbols.print_rule(r));
         }
         s.append("\n\t\t]\n\t\tchecks: [");
         for (Check c : this.checks) {
             s.append("\n\t\t\t");
-            s.append(symbol_table.print_check(c));
+            s.append(local_symbols.print_check(c));
         }
         s.append("\n\t\t]\n\t}");
 

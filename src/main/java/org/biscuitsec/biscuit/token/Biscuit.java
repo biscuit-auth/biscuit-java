@@ -454,6 +454,8 @@ public class Biscuit extends UnverifiedBiscuit {
         StringBuilder s = new StringBuilder();
         s.append("Biscuit {\n\tsymbols: ");
         s.append(this.symbols.getAllSymbols());
+        s.append("\n\tpublic keys: ");
+        s.append(this.symbols.publicKeys());
         s.append("\n\tauthority: ");
         s.append(this.authority.print(this.symbols));
         s.append("\n\tblocks: [\n");

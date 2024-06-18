@@ -450,6 +450,8 @@ public class SerializedBiscuit {
             sgr2.update(block);
             sgr2.update(algo_buf2);
             sgr2.update(publicKey.toBytes());
+            Either<Error.FormatError, Block> authRes = Block.from_bytes(block, Option.none());
+
             if (!sgr2.verify(signedBlock.externalSignature.get().signature)) {
                 return Left(new Error.FormatError.Signature.InvalidSignature("external signature error: Verification equation was not satisfied"));
             }

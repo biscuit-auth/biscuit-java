@@ -614,8 +614,13 @@ public class Authorizer {
             for (int i = 0; i < this.token.blocks.size(); i++) {
                 Block b = this.token.blocks.get(i);
 
+                SymbolTable blockSymbols = token.symbols;
+                if(b.externalKey.isDefined()) {
+                    blockSymbols = new SymbolTable(b.symbols.symbols, token.symbols.publicKeys());
+                }
+
                 for (int j = 0; j < b.checks.size(); j++) {
-                    checks.add("Block[" + i + "][" + j + "]: " + this.symbols.print_check(b.checks.get(j)));
+                    checks.add("Block[" + (i+1) + "][" + j + "]: " + blockSymbols.print_check(b.checks.get(j)));
                 }
             }
         }
