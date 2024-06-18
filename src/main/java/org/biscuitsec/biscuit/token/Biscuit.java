@@ -95,6 +95,10 @@ public class Biscuit extends UnverifiedBiscuit {
 
         KeyPair next = new KeyPair(rng);
 
+        for(PublicKey pk:  authority.publicKeys) {
+            authority.symbols.insert(pk);
+        }
+
         Either<Error.FormatError, SerializedBiscuit> container = SerializedBiscuit.make(root, root_key_id, authority, next);
         if (container.isLeft()) {
             throw container.getLeft();
@@ -340,6 +344,10 @@ public class Biscuit extends UnverifiedBiscuit {
         SymbolTable symbols = new SymbolTable(copiedBiscuit.symbols);
         for (String s : block.symbols.symbols) {
             symbols.add(s);
+        }
+
+        for(PublicKey pk: block.publicKeys) {
+            symbols.insert(pk);
         }
 
         ArrayList<Block> blocks = new ArrayList<>();
