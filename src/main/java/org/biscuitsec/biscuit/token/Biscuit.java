@@ -367,7 +367,7 @@ public class Biscuit extends UnverifiedBiscuit {
     /**
      * Generates a third party block request from a token
      */
-    public ThirdPartyRequest thirdPartyRequest() {
+    public ThirdPartyBlockRequest thirdPartyRequest() {
         PublicKey previousKey;
         if(this.serializedBiscuit.blocks.isEmpty()) {
             previousKey = this.serializedBiscuit.authority.key;
@@ -376,13 +376,13 @@ public class Biscuit extends UnverifiedBiscuit {
         }
 
         List<PublicKey> publicKeys = new ArrayList<>(this.symbols.publicKeys());
-        return new ThirdPartyRequest(previousKey, publicKeys);
+        return new ThirdPartyBlockRequest(previousKey, publicKeys);
     }
 
     /**
      * Generates a third party block request from a token
      */
-    public Biscuit appendThirdPartyBlock(PublicKey externalKey, ThirdPartyBlock blockResponse)
+    public Biscuit appendThirdPartyBlock(PublicKey externalKey, ThirdPartyBlockContents blockResponse)
             throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         KeyPair nextKeyPair = new KeyPair();
 

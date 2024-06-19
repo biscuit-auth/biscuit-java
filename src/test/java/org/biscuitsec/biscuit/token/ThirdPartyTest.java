@@ -1,9 +1,6 @@
 package org.biscuitsec.biscuit.token;
 
-import io.vavr.control.Option;
-import org.biscuitsec.biscuit.crypto.KeyDelegate;
 import org.biscuitsec.biscuit.crypto.KeyPair;
-import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.datalog.RunLimits;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.error.FailedCheck;
@@ -11,6 +8,7 @@ import org.biscuitsec.biscuit.error.LogicError;
 import org.biscuitsec.biscuit.token.builder.Block;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -18,14 +16,12 @@ import java.security.SignatureException;
 import java.time.Duration;
 import java.util.Arrays;
 
-import static org.biscuitsec.biscuit.crypto.TokenSignature.hex;
-import static org.biscuitsec.biscuit.token.builder.Utils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ThirdPartyTest {
     @Test
-    public void testRoundTrip() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, CloneNotSupportedException, Error {
+    public void testRoundTrip() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, CloneNotSupportedException, Error, IOException {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
@@ -40,12 +36,20 @@ public class ThirdPartyTest {
         authority_builder.add_check("check if group(\"admin\") trusting ed25519/"+external.public_key().toHex());
 
         Biscuit b1 = Biscuit.make(rng, root, authority_builder.build());
-        ThirdPartyRequest request = b1.thirdPartyRequest();
+        ThirdPartyBlockRequest request = b1.thirdPartyRequest();
+        byte[] reqb = request.toBytes();
+        ThirdPartyBlockRequest reqdeser = ThirdPartyBlockRequest.fromBytes(reqb);
+        assertEquals(request, reqdeser);
+
         Block builder = new Block();
         builder.add_fact("group(\"admin\")");
         builder.add_check("check if resource(\"file1\")");
 
-        ThirdPartyBlock blockResponse = request.createBlock(external, builder).get();
+        ThirdPartyBlockContents blockResponse = request.createBlock(external, builder).get();
+        byte[] resb = blockResponse.toBytes();
+        ThirdPartyBlockContents resdeser = ThirdPartyBlockContents.fromBytes(resb);
+        assertEquals(blockResponse, resdeser);
+
         Biscuit b2 = b1.appendThirdPartyBlock(external.public_key(), blockResponse);
 
         byte[] data = b2.serialize();
@@ -97,23 +101,23 @@ public class ThirdPartyTest {
         Biscuit b1 = Biscuit.make(rng, root, authority_block);
         System.out.println("TOKEN: "+b1.print());
 
-        ThirdPartyRequest request1 = b1.thirdPartyRequest();
+        ThirdPartyBlockRequest request1 = b1.thirdPartyRequest();
         Block builder = new Block();
         builder.add_fact("first(\"admin\")");
         builder.add_fact("second(\"A\")");
         builder.add_check("check if third(3) trusting ed25519/"+external2.public_key().toHex());
-        ThirdPartyBlock blockResponse = request1.createBlock(external1, builder).get();
+        ThirdPartyBlockContents blockResponse = request1.createBlock(external1, builder).get();
         Biscuit b2 = b1.appendThirdPartyBlock(external1.public_key(), blockResponse);
         byte[] data = b2.serialize();
         Biscuit deser2 = Biscuit.from_bytes(data, root.public_key());
         assertEquals(b2.print(), deser2.print());
         System.out.println("TOKEN: "+deser2.print());
 
-        ThirdPartyRequest request2 = deser2.thirdPartyRequest();
+        ThirdPartyBlockRequest request2 = deser2.thirdPartyRequest();
         Block builder2 = new Block();
         builder2.add_fact("third(3)");
         builder2.add_check("check if fourth(1) trusting ed25519/"+external3.public_key().toHex()+", ed25519/"+external1.public_key().toHex());
-        ThirdPartyBlock blockResponse2 = request2.createBlock(external2, builder2).get();
+        ThirdPartyBlockContents blockResponse2 = request2.createBlock(external2, builder2).get();
         Biscuit b3 = deser2.appendThirdPartyBlock(external2.public_key(), blockResponse2);
         byte[] data2 = b3.serialize();
         Biscuit deser3 = Biscuit.from_bytes(data2, root.public_key());
@@ -121,11 +125,11 @@ public class ThirdPartyTest {
         System.out.println("TOKEN: "+deser3.print());
 
 
-        ThirdPartyRequest request3 = deser3.thirdPartyRequest();
+        ThirdPartyBlockRequest request3 = deser3.thirdPartyRequest();
         Block builder3 = new Block();
         builder3.add_fact("fourth(1)");
         builder3.add_check("check if resource(\"file1\")");
-        ThirdPartyBlock blockResponse3 = request3.createBlock(external1, builder3).get();
+        ThirdPartyBlockContents blockResponse3 = request3.createBlock(external1, builder3).get();
         Biscuit b4 = deser3.appendThirdPartyBlock(external1.public_key(), blockResponse3);
         byte[] data3 = b4.serialize();
         Biscuit deser4 = Biscuit.from_bytes(data3, root.public_key());
@@ -174,14 +178,14 @@ public class ThirdPartyTest {
         authority_builder.add_check("check if group(\"admin\") trusting ed25519/"+external.public_key().toHex());
 
         Biscuit b1 = Biscuit.make(rng, root, authority_builder.build());
-        ThirdPartyRequest request = b1.thirdPartyRequest();
+        ThirdPartyBlockRequest request = b1.thirdPartyRequest();
         Block builder = new Block();
         builder.add_fact("group(\"admin\")");
         builder.add_fact("resource(\"file2\")");
         builder.add_check("check if resource(\"file1\")");
         builder.add_check("check if right(\"read\")");
 
-        ThirdPartyBlock blockResponse = request.createBlock(external, builder).get();
+        ThirdPartyBlockContents blockResponse = request.createBlock(external, builder).get();
         Biscuit b2 = b1.appendThirdPartyBlock(external.public_key(), blockResponse);
 
         byte[] data = b2.serialize();
