@@ -301,47 +301,6 @@ public class SerializedBiscuit {
         }
     }
 
-    public Either<Error.FormatError, SerializedBiscuit> appendThirdParty(final org.biscuitsec.biscuit.crypto.KeyPair next,
-                                                               final Block newBlock) {
-        /*if (this.proof.secretKey.isEmpty()) {
-            return Left(new Error.FormatError.SerializationError("the token is sealed"));
-        }
-
-        Schema.Block b = newBlock.serialize();
-        try {
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            b.writeTo(stream);
-
-            byte[] block = stream.toByteArray();
-            PublicKey next_key = next.public_key();
-            ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-            algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
-            algo_buf.flip();
-
-            Signature sgr = new EdDSAEngine(MessageDigest.getInstance(ed25519.getHashAlgorithm()));
-            sgr.initSign(this.proof.secretKey.get().private_key);
-            sgr.update(block);
-            sgr.update(algo_buf);
-            sgr.update(next_key.toBytes());
-            byte[] signature = sgr.sign();
-
-            SignedBlock signedBlock = new SignedBlock(block, next_key, signature);
-
-            ArrayList<SignedBlock> blocks = new ArrayList<>();
-            for (SignedBlock bl : this.blocks) {
-                blocks.add(bl);
-            }
-            blocks.add(signedBlock);
-
-            Proof proof = new Proof(next);
-
-            return Right(new SerializedBiscuit(this.authority, blocks, proof, root_key_id));
-        } catch (IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
-            return Left(new Error.FormatError.SerializationError(e.toString()));
-        }*/
-        throw new RuntimeException("todo");
-    }
-
     public Either<Error, Void> verify(org.biscuitsec.biscuit.crypto.PublicKey root) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         org.biscuitsec.biscuit.crypto.PublicKey current_key = root;
         ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
