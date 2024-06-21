@@ -46,7 +46,8 @@ public class ThirdPartyBlockRequest {
 
         byte[] serializedBlock = res.get();
 
-        Signature sgr = new EdDSAEngine(MessageDigest.getInstance(KeyPair.ed25519.getHashAlgorithm()));
+        Signature sgr = KeyPair.generateSignature(keyPair.public_key().algorithm);
+
         sgr.initSign(keyPair.private_key);
         sgr.update(serializedBlock);
 

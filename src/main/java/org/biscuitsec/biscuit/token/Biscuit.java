@@ -1,5 +1,6 @@
 package org.biscuitsec.biscuit.token;
 
+import biscuit.format.schema.Schema;
 import org.biscuitsec.biscuit.crypto.KeyDelegate;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.crypto.PublicKey;
@@ -88,7 +89,7 @@ public class Biscuit extends UnverifiedBiscuit {
     static Biscuit make(final SecureRandom rng, final KeyPair root, final Option<Integer> root_key_id, final Block authority) throws Error.FormatError {
         ArrayList<Block> blocks = new ArrayList<>();
 
-        KeyPair next = new KeyPair(rng);
+        KeyPair next = KeyPair.generate(root.public_key().algorithm, rng);
 
         for(PublicKey pk:  authority.publicKeys) {
             authority.symbols.insert(pk);
@@ -305,7 +306,7 @@ public class Biscuit extends UnverifiedBiscuit {
      */
     public Biscuit attenuate(org.biscuitsec.biscuit.token.builder.Block block) throws Error {
         SecureRandom rng = new SecureRandom();
-        KeyPair keypair = new KeyPair(rng);
+        KeyPair keypair = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
         SymbolTable builderSymbols = new SymbolTable(this.symbols);
         return attenuate(rng, keypair, block.build(builderSymbols));
     }

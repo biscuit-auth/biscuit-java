@@ -242,7 +242,7 @@ public class SerializedBiscuit {
             algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
             algo_buf.flip();
 
-            Signature sgr = new EdDSAEngine(MessageDigest.getInstance(org.biscuitsec.biscuit.crypto.KeyPair.ed25519.getHashAlgorithm()));
+            Signature sgr = KeyPair.generateSignature(root.public_key().algorithm);
             sgr.initSign(root.private_key);
             sgr.update(block);
             sgr.update(algo_buf);
@@ -427,7 +427,7 @@ public class SerializedBiscuit {
         algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
         algo_buf.flip();
 
-        Signature sgr = new EdDSAEngine(MessageDigest.getInstance(org.biscuitsec.biscuit.crypto.KeyPair.ed25519.getHashAlgorithm()));
+        Signature sgr = KeyPair.generateSignature(publicKey.algorithm);
 
         sgr.initVerify(publicKey.key);
         sgr.update(block);

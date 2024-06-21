@@ -142,7 +142,7 @@ public class UnverifiedBiscuit {
      */
     public UnverifiedBiscuit attenuate(org.biscuitsec.biscuit.token.builder.Block block) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         SecureRandom rng = new SecureRandom();
-        KeyPair keypair = new KeyPair(rng);
+        KeyPair keypair = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
         SymbolTable builderSymbols = new SymbolTable(this.symbols);
         return attenuate(rng, keypair, block.build(builderSymbols));
     }
@@ -255,9 +255,9 @@ public class UnverifiedBiscuit {
      */
     public UnverifiedBiscuit appendThirdPartyBlock(PublicKey externalKey, ThirdPartyBlockContents blockResponse)
             throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
-        KeyPair nextKeyPair = new KeyPair();
+        KeyPair nextKeyPair = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519);
 
-        Signature sgr = new EdDSAEngine(MessageDigest.getInstance(org.biscuitsec.biscuit.crypto.KeyPair.ed25519.getHashAlgorithm()));
+        Signature sgr = KeyPair.generateSignature(externalKey.algorithm);
         sgr.initVerify(externalKey.key);
 
         sgr.update(blockResponse.payload);
