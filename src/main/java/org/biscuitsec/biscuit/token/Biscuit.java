@@ -86,7 +86,7 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param authority authority block
      * @return Biscuit
      */
-    static Biscuit make(final SecureRandom rng, final KeyPair root, final Option<Integer> root_key_id, final Block authority) throws Error.FormatError {
+    static private Biscuit make(final SecureRandom rng, final KeyPair root, final Option<Integer> root_key_id, final Block authority) throws Error.FormatError {
         ArrayList<Block> blocks = new ArrayList<>();
 
         KeyPair next = KeyPair.generate(root.public_key().algorithm, rng);
