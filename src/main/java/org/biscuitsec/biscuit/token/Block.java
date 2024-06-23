@@ -31,8 +31,8 @@ public class Block {
     final List<Check> checks;
     final List<Scope> scopes;
     final List<PublicKey> publicKeys;
-    final Option<PublicKey> externalKey;
-    final long version;
+    Option<PublicKey> externalKey;
+    long version;
 
     /**
      * creates a new block
@@ -48,7 +48,6 @@ public class Block {
         this.scopes = new ArrayList<>();
         this.publicKeys = new ArrayList<>();
         this.externalKey = Option.none();
-        this.version = SerializedBiscuit.MAX_SCHEMA_VERSION;
     }
 
     /**
@@ -66,7 +65,6 @@ public class Block {
         this.rules = rules;
         this.checks = checks;
         this.scopes = scopes;
-        this.version = version;
         this.publicKeys = publicKeys;
         this.externalKey = externalKey;
     }
@@ -79,6 +77,10 @@ public class Block {
         return publicKeys;
     }
 
+    public void setExternalKey(PublicKey externalKey) {
+        this.externalKey = Option.some(externalKey);
+    }
+
     /**
      * pretty printing for a block
      *
@@ -88,9 +90,22 @@ public class Block {
     public String print(SymbolTable symbol_table) {
         StringBuilder s = new StringBuilder();
 
+        SymbolTable local_symbols;
+        if(this.externalKey.isDefined()) {
+            local_symbols = new SymbolTable(this.symbols);
+            for(PublicKey pk: symbol_table.publicKeys()) {
+                local_symbols.insert(pk);
+            }
+        } else {
+            local_symbols = symbol_table;
+        }
         s.append("Block");
         s.append(" {\n\t\tsymbols: ");
         s.append(this.symbols.symbols);
+        s.append("\n\t\tpublic keys: ");
+        s.append(this.publicKeys);
+        s.append("\n\t\tsymbol public keys: ");
+        s.append(this.symbols.publicKeys());
         s.append("\n\t\tcontext: ");
         s.append(this.context);
         if(this.externalKey.isDefined()) {
@@ -105,17 +120,17 @@ public class Block {
         s.append("\n\t\t]\n\t\tfacts: [");
         for (Fact f : this.facts) {
             s.append("\n\t\t\t");
-            s.append(symbol_table.print_fact(f));
+            s.append(local_symbols.print_fact(f));
         }
         s.append("\n\t\t]\n\t\trules: [");
         for (Rule r : this.rules) {
             s.append("\n\t\t\t");
-            s.append(symbol_table.print_rule(r));
+            s.append(local_symbols.print_rule(r));
         }
         s.append("\n\t\t]\n\t\tchecks: [");
         for (Check c : this.checks) {
             s.append("\n\t\t\t");
-            s.append(symbol_table.print_check(c));
+            s.append(local_symbols.print_check(c));
         }
         s.append("\n\t\t]\n\t}");
 
@@ -184,7 +199,7 @@ public class Block {
             }
         }
 
-        if(containsScopes || containsCheckAll || containsV4) {
+        if(containsScopes || containsCheckAll || containsV4 || this.externalKey.isDefined()) {
             return SerializedBiscuit.MAX_SCHEMA_VERSION;
         } else {
             return SerializedBiscuit.MIN_SCHEMA_VERSION;
@@ -321,7 +336,6 @@ public class Block {
 
         Block block = (Block) o;
 
-        if (version != block.version) return false;
         if (!Objects.equals(symbols, block.symbols)) return false;
         if (!Objects.equals(context, block.context)) return false;
         if (!Objects.equals(facts, block.facts)) return false;
@@ -342,7 +356,6 @@ public class Block {
         result = 31 * result + (scopes != null ? scopes.hashCode() : 0);
         result = 31 * result + (publicKeys != null ? publicKeys.hashCode() : 0);
         result = 31 * result + (externalKey != null ? externalKey.hashCode() : 0);
-        result = 31 * result + (int) (version ^ (version >>> 32));
         return result;
     }
 
@@ -357,7 +370,6 @@ public class Block {
                 ", scopes=" + scopes +
                 ", publicKeys=" + publicKeys +
                 ", externalKey=" + externalKey +
-                ", version=" + version +
                 '}';
     }
 }

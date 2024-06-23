@@ -18,15 +18,13 @@ import static org.biscuitsec.biscuit.token.builder.Utils.*;
 import java.util.*;
 
 public class Block {
-    long index;
     String context;
     List<Fact> facts;
     List<Rule> rules;
     List<Check> checks;
     List<Scope> scopes;
 
-    public Block(long index) {
-        this.index = index;
+    public Block() {
         this.context = "";
         this.facts = new ArrayList<>();
         this.rules = new ArrayList<>();
@@ -138,7 +136,6 @@ public class Block {
             block_symbols.add(symbols.symbols.get(i));
         }
 
-
         List<PublicKey> publicKeys = new ArrayList<>();
         for (int i = publicKeyStart; i < symbols.currentPublicKeyOffset(); i++) {
             publicKeys.add(symbols.publicKeys().get(i));
@@ -155,7 +152,6 @@ public class Block {
 
         Block block = (Block) o;
 
-        if (index != block.index) return false;
         if (!Objects.equals(context, block.context)) return false;
         if (!Objects.equals(facts, block.facts)) return false;
         if (!Objects.equals(rules, block.rules)) return false;
@@ -165,8 +161,7 @@ public class Block {
 
     @Override
     public int hashCode() {
-        int result = (int) (index ^ (index >>> 32));
-        result = 31 * result + (context != null ? context.hashCode() : 0);
+        int result = context != null ? context.hashCode() : 0;
         result = 31 * result + (facts != null ? facts.hashCode() : 0);
         result = 31 * result + (rules != null ? rules.hashCode() : 0);
         result = 31 * result + (checks != null ? checks.hashCode() : 0);

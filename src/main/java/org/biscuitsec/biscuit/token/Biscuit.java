@@ -1,5 +1,6 @@
 package org.biscuitsec.biscuit.token;
 
+import biscuit.format.schema.Schema;
 import org.biscuitsec.biscuit.crypto.KeyDelegate;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.crypto.PublicKey;
@@ -10,10 +11,7 @@ import io.vavr.Tuple3;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.SignatureException;
+import java.security.*;
 import java.util.*;
 
 /**
@@ -91,7 +89,11 @@ public class Biscuit extends UnverifiedBiscuit {
     static private Biscuit make(final SecureRandom rng, final KeyPair root, final Option<Integer> root_key_id, final Block authority) throws Error.FormatError {
         ArrayList<Block> blocks = new ArrayList<>();
 
-        KeyPair next = new KeyPair(rng);
+        KeyPair next = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
+
+        for(PublicKey pk:  authority.publicKeys) {
+            authority.symbols.insert(pk);
+        }
 
         Either<Error.FormatError, SerializedBiscuit> container = SerializedBiscuit.make(root, root_key_id, authority, next);
         if (container.isLeft()) {
@@ -304,7 +306,7 @@ public class Biscuit extends UnverifiedBiscuit {
      */
     public Biscuit attenuate(org.biscuitsec.biscuit.token.builder.Block block) throws Error {
         SecureRandom rng = new SecureRandom();
-        KeyPair keypair = new KeyPair(rng);
+        KeyPair keypair = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
         SymbolTable builderSymbols = new SymbolTable(this.symbols);
         return attenuate(rng, keypair, block.build(builderSymbols));
     }
@@ -329,7 +331,7 @@ public class Biscuit extends UnverifiedBiscuit {
             throw new Error.SymbolTableOverlap();
         }
 
-        Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.serializedBiscuit.append(keypair, block);
+        Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.serializedBiscuit.append(keypair, block, Option.none());
         if (containerRes.isLeft()) {
             throw containerRes.getLeft();
         }
@@ -338,6 +340,10 @@ public class Biscuit extends UnverifiedBiscuit {
         SymbolTable symbols = new SymbolTable(copiedBiscuit.symbols);
         for (String s : block.symbols.symbols) {
             symbols.add(s);
+        }
+
+        for(PublicKey pk: block.publicKeys) {
+            symbols.insert(pk);
         }
 
         ArrayList<Block> blocks = new ArrayList<>();
@@ -355,12 +361,25 @@ public class Biscuit extends UnverifiedBiscuit {
     }
 
     /**
+     * Generates a third party block request from a token
+     */
+    public Biscuit appendThirdPartyBlock(PublicKey externalKey, ThirdPartyBlockContents blockResponse)
+            throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+       UnverifiedBiscuit b = super.appendThirdPartyBlock(externalKey, blockResponse);
+
+       // no need to verify again, we are already working from a verified token
+        return Biscuit.from_serialized_biscuit(b.serializedBiscuit, b.symbols);
+    }
+
+    /**
      * Prints a token's content
      */
     public String print() {
         StringBuilder s = new StringBuilder();
         s.append("Biscuit {\n\tsymbols: ");
         s.append(this.symbols.getAllSymbols());
+        s.append("\n\tpublic keys: ");
+        s.append(this.symbols.publicKeys());
         s.append("\n\tauthority: ");
         s.append(this.authority.print(this.symbols));
         s.append("\n\tblocks: [\n");

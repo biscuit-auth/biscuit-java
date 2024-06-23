@@ -434,7 +434,7 @@ class ParserTest {
         Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1, toParse);
         assertTrue(output.isRight());
 
-        Block validBlock = new Block(1);
+        Block validBlock = new Block();
         validBlock.add_fact(l1);
         validBlock.add_fact(l2);
         validBlock.add_rule(l3);
@@ -455,7 +455,7 @@ class ParserTest {
         Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1, toParse);
         assertTrue(output.isRight());
 
-        Block validBlock = new Block(1);
+        Block validBlock = new Block();
         validBlock.add_check(l1);
 
         output.forEach(block ->
@@ -473,7 +473,7 @@ class ParserTest {
         Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1,  toParse);
         assertTrue(output.isRight());
 
-        Block validBlock = new Block(1);
+        Block validBlock = new Block();
         validBlock.add_check(l1);
 
         output.forEach(block ->

@@ -242,7 +242,7 @@ public class SerializedBiscuit {
             algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
             algo_buf.flip();
 
-            Signature sgr = new EdDSAEngine(MessageDigest.getInstance(org.biscuitsec.biscuit.crypto.KeyPair.ed25519.getHashAlgorithm()));
+            Signature sgr = KeyPair.generateSignature(root.public_key().algorithm);
             sgr.initSign(root.private_key);
             sgr.update(block);
             sgr.update(algo_buf);
@@ -259,7 +259,7 @@ public class SerializedBiscuit {
     }
 
     public Either<Error.FormatError, SerializedBiscuit> append(final org.biscuitsec.biscuit.crypto.KeyPair next,
-                                                               final Block newBlock) {
+                                                               final Block newBlock, Option<ExternalSignature> externalSignature) {
         if (this.proof.secretKey.isEmpty()) {
             return Left(new Error.FormatError.SerializationError("the token is sealed"));
         }
@@ -278,11 +278,14 @@ public class SerializedBiscuit {
             Signature sgr = new EdDSAEngine(MessageDigest.getInstance(org.biscuitsec.biscuit.crypto.KeyPair.ed25519.getHashAlgorithm()));
             sgr.initSign(this.proof.secretKey.get().private_key);
             sgr.update(block);
+            if(externalSignature.isDefined()) {
+                sgr.update(externalSignature.get().signature);
+            }
             sgr.update(algo_buf);
             sgr.update(next_key.toBytes());
             byte[] signature = sgr.sign();
 
-            SignedBlock signedBlock = new SignedBlock(block, next_key, signature, Option.none());
+            SignedBlock signedBlock = new SignedBlock(block, next_key, signature, externalSignature);
 
             ArrayList<SignedBlock> blocks = new ArrayList<>();
             for (SignedBlock bl : this.blocks) {
@@ -296,47 +299,6 @@ public class SerializedBiscuit {
         } catch (IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
             return Left(new Error.FormatError.SerializationError(e.toString()));
         }
-    }
-
-    public Either<Error.FormatError, SerializedBiscuit> appendThirdParty(final org.biscuitsec.biscuit.crypto.KeyPair next,
-                                                               final Block newBlock) {
-        /*if (this.proof.secretKey.isEmpty()) {
-            return Left(new Error.FormatError.SerializationError("the token is sealed"));
-        }
-
-        Schema.Block b = newBlock.serialize();
-        try {
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            b.writeTo(stream);
-
-            byte[] block = stream.toByteArray();
-            PublicKey next_key = next.public_key();
-            ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-            algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
-            algo_buf.flip();
-
-            Signature sgr = new EdDSAEngine(MessageDigest.getInstance(ed25519.getHashAlgorithm()));
-            sgr.initSign(this.proof.secretKey.get().private_key);
-            sgr.update(block);
-            sgr.update(algo_buf);
-            sgr.update(next_key.toBytes());
-            byte[] signature = sgr.sign();
-
-            SignedBlock signedBlock = new SignedBlock(block, next_key, signature);
-
-            ArrayList<SignedBlock> blocks = new ArrayList<>();
-            for (SignedBlock bl : this.blocks) {
-                blocks.add(bl);
-            }
-            blocks.add(signedBlock);
-
-            Proof proof = new Proof(next);
-
-            return Right(new SerializedBiscuit(this.authority, blocks, proof, root_key_id));
-        } catch (IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
-            return Left(new Error.FormatError.SerializationError(e.toString()));
-        }*/
-        throw new RuntimeException("todo");
     }
 
     public Either<Error, Void> verify(org.biscuitsec.biscuit.crypto.PublicKey root) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
@@ -424,7 +386,7 @@ public class SerializedBiscuit {
         algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
         algo_buf.flip();
 
-        Signature sgr = new EdDSAEngine(MessageDigest.getInstance(org.biscuitsec.biscuit.crypto.KeyPair.ed25519.getHashAlgorithm()));
+        Signature sgr = KeyPair.generateSignature(publicKey.algorithm);
 
         sgr.initVerify(publicKey.key);
         sgr.update(block);
@@ -442,11 +404,13 @@ public class SerializedBiscuit {
             algo_buf2.putInt(Integer.valueOf(publicKey.algorithm.getNumber()));
             algo_buf2.flip();
 
-            Signature sgr2 = new EdDSAEngine(MessageDigest.getInstance(org.biscuitsec.biscuit.crypto.KeyPair.ed25519.getHashAlgorithm()));
+            Signature sgr2 = new EdDSAEngine(MessageDigest.getInstance(KeyPair.ed25519.getHashAlgorithm()));
             sgr2.initVerify(signedBlock.externalSignature.get().key.key);
             sgr2.update(block);
             sgr2.update(algo_buf2);
             sgr2.update(publicKey.toBytes());
+            Either<Error.FormatError, Block> authRes = Block.from_bytes(block, Option.none());
+
             if (!sgr2.verify(signedBlock.externalSignature.get().signature)) {
                 return Left(new Error.FormatError.Signature.InvalidSignature("external signature error: Verification equation was not satisfied"));
             }
