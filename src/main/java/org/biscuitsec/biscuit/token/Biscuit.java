@@ -89,7 +89,7 @@ public class Biscuit extends UnverifiedBiscuit {
     static private Biscuit make(final SecureRandom rng, final KeyPair root, final Option<Integer> root_key_id, final Block authority) throws Error.FormatError {
         ArrayList<Block> blocks = new ArrayList<>();
 
-        KeyPair next = KeyPair.generate(root.public_key().algorithm, rng);
+        KeyPair next = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
 
         for(PublicKey pk:  authority.publicKeys) {
             authority.symbols.insert(pk);
