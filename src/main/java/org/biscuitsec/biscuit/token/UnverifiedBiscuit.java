@@ -308,8 +308,6 @@ public class UnverifiedBiscuit {
         }
 
         long pkIndex = symbols.insert(externalKey);
-        // if (copiedBiscuit.publicKeyToBlockId.
-
 
         HashMap<Long, List<Long>> publicKeyToBlockId = new HashMap<>();
         publicKeyToBlockId.putAll(this.publicKeyToBlockId);
