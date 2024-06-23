@@ -48,7 +48,6 @@ public class Block {
         this.scopes = new ArrayList<>();
         this.publicKeys = new ArrayList<>();
         this.externalKey = Option.none();
-        this.version = SerializedBiscuit.MIN_SCHEMA_VERSION;
     }
 
     /**
@@ -66,7 +65,6 @@ public class Block {
         this.rules = rules;
         this.checks = checks;
         this.scopes = scopes;
-        this.version = version;
         this.publicKeys = publicKeys;
         this.externalKey = externalKey;
     }
@@ -338,7 +336,6 @@ public class Block {
 
         Block block = (Block) o;
 
-        if (version != block.version) return false;
         if (!Objects.equals(symbols, block.symbols)) return false;
         if (!Objects.equals(context, block.context)) return false;
         if (!Objects.equals(facts, block.facts)) return false;
@@ -359,7 +356,6 @@ public class Block {
         result = 31 * result + (scopes != null ? scopes.hashCode() : 0);
         result = 31 * result + (publicKeys != null ? publicKeys.hashCode() : 0);
         result = 31 * result + (externalKey != null ? externalKey.hashCode() : 0);
-        result = 31 * result + (int) (version ^ (version >>> 32));
         return result;
     }
 
@@ -374,7 +370,6 @@ public class Block {
                 ", scopes=" + scopes +
                 ", publicKeys=" + publicKeys +
                 ", externalKey=" + externalKey +
-                ", version=" + version +
                 '}';
     }
 }

@@ -37,7 +37,6 @@ public class ThirdPartyBlockRequest {
         }
 
         org.biscuitsec.biscuit.token.Block block = blockBuilder.build(symbols, Option.some(keyPair.public_key()));
-        block.version = SerializedBiscuit.MAX_SCHEMA_VERSION;
 
         Either<Error.FormatError, byte[]> res = block.to_bytes();
         if(res.isLeft()) {
