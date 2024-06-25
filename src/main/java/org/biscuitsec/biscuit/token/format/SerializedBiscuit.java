@@ -12,7 +12,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import io.vavr.Tuple3;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
-import net.i2p.crypto.eddsa.EdDSAEngine;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -150,7 +149,7 @@ public class SerializedBiscuit {
 
         Option<org.biscuitsec.biscuit.crypto.KeyPair> secretKey = Option.none();
         if (data.getProof().hasNextSecret()) {
-            secretKey = Option.some(new org.biscuitsec.biscuit.crypto.KeyPair(data.getProof().getNextSecret().toByteArray()));
+            secretKey = Option.some(KeyPair.generate(authority.key.algorithm, data.getProof().getNextSecret().toByteArray()));
         }
 
         Option<byte[]> signature = Option.none();
@@ -243,7 +242,7 @@ public class SerializedBiscuit {
             algo_buf.flip();
 
             Signature sgr = KeyPair.generateSignature(root.public_key().algorithm);
-            sgr.initSign(root.private_key);
+            sgr.initSign(root.private_key());
             sgr.update(block);
             sgr.update(algo_buf);
             sgr.update(next_key.toBytes());
@@ -275,8 +274,8 @@ public class SerializedBiscuit {
             algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
             algo_buf.flip();
 
-            Signature sgr = new EdDSAEngine(MessageDigest.getInstance(org.biscuitsec.biscuit.crypto.KeyPair.ed25519.getHashAlgorithm()));
-            sgr.initSign(this.proof.secretKey.get().private_key);
+            Signature sgr = KeyPair.generateSignature(next_key.algorithm);
+            sgr.initSign(this.proof.secretKey.get().private_key());
             sgr.update(block);
             if(externalSignature.isDefined()) {
                 sgr.update(externalSignature.get().signature);
@@ -356,8 +355,7 @@ public class SerializedBiscuit {
             algo_buf.putInt(next_key.algorithm.getNumber());
             algo_buf.flip();
 
-            Signature sgr = new EdDSAEngine(MessageDigest.getInstance(org.biscuitsec.biscuit.crypto.KeyPair.ed25519.getHashAlgorithm()));
-
+            Signature sgr = KeyPair.generateSignature(next_key.algorithm);
             sgr.initVerify(current_key.key);
             sgr.update(block);
             sgr.update(algo_buf);
@@ -379,15 +377,24 @@ public class SerializedBiscuit {
         byte[] block = signedBlock.block;
         org.biscuitsec.biscuit.crypto.PublicKey next_key = signedBlock.key;
         byte[] signature = signedBlock.signature;
-        if (signature.length != 64) {
-            return Either.left(new Error.FormatError.Signature.InvalidSignatureSize(signature.length));
+
+        if (publicKey.algorithm == Schema.PublicKey.Algorithm.Ed25519) {
+            if (signature.length != 64) {
+                return Either.left(new Error.FormatError.Signature.InvalidSignatureSize(signature.length));
+            }
+        } else if (publicKey.algorithm == Schema.PublicKey.Algorithm.SECP256R1) {
+            if (signature.length < 68 || signature.length > 72) {
+                return Either.left(new Error.FormatError.Signature.InvalidSignatureSize(signature.length));
+            }
+        } else {
+            return Left(new Error.FormatError.Signature.InvalidSignature("unsupported algorithm"));
         }
+
         ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
         algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
         algo_buf.flip();
 
         Signature sgr = KeyPair.generateSignature(publicKey.algorithm);
-
         sgr.initVerify(publicKey.key);
         sgr.update(block);
         if(signedBlock.externalSignature.isDefined()) {
@@ -404,7 +411,7 @@ public class SerializedBiscuit {
             algo_buf2.putInt(Integer.valueOf(publicKey.algorithm.getNumber()));
             algo_buf2.flip();
 
-            Signature sgr2 = new EdDSAEngine(MessageDigest.getInstance(KeyPair.ed25519.getHashAlgorithm()));
+            Signature sgr2 = KeyPair.generateSignature(publicKey.algorithm);
             sgr2.initVerify(signedBlock.externalSignature.get().key.key);
             sgr2.update(block);
             sgr2.update(algo_buf2);
@@ -489,13 +496,13 @@ public class SerializedBiscuit {
             block = this.blocks.get(this.blocks.size() - 1);
         }
 
-        Signature sgr = new EdDSAEngine(MessageDigest.getInstance(KeyPair.ed25519.getHashAlgorithm()));
+        Signature sgr = KeyPair.generateSignature(block.key.algorithm);
         ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
         algo_buf.putInt(Integer.valueOf(block.key.algorithm.getNumber()));
         algo_buf.flip();
 
 
-        sgr.initSign(this.proof.secretKey.get().private_key);
+        sgr.initSign(this.proof.secretKey.get().private_key());
         sgr.update(block.block);
         sgr.update(algo_buf);
         sgr.update(block.key.toBytes());

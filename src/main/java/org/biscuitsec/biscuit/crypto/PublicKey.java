@@ -2,32 +2,46 @@ package org.biscuitsec.biscuit.crypto;
 
 import biscuit.format.schema.Schema;
 import biscuit.format.schema.Schema.PublicKey.Algorithm;
+import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.token.builder.Utils;
 import com.google.protobuf.ByteString;
-import net.i2p.crypto.eddsa.EdDSAPublicKey;
-import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 
-import static org.biscuitsec.biscuit.crypto.KeyPair.ed25519;
+import java.util.List;
+
 
 public class PublicKey {
 
-    public final EdDSAPublicKey key;
+    public final java.security.PublicKey key;
     public final Algorithm algorithm;
 
-    public PublicKey(Algorithm algorithm, EdDSAPublicKey public_key) {
+    private static final List<Algorithm> SUPPORTED_ALGORITHMS = List.of(Algorithm.Ed25519, Algorithm.SECP256R1);
+
+    public PublicKey(Algorithm algorithm, java.security.PublicKey public_key) {
         this.key = public_key;
         this.algorithm = algorithm;
     }
 
     public PublicKey(Algorithm algorithm, byte[] data) {
-        EdDSAPublicKeySpec pubKeySpec = new EdDSAPublicKeySpec(data, ed25519);
-        this.key = new EdDSAPublicKey(pubKeySpec);
+        if (algorithm == Algorithm.Ed25519) {
+            this.key = Ed25519KeyPair.decode(data);
+        } else if (algorithm == Algorithm.SECP256R1) {
+            this.key = SECP256R1KeyPair.decode(data);
+        } else {
+            throw new IllegalArgumentException("Invalid algorithm");
+        }
         this.algorithm = algorithm;
     }
 
     public byte[] toBytes() {
-        return this.key.getAbyte();
+        if (algorithm == Algorithm.Ed25519) {
+            return ((EdDSAPublicKey) key).getAbyte();
+        } else if (algorithm == Algorithm.SECP256R1) {
+            return ((BCECPublicKey) key).getQ().getEncoded(true); // true = compressed
+        } else {
+            throw new IllegalArgumentException("Invalid algorithm");
+        }
     }
 
     public String toHex() {
@@ -36,8 +50,13 @@ public class PublicKey {
 
     public PublicKey(Algorithm algorithm, String hex) {
         byte[] data = Utils.hexStringToByteArray(hex);
-        EdDSAPublicKeySpec pubKeySpec = new EdDSAPublicKeySpec(data, ed25519);
-        this.key = new EdDSAPublicKey(pubKeySpec);
+        if (algorithm == Algorithm.Ed25519) {
+            this.key = Ed25519KeyPair.decode(data);
+        } else if (algorithm == Algorithm.SECP256R1) {
+            this.key = SECP256R1KeyPair.decode(data);
+        } else {
+            throw new IllegalArgumentException("Invalid algorithm");
+        }
         this.algorithm = algorithm;
     }
 
@@ -49,10 +68,9 @@ public class PublicKey {
     }
 
     static public PublicKey deserialize(Schema.PublicKey pk) throws Error.FormatError.DeserializationError {
-        if(!pk.hasAlgorithm() || !pk.hasKey() || pk.getAlgorithm() != Algorithm.Ed25519) {
+        if(!pk.hasAlgorithm() || !pk.hasKey() || !SUPPORTED_ALGORITHMS.contains(pk.getAlgorithm())) {
             throw new Error.FormatError.DeserializationError("Invalid public key");
         }
-
         return new PublicKey(pk.getAlgorithm(), pk.getKey().toByteArray());
     }
 
@@ -73,6 +91,12 @@ public class PublicKey {
 
     @Override
     public String toString() {
-        return "ed25519/" + toHex().toLowerCase();
+        if (algorithm == Algorithm.Ed25519) {
+            return "ed25519/" + toHex().toLowerCase();
+        } else if (algorithm == Algorithm.SECP256R1) {
+            return "secp256r1/" + toHex().toLowerCase();
+        } else {
+            return null;
+        }
     }
 }
