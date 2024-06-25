@@ -53,8 +53,7 @@ public class World implements Serializable {
                        Tuple2<Origin, Fact> t2 = res.get();
                        newFacts.add(t2._1, t2._2);
                     } else {
-                       Error e = res.getLeft();
-                       throw e;
+                        throw res.getLeft();
                     }
                 }
             }
@@ -97,8 +96,7 @@ public class World implements Serializable {
             Tuple2<Origin, Fact> t2 = res.get();
             newFacts.add(t2._1, t2._2);
          } else {
-            Error e = res.getLeft();
-            throw e;
+             throw res.getLeft();
          }
       }
 

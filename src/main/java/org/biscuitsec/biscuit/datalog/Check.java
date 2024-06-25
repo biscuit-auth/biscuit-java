@@ -35,21 +35,6 @@ public class Check {
         return queries;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(queries);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        return super.equals(o);
-    }
-
-    @Override
-    public String toString() {
-        return super.toString();
-    }
-
     public Schema.CheckV2 serialize() {
         Schema.CheckV2.Builder b = Schema.CheckV2.newBuilder();
 
@@ -94,5 +79,31 @@ public class Check {
         }
 
         return Right(new Check(kind, queries));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Check check = (Check) o;
+
+        if (kind != check.kind) return false;
+        return Objects.equals(queries, check.queries);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = kind != null ? kind.hashCode() : 0;
+        result = 31 * result + (queries != null ? queries.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Check{" +
+                "kind=" + kind +
+                ", queries=" + queries +
+                '}';
     }
 }

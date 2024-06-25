@@ -85,9 +85,8 @@ public class SerializedBiscuit {
 
         Either<Error, Void> res = b.verify(root);
         if (res.isLeft()) {
-            Error e = res.getLeft();
             //System.out.println("verification error: "+e.toString());
-            throw e;
+            throw res.getLeft();
         } else {
             return b;
         }
@@ -163,8 +162,7 @@ public class SerializedBiscuit {
         }
         Proof proof = new Proof(secretKey, signature);
 
-        SerializedBiscuit b = new SerializedBiscuit(authority, blocks, proof);
-        return b;
+        return new SerializedBiscuit(authority, blocks, proof);
     }
 
 
@@ -218,8 +216,7 @@ public class SerializedBiscuit {
         try {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             biscuit.writeTo(stream);
-            byte[] data = stream.toByteArray();
-            return data;
+            return stream.toByteArray();
         } catch (IOException e) {
             throw new Error.FormatError.SerializationError(e.toString());
         }
@@ -244,7 +241,7 @@ public class SerializedBiscuit {
             algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
             algo_buf.flip();
 
-            Signature sgr = KeyPair.generateSignature(next_key.algorithm);
+            Signature sgr = KeyPair.generateSignature(root.public_key().algorithm);
             sgr.initSign(root.private_key());
             sgr.update(block);
             sgr.update(algo_buf);
@@ -261,7 +258,7 @@ public class SerializedBiscuit {
     }
 
     public Either<Error.FormatError, SerializedBiscuit> append(final org.biscuitsec.biscuit.crypto.KeyPair next,
-                                                               final Block newBlock) {
+                                                               final Block newBlock, Option<ExternalSignature> externalSignature) {
         if (this.proof.secretKey.isEmpty()) {
             return Left(new Error.FormatError.SerializationError("the token is sealed"));
         }
@@ -280,11 +277,14 @@ public class SerializedBiscuit {
             Signature sgr = KeyPair.generateSignature(next_key.algorithm);
             sgr.initSign(this.proof.secretKey.get().private_key());
             sgr.update(block);
+            if(externalSignature.isDefined()) {
+                sgr.update(externalSignature.get().signature);
+            }
             sgr.update(algo_buf);
             sgr.update(next_key.toBytes());
             byte[] signature = sgr.sign();
 
-            SignedBlock signedBlock = new SignedBlock(block, next_key, signature, Option.none());
+            SignedBlock signedBlock = new SignedBlock(block, next_key, signature, externalSignature);
 
             ArrayList<SignedBlock> blocks = new ArrayList<>();
             for (SignedBlock bl : this.blocks) {
@@ -298,47 +298,6 @@ public class SerializedBiscuit {
         } catch (IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
             return Left(new Error.FormatError.SerializationError(e.toString()));
         }
-    }
-
-    public Either<Error.FormatError, SerializedBiscuit> appendThirdParty(final org.biscuitsec.biscuit.crypto.KeyPair next,
-                                                               final Block newBlock) {
-        /*if (this.proof.secretKey.isEmpty()) {
-            return Left(new Error.FormatError.SerializationError("the token is sealed"));
-        }
-
-        Schema.Block b = newBlock.serialize();
-        try {
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            b.writeTo(stream);
-
-            byte[] block = stream.toByteArray();
-            PublicKey next_key = next.public_key();
-            ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-            algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
-            algo_buf.flip();
-
-            Signature sgr = new EdDSAEngine(MessageDigest.getInstance(ed25519.getHashAlgorithm()));
-            sgr.initSign(this.proof.secretKey.get().private_key);
-            sgr.update(block);
-            sgr.update(algo_buf);
-            sgr.update(next_key.toBytes());
-            byte[] signature = sgr.sign();
-
-            SignedBlock signedBlock = new SignedBlock(block, next_key, signature);
-
-            ArrayList<SignedBlock> blocks = new ArrayList<>();
-            for (SignedBlock bl : this.blocks) {
-                blocks.add(bl);
-            }
-            blocks.add(signedBlock);
-
-            Proof proof = new Proof(next);
-
-            return Right(new SerializedBiscuit(this.authority, blocks, proof, root_key_id));
-        } catch (IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
-            return Left(new Error.FormatError.SerializationError(e.toString()));
-        }*/
-        throw new RuntimeException("todo");
     }
 
     public Either<Error, Void> verify(org.biscuitsec.biscuit.crypto.PublicKey root) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
@@ -457,6 +416,8 @@ public class SerializedBiscuit {
             sgr2.update(block);
             sgr2.update(algo_buf2);
             sgr2.update(publicKey.toBytes());
+            Either<Error.FormatError, Block> authRes = Block.from_bytes(block, Option.none());
+
             if (!sgr2.verify(signedBlock.externalSignature.get().signature)) {
                 return Left(new Error.FormatError.Signature.InvalidSignature("external signature error: Verification equation was not satisfied"));
             }
@@ -469,8 +430,7 @@ public class SerializedBiscuit {
         ArrayList<Option<org.biscuitsec.biscuit.crypto.PublicKey>> blockExternalKeys = new ArrayList<>();
         Either<Error.FormatError, Block> authRes = Block.from_bytes(this.authority.block, Option.none());
         if (authRes.isLeft()) {
-            Error e = authRes.getLeft();
-            throw e;
+            throw authRes.getLeft();
         }
         Block authority = authRes.get();
         for(org.biscuitsec.biscuit.crypto.PublicKey pk: authority.publicKeys()) {
@@ -490,8 +450,7 @@ public class SerializedBiscuit {
             }
             Either<Error.FormatError, Block> blockRes = Block.from_bytes(bdata.block, externalKey);
             if (blockRes.isLeft()) {
-                Error e = blockRes.getLeft();
-                throw e;
+                throw blockRes.getLeft();
             }
             Block block = blockRes.get();
 

@@ -612,8 +612,13 @@ public class Authorizer {
             for (int i = 0; i < this.token.blocks.size(); i++) {
                 Block b = this.token.blocks.get(i);
 
+                SymbolTable blockSymbols = token.symbols;
+                if(b.externalKey.isDefined()) {
+                    blockSymbols = new SymbolTable(b.symbols.symbols, token.symbols.publicKeys());
+                }
+
                 for (int j = 0; j < b.checks.size(); j++) {
-                    checks.add("Block[" + i + "][" + j + "]: " + this.symbols.print_check(b.checks.get(j)));
+                    checks.add("Block[" + (i+1) + "][" + j + "]: " + blockSymbols.print_check(b.checks.get(j)));
                 }
             }
         }
@@ -639,7 +644,7 @@ public class Authorizer {
     public List<Tuple2<Long, List<Check>>> checks() {
         List<Tuple2<Long, List<Check>>> allChecks = new ArrayList<>();
         if(!this.checks.isEmpty()) {
-            allChecks.add(new Tuple2(Long.MAX_VALUE, this.checks));
+            allChecks.add(new Tuple2<>(Long.MAX_VALUE, this.checks));
         }
 
         List<Check> authorityChecks = new ArrayList<>();
@@ -647,7 +652,7 @@ public class Authorizer {
             authorityChecks.add(Check.convert_from(check, this.token.symbols));
         }
         if(!authorityChecks.isEmpty()) {
-            allChecks.add(new Tuple2((long) 0, authorityChecks));
+            allChecks.add(new Tuple2<>((long) 0, authorityChecks));
         }
 
         long count = 1;
@@ -665,7 +670,7 @@ public class Authorizer {
                 }
             }
             if(!blockChecks.isEmpty()) {
-                allChecks.add(new Tuple2(count, blockChecks));
+                allChecks.add(new Tuple2<>(count, blockChecks));
             }
             count += 1;
         }

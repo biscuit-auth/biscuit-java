@@ -32,13 +32,14 @@ public class UnverifiedBiscuitTest {
 
         KeyPair keypair0 = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
 
-        SymbolTable symbols = Biscuit.default_symbol_table();
-        org.biscuitsec.biscuit.token.builder.Block block0 = new org.biscuitsec.biscuit.token.builder.Block(0, symbols);
-        block0.add_fact(Utils.fact("right", List.of(Utils.s("file1"), Utils.s("read"))));
-        block0.add_fact(Utils.fact("right", List.of(Utils.s("file2"), Utils.s("read"))));
-        block0.add_fact(Utils.fact("right", List.of(Utils.s("file1"), Utils.s("write"))));
+       // org.biscuitsec.biscuit.token.builder.Block block0 = new org.biscuitsec.biscuit.token.builder.Block(0);
+       org.biscuitsec.biscuit.token.builder.Biscuit block0 = Biscuit.builder(rng, keypair0);
+        block0.add_authority_fact(Utils.fact("right", List.of(Utils.s("file1"), Utils.s("read"))));
+        block0.add_authority_fact(Utils.fact("right", List.of(Utils.s("file2"), Utils.s("read"))));
+        block0.add_authority_fact(Utils.fact("right", List.of(Utils.s("file1"), Utils.s("write"))));
 
-        Biscuit biscuit0 = Biscuit.make(rng, keypair0, Biscuit.default_symbol_table(), block0.build());
+
+        Biscuit biscuit0 = block0.build();
 
         System.out.println(biscuit0.print());
         System.out.println("serializing the first token");
@@ -98,7 +99,7 @@ public class UnverifiedBiscuitTest {
                 )
         )));
 
-        UnverifiedBiscuit unverifiedBiscuit2 = unverifiedBiscuit1.attenuate(rng, keypair2, block2.build());
+        UnverifiedBiscuit unverifiedBiscuit2 = unverifiedBiscuit1.attenuate(rng, keypair2, block2);
 
         System.out.println(unverifiedBiscuit2.print());
 

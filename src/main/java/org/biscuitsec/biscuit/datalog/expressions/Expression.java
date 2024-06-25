@@ -8,10 +8,7 @@ import org.biscuitsec.biscuit.error.Error;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.Map;
+import java.util.*;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
@@ -77,5 +74,27 @@ public class Expression {
         }
 
         return Right(new Expression(ops));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Expression that = (Expression) o;
+
+        return Objects.equals(ops, that.ops);
+    }
+
+    @Override
+    public int hashCode() {
+        return ops != null ? ops.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return "Expression{" +
+                "ops=" + ops +
+                '}';
     }
 }

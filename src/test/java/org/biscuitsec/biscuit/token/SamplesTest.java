@@ -8,11 +8,14 @@ import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.datalog.Rule;
 import org.biscuitsec.biscuit.datalog.RunLimits;
+import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.error.Error;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 import org.biscuitsec.biscuit.token.builder.Check;
 import org.biscuitsec.biscuit.token.builder.parser.Parser;
+import org.biscuitsec.biscuit.token.format.SerializedBiscuit;
+import org.biscuitsec.biscuit.token.format.SignedBlock;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
@@ -22,8 +25,10 @@ import java.io.InputStreamReader;
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static org.biscuitsec.biscuit.token.Block.from_bytes;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SamplesTest {
@@ -37,6 +42,65 @@ class SamplesTest {
         PublicKey publicKey = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, sample.root_public_key);
         KeyPair keyPair = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, sample.root_private_key);
         return sample.testcases.stream().map(t -> process_testcase(t, publicKey, keyPair));
+    }
+
+    void compareBlocks(List<Block> sampleBlocks, List<org.biscuitsec.biscuit.token.Block> blocks) {
+        assertEquals(sampleBlocks.size(), blocks.size());
+        List<Tuple2<Block, org.biscuitsec.biscuit.token.Block>> comparisonList = IntStream.range(0, sampleBlocks.size())
+                .mapToObj(i -> new Tuple2<>(sampleBlocks.get(i), blocks.get(i)))
+                .collect(Collectors.toList());
+
+        // for each token we start from the base symbol table
+        SymbolTable baseSymbols = new SymbolTable();
+
+        io.vavr.collection.Stream.ofAll(comparisonList).zipWithIndex().forEach(indexedItem -> {
+            compareBlock(baseSymbols, indexedItem._2, indexedItem._1._1, indexedItem._1._2);
+        });
+    }
+
+    void compareBlock(SymbolTable baseSymbols, long sampleBlockIndex, Block sampleBlock, org.biscuitsec.biscuit.token.Block block) {
+        Option<PublicKey> sampleExternalKey = sampleBlock.getExternalKey();
+        List<PublicKey> samplePublicKeys = sampleBlock.getPublicKeys();
+        String sampleDatalog = sampleBlock.getCode().replace("\"","\\\"");
+
+        Either<Map<Integer, List<org.biscuitsec.biscuit.token.builder.parser.Error>>, org.biscuitsec.biscuit.token.builder.Block> outputSample = Parser.datalog(sampleBlockIndex, sampleDatalog);
+
+        // the invalid block rule with unbound variable cannot be parsed
+        if(outputSample.isLeft()) {
+            return;
+        }
+
+        SymbolTable sampleSymbols;
+        if (!block.externalKey.isDefined()) {
+            sampleSymbols = new SymbolTable(baseSymbols);
+        } else {
+            sampleSymbols = new SymbolTable();
+
+            for(PublicKey pk: baseSymbols.publicKeys()) {
+               sampleSymbols.insert(pk);
+            }
+        }
+
+        org.biscuitsec.biscuit.token.Block generatedSampleBlock = outputSample.get().build(sampleSymbols);
+
+        if(!block.externalKey.isDefined()) {
+            generatedSampleBlock.symbols.symbols.forEach(baseSymbols::add);
+        } else {
+            generatedSampleBlock.setExternalKey(block.externalKey.get());
+            generatedSampleBlock.version = SerializedBiscuit.MAX_SCHEMA_VERSION;
+            baseSymbols.insert(block.externalKey.get());
+        }
+
+        for(PublicKey pk: generatedSampleBlock.publicKeys) {
+            baseSymbols.insert(pk);
+        }
+        System.out.println(baseSymbols.symbols);
+
+        System.out.println(generatedSampleBlock.print(baseSymbols));
+        System.out.println(block.print(baseSymbols));
+        assertEquals(generatedSampleBlock.print(baseSymbols), block.print(baseSymbols));
+        assertEquals(generatedSampleBlock, block);
+        assertArrayEquals(generatedSampleBlock.to_bytes().get(), block.to_bytes().get());
     }
 
     DynamicTest process_testcase(final TestCase testCase, final PublicKey publicKey, final KeyPair privateKey) {
@@ -56,6 +120,28 @@ class SamplesTest {
                     inputStream.read(data);
                     Biscuit token = Biscuit.from_bytes(data, publicKey);
                     assertArrayEquals(token.serialize(), data);
+
+                    List<org.biscuitsec.biscuit.token.Block> allBlocks = new ArrayList<>();
+                    allBlocks.add(token.authority);
+                    allBlocks.addAll(token.blocks);
+
+                    compareBlocks(testCase.token, allBlocks);
+
+                    byte[] ser_block_authority = token.authority.to_bytes().get();
+                    System.out.println(Arrays.toString(ser_block_authority));
+                    System.out.println(Arrays.toString(token.serializedBiscuit.authority.block));
+                    org.biscuitsec.biscuit.token.Block deser_block_authority = from_bytes(ser_block_authority, token.authority.externalKey).get();
+                    assertEquals(token.authority.print(token.symbols), deser_block_authority.print(token.symbols));
+                    assert(Arrays.equals(ser_block_authority, token.serializedBiscuit.authority.block));
+
+                    for(int i = 0; i < token.blocks.size() - 1; i++) {
+                        org.biscuitsec.biscuit.token.Block block = token.blocks.get(i);
+                        SignedBlock signed_block = token.serializedBiscuit.blocks.get(i);
+                        byte[] ser_block = block.to_bytes().get();
+                        org.biscuitsec.biscuit.token.Block deser_block = from_bytes(ser_block,block.externalKey).get();
+                        assertEquals(block.print(token.symbols), deser_block.print(token.symbols));
+                        assert(Arrays.equals(ser_block, signed_block.block));
+                    }
 
                     List<RevocationIdentifier> revocationIds = token.revocation_identifiers();
                     JsonArray validationRevocationIds = validation.getAsJsonArray("revocation_ids");
@@ -303,18 +389,16 @@ class SamplesTest {
 
             this.rules = rulesets;
 
-            List<CheckSet> checksets = authorizer.checks().stream()
+            this.checks = authorizer.checks().stream()
                     .map((Tuple2<Long, List<Check>> t) -> {
-                        List<String> checks = t._2.stream().map(c -> c.toString()).collect(Collectors.toList());
-                        Collections.sort(checks);
+                        List<String> checks1 = t._2.stream().map(c -> c.toString()).collect(Collectors.toList());
+                        Collections.sort(checks1);
                         if(t._1 == null) {
-                            return new CheckSet(checks);
+                            return new CheckSet(checks1);
                         } else {
-                            return new CheckSet(t._1, checks);
+                            return new CheckSet(t._1, checks1);
                         }
                     }).collect(Collectors.toList());
-
-            this.checks = checksets;
             this.policies = authorizer.policies().stream().map(p -> p.toString()).collect(Collectors.toList());
             Collections.sort(this.rules);
             Collections.sort(this.checks);

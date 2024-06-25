@@ -2,6 +2,8 @@ package org.biscuitsec.biscuit.token;
 
 import biscuit.format.schema.Schema;
 import org.biscuitsec.biscuit.crypto.PublicKey;
+import org.biscuitsec.biscuit.datalog.expressions.Expression;
+import org.biscuitsec.biscuit.datalog.expressions.Op;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.datalog.*;
 import org.biscuitsec.biscuit.token.format.SerializedBiscuit;
@@ -13,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
@@ -28,8 +31,8 @@ public class Block {
     final List<Check> checks;
     final List<Scope> scopes;
     final List<PublicKey> publicKeys;
-    final Option<PublicKey> externalKey;
-    final long version;
+    Option<PublicKey> externalKey;
+    long version;
 
     /**
      * creates a new block
@@ -45,7 +48,6 @@ public class Block {
         this.scopes = new ArrayList<>();
         this.publicKeys = new ArrayList<>();
         this.externalKey = Option.none();
-        this.version = SerializedBiscuit.MAX_SCHEMA_VERSION;
     }
 
     /**
@@ -63,7 +65,6 @@ public class Block {
         this.rules = rules;
         this.checks = checks;
         this.scopes = scopes;
-        this.version = version;
         this.publicKeys = publicKeys;
         this.externalKey = externalKey;
     }
@@ -76,6 +77,10 @@ public class Block {
         return publicKeys;
     }
 
+    public void setExternalKey(PublicKey externalKey) {
+        this.externalKey = Option.some(externalKey);
+    }
+
     /**
      * pretty printing for a block
      *
@@ -85,9 +90,22 @@ public class Block {
     public String print(SymbolTable symbol_table) {
         StringBuilder s = new StringBuilder();
 
+        SymbolTable local_symbols;
+        if(this.externalKey.isDefined()) {
+            local_symbols = new SymbolTable(this.symbols);
+            for(PublicKey pk: symbol_table.publicKeys()) {
+                local_symbols.insert(pk);
+            }
+        } else {
+            local_symbols = symbol_table;
+        }
         s.append("Block");
         s.append(" {\n\t\tsymbols: ");
         s.append(this.symbols.symbols);
+        s.append("\n\t\tpublic keys: ");
+        s.append(this.publicKeys);
+        s.append("\n\t\tsymbol public keys: ");
+        s.append(this.symbols.publicKeys());
         s.append("\n\t\tcontext: ");
         s.append(this.context);
         if(this.externalKey.isDefined()) {
@@ -102,17 +120,17 @@ public class Block {
         s.append("\n\t\t]\n\t\tfacts: [");
         for (Fact f : this.facts) {
             s.append("\n\t\t\t");
-            s.append(symbol_table.print_fact(f));
+            s.append(local_symbols.print_fact(f));
         }
         s.append("\n\t\t]\n\t\trules: [");
         for (Rule r : this.rules) {
             s.append("\n\t\t\t");
-            s.append(symbol_table.print_rule(r));
+            s.append(local_symbols.print_rule(r));
         }
         s.append("\n\t\t]\n\t\tchecks: [");
         for (Check c : this.checks) {
             s.append("\n\t\t\t");
-            s.append(symbol_table.print_check(c));
+            s.append(local_symbols.print_check(c));
         }
         s.append("\n\t\t]\n\t}");
 
@@ -155,8 +173,50 @@ public class Block {
             b.addPublicKeys(pk.serialize());
         }
 
-        b.setVersion(SerializedBiscuit.MAX_SCHEMA_VERSION);
+        b.setVersion(getSchemaVersion());
         return b.build();
+    }
+
+    int getSchemaVersion() {
+        boolean containsScopes = !this.scopes.isEmpty();
+        boolean containsCheckAll = false;
+        boolean containsV4 = false;
+
+        for (Rule r: this.rules) {
+            containsScopes |= !r.scopes().isEmpty();
+            for(Expression e: r.expressions()) {
+                containsV4 |= containsV4Op(e);
+            }
+        }
+        for(Check c: this.checks) {
+            containsCheckAll |= c.kind() == Check.Kind.All;
+
+            for (Rule q: c.queries()) {
+                containsScopes |= !q.scopes().isEmpty();
+                for(Expression e: q.expressions()) {
+                    containsV4 |= containsV4Op(e);
+                }
+            }
+        }
+
+        if(containsScopes || containsCheckAll || containsV4 || this.externalKey.isDefined()) {
+            return SerializedBiscuit.MAX_SCHEMA_VERSION;
+        } else {
+            return SerializedBiscuit.MIN_SCHEMA_VERSION;
+        }
+    }
+
+    boolean containsV4Op(Expression e) {
+        for (Op op: e.getOps()) {
+            if (op instanceof Op.Binary) {
+                Op.BinaryOp o = ((Op.Binary) op).getOp();
+                if (o == Op.BinaryOp.BitwiseAnd || o == Op.BinaryOp.BitwiseOr || o == Op.BinaryOp.BitwiseXor || o == Op.BinaryOp.NotEqual) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -267,6 +327,50 @@ public class Block {
         } catch (IOException e) {
             return Left(new Error.FormatError.SerializationError(e.toString()));
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Block block = (Block) o;
+
+        if (!Objects.equals(symbols, block.symbols)) return false;
+        if (!Objects.equals(context, block.context)) return false;
+        if (!Objects.equals(facts, block.facts)) return false;
+        if (!Objects.equals(rules, block.rules)) return false;
+        if (!Objects.equals(checks, block.checks)) return false;
+        if (!Objects.equals(scopes, block.scopes)) return false;
+        if (!Objects.equals(publicKeys, block.publicKeys)) return false;
+        return Objects.equals(externalKey, block.externalKey);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = symbols != null ? symbols.hashCode() : 0;
+        result = 31 * result + (context != null ? context.hashCode() : 0);
+        result = 31 * result + (facts != null ? facts.hashCode() : 0);
+        result = 31 * result + (rules != null ? rules.hashCode() : 0);
+        result = 31 * result + (checks != null ? checks.hashCode() : 0);
+        result = 31 * result + (scopes != null ? scopes.hashCode() : 0);
+        result = 31 * result + (publicKeys != null ? publicKeys.hashCode() : 0);
+        result = 31 * result + (externalKey != null ? externalKey.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Block{" +
+                "symbols=" + symbols +
+                ", context='" + context + '\'' +
+                ", facts=" + facts +
+                ", rules=" + rules +
+                ", checks=" + checks +
+                ", scopes=" + scopes +
+                ", publicKeys=" + publicKeys +
+                ", externalKey=" + externalKey +
+                '}';
     }
 }
 
