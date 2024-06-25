@@ -18,6 +18,7 @@ import org.biscuitsec.biscuit.token.builder.Check;
 import org.biscuitsec.biscuit.token.builder.Expression;
 import org.biscuitsec.biscuit.token.builder.parser.ExpressionParser;
 import org.biscuitsec.biscuit.token.builder.parser.Parser;
+import org.biscuitsec.biscuit.token.format.SerializedBiscuit;
 import org.biscuitsec.biscuit.token.format.SignedBlock;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -78,14 +79,24 @@ class SamplesTest {
             sampleSymbols = new SymbolTable(baseSymbols);
         } else {
             sampleSymbols = new SymbolTable();
+
+            for(PublicKey pk: baseSymbols.publicKeys()) {
+               sampleSymbols.insert(pk);
+            }
         }
 
         org.biscuitsec.biscuit.token.Block generatedSampleBlock = outputSample.get().build(sampleSymbols);
-        System.out.println(generatedSampleBlock.symbols.symbols);
-        System.out.println(block.symbols.symbols);
-        System.out.println(sampleSymbols.symbols);
+
         if(!block.externalKey.isDefined()) {
             generatedSampleBlock.symbols.symbols.forEach(baseSymbols::add);
+        } else {
+            generatedSampleBlock.setExternalKey(block.externalKey.get());
+            generatedSampleBlock.version = SerializedBiscuit.MAX_SCHEMA_VERSION;
+            baseSymbols.insert(block.externalKey.get());
+        }
+
+        for(PublicKey pk: generatedSampleBlock.publicKeys) {
+            baseSymbols.insert(pk);
         }
         System.out.println(baseSymbols.symbols);
 

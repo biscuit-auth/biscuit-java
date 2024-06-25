@@ -38,7 +38,7 @@ public class BiscuitTest {
 
         KeyPair root = new KeyPair(rng);
 
-        Block authority_builder = new Block(0);
+        Block authority_builder = new Block();
 
         authority_builder.add_fact(fact("right", Arrays.asList(s("file1"), s("read"))));
         authority_builder.add_fact(fact("right", Arrays.asList(s("file2"), s("read"))));
@@ -226,7 +226,7 @@ public class BiscuitTest {
         SecureRandom rng = new SecureRandom();
         KeyPair root = new KeyPair(rng);
 
-        Block authority_builder = new Block(0);
+        Block authority_builder = new Block();
         Date date = Date.from(Instant.now());
         authority_builder.add_fact(fact("revocation_id", Arrays.asList(date(date))));
 
@@ -369,7 +369,7 @@ public class BiscuitTest {
 
         KeyPair root = new KeyPair(rng);
 
-        Block authority_builder = new Block(0);
+        Block authority_builder = new Block();
 
         authority_builder.add_fact(fact("namespace:right", Arrays.asList(s("file1"), s("read"))));
         authority_builder.add_fact(fact("namespace:right", Arrays.asList(s("file1"), s("write"))));
@@ -616,7 +616,7 @@ public class BiscuitTest {
 
         KeyPair root = new KeyPair(rng);
 
-        Block authority_builder = new Block(0);
+        Block authority_builder = new Block();
 
         authority_builder.add_fact(fact("right", Arrays.asList(s("file1"), s("read"))));
         authority_builder.add_fact(fact("right", Arrays.asList(s("file2"), s("read"))));

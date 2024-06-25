@@ -180,7 +180,7 @@ public final class SymbolTable implements Serializable {
                     return pk.get().toString();
                 }
         }
-        return "?";
+        return "<"+ scope.publicKey+"?>";
     }
 
     public String print_predicate(final Predicate p) {

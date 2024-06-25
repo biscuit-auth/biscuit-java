@@ -2,12 +2,17 @@ package org.biscuitsec.biscuit.crypto;
 
 
 import biscuit.format.schema.Schema;
+import biscuit.format.schema.Schema.PublicKey.Algorithm;
+import net.i2p.crypto.eddsa.EdDSAEngine;
 import org.biscuitsec.biscuit.token.builder.Utils;
 import net.i2p.crypto.eddsa.EdDSAPrivateKey;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import net.i2p.crypto.eddsa.spec.*;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.Signature;
 
 /**
  * Private and public key
@@ -37,6 +42,26 @@ public final class KeyPair {
 
         this.private_key = privKey;
         this.public_key = pubKey;
+    }
+
+    public static KeyPair generate(Algorithm algorithm) {
+        return generate(algorithm, new SecureRandom());
+    }
+
+    public static KeyPair generate(Algorithm algorithm, SecureRandom rng) {
+        if (algorithm == Algorithm.Ed25519) {
+            return new KeyPair(rng);
+        } else {
+            throw new IllegalArgumentException("Unsupported algorithm");
+        }
+    }
+
+    public static Signature generateSignature(Algorithm algorithm) throws NoSuchAlgorithmException {
+        if (algorithm == Algorithm.Ed25519) {
+            return KeyPair.getSignature();
+        } else {
+            throw new NoSuchAlgorithmException("Unsupported algorithm");
+        }
     }
 
     public byte[] toBytes() {
@@ -69,6 +94,10 @@ public final class KeyPair {
 
         this.private_key = privKey;
         this.public_key = pubKey;
+    }
+
+    public static Signature getSignature() throws NoSuchAlgorithmException {
+        return new EdDSAEngine(MessageDigest.getInstance(ed25519.getHashAlgorithm()));
     }
 
     public PublicKey public_key() {
