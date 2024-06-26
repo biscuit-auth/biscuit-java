@@ -261,8 +261,14 @@ public class SerializedBiscuit {
             byte[] block = stream.toByteArray();
             org.biscuitsec.biscuit.crypto.PublicKey next_key = next.public_key();
 
-            byte[] signature = proof.secretKey.get().sign(block, next_key.toBytes());
-            SignedBlock signedBlock = new SignedBlock(block, next_key, signature, Option.none());
+            byte[] signature;
+            if (externalSignature.isDefined()) {
+                signature = proof.secretKey.get().signExternal(block, next_key.toBytes(), externalSignature.get().signature);
+            } else {
+                signature = proof.secretKey.get().sign(block, next_key.toBytes());
+            }
+            
+            SignedBlock signedBlock = new SignedBlock(block, next_key, signature, externalSignature);
 
             ArrayList<SignedBlock> blocks = new ArrayList<>();
             for (SignedBlock bl : this.blocks) {
@@ -456,7 +462,7 @@ public class SerializedBiscuit {
             block = this.blocks.get(this.blocks.size() - 1);
         }
 
-        byte[] signature = proof.secretKey.get().sign(block.block, block.key.toBytes(), block.signature);
+        byte[] signature = proof.secretKey.get().signSealed(block.block, block.key.toBytes(), block.signature);
 
         this.proof.secretKey = Option.none();
         this.proof.signature = Option.some(signature);

@@ -84,14 +84,17 @@ final class Ed25519KeyPair extends KeyPair {
 
     @Override
     public byte[] sign(byte[] block, byte[] publicKey) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        var bytes = toSigningFormat(block, Algorithm.Ed25519, publicKey, Optional.empty());
-        return signer.sign(bytes);
+        return signer.signStandard(block, Algorithm.Ed25519, publicKey);
     }
 
     @Override
-    public byte[] sign(byte[] block, byte[] publicKey, byte[] seal) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        var bytes = toSigningFormat(block, Algorithm.Ed25519, publicKey, Optional.of(seal));
-        return signer.sign(bytes);
+    public byte[] signExternal(byte[] block, byte[] publicKey, byte[] external) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        return signer.signExternal(block, Algorithm.Ed25519, publicKey, external);
+    }
+
+    @Override
+    public byte[] signSealed(byte[] block, byte[] publicKey, byte[] seal) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        return signer.signSealed(block, Algorithm.Ed25519, publicKey, seal);
     }
 
     @Override

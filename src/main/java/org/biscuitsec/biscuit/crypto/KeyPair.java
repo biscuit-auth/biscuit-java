@@ -70,19 +70,7 @@ public abstract class KeyPair {
 
     public abstract byte[] sign(byte[] block, byte[] publicKey) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException;
 
-    public abstract byte[] sign(byte[] block, byte[] publicKey, byte[] seal) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException;
+    public abstract byte[] signExternal(byte[] block, byte[] publicKey, byte[] external) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException;
 
-    protected static byte[] toSigningFormat(byte[] block, Algorithm algorithm, byte[] publicKey, Optional<byte[]> seal) {
-        var algorithmBuffer = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-        algorithmBuffer.putInt(algorithm.getNumber());
-        algorithmBuffer.flip();
-        var algorithmBytes = algorithmBuffer.array();
-
-        var payload = new byte[block.length + algorithmBytes.length + publicKey.length + seal.orElse(new byte[0]).length];
-        System.arraycopy(block, 0, payload, 0, block.length);
-        System.arraycopy(algorithmBytes, 0, payload, block.length, algorithmBytes.length);
-        System.arraycopy(publicKey, 0, payload, block.length + algorithmBytes.length, publicKey.length);
-        seal.ifPresent(bytes -> System.arraycopy(bytes, 0, payload, block.length + algorithmBytes.length + publicKey.length, bytes.length));
-        return payload;
-    }
+    public abstract byte[] signSealed(byte[] block, byte[] publicKey, byte[] seal) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException;
 }

@@ -33,14 +33,17 @@ public class RemoteKeyPair extends KeyPair {
 
     @Override
     public byte[] sign(byte[] block, byte[] publicKey) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        var bytes = toSigningFormat(block, this.publicKey.algorithm, publicKey, Optional.empty());
-        return signer.sign(bytes);
+        return signer.signStandard(block, this.publicKey.algorithm, publicKey);
     }
 
     @Override
-    public byte[] sign(byte[] block, byte[] publicKey, byte[] seal) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        var bytes = toSigningFormat(block, this.publicKey.algorithm, publicKey, Optional.of(seal));
-        return signer.sign(bytes);
+    public byte[] signExternal(byte[] block, byte[] publicKey, byte[] external) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        return signer.signExternal(block, this.publicKey.algorithm, publicKey, external);
+    }
+
+    @Override
+    public byte[] signSealed(byte[] block, byte[] publicKey, byte[] seal) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        return signer.signSealed(block, this.publicKey.algorithm, publicKey, seal);
     }
 
     @Override
