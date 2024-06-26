@@ -2,12 +2,8 @@ package org.biscuitsec.biscuit.token.builder;
 
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.crypto.PublicKey;
-import org.biscuitsec.biscuit.crypto.Signer;
 import org.biscuitsec.biscuit.datalog.SchemaVersion;
 import org.biscuitsec.biscuit.datalog.SymbolTable;
-import org.biscuitsec.biscuit.datalog.Check;
-import org.biscuitsec.biscuit.datalog.Fact;
-import org.biscuitsec.biscuit.datalog.Rule;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.token.Block;
 import io.vavr.Tuple2;

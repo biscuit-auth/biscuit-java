@@ -39,16 +39,7 @@ public class ThirdPartyBlockRequest {
 
         byte[] serializedBlock = res.get();
 
-        Signature sgr = KeyPair.generateSignature(keyPair.public_key().algorithm);
-        sgr.initSign(keyPair.private_key());
-        sgr.update(serializedBlock);
-
-        ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-        algo_buf.putInt(Integer.valueOf(Schema.PublicKey.Algorithm.Ed25519.getNumber()));
-        algo_buf.flip();
-        sgr.update(algo_buf);
-        sgr.update(previousKey.toBytes());
-        byte[] signature = sgr.sign();
+        byte[] signature = keyPair.sign(serializedBlock, previousKey.toBytes());
 
         PublicKey publicKey = keyPair.public_key();
 
