@@ -99,7 +99,7 @@ final class SECP256R1KeyPair extends KeyPair {
 
     @Override
     public byte[] signSealed(byte[] block, byte[] publicKey, byte[] seal) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        return signer.signExternal(block, Algorithm.SECP256R1, publicKey, seal);
+        return signer.signSealed(block, Algorithm.SECP256R1, publicKey, seal);
     }
 
     @Override
