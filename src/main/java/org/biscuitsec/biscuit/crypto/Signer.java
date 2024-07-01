@@ -7,37 +7,41 @@ import java.nio.ByteOrder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.util.Arrays;
 
 public interface Signer {
     byte[] sign(byte[] bytes) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException;
 
+    // format: block, algo, publicKey
     default byte[] signStandard(byte[] block, Schema.PublicKey.Algorithm algorithm, byte[] publicKey) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         var algorithmBytes = getBufferForAlgorithm(algorithm);
-        var payload = new byte[block.length + algorithmBytes.length + publicKey.length];
-        System.arraycopy(block, 0, payload, 0, block.length);
-        System.arraycopy(algorithmBytes, 0, payload, block.length, algorithmBytes.length);
-        System.arraycopy(publicKey, 0, payload, block.length + algorithmBytes.length, publicKey.length);
+        var payload = concatenateArrays(block, algorithmBytes, publicKey);
         return sign(payload);
     }
 
+    // format: block, algo, publicKey, seal
     default byte[] signSealed(byte[] block, Schema.PublicKey.Algorithm algorithm, byte[] publicKey, byte[] seal) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         var algorithmBytes = getBufferForAlgorithm(algorithm);
-        var payload = new byte[block.length + algorithmBytes.length + publicKey.length + seal.length];
-        System.arraycopy(block, 0, payload, 0, block.length);
-        System.arraycopy(algorithmBytes, 0, payload, block.length, algorithmBytes.length);
-        System.arraycopy(publicKey, 0, payload, block.length + algorithmBytes.length, publicKey.length);
-        System.arraycopy(seal, 0, payload, block.length + algorithmBytes.length + publicKey.length, seal.length);
+        var payload = concatenateArrays(block, algorithmBytes, publicKey, seal);
         return sign(payload);
     }
 
+    // format: block, external, algo, publicKey
     default byte[] signExternal(byte[] block, Schema.PublicKey.Algorithm algorithm, byte[] publicKey, byte[] external) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         var algorithmBytes = getBufferForAlgorithm(algorithm);
-        var payload = new byte[block.length + external.length + algorithmBytes.length + publicKey.length];
-        System.arraycopy(block, 0, payload, 0, block.length);
-        System.arraycopy(external, 0, payload, block.length, external.length);
-        System.arraycopy(algorithmBytes, 0, payload, block.length + external.length, algorithmBytes.length);
-        System.arraycopy(publicKey, 0, payload, block.length + external.length + algorithmBytes.length, publicKey.length);
+        var payload = concatenateArrays(block, external, algorithmBytes, publicKey);
         return sign(payload);
+    }
+
+    private static byte[] concatenateArrays(byte[]... arrays) {
+        int totalLength = Arrays.stream(arrays).mapToInt(arr -> arr.length).sum();
+        byte[] result = new byte[totalLength];
+        int currentPos = 0;
+        for (byte[] array : arrays) {
+            System.arraycopy(array, 0, result, currentPos, array.length);
+            currentPos += array.length;
+        }
+        return result;
     }
 
     private static byte[] getBufferForAlgorithm(Schema.PublicKey.Algorithm algorithm) {
