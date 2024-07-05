@@ -10,6 +10,7 @@ import com.google.re2j.Pattern;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 import static io.vavr.API.Left;
@@ -136,7 +137,11 @@ public abstract class Op {
                         if(s.isEmpty()) {
                             throw new Error.Execution("string not found in symbols for id"+value);
                         } else {
-                            stack.push(new Term.Integer(s.get().getBytes("UTF-8").length));
+                            try {
+                                stack.push(new Term.Integer(s.get().getBytes("UTF-8").length));
+                            } catch (UnsupportedEncodingException e) {
+                                throw new Error.Execution("cannot calculate string length: "+e.toString());
+                            }
                         }
                     } else if (value instanceof Term.Bytes) {
                         stack.push(new Term.Integer(((Term.Bytes) value).value().length));
