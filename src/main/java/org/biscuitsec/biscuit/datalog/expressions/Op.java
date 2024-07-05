@@ -136,7 +136,7 @@ public abstract class Op {
                         if(s.isEmpty()) {
                             throw new Error.Execution("string not found in symbols for id"+value);
                         } else {
-                            stack.push(new Term.Integer(s.get().length()));
+                            stack.push(new Term.Integer(s.get().getBytes().length));
                         }
                     } else if (value instanceof Term.Bytes) {
                         stack.push(new Term.Integer(((Term.Bytes) value).value().length));
