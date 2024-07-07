@@ -2,7 +2,6 @@ package org.biscuitsec.biscuit.token;
 
 import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.datalog.*;
-import org.biscuitsec.biscuit.datalog.Rule;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.error.FailedCheck;
 import org.biscuitsec.biscuit.error.LogicError;
@@ -12,7 +11,6 @@ import io.vavr.control.Either;
 import io.vavr.control.Option;
 import org.biscuitsec.biscuit.datalog.Scope;
 import org.biscuitsec.biscuit.token.builder.Check;
-import org.biscuitsec.biscuit.token.builder.Fact;
 import org.biscuitsec.biscuit.token.builder.Term;
 import org.biscuitsec.biscuit.token.builder.parser.Parser;
 
