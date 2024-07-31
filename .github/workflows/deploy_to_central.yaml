@@ -6,25 +6,15 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Install gpg secret key
-        run: |
-          cat <(echo -e "${{ secrets.OSSRH_GPG_SECRET_KEY }}") | gpg --batch --import
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Set up setting.xml
-        uses: s4u/maven-settings-action@v3.0.0
-        with:
-          servers:  |
-            [{
-                "id": "ossrh",
-                "username": "${{ secrets.OSSRH_USERNAME }}",
-                "password": "${{ secrets.OSSRH_TOKEN }}"
-            }]
       - name: Set up Maven Central Repository
         uses: actions/setup-java@v2
         with:
           java-version: "11"
           distribution: "adopt"
           server-id: ossrh
+          server-username:  ${{ secrets.OSSRH_USERNAME }}
+          server-password: ${{ secrets.OSSRH_TOKEN }}
+          gpg-private-key: ${{ secrets.OSSRH_GPG_SECRET_KEY }}
+          gpg-passphrase: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
       - name: Publish package
-        run: mvn --batch-mode deploy -Pdeploy
+        run: mvn deploy
