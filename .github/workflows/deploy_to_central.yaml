@@ -26,7 +26,5 @@ jobs:
           java-version: "11"
           distribution: "adopt"
           server-id: ossrh
-          server-username:  ${{ secrets.OSSRH_USERNAME }}
-          server-password: ${{ secrets.OSSRH_TOKEN }}
       - name: Publish package
-        run: mvn --batch-mode -Dgpg.passphrase=${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }} -s ~/.m2/settings.xml deploy -Pdeploy
+        run: mvn --batch-mode deploy -Pdeploy
