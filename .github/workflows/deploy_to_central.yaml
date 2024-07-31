@@ -16,7 +16,7 @@ jobs:
         with:
           servers:  |
             [{
-                "id": "biscuit-auth",
+                "id": "ossrh",
                 "username": "${{ secrets.OSSRH_USERNAME }}",
                 "password": "${{ secrets.OSSRH_TOKEN }}"
             }]
