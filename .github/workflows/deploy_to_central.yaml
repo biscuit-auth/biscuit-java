@@ -8,6 +8,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Build with Maven
+        run: mvn -B biscuit-auth --file pom.xml
       - name: Set up Maven Central Repository
         uses: actions/setup-java@v2
         with:
