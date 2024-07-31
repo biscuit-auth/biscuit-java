@@ -29,4 +29,4 @@ jobs:
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
       - name: Publish package
-        run: mvn --batch-mode -Dgpg.passphrase=${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }} -s ~/.m2/settings.xml deploy -Pdeploy
+        run: mvn --batch-mode -s ~/.m2/settings.xml deploy -Pdeploy
