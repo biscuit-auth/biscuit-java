@@ -1,14 +1,13 @@
 package org.biscuitsec.biscuit.token;
 
 import biscuit.format.schema.Schema;
-import net.i2p.crypto.eddsa.EdDSAEngine;
 import org.biscuitsec.biscuit.crypto.KeyDelegate;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.token.format.ExternalSignature;
 import org.biscuitsec.biscuit.token.format.SerializedBiscuit;
-import io.vavr.Tuple3;
+import io.vavr.Tuple2;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 import org.biscuitsec.biscuit.datalog.Check;
@@ -30,27 +29,24 @@ public class UnverifiedBiscuit {
     final SerializedBiscuit serializedBiscuit;
     final List<byte[]> revocation_ids;
     final Option<Integer> root_key_id;
-    final HashMap<Long, List<Long>> publicKeyToBlockId;
 
     UnverifiedBiscuit(Block authority, List<Block> blocks, SymbolTable symbols, SerializedBiscuit serializedBiscuit,
-                      HashMap<Long, List<Long>> publicKeyToBlockId, List<byte[]> revocation_ids) {
+                       List<byte[]> revocation_ids) {
         this.authority = authority;
         this.blocks = blocks;
         this.symbols = symbols;
         this.serializedBiscuit = serializedBiscuit;
-        this.publicKeyToBlockId = publicKeyToBlockId;
         this.revocation_ids = revocation_ids;
         this.root_key_id = Option.none();
     }
 
     UnverifiedBiscuit(Block authority, List<Block> blocks, SymbolTable symbols, SerializedBiscuit serializedBiscuit,
-                      HashMap<Long, List<Long>> publicKeyToBlockId, List<byte[]> revocation_ids,
+                      List<byte[]> revocation_ids,
                       Option<Integer> root_key_id) {
         this.authority = authority;
         this.blocks = blocks;
         this.symbols = symbols;
         this.serializedBiscuit = serializedBiscuit;
-        this.publicKeyToBlockId = publicKeyToBlockId;
         this.revocation_ids = revocation_ids;
         this.root_key_id = root_key_id;
     }
@@ -96,14 +92,13 @@ public class UnverifiedBiscuit {
      * @return UnverifiedBiscuit
      */
     static private UnverifiedBiscuit from_serialized_biscuit(SerializedBiscuit ser, SymbolTable symbols) throws Error {
-        Tuple3<Block, ArrayList<Block>, HashMap<Long, List<Long>>> t = ser.extractBlocks(symbols);
+        Tuple2<Block, ArrayList<Block>> t = ser.extractBlocks(symbols);
         Block authority = t._1;
         ArrayList<Block> blocks = t._2;
-        HashMap<Long, List<Long>> publicKeyToBlockId = t._3;
 
         List<byte[]> revocation_ids = ser.revocation_identifiers();
 
-        return new UnverifiedBiscuit(authority, blocks, symbols, ser, publicKeyToBlockId, revocation_ids);
+        return new UnverifiedBiscuit(authority, blocks, symbols, ser, revocation_ids);
     }
 
     /**
@@ -186,11 +181,7 @@ public class UnverifiedBiscuit {
 
         List<byte[]> revocation_ids = container.revocation_identifiers();
 
-        HashMap<Long, List<Long>> publicKeyToBlockId = new HashMap<>();
-        publicKeyToBlockId.putAll(this.publicKeyToBlockId);
-
-        return new UnverifiedBiscuit(copiedBiscuit.authority, blocks, symbols, container,
-                publicKeyToBlockId, revocation_ids);
+        return new UnverifiedBiscuit(copiedBiscuit.authority, blocks, symbols, container, revocation_ids);
     }
     //FIXME: attenuate 3rd Party
 
@@ -245,8 +236,7 @@ public class UnverifiedBiscuit {
             previousKey = this.serializedBiscuit.blocks.get(this.serializedBiscuit.blocks.size() - 1).key;
         }
 
-        List<PublicKey> publicKeys = new ArrayList<>(this.symbols.publicKeys());
-        return new ThirdPartyBlockRequest(previousKey, publicKeys);
+        return new ThirdPartyBlockRequest(previousKey);
     }
 
 
@@ -303,25 +293,8 @@ public class UnverifiedBiscuit {
         }
         blocks.add(block);
 
-        for(PublicKey pk: block.publicKeys) {
-            symbols.insert(pk);
-        }
-
-        long pkIndex = symbols.insert(externalKey);
-
-        HashMap<Long, List<Long>> publicKeyToBlockId = new HashMap<>();
-        publicKeyToBlockId.putAll(this.publicKeyToBlockId);
-        if(publicKeyToBlockId.containsKey(pkIndex)) {
-            publicKeyToBlockId.get(pkIndex).add((long)this.blocks.size()+1);
-        } else {
-            List<Long> list = new ArrayList<>();
-            list.add((long)this.blocks.size()+1);
-            publicKeyToBlockId.put(pkIndex, list);
-        }
-
         List<byte[]> revocation_ids = container.revocation_identifiers();
-
-        return new UnverifiedBiscuit(copiedBiscuit.authority, blocks, symbols, container, publicKeyToBlockId, revocation_ids);
+        return new UnverifiedBiscuit(copiedBiscuit.authority, blocks, symbols, container, revocation_ids);
     }
 
     /**

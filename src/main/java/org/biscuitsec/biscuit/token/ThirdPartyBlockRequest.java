@@ -23,19 +23,13 @@ import java.util.Objects;
 
 public class ThirdPartyBlockRequest {
     PublicKey previousKey;
-    List<PublicKey> publicKeys;
 
-    ThirdPartyBlockRequest(PublicKey previousKey, List<PublicKey> publicKeys) {
+    ThirdPartyBlockRequest(PublicKey previousKey) {
         this.previousKey = previousKey;
-        this.publicKeys = publicKeys;
     }
 
     public Either<Error.FormatError, ThirdPartyBlockContents> createBlock(KeyPair keyPair, Block blockBuilder) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         SymbolTable symbols = new SymbolTable();
-        for(PublicKey pk: this.publicKeys) {
-            symbols.insert(pk);
-        }
-
         org.biscuitsec.biscuit.token.Block block = blockBuilder.build(symbols, Option.some(keyPair.public_key()));
 
         Either<Error.FormatError, byte[]> res = block.to_bytes();
@@ -66,20 +60,12 @@ public class ThirdPartyBlockRequest {
         Schema.ThirdPartyBlockRequest.Builder b = Schema.ThirdPartyBlockRequest.newBuilder();
         b.setPreviousKey(this.previousKey.serialize());
 
-        for(PublicKey pk: this.publicKeys) {
-            b.addPublicKeys(pk.serialize());
-        }
-
         return b.build();
     }
 
     static public ThirdPartyBlockRequest deserialize(Schema.ThirdPartyBlockRequest b) throws Error.FormatError.DeserializationError {
         PublicKey previousKey = PublicKey.deserialize(b.getPreviousKey());
-        List<PublicKey> publicKeys = new ArrayList<>();
-        for(Schema.PublicKey pk: b.getPublicKeysList()) {
-            publicKeys.add(PublicKey.deserialize(pk));
-        }
-        return new ThirdPartyBlockRequest(previousKey, publicKeys);
+        return new ThirdPartyBlockRequest(previousKey);
     }
 
     static public ThirdPartyBlockRequest fromBytes(byte[] slice) throws InvalidProtocolBufferException, Error.FormatError.DeserializationError {
@@ -100,22 +86,18 @@ public class ThirdPartyBlockRequest {
 
         ThirdPartyBlockRequest that = (ThirdPartyBlockRequest) o;
 
-        if (!Objects.equals(previousKey, that.previousKey)) return false;
-        return Objects.equals(publicKeys, that.publicKeys);
+        return Objects.equals(previousKey, that.previousKey);
     }
 
     @Override
     public int hashCode() {
-        int result = previousKey != null ? previousKey.hashCode() : 0;
-        result = 31 * result + (publicKeys != null ? publicKeys.hashCode() : 0);
-        return result;
+        return previousKey != null ? previousKey.hashCode() : 0;
     }
 
     @Override
     public String toString() {
         return "ThirdPartyBlockRequest{" +
                 "previousKey=" + previousKey +
-                ", publicKeys=" + publicKeys +
                 '}';
     }
 }

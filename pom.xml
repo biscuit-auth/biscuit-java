@@ -4,7 +4,7 @@
     <groupId>org.biscuitsec</groupId>
     <artifactId>biscuit</artifactId>
     <packaging>jar</packaging>
-    <version>3.0.2</version>
+    <version>4.0.0</version>
     <name>biscuit-java</name>
     <url>https://github.com/biscuit-auth/biscuit-java</url>
 

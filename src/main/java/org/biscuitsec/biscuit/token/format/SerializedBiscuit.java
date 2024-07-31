@@ -1,6 +1,7 @@
 package org.biscuitsec.biscuit.token.format;
 
 import biscuit.format.schema.Schema;
+import io.vavr.Tuple2;
 import org.biscuitsec.biscuit.crypto.KeyDelegate;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.crypto.PublicKey;
@@ -34,7 +35,7 @@ public class SerializedBiscuit {
     public Option<Integer> root_key_id;
 
     public static int MIN_SCHEMA_VERSION = 3;
-    public static int MAX_SCHEMA_VERSION = 4;
+    public static int MAX_SCHEMA_VERSION = 5;
 
     /**
      * Deserializes a SerializedBiscuit from a byte array
@@ -86,7 +87,6 @@ public class SerializedBiscuit {
 
         Either<Error, Void> res = b.verify(root);
         if (res.isLeft()) {
-            //System.out.println("verification error: "+e.toString());
             throw res.getLeft();
         } else {
             return b;
@@ -409,7 +409,6 @@ public class SerializedBiscuit {
             sgr2.update(block);
             sgr2.update(algo_buf2);
             sgr2.update(publicKey.toBytes());
-            Either<Error.FormatError, Block> authRes = Block.from_bytes(block, Option.none());
 
             if (!sgr2.verify(signedBlock.externalSignature.get().signature)) {
                 return Left(new Error.FormatError.Signature.InvalidSignature("external signature error: Verification equation was not satisfied"));
@@ -419,7 +418,7 @@ public class SerializedBiscuit {
         return Right(next_key);
     }
 
-    public Tuple3<Block, ArrayList<Block>, HashMap<Long, List<Long>>> extractBlocks(SymbolTable symbols) throws Error {
+    public Tuple2<Block, ArrayList<Block>> extractBlocks(SymbolTable symbols) throws Error {
         ArrayList<Option<org.biscuitsec.biscuit.crypto.PublicKey>> blockExternalKeys = new ArrayList<>();
         Either<Error.FormatError, Block> authRes = Block.from_bytes(this.authority.block, Option.none());
         if (authRes.isLeft()) {
@@ -449,32 +448,22 @@ public class SerializedBiscuit {
 
             // blocks with external signatures keep their own symbol table
             if(bdata.externalSignature.isDefined()) {
-                symbols.insert(bdata.externalSignature.get().key);
+                //symbols.insert(bdata.externalSignature.get().key);
                 blockExternalKeys.add(Option.some(bdata.externalSignature.get().key));
             } else {
                 blockExternalKeys.add(Option.none());
                 for (String s : block.symbols().symbols) {
                     symbols.add(s);
                 }
+                for(org.biscuitsec.biscuit.crypto.PublicKey pk: block.publicKeys()) {
+                    symbols.insert(pk);
+                }
             }
-            for(org.biscuitsec.biscuit.crypto.PublicKey pk: block.publicKeys()) {
-                symbols.insert(pk);
-            }
+
             blocks.add(block);
         }
 
-        HashMap<Long, List<Long>> publicKeyToBlockId = new HashMap<>();
-        for(int blockIndex = 0; blockIndex < blockExternalKeys.size(); blockIndex++) {
-            if(blockExternalKeys.get(blockIndex).isDefined()) {
-                PublicKey pk = blockExternalKeys.get(blockIndex).get();
-                long keyIndex = symbols.insert(pk);
-                if(!publicKeyToBlockId.containsKey(keyIndex)) {
-                    publicKeyToBlockId.put(keyIndex, new ArrayList<>());
-                }
-                publicKeyToBlockId.get(keyIndex).add((long) blockIndex);
-            }
-        }
-        return new Tuple3<>(authority, blocks, publicKeyToBlockId);
+        return new Tuple2<>(authority, blocks);
     }
 
     public Either<Error, Void> seal() throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {

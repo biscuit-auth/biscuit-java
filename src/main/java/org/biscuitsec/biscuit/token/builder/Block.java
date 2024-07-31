@@ -109,6 +109,9 @@ public class Block {
     }
 
     public org.biscuitsec.biscuit.token.Block build(SymbolTable symbols, final Option<PublicKey> externalKey) {
+        if(externalKey.isDefined()) {
+            symbols = new SymbolTable();
+        }
         int symbol_start = symbols.currentOffset();
         int publicKeyStart = symbols.currentPublicKeyOffset();
 

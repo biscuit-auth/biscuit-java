@@ -7,7 +7,7 @@ import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.token.format.SerializedBiscuit;
-import io.vavr.Tuple3;
+import io.vavr.Tuple2;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 
@@ -101,21 +101,20 @@ public class Biscuit extends UnverifiedBiscuit {
         } else {
             SerializedBiscuit s = container.get();
             List<byte[]> revocation_ids = s.revocation_identifiers();
-            HashMap<Long, List<Long>> publicKeyToBlockId = new HashMap<>();
 
             Option<SerializedBiscuit> c = Option.some(s);
-            return new Biscuit(authority, blocks, authority.symbols, s, publicKeyToBlockId, revocation_ids, root_key_id);
+            return new Biscuit(authority, blocks, authority.symbols, s, revocation_ids, root_key_id);
         }
     }
 
     Biscuit(Block authority, List<Block> blocks, SymbolTable symbols, SerializedBiscuit serializedBiscuit,
-            HashMap<Long, List<Long>> publicKeyToBlockId, List<byte[]> revocation_ids) {
-        super(authority, blocks, symbols, serializedBiscuit, publicKeyToBlockId, revocation_ids);
+            List<byte[]> revocation_ids) {
+        super(authority, blocks, symbols, serializedBiscuit,  revocation_ids);
     }
 
     Biscuit(Block authority, List<Block> blocks, SymbolTable symbols, SerializedBiscuit serializedBiscuit,
-            HashMap<Long, List<Long>> publicKeyToBlockId, List<byte[]> revocation_ids, Option<Integer> root_key_id) {
-        super(authority, blocks, symbols, serializedBiscuit, publicKeyToBlockId, revocation_ids, root_key_id);
+            List<byte[]> revocation_ids, Option<Integer> root_key_id) {
+        super(authority, blocks, symbols, serializedBiscuit, revocation_ids, root_key_id);
     }
 
     /**
@@ -248,14 +247,13 @@ public class Biscuit extends UnverifiedBiscuit {
      * @return
      */
     static Biscuit from_serialized_biscuit(SerializedBiscuit ser, SymbolTable symbols) throws Error {
-        Tuple3<Block, ArrayList<Block>, HashMap<Long, List<Long>>> t = ser.extractBlocks(symbols);
+        Tuple2<Block, ArrayList<Block>> t = ser.extractBlocks(symbols);
         Block authority = t._1;
         ArrayList<Block> blocks = t._2;
-        HashMap<Long, List<Long>> publicKeyToBlockId = t._3;
 
         List<byte[]> revocation_ids = ser.revocation_identifiers();
 
-        return new Biscuit(authority, blocks, symbols, ser, publicKeyToBlockId, revocation_ids);
+        return new Biscuit(authority, blocks, symbols, ser, revocation_ids);
     }
 
     /**
@@ -311,7 +309,7 @@ public class Biscuit extends UnverifiedBiscuit {
         return attenuate(rng, keypair, block.build(builderSymbols));
     }
 
-    public Biscuit attenuate(final SecureRandom rng, final KeyPair keypair,org.biscuitsec.biscuit.token.builder.Block block) throws Error {
+    public Biscuit attenuate(final SecureRandom rng, final KeyPair keypair, org.biscuitsec.biscuit.token.builder.Block block) throws Error {
         SymbolTable builderSymbols = new SymbolTable(this.symbols);
         return attenuate(rng, keypair, block.build(builderSymbols));
     }
@@ -354,10 +352,7 @@ public class Biscuit extends UnverifiedBiscuit {
 
         List<byte[]> revocation_ids = container.revocation_identifiers();
 
-        HashMap<Long, List<Long>> publicKeyToBlockId = new HashMap<>();
-        publicKeyToBlockId.putAll(this.publicKeyToBlockId);
-
-        return new Biscuit(copiedBiscuit.authority, blocks, symbols, container, publicKeyToBlockId, revocation_ids);
+        return new Biscuit(copiedBiscuit.authority, blocks, symbols, container, revocation_ids);
     }
 
     /**
@@ -385,7 +380,11 @@ public class Biscuit extends UnverifiedBiscuit {
         s.append("\n\tblocks: [\n");
         for (Block b : this.blocks) {
             s.append("\t\t");
-            s.append(b.print(this.symbols));
+            if(b.externalKey.isDefined()) {
+                s.append(b.print(b.symbols));
+            } else {
+                s.append(b.print(this.symbols));
+            }
             s.append("\n");
         }
         s.append("\t]\n}");
