@@ -446,8 +446,6 @@ class ParserTest {
 
     @Test
     void testDatalogSucceedsArrays() throws org.biscuitsec.biscuit.error.Error.Parser {
-        SymbolTable symbols = Biscuit.default_symbol_table();
-
         String l1 = "check if [2, 3].union([2])";
         String toParse = String.join(";", List.of(l1));
 
@@ -464,8 +462,6 @@ class ParserTest {
 
     @Test
     void testDatalogSucceedsArraysContains() throws org.biscuitsec.biscuit.error.Error.Parser {
-        SymbolTable symbols = Biscuit.default_symbol_table();
-
         String l1 = "check if [2019-12-04T09:46:41Z, 2020-12-04T09:46:41Z].contains(2020-12-04T09:46:41Z)";
         String toParse = String.join(";", List.of(l1));
 
@@ -482,8 +478,6 @@ class ParserTest {
 
     @Test
     void testDatalogFailed() {
-        SymbolTable symbols = Biscuit.default_symbol_table();
-
         String l1 = "fact(1)";
         String l2 = "check fact(1)"; // typo missing "if"
         String toParse = String.join(";", Arrays.asList(l1, l2));
@@ -494,8 +488,6 @@ class ParserTest {
 
     @Test
     void testDatalogRemoveComment()  {
-        SymbolTable symbols = Biscuit.default_symbol_table();
-
         String l0 = "// test comment";
         String l1 = "fact1(1, 2);";
         String l2 = "fact2(\"2\");";
