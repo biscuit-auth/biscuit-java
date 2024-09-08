@@ -5,7 +5,6 @@ import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.datalog.TemporarySymbolTable;
 import org.biscuitsec.biscuit.datalog.expressions.Op;
-import org.biscuitsec.biscuit.token.Biscuit;
 import org.biscuitsec.biscuit.token.builder.parser.Error;
 import org.biscuitsec.biscuit.token.builder.parser.Parser;
 import io.vavr.Tuple2;
