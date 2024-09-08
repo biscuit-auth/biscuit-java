@@ -10,7 +10,6 @@ import org.biscuitsec.biscuit.token.builder.parser.Error;
 import org.biscuitsec.biscuit.token.builder.parser.Parser;
 import io.vavr.Tuple2;
 import io.vavr.control.Either;
-import io.vavr.control.Option;
 import org.biscuitsec.biscuit.token.builder.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
