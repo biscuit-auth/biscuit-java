@@ -214,7 +214,7 @@ class ParserTest {
                                         "valid_date",
                                         List.of(Utils.string("file1")
                                         )),
-                                Arrays.asList(
+                                List.of(
                                         Utils.pred("resource", List.of(Utils.string("file1")))
                                 ),
                                 new ArrayList<>(),
