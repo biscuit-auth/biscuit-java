@@ -102,6 +102,6 @@ public class BuilderTest {
         byte[] someBytes = "Hello".getBytes(StandardCharsets.UTF_8);
         Term.Bytes term = new Term.Bytes(someBytes);
         assertArrayEquals(someBytes, term.getValue(), "content not the same");
-        assertNotEquals(System.identityHashCode(someBytes), System.identityHashCode(term.getValue()), "different objects");
+        assertNotEquals(System.identityHashCode(someBytes), System.identityHashCode(term.getValue()), "objects not different");
     }
 }
