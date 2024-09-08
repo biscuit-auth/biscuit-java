@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class BuilderTest {
 
     @Test
-    public void testBuild() throws Error.Language, Error.SymbolTableOverlap, Error.FormatError {
+    public void testBuild() throws Error.Language, Error.FormatError {
         SecureRandom rng = new SecureRandom();
         KeyPair root = new KeyPair(rng);
         SymbolTable symbols = Biscuit.default_symbol_table();
