@@ -493,7 +493,7 @@ class ParserTest {
     }
 
     @Test
-    void testDatalogRemoveComment() throws org.biscuitsec.biscuit.error.Error.Parser {
+    void testDatalogRemoveComment()  {
         SymbolTable symbols = Biscuit.default_symbol_table();
 
         String l0 = "// test comment";
