@@ -13,10 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,12 +26,12 @@ public class BuilderTest {
         SymbolTable symbols = Biscuit.default_symbol_table();
 
         Block authority_builder = new Block();
-        authority_builder.add_fact(Utils.fact("revocation_id", Arrays.asList(Utils.date(Date.from(Instant.now())))));
-        authority_builder.add_fact(Utils.fact("right", Arrays.asList(Utils.s("admin"))));
+        authority_builder.add_fact(Utils.fact("revocation_id", List.of(Utils.date(Date.from(Instant.now())))));
+        authority_builder.add_fact(Utils.fact("right", List.of(Utils.s("admin"))));
         authority_builder.add_rule(Utils.constrained_rule("right",
                 Arrays.asList(Utils.s("namespace"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("operation")),
-                Arrays.asList(Utils.pred("ns_operation", Arrays.asList(Utils.s("namespace"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("operation")))),
-                Arrays.asList(
+                List.of(Utils.pred("ns_operation", Arrays.asList(Utils.s("namespace"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("operation")))),
+                List.of(
                         new Expression.Binary(
                                 Expression.Op.Contains,
                                 new Expression.Value(Utils.var("operation")),
@@ -47,12 +44,12 @@ public class BuilderTest {
         ));
         authority_builder.add_rule(Utils.constrained_rule("right",
                 Arrays.asList(Utils.s("topic"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("topic"), Utils.var("operation")),
-                Arrays.asList(Utils.pred("topic_operation", Arrays.asList(Utils.s("topic"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("topic"), Utils.var("operation")))),
-                Arrays.asList(
+                List.of(Utils.pred("topic_operation", Arrays.asList(Utils.s("topic"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("topic"), Utils.var("operation")))),
+                List.of(
                         new Expression.Binary(
                                 Expression.Op.Contains,
                                 new Expression.Value(Utils.var("operation")),
-                                new Expression.Value(new Term.Set(new HashSet<>(Arrays.asList(
+                                new Expression.Value(new Term.Set(new HashSet<>(List.of(
                                         Utils.s("lookup")
                                 )))))
                 )
