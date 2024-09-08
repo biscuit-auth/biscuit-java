@@ -25,7 +25,7 @@ This API implements [Biscuit 2.0](https://www.biscuitsec.org/blog/biscuit-2-0/).
 ### Requirements
 
 * JDK v11
-* the Protobuf compiler command `protoc` v3+ is required in `$PATH`.
+* The Protobuf compiler command `protoc` v3+ is required in `$PATH`.
 
 ### Build
 
