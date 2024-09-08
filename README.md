@@ -11,7 +11,7 @@ This API implements [Biscuit 2.0](https://www.biscuitsec.org/blog/biscuit-2-0/).
 
 ## Usage
 
-```java
+```xml
 <!-- https://mvnrepository.com/artifact/org.biscuitsec/biscuit -->
 <dependency>
     <groupId>org.biscuitsec</groupId>
