@@ -101,7 +101,7 @@ public class BuilderTest {
     public void testArrayValueIsCopy() {
         byte[] someBytes = "Hello".getBytes(StandardCharsets.UTF_8);
         Term.Bytes term = new Term.Bytes(someBytes);
-        assertTrue(Arrays.equals(someBytes, term.getValue()), "same content");
+        assertArrayEquals(someBytes, term.getValue(), "content not the same");
         assertNotEquals(System.identityHashCode(someBytes), System.identityHashCode(term.getValue()), "different objects");
     }
 }
