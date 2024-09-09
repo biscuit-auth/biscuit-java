@@ -110,7 +110,7 @@ class SamplesTest {
             System.out.println("Testcase name: \"" + testCase.title + "\"");
             System.out.println("filename: \"" + testCase.filename + "\"");
             InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("samples/" + testCase.filename);
-            byte[] data = new byte[inputStream.available()];
+            byte[] data = new byte[requireNonNull(inputStream, "InputStream cannot be null").available()];
 
             for (Map.Entry<String, JsonElement> validationEntry : testCase.validations.getAsJsonObject().entrySet()) {
                 String validationName = validationEntry.getKey();
