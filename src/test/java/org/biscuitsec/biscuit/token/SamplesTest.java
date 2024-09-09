@@ -48,7 +48,7 @@ class SamplesTest {
         return sample.testcases.stream().map(t -> processTestcase(t, publicKey, keyPair));
     }
 
-    void compareBlocks(KeyPair root, List<Block> sampleBlocks, Biscuit token) throws Error {
+    private void compareBlocks(KeyPair root, List<Block> sampleBlocks, Biscuit token) throws Error {
         assertEquals(sampleBlocks.size(), 1 + token.blocks.size());
         Option<Biscuit> sampleToken = Option.none();
         Biscuit b = compareBlock(root, sampleToken, 0, sampleBlocks.get(0), token.authority, token.symbols);
@@ -60,7 +60,7 @@ class SamplesTest {
         }
     }
 
-    Biscuit compareBlock(KeyPair root, Option<Biscuit> sampleToken, long sampleBlockIndex, Block sampleBlock, org.biscuitsec.biscuit.token.Block tokenBlock, SymbolTable tokenSymbols) throws Error {
+    private Biscuit compareBlock(KeyPair root, Option<Biscuit> sampleToken, long sampleBlockIndex, Block sampleBlock, org.biscuitsec.biscuit.token.Block tokenBlock, SymbolTable tokenSymbols) throws Error {
         Option<PublicKey> sampleExternalKey = sampleBlock.getExternalKey();
         List<PublicKey> samplePublicKeys = sampleBlock.getPublicKeys();
         String sampleDatalog = sampleBlock.getCode().replace("\"", "\\\"");
@@ -105,7 +105,7 @@ class SamplesTest {
         return newSampleToken;
     }
 
-    DynamicTest processTestcase(final TestCase testCase, final PublicKey publicKey, final KeyPair privateKey) {
+    private DynamicTest processTestcase(final TestCase testCase, final PublicKey publicKey, final KeyPair privateKey) {
         return DynamicTest.dynamicTest(testCase.title + ": " + testCase.filename, () -> {
             System.out.println("Testcase name: \"" + testCase.title + "\"");
             System.out.println("filename: \"" + testCase.filename + "\"");
@@ -230,7 +230,7 @@ class SamplesTest {
         });
     }
 
-    class Block {
+    private class Block {
         List<String> symbols;
         String code;
         List<String> public_keys;
@@ -285,7 +285,7 @@ class SamplesTest {
         }
     }
 
-    class TestCase {
+    private class TestCase {
         String title;
 
         public String getTitle() {
@@ -325,7 +325,7 @@ class SamplesTest {
         }
     }
 
-    class Sample {
+    private class Sample {
         String root_private_key;
 
         public String getRoot_public_key() {
@@ -356,7 +356,7 @@ class SamplesTest {
         }
     }
 
-    class World {
+    private class World {
         List<FactSet> facts;
         List<RuleSet> rules;
         List<CheckSet> checks;
@@ -448,7 +448,7 @@ class SamplesTest {
         }
     }
 
-    class FactSet {
+    private class FactSet {
         List<Long> origin;
         List<String> facts;
 
@@ -494,7 +494,7 @@ class SamplesTest {
         }
     }
 
-    class RuleSet implements Comparable<RuleSet> {
+    private class RuleSet implements Comparable<RuleSet> {
         Long origin;
         List<String> rules;
 
@@ -549,7 +549,7 @@ class SamplesTest {
         }
     }
 
-    class CheckSet implements Comparable<CheckSet> {
+    private class CheckSet implements Comparable<CheckSet> {
         Long origin;
         List<String> checks;
 
@@ -608,5 +608,4 @@ class SamplesTest {
                     '}';
         }
     }
-
 }
