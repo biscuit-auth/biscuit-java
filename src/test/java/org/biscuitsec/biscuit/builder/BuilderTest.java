@@ -15,6 +15,7 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.*;
 
+import static java.lang.System.out;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BuilderTest {
@@ -58,7 +59,7 @@ public class BuilderTest {
         org.biscuitsec.biscuit.token.Block authority = authority_builder.build(symbols);
         Biscuit rootBiscuit = Biscuit.make(rng, root, authority);
 
-        System.out.println(rootBiscuit.print());
+        out.println(rootBiscuit.print());
 
         assertNotNull(rootBiscuit);
     }
