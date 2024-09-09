@@ -21,7 +21,7 @@ public class ExpressionTest {
         symbols.add("var");
 
 
-        Expression e = new Expression(new ArrayList<Op>(Arrays.asList(
+        Expression e = new Expression(new ArrayList<>(Arrays.asList(
                 new Op.Value(new Term.Integer(1)),
                 new Op.Value(new Term.Variable(SymbolTable.DEFAULT_SYMBOLS_OFFSET + 2)),
                 new Op.Binary(Op.BinaryOp.LessThan),
@@ -50,7 +50,7 @@ public class ExpressionTest {
         symbols.add("ab");
 
 
-        Expression e = new Expression(new ArrayList<Op>(Arrays.asList(
+        Expression e = new Expression(new ArrayList<>(Arrays.asList(
                 new Op.Value(new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET)),
                 new Op.Value(new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET + 1)),
                 new Op.Binary(Op.BinaryOp.Add)
@@ -74,7 +74,7 @@ public class ExpressionTest {
         symbols.add("b");
 
 
-        Expression e = new Expression(new ArrayList<Op>(Arrays.asList(
+        Expression e = new Expression(new ArrayList<>(Arrays.asList(
                 new Op.Value(new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET)),
                 new Op.Value(new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET + 1)),
                 new Op.Binary(Op.BinaryOp.Contains)
@@ -98,7 +98,7 @@ public class ExpressionTest {
         symbols.add("b");
 
 
-        Expression e = new Expression(new ArrayList<Op>(Arrays.asList(
+        Expression e = new Expression(new ArrayList<>(Arrays.asList(
                 new Op.Value(new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET)),
                 new Op.Value(new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET + 1)),
                 new Op.Binary(Op.BinaryOp.Contains),
@@ -120,7 +120,7 @@ public class ExpressionTest {
     public void testIntersectionAndContains() throws Error.Execution {
         SymbolTable symbols = new SymbolTable();
 
-        Expression e = new Expression(new ArrayList<Op>(Arrays.asList(
+        Expression e = new Expression(new ArrayList<>(Arrays.asList(
                 new Op.Value(new Term.Set(new HashSet<>(Arrays.asList(new Term.Integer(1), new Term.Integer(2), new Term.Integer(3))))),
                 new Op.Value(new Term.Set(new HashSet<>(Arrays.asList(new Term.Integer(1), new Term.Integer(2))))),
                 new Op.Binary(Op.BinaryOp.Intersection),
