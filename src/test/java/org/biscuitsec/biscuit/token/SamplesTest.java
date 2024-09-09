@@ -227,7 +227,7 @@ class SamplesTest {
         });
     }
 
-    private class Block {
+    private static class Block {
         List<String> symbols;
         String code;
         List<String> public_keys;
@@ -282,7 +282,7 @@ class SamplesTest {
         }
     }
 
-    private class TestCase {
+    private static class TestCase {
         String title;
 
         public String getTitle() {
@@ -322,7 +322,7 @@ class SamplesTest {
         }
     }
 
-    private class Sample {
+    private static class Sample {
         String root_private_key;
 
         public String getRoot_public_key() {
@@ -353,7 +353,7 @@ class SamplesTest {
         }
     }
 
-    private class World {
+    private static class World {
         final List<FactSet> facts;
         final List<RuleSet> rules;
         final List<CheckSet> checks;
@@ -446,7 +446,7 @@ class SamplesTest {
         }
     }
 
-    private class FactSet {
+    private static class FactSet {
         final List<Long> origin;
         final List<String> facts;
 
@@ -492,7 +492,7 @@ class SamplesTest {
         }
     }
 
-    private class RuleSet implements Comparable<RuleSet> {
+    private static class RuleSet implements Comparable<RuleSet> {
         Long origin;
         final List<String> rules;
 
@@ -547,7 +547,7 @@ class SamplesTest {
         }
     }
 
-    private class CheckSet implements Comparable<CheckSet> {
+    private static class CheckSet implements Comparable<CheckSet> {
         Long origin;
         final List<String> checks;
 
