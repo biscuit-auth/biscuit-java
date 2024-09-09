@@ -1,6 +1,8 @@
 package org.biscuitsec.biscuit.crypto;
 
 import biscuit.format.schema.Schema;
+import org.biscuitsec.biscuit.error.Error;
+import org.junit.jupiter.api.Test;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -9,9 +11,6 @@ import java.security.SignatureException;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
-
-import org.biscuitsec.biscuit.error.Error;
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
