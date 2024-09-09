@@ -227,10 +227,8 @@ public class WorldTest {
         assertEquals(expected, res);
 
         res = testSuffix(w, syms, suff, route, "example.com");
-        for (Iterator<Fact> it = res.stream().iterator(); it.hasNext(); ) {
-            Fact f = it.next();
-            System.out.println("\t" + syms.print_fact(f));
-        }
+        res.stream().forEach(fact -> System.out.println("\t" + syms.print_fact(fact)));
+
         expected = new FactSet(new Origin(0), new HashSet<>(Arrays.asList(new Fact(new Predicate(suff,
                         Arrays.asList(
                                 app_0,
