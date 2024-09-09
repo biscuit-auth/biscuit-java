@@ -168,7 +168,7 @@ public class WorldTest {
                                       new Term.Variable(syms.insert("t2_id")),
                                       new Term.Variable(syms.insert("right")),
                                       new Term.Variable(syms.insert("id"))))),
-              List.of(new Expression(new ArrayList<Op>(Arrays.asList(
+              List.of(new Expression(new ArrayList<>(Arrays.asList(
                       new Op.Value(new Term.Variable(syms.insert("id"))),
                       new Op.Value(new Term.Integer(1)),
                       new Op.Binary(Op.BinaryOp.LessThan)
@@ -192,7 +192,7 @@ public class WorldTest {
                               new Term.Variable(syms.insert("app_id")),
                               new Term.Variable(syms.insert("domain"))))
               ),
-              List.of(new Expression(new ArrayList<Op>(Arrays.asList(
+              List.of(new Expression(new ArrayList<>(Arrays.asList(
                       new Op.Value(new Term.Variable(syms.insert("domain"))),
                       new Op.Value(syms.add(suffix)),
                       new Op.Binary(Op.BinaryOp.Suffix)
@@ -271,12 +271,12 @@ public class WorldTest {
                       new Predicate(x, Arrays.asList(new Term.Variable(syms.insert("date")), new Term.Variable(syms.insert("val"))))
               ),
               Arrays.asList(
-                   new Expression(new ArrayList<Op>(Arrays.asList(
+                   new Expression(new ArrayList<>(Arrays.asList(
                            new Op.Value(new Term.Variable(syms.insert("date"))),
                            new Op.Value(new Term.Date(t2_timestamp)),
                            new Op.Binary(Op.BinaryOp.LessOrEqual)
                    ))),
-                   new Expression(new ArrayList<Op>(Arrays.asList(
+                   new Expression(new ArrayList<>(Arrays.asList(
                            new Op.Value(new Term.Variable(syms.insert("date"))),
                            new Op.Value(new Term.Date(0)),
                            new Op.Binary(Op.BinaryOp.GreaterOrEqual)
@@ -300,16 +300,16 @@ public class WorldTest {
                       new Predicate(x, Arrays.asList(new Term.Variable(syms.insert("date")), new Term.Variable(syms.insert("val"))))
               ),
               Arrays.asList(
-                      new Expression(new ArrayList<Op>(Arrays.asList(
+                      new Expression(new ArrayList<>(Arrays.asList(
                               new Op.Value(new Term.Variable(syms.insert("date"))),
                               new Op.Value(new Term.Date(t2_timestamp)),
                               new Op.Binary(Op.BinaryOp.GreaterOrEqual)
                       ))),
-                     new Expression(new ArrayList<Op>(Arrays.asList(
-                              new Op.Value(new Term.Variable(syms.insert("date"))),
-                              new Op.Value(new Term.Date(0)),
-                              new Op.Binary(Op.BinaryOp.GreaterOrEqual)
-                      )))
+                     new Expression(new ArrayList<>(Arrays.asList(
+                             new Op.Value(new Term.Variable(syms.insert("date"))),
+                             new Op.Value(new Term.Date(0)),
+                             new Op.Binary(Op.BinaryOp.GreaterOrEqual)
+                     )))
               )
       );
 
@@ -346,7 +346,7 @@ public class WorldTest {
                       Arrays.asList(new Term.Variable(syms.insert("sym")), new Term.Variable(syms.insert("int")), new Term.Variable(syms.insert("str"))))
               ),
               List.of(
-                      new Expression(new ArrayList<Op>(Arrays.asList(
+                      new Expression(new ArrayList<>(Arrays.asList(
                               new Op.Value(new Term.Set(new HashSet<>(Arrays.asList(new Term.Integer(0L), new Term.Integer(1L))))),
                               new Op.Value(new Term.Variable(syms.insert("int"))),
                               new Op.Binary(Op.BinaryOp.Contains)
@@ -370,7 +370,7 @@ public class WorldTest {
               List.of(new Predicate(x, Arrays.asList(new Term.Variable(syms.insert("sym")), new Term.Variable(syms.insert("int")), new Term.Variable(syms.insert("str"))))
               ),
               List.of(
-                      new Expression(new ArrayList<Op>(Arrays.asList(
+                      new Expression(new ArrayList<>(Arrays.asList(
                               new Op.Value(new Term.Set(new HashSet<>(Arrays.asList(new Term.Str(abc_sym_id), new Term.Str(ghi_sym_id))))),
                               new Op.Value(new Term.Variable(syms.insert("sym"))),
                               new Op.Binary(Op.BinaryOp.Contains),
@@ -392,7 +392,7 @@ public class WorldTest {
               new Predicate(string_set, Arrays.asList(new Term.Variable(syms.insert("sym")), new Term.Variable(syms.insert("int")), new Term.Variable(syms.insert("str")))),
               List.of(new Predicate(x, Arrays.asList(new Term.Variable(syms.insert("sym")), new Term.Variable(syms.insert("int")), new Term.Variable(syms.insert("str"))))),
               List.of(
-                      new Expression(new ArrayList<Op>(Arrays.asList(
+                      new Expression(new ArrayList<>(Arrays.asList(
                               new Op.Value(new Term.Set(new HashSet<>(Arrays.asList(syms.add("test"), syms.add("aaa"))))),
                               new Op.Value(new Term.Variable(syms.insert("str"))),
                               new Op.Binary(Op.BinaryOp.Contains)
