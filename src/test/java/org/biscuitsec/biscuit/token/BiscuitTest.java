@@ -1,19 +1,14 @@
 package org.biscuitsec.biscuit.token;
 
+import io.vavr.control.Option;
+import io.vavr.control.Try;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.datalog.RunLimits;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.error.FailedCheck;
 import org.biscuitsec.biscuit.error.LogicError;
 import org.biscuitsec.biscuit.token.builder.Block;
-
-import io.vavr.control.Option;
-import io.vavr.control.Try;
-
 import org.junit.jupiter.api.Test;
-
-import static java.lang.System.out;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -21,10 +16,14 @@ import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
+import static java.lang.System.out;
 import static org.biscuitsec.biscuit.crypto.TokenSignature.hex;
 import static org.biscuitsec.biscuit.token.builder.Utils.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BiscuitTest {
 
@@ -671,7 +670,7 @@ public class BiscuitTest {
 
         try {
             authorizer.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
-        } catch(Error.FailedLogic e) {
+        } catch (Error.FailedLogic e) {
             e.printStackTrace(out);
             assertEquals(new Error.FailedLogic(new LogicError.Unauthorized(
                     new LogicError.MatchedPolicy.Allow(0),
