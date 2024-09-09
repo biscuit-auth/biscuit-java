@@ -30,6 +30,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Objects.requireNonNull;
 import static org.biscuitsec.biscuit.token.Block.from_bytes;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,7 +43,9 @@ class SamplesTest {
         InputStream inputStream =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("samples/samples.json");
         Gson gson = new Gson();
-        Sample sample = gson.fromJson(new InputStreamReader(new BufferedInputStream(inputStream)), Sample.class);
+        Sample sample = gson.fromJson(new InputStreamReader(
+                        new BufferedInputStream(requireNonNull(inputStream, "InputStream cannot be null"))),
+                Sample.class);
         PublicKey publicKey = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, sample.root_public_key);
         KeyPair keyPair = new KeyPair(sample.root_private_key);
         return sample.testcases.stream().map(t -> processTestcase(t, publicKey, keyPair));
