@@ -158,7 +158,7 @@ class SamplesTest {
                     System.out.println(token.print());
                     for (String f : authorizer_facts) {
                         f = f.trim();
-                        if (f.length() > 0) {
+                        if (!f.isEmpty()) {
                             if (f.startsWith("check if") || f.startsWith("check all")) {
                                 authorizer.add_check(f);
                             } else if (f.startsWith("allow if") || f.startsWith("deny if")) {
