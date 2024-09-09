@@ -119,7 +119,7 @@ class SamplesTest {
                 JsonObject expected_result = validation.getAsJsonObject("result");
                 String[] authorizer_facts = validation.getAsJsonPrimitive("authorizer_code").getAsString().split(";");
                 Either<Throwable, Long> res = Try.of(() -> {
-                    inputStream.read(data);
+                    int ignoreNumBytesRead = inputStream.read(data);
                     Biscuit token = Biscuit.from_bytes(data, publicKey);
                     assertArrayEquals(token.serialize(), data);
 
