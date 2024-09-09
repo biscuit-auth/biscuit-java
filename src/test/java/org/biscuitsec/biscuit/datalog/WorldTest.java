@@ -54,7 +54,7 @@ public class WorldTest {
       System.out.println("parents:");
       final Rule query1 = new Rule(new Predicate(parent,
               Arrays.asList(new Term.Variable(syms.insert("parent")), new Term.Variable(syms.insert("child")))),
-              Arrays.asList(new Predicate(parent,
+              List.of(new Predicate(parent,
                       Arrays.asList(new Term.Variable(syms.insert("parent")), new Term.Variable(syms.insert("child"))))),
               new ArrayList<>());
 
@@ -63,14 +63,14 @@ public class WorldTest {
          System.out.println("\t" + syms.print_fact(fact));
       }
       final Rule query2 = new Rule(new Predicate(parent, Arrays.asList(new Term.Variable(syms.insert("parent")), b)),
-              Arrays.asList(new Predicate(parent, Arrays.asList(new Term.Variable(syms.insert("parent")), b))),
+              List.of(new Predicate(parent, Arrays.asList(new Term.Variable(syms.insert("parent")), b))),
               new ArrayList<>());
       System.out.println("parents of B: [" + String.join(", ",
               w.query_rule(query2, (long) 0, new TrustedOrigins(0), syms)
                       .stream().map((f) -> syms.print_fact(f)).collect(Collectors.toSet())) + "]");
       final Rule query3 = new Rule(new Predicate(grandparent, Arrays.asList(new Term.Variable(syms.insert("grandparent")),
               new Term.Variable(syms.insert("grandchild")))),
-              Arrays.asList(new Predicate(grandparent, Arrays.asList(new Term.Variable(syms.insert("grandparent")),
+              List.of(new Predicate(grandparent, Arrays.asList(new Term.Variable(syms.insert("grandparent")),
                       new Term.Variable(syms.insert("grandchild"))))),
               new ArrayList<>());
       System.out.println("grandparents: [" + String.join(", ",
@@ -82,8 +82,8 @@ public class WorldTest {
 
       final Rule query4 = new Rule(new Predicate(grandparent,
               Arrays.asList(new Term.Variable(syms.insert("grandparent")), new Term.Variable(syms.insert("grandchild")))),
-              Arrays.asList(new Predicate(grandparent,
-                              Arrays.asList(new Term.Variable(syms.insert("grandparent")), new Term.Variable(syms.insert("grandchild"))))),
+              List.of(new Predicate(grandparent,
+                      Arrays.asList(new Term.Variable(syms.insert("grandparent")), new Term.Variable(syms.insert("grandchild"))))),
               new ArrayList<>());
       final FactSet res = w.query_rule(query4, (long) 0, new TrustedOrigins(0), syms);
       System.out.println("grandparents after inserting parent(C, E): [" + String.join(", ",
@@ -105,7 +105,7 @@ public class WorldTest {
       final Rule query5 = new Rule(new Predicate(sibling, Arrays.asList(
               new Term.Variable(syms.insert("sibling1")),
               new Term.Variable(syms.insert("sibling2")))),
-              Arrays.asList(new Predicate(sibling, Arrays.asList(
+              List.of(new Predicate(sibling, Arrays.asList(
                       new Term.Variable(syms.insert("sibling1")),
                       new Term.Variable(syms.insert("sibling2"))))),
               new ArrayList<>());
@@ -168,11 +168,11 @@ public class WorldTest {
                                       new Term.Variable(syms.insert("t2_id")),
                                       new Term.Variable(syms.insert("right")),
                                       new Term.Variable(syms.insert("id"))))),
-              Arrays.asList(new Expression(new ArrayList<Op>(Arrays.asList(
+              List.of(new Expression(new ArrayList<Op>(Arrays.asList(
                       new Op.Value(new Term.Variable(syms.insert("id"))),
                       new Op.Value(new Term.Integer(1)),
                       new Op.Binary(Op.BinaryOp.LessThan)
-                      ))))
+              ))))
       ), (long) 0, new TrustedOrigins(0), syms);
        for (Iterator<Fact> it = res.stream().iterator(); it.hasNext(); ) {
            Fact f = it.next();
@@ -186,13 +186,13 @@ public class WorldTest {
    private final FactSet testSuffix(final World w, SymbolTable syms, final long suff, final long route, final String suffix) throws Error {
       return w.query_rule(new Rule(new Predicate(suff,
               Arrays.asList(new Term.Variable(syms.insert("app_id")), new Term.Variable(syms.insert("domain")))),
-              Arrays.asList(
-            new Predicate(route, Arrays.asList(
-                    new Term.Variable(syms.insert("route_id")),
-                    new Term.Variable(syms.insert("app_id")),
-                    new Term.Variable(syms.insert("domain"))))
-      ),
-              Arrays.asList(new Expression(new ArrayList<Op>(Arrays.asList(
+              List.of(
+                      new Predicate(route, Arrays.asList(
+                              new Term.Variable(syms.insert("route_id")),
+                              new Term.Variable(syms.insert("app_id")),
+                              new Term.Variable(syms.insert("domain"))))
+              ),
+              List.of(new Expression(new ArrayList<Op>(Arrays.asList(
                       new Op.Value(new Term.Variable(syms.insert("domain"))),
                       new Op.Value(syms.add(suffix)),
                       new Op.Binary(Op.BinaryOp.Suffix)
@@ -223,7 +223,7 @@ public class WorldTest {
            System.out.println("\t" + syms.print_fact(f));
        }
       FactSet expected = new FactSet(new Origin(0),
-              new HashSet<>(Arrays.asList(new Fact(new Predicate(suff, Arrays.asList(app_2, syms.add("test.fr")))))));
+              new HashSet<>(List.of(new Fact(new Predicate(suff, Arrays.asList(app_2, syms.add("test.fr")))))));
       assertEquals(expected, res);
 
       res = testSuffix(w, syms, suff, route, "example.com");
@@ -267,7 +267,7 @@ public class WorldTest {
       final Rule r1 = new Rule(new Predicate(
               before,
               Arrays.asList(new Term.Variable(syms.insert("date")), new Term.Variable(syms.insert("val")))),
-              Arrays.asList(
+              List.of(
                       new Predicate(x, Arrays.asList(new Term.Variable(syms.insert("date")), new Term.Variable(syms.insert("val"))))
               ),
               Arrays.asList(
@@ -290,13 +290,13 @@ public class WorldTest {
            Fact f = it.next();
            System.out.println("\t" + syms.print_fact(f));
        }
-      FactSet expected = new FactSet(new Origin(0),new HashSet<>(Arrays.asList(new Fact(new Predicate(before, Arrays.asList(new Term.Date(t1.getEpochSecond()), abc))))));
+      FactSet expected = new FactSet(new Origin(0),new HashSet<>(List.of(new Fact(new Predicate(before, Arrays.asList(new Term.Date(t1.getEpochSecond()), abc))))));
       assertEquals(expected, res);
 
       final Rule r2 = new Rule(new Predicate(
               after,
               Arrays.asList(new Term.Variable(syms.insert("date")), new Term.Variable(syms.insert("val")))),
-              Arrays.asList(
+              List.of(
                       new Predicate(x, Arrays.asList(new Term.Variable(syms.insert("date")), new Term.Variable(syms.insert("val"))))
               ),
               Arrays.asList(
@@ -319,7 +319,7 @@ public class WorldTest {
            Fact f = it.next();
            System.out.println("\t" + syms.print_fact(f));
        }
-      expected = new FactSet(new Origin(0),new HashSet<>(Arrays.asList(new Fact(new Predicate(after, Arrays.asList(new Term.Date(t3.getEpochSecond()), def))))));
+      expected = new FactSet(new Origin(0),new HashSet<>(List.of(new Fact(new Predicate(after, Arrays.asList(new Term.Date(t3.getEpochSecond()), def))))));
       assertEquals(expected, res);
    }
 
@@ -342,10 +342,10 @@ public class WorldTest {
               int_set,
               Arrays.asList(new Term.Variable(syms.insert("sym")), new Term.Variable(syms.insert("str")))
       ),
-              Arrays.asList(new Predicate(x,
+              List.of(new Predicate(x,
                       Arrays.asList(new Term.Variable(syms.insert("sym")), new Term.Variable(syms.insert("int")), new Term.Variable(syms.insert("str"))))
-      ),
-              Arrays.asList(
+              ),
+              List.of(
                       new Expression(new ArrayList<Op>(Arrays.asList(
                               new Op.Value(new Term.Set(new HashSet<>(Arrays.asList(new Term.Integer(0L), new Term.Integer(1L))))),
                               new Op.Value(new Term.Variable(syms.insert("int"))),
@@ -359,7 +359,7 @@ public class WorldTest {
            Fact f = it.next();
            System.out.println("\t" + syms.print_fact(f));
        }
-      FactSet expected = new FactSet(new Origin(0), new HashSet<>(Arrays.asList(new Fact(new Predicate(int_set, Arrays.asList(abc, syms.add("test")))))));
+      FactSet expected = new FactSet(new Origin(0), new HashSet<>(List.of(new Fact(new Predicate(int_set, Arrays.asList(abc, syms.add("test")))))));
       assertEquals(expected, res);
 
       final long abc_sym_id = syms.insert("abc");
@@ -367,9 +367,9 @@ public class WorldTest {
 
       final Rule r2 = new Rule(new Predicate(symbol_set,
               Arrays.asList(new Term.Variable(syms.insert("sym")), new Term.Variable(syms.insert("int")), new Term.Variable(syms.insert("str")))),
-              Arrays.asList(new Predicate(x, Arrays.asList(new Term.Variable(syms.insert("sym")), new Term.Variable(syms.insert("int")), new Term.Variable(syms.insert("str"))))
+              List.of(new Predicate(x, Arrays.asList(new Term.Variable(syms.insert("sym")), new Term.Variable(syms.insert("int")), new Term.Variable(syms.insert("str"))))
               ),
-              Arrays.asList(
+              List.of(
                       new Expression(new ArrayList<Op>(Arrays.asList(
                               new Op.Value(new Term.Set(new HashSet<>(Arrays.asList(new Term.Str(abc_sym_id), new Term.Str(ghi_sym_id))))),
                               new Op.Value(new Term.Variable(syms.insert("sym"))),
@@ -385,13 +385,13 @@ public class WorldTest {
            Fact f = it.next();
            System.out.println("\t" + syms.print_fact(f));
        }
-      expected = new FactSet(new Origin(0),new HashSet<>(Arrays.asList(new Fact(new Predicate(symbol_set, Arrays.asList(def, new Term.Integer(2), syms.add("hello")))))));
+      expected = new FactSet(new Origin(0),new HashSet<>(List.of(new Fact(new Predicate(symbol_set, Arrays.asList(def, new Term.Integer(2), syms.add("hello")))))));
       assertEquals(expected, res);
 
       final Rule r3 = new Rule(
               new Predicate(string_set, Arrays.asList(new Term.Variable(syms.insert("sym")), new Term.Variable(syms.insert("int")), new Term.Variable(syms.insert("str")))),
-              Arrays.asList(new Predicate(x, Arrays.asList(new Term.Variable(syms.insert("sym")), new Term.Variable(syms.insert("int")), new Term.Variable(syms.insert("str"))))),
-              Arrays.asList(
+              List.of(new Predicate(x, Arrays.asList(new Term.Variable(syms.insert("sym")), new Term.Variable(syms.insert("int")), new Term.Variable(syms.insert("str"))))),
+              List.of(
                       new Expression(new ArrayList<Op>(Arrays.asList(
                               new Op.Value(new Term.Set(new HashSet<>(Arrays.asList(syms.add("test"), syms.add("aaa"))))),
                               new Op.Value(new Term.Variable(syms.insert("str"))),
@@ -405,7 +405,7 @@ public class WorldTest {
            Fact f = it.next();
            System.out.println("\t" + syms.print_fact(f));
        }
-      expected = new FactSet(new Origin(0),new HashSet<>(Arrays.asList(new Fact(new Predicate(string_set, Arrays.asList(abc, new Term.Integer(0), syms.add("test")))))));
+      expected = new FactSet(new Origin(0),new HashSet<>(List.of(new Fact(new Predicate(string_set, Arrays.asList(abc, new Term.Integer(0), syms.add("test")))))));
       assertEquals(expected, res);
    }
 
@@ -432,9 +432,9 @@ public class WorldTest {
       final long caveat1 = syms.insert("caveat1");
       //r1: caveat2(#file1) <- resource(#ambient, #file1)
       final Rule r1 = new Rule(
-              new Predicate(caveat1, Arrays.asList(file1)),
-              Arrays.asList(new Predicate(resource, Arrays.asList(file1))
-      ), new ArrayList<>());
+              new Predicate(caveat1, List.of(file1)),
+              List.of(new Predicate(resource, List.of(file1))
+              ), new ArrayList<>());
 
       System.out.println("testing caveat 1(should return nothing): " + syms.print_rule(r1));
       FactSet res = w.query_rule(r1, (long) 0, new TrustedOrigins(0), syms);
@@ -450,10 +450,10 @@ public class WorldTest {
       final Term var0 = new Term.Variable(var0_id);
       //r2: caveat1(0?) <- resource(#ambient, 0?) && operation(#ambient, #read) && right(#authority, 0?, #read)
       final Rule r2 = new Rule(
-              new Predicate(caveat2, Arrays.asList(var0)),
+              new Predicate(caveat2, List.of(var0)),
               Arrays.asList(
-                      new Predicate(resource, Arrays.asList(var0)),
-                      new Predicate(operation, Arrays.asList(read)),
+                      new Predicate(resource, List.of(var0)),
+                      new Predicate(operation, List.of(read)),
                       new Predicate(right, Arrays.asList(var0, read))
               ), new ArrayList<>());
 
