@@ -175,10 +175,7 @@ public class WorldTest {
                         new Op.Binary(Op.BinaryOp.LessThan)
                 ))))
         ), (long) 0, new TrustedOrigins(0), syms);
-        for (Iterator<Fact> it = res.stream().iterator(); it.hasNext(); ) {
-            Fact f = it.next();
-            out.println("\t" + syms.print_fact(f));
-        }
+        res.stream().forEachOrdered(fact -> out.println("\t" + syms.print_fact(fact)));
         expected = new FactSet(new Origin(0),
                 new HashSet<>(Arrays.asList(new Fact(new Predicate(join, Arrays.asList(abc, aaa))), new Fact(new Predicate(join, Arrays.asList(abc, bbb))))));
         assertEquals(expected, res);
@@ -219,10 +216,7 @@ public class WorldTest {
         w.add_fact(new Origin(0), new Fact(new Predicate(route, Arrays.asList(new Term.Integer(4), app_1, syms.add("mx.example.com")))));
 
         FactSet res = testSuffix(w, syms, suff, route, ".fr");
-        for (Iterator<Fact> it = res.stream().iterator(); it.hasNext(); ) {
-            Fact f = it.next();
-            out.println("\t" + syms.print_fact(f));
-        }
+        res.stream().forEachOrdered(fact -> out.println("\t" + syms.print_fact(fact)));
         FactSet expected = new FactSet(new Origin(0),
                 new HashSet<>(List.of(new Fact(new Predicate(suff, Arrays.asList(app_2, syms.add("test.fr")))))));
         assertEquals(expected, res);
