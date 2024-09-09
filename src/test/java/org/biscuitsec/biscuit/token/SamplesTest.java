@@ -183,8 +183,6 @@ class SamplesTest {
                             assertEquals(world.rules, authorizerWorld.rules);
                             assertEquals(world.checks, authorizerWorld.checks);
                             assertEquals(world.policies, authorizerWorld.policies);
-
-
                         }
 
                         return authorizeResult;
