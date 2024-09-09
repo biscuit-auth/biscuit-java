@@ -93,9 +93,8 @@ class SamplesTest {
         System.out.println("deserialized block: ");
         System.out.println(tokenBlock.print(newSampleToken.symbols));
 
-        SymbolTable tokenBlockSymbols = tokenSymbols;
         SymbolTable generatedBlockSymbols = newSampleToken.symbols;
-        assertEquals(generatedSampleBlock.printCode(generatedBlockSymbols), tokenBlock.printCode(tokenBlockSymbols));
+        assertEquals(generatedSampleBlock.printCode(generatedBlockSymbols), tokenBlock.printCode(tokenSymbols));
 
         /* FIXME: to generate the same sample block, we need the samples to provide the external private key
         assertEquals(generatedSampleBlock, tokenBlock);
