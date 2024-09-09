@@ -45,7 +45,7 @@ class SamplesTest {
         Sample sample = gson.fromJson(new InputStreamReader(new BufferedInputStream(inputStream)), Sample.class);
         PublicKey publicKey = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, sample.root_public_key);
         KeyPair keyPair = new KeyPair(sample.root_private_key);
-        return sample.testcases.stream().map(t -> process_testcase(t, publicKey, keyPair));
+        return sample.testcases.stream().map(t -> processTestcase(t, publicKey, keyPair));
     }
 
     void compareBlocks(KeyPair root, List<Block> sampleBlocks, Biscuit token) throws Error {
@@ -105,7 +105,7 @@ class SamplesTest {
         return newSampleToken;
     }
 
-    DynamicTest process_testcase(final TestCase testCase, final PublicKey publicKey, final KeyPair privateKey) {
+    DynamicTest processTestcase(final TestCase testCase, final PublicKey publicKey, final KeyPair privateKey) {
         return DynamicTest.dynamicTest(testCase.title + ": " + testCase.filename, () -> {
             System.out.println("Testcase name: \"" + testCase.title + "\"");
             System.out.println("filename: \"" + testCase.filename + "\"");
