@@ -8,12 +8,12 @@ import org.biscuitsec.biscuit.token.builder.Term;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
 import static org.biscuitsec.biscuit.token.builder.Utils.constrained_rule;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AuthorizerTest {
 
@@ -25,12 +25,12 @@ public class AuthorizerTest {
         assertEquals(1, policies.size());
 
         authorizer.add_policy(new Policy(
-                Arrays.asList(
+                List.of(
                         constrained_rule(
                                 "deny",
                                 new ArrayList<>(),
                                 new ArrayList<>(),
-                                Arrays.asList(new Expression.Value(new Term.Bool(true)))
+                                List.of(new Expression.Value(new Term.Bool(true)))
                         )
                 ), Policy.Kind.Deny));
         assertEquals(2, policies.size());
@@ -63,7 +63,7 @@ public class AuthorizerTest {
         assertEquals(123, ((Term.Integer) idTerm).getValue());
 
         Term enabledTerm = queryFirstResult(authorizer, "enabledfact($name) <- enabled($name)");
-        assertEquals(true, ((Term.Bool) enabledTerm).getValue());
+        assertTrue(((Term.Bool) enabledTerm).getValue());
 
         Term permsTerm = queryFirstResult(authorizer, "permsfact($name) <- perms($name)");
         assertEquals(
