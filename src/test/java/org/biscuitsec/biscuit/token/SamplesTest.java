@@ -371,10 +371,10 @@ class SamplesTest {
             this.facts = authorizer.facts().facts().entrySet().stream().map(entry -> {
                 ArrayList<Long> origin = new ArrayList<>(entry.getKey().inner);
                 Collections.sort(origin);
-                ArrayList<String> facts = new ArrayList<>(entry.getValue().stream()
-                        .map(f -> authorizer.symbols.print_fact(f)).collect(Collectors.toList()));
-                Collections.sort(facts);
-
+                ArrayList<String> facts = entry.getValue().stream()
+                        .map(f -> authorizer.symbols.print_fact(f))
+                        .sorted()
+                        .collect(Collectors.toCollection(ArrayList::new));
                 return new FactSet(origin, facts);
             }).collect(Collectors.toList());
 
