@@ -1,10 +1,7 @@
 package org.biscuitsec.biscuit.token;
 
-import org.biscuitsec.biscuit.crypto.KeyDelegate;
 import org.biscuitsec.biscuit.crypto.KeyPair;
-import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.datalog.RunLimits;
-import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.error.FailedCheck;
 import org.biscuitsec.biscuit.error.LogicError;
@@ -14,6 +11,8 @@ import io.vavr.control.Option;
 import io.vavr.control.Try;
 
 import org.junit.jupiter.api.Test;
+
+import static java.lang.System.out;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.security.InvalidKeyException;
@@ -30,11 +29,11 @@ import static org.biscuitsec.biscuit.token.builder.Utils.*;
 public class BiscuitTest {
 
     @Test
-    public void testBasic() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, CloneNotSupportedException, Error {
+    public void testBasic() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
-        System.out.println("preparing the authority block");
+        out.println("preparing the authority block");
 
         KeyPair root = new KeyPair(rng);
 
@@ -46,87 +45,87 @@ public class BiscuitTest {
 
         Biscuit b = Biscuit.make(rng, root, authority_builder.build());
 
-        System.out.println(b.print());
+        out.println(b.print());
 
-        System.out.println("serializing the first token");
+        out.println("serializing the first token");
 
         byte[] data = b.serialize();
 
-        System.out.print("data len: ");
-        System.out.println(data.length);
-        System.out.println(hex(data));
+        out.print("data len: ");
+        out.println(data.length);
+        out.println(hex(data));
 
-        System.out.println("deserializing the first token");
+        out.println("deserializing the first token");
         Biscuit deser = Biscuit.from_bytes(data, root.public_key());
 
-        System.out.println(deser.print());
+        out.println(deser.print());
 
         // SECOND BLOCK
-        System.out.println("preparing the second block");
+        out.println("preparing the second block");
 
         KeyPair keypair2 = new KeyPair(rng);
 
         Block builder = deser.create_block();
         builder.add_check(check(rule(
                 "caveat1",
-                Arrays.asList(var("resource")),
+                List.of(var("resource")),
                 Arrays.asList(
-                        pred("resource", Arrays.asList(var("resource"))),
-                        pred("operation", Arrays.asList(s("read"))),
+                        pred("resource", List.of(var("resource"))),
+                        pred("operation", List.of(s("read"))),
                         pred("right", Arrays.asList(var("resource"), s("read")))
                 )
         )));
 
         Biscuit b2 = deser.attenuate(rng, keypair2, builder);
 
-        System.out.println(b2.print());
+        out.println(b2.print());
 
-        System.out.println("serializing the second token");
+        out.println("serializing the second token");
 
         byte[] data2 = b2.serialize();
 
-        System.out.print("data len: ");
-        System.out.println(data2.length);
-        System.out.println(hex(data2));
+        out.print("data len: ");
+        out.println(data2.length);
+        out.println(hex(data2));
 
-        System.out.println("deserializing the second token");
+        out.println("deserializing the second token");
         Biscuit deser2 = Biscuit.from_bytes(data2, root.public_key());
 
-        System.out.println(deser2.print());
+        out.println(deser2.print());
 
         // THIRD BLOCK
-        System.out.println("preparing the third block");
+        out.println("preparing the third block");
 
         KeyPair keypair3 = new KeyPair(rng);
 
         Block builder3 = deser2.create_block();
         builder3.add_check(check(rule(
                 "caveat2",
-                Arrays.asList(s("file1")),
-                Arrays.asList(
-                        pred("resource", Arrays.asList(s("file1")))
+                List.of(s("file1")),
+                List.of(
+                        pred("resource", List.of(s("file1")))
                 )
         )));
 
         Biscuit b3 = deser2.attenuate(rng, keypair3, builder3);
 
-        System.out.println(b3.print());
+        out.println(b3.print());
 
-        System.out.println("serializing the third token");
+        out.println("serializing the third token");
 
         byte[] data3 = b3.serialize();
 
-        System.out.print("data len: ");
-        System.out.println(data3.length);
-        System.out.println(hex(data3));
+        out.print("data len: ");
+        out.println(data3.length);
+        out.println(hex(data3));
 
-        System.out.println("deserializing the third token");
+        out.println("deserializing the third token");
         Biscuit final_token = Biscuit.from_bytes(data3, root.public_key());
 
-        System.out.println(final_token.print());
+        out.println(final_token.print());
 
         // check
-        System.out.println("will check the token for resource=file1 and operation=read");
+        out.println("will check the token for resource=file1 and operation=read");
 
         Authorizer authorizer = final_token.authorizer();
         authorizer.add_fact("resource(\"file1\")");
@@ -134,7 +133,7 @@ public class BiscuitTest {
         authorizer.add_policy("allow if true");
         authorizer.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
 
-        System.out.println("will check the token for resource=file2 and operation=write");
+        out.println("will check the token for resource=file2 and operation=write");
 
         Authorizer authorizer2 = final_token.authorizer();
         authorizer2.add_fact("resource(\"file2\")");
@@ -144,7 +143,7 @@ public class BiscuitTest {
         try {
             authorizer2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         } catch (Error e) {
-            System.out.println(e);
+            e.printStackTrace(out);
             assertEquals(
                     new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                             new FailedCheck.FailedBlock(1, 0, "check if resource($resource), operation(\"read\"), right($resource, \"read\")"),
@@ -155,11 +154,11 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testFolders() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+    public void testFolders() throws Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
-        System.out.println("preparing the authority block");
+        out.println("preparing the authority block");
 
         KeyPair root = new KeyPair(rng);
 
@@ -171,10 +170,10 @@ public class BiscuitTest {
         builder.add_right("/folder1/file2", "write");
         builder.add_right("/folder2/file3", "read");
 
-        System.out.println(builder.build());
+        out.println(builder.build());
         Biscuit b = builder.build();
 
-        System.out.println(b.print());
+        out.println(b.print());
 
         Block block2 = b.create_block();
         block2.resource_prefix("/folder1/");
@@ -208,9 +207,9 @@ public class BiscuitTest {
             v3.authorize();
             fail();
         } catch (Error e) {
-            System.out.println(v3.print_world());
+            out.println(v3.print_world());
             for (FailedCheck f : e.failed_checks().get()) {
-                System.out.println(f.toString());
+                out.println(f.toString());
             }
             assertEquals(
                     new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
@@ -228,7 +227,7 @@ public class BiscuitTest {
 
         Block authority_builder = new Block();
         Date date = Date.from(Instant.now());
-        authority_builder.add_fact(fact("revocation_id", Arrays.asList(date(date))));
+        authority_builder.add_fact(fact("revocation_id", List.of(date(date))));
 
         Biscuit biscuit = Biscuit.make(rng, root, authority_builder.build());
 
@@ -240,21 +239,21 @@ public class BiscuitTest {
 
         String attenuatedB64 = biscuit.attenuate(rng, new KeyPair(rng), builder).serialize_b64url();
 
-        System.out.println("attenuated: " + attenuatedB64);
+        out.println("attenuated: " + attenuatedB64);
 
         Biscuit.from_b64url(attenuatedB64, root.public_key());
         String attenuated2B64 = biscuit.attenuate(rng, new KeyPair(rng), builder).serialize_b64url();
 
-        System.out.println("attenuated2: " + attenuated2B64);
+        out.println("attenuated2: " + attenuated2B64);
         Biscuit.from_b64url(attenuated2B64, root.public_key());
     }
 
     @Test
-    public void testReset() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+    public void testReset() throws Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
-        System.out.println("preparing the authority block");
+        out.println("preparing the authority block");
 
         KeyPair root = new KeyPair(rng);
 
@@ -266,10 +265,10 @@ public class BiscuitTest {
         builder.add_right("/folder1/file2", "write");
         builder.add_right("/folder2/file3", "read");
 
-        System.out.println(builder.build());
+        out.println(builder.build());
         Biscuit b = builder.build();
 
-        System.out.println(b.print());
+        out.println(b.print());
 
         Block block2 = b.create_block();
         block2.resource_prefix("/folder1/");
@@ -294,8 +293,8 @@ public class BiscuitTest {
         v3.add_fact("resource(\"/folder2/file3\")");
         v3.add_fact("operation(\"read\")");
 
-        Try<Long> res = Try.of(() -> v3.authorize());
-        System.out.println(v3.print_world());
+        Try<Long> res = Try.of(v3::authorize);
+        out.println(v3.print_world());
 
         assertTrue(res.isFailure());
 
@@ -304,11 +303,11 @@ public class BiscuitTest {
         v4.add_fact("resource(\"/folder2/file1\")");
         v4.add_fact("operation(\"write\")");
 
-        Error e = (Error) Try.of(() -> v4.authorize()).getCause();
+        Error e = (Error) Try.of(v4::authorize).getCause();
 
-        System.out.println(v4.print_world());
+        out.println(v4.print_world());
         for (FailedCheck f : e.failed_checks().get()) {
-            System.out.println(f.toString());
+            out.println(f.toString());
         }
         assertEquals(
                 new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
@@ -319,11 +318,11 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testEmptyAuthorizer() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+    public void testEmptyAuthorizer() throws Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
-        System.out.println("preparing the authority block");
+        out.println("preparing the authority block");
 
         KeyPair root = new KeyPair(rng);
 
@@ -335,10 +334,10 @@ public class BiscuitTest {
         builder.add_right("/folder1/file2", "write");
         builder.add_right("/folder2/file3", "read");
 
-        System.out.println(builder.build());
+        out.println(builder.build());
         Biscuit b = builder.build();
 
-        System.out.println(b.print());
+        out.println(b.print());
 
         Block block2 = b.create_block();
         block2.resource_prefix("/folder1/");
@@ -357,15 +356,15 @@ public class BiscuitTest {
         v1.add_fact("resource(\"/folder2/file1\")");
         v1.add_fact("operation(\"write\")");
 
-        assertTrue(Try.of(()-> v1.authorize()).isFailure());
+        assertTrue(Try.of(v1::authorize).isFailure());
     }
 
     @Test
-    public void testBasicWithNamespaces() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, CloneNotSupportedException, Error {
+    public void testBasicWithNamespaces() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
-        System.out.println("preparing the authority block");
+        out.println("preparing the authority block");
 
         KeyPair root = new KeyPair(rng);
 
@@ -376,87 +375,87 @@ public class BiscuitTest {
         authority_builder.add_fact(fact("namespace:right", Arrays.asList(s("file2"), s("read"))));
         Biscuit b = Biscuit.make(rng, root, authority_builder.build());
 
-        System.out.println(b.print());
+        out.println(b.print());
 
-        System.out.println("serializing the first token");
+        out.println("serializing the first token");
 
         byte[] data = b.serialize();
 
-        System.out.print("data len: ");
-        System.out.println(data.length);
-        System.out.println(hex(data));
+        out.print("data len: ");
+        out.println(data.length);
+        out.println(hex(data));
 
-        System.out.println("deserializing the first token");
+        out.println("deserializing the first token");
         Biscuit deser = Biscuit.from_bytes(data, root.public_key());
 
-        System.out.println(deser.print());
+        out.println(deser.print());
 
         // SECOND BLOCK
-        System.out.println("preparing the second block");
+        out.println("preparing the second block");
 
         KeyPair keypair2 = new KeyPair(rng);
 
         Block builder = deser.create_block();
         builder.add_check(check(rule(
                 "caveat1",
-                Arrays.asList(var("resource")),
+                List.of(var("resource")),
                 Arrays.asList(
-                        pred("resource", Arrays.asList(var("resource"))),
-                        pred("operation", Arrays.asList(s("read"))),
+                        pred("resource", List.of(var("resource"))),
+                        pred("operation", List.of(s("read"))),
                         pred("namespace:right", Arrays.asList(var("resource"), s("read")))
                 )
         )));
 
         Biscuit b2 = deser.attenuate(rng, keypair2, builder);
 
-        System.out.println(b2.print());
+        out.println(b2.print());
 
-        System.out.println("serializing the second token");
+        out.println("serializing the second token");
 
         byte[] data2 = b2.serialize();
 
-        System.out.print("data len: ");
-        System.out.println(data2.length);
-        System.out.println(hex(data2));
+        out.print("data len: ");
+        out.println(data2.length);
+        out.println(hex(data2));
 
-        System.out.println("deserializing the second token");
+        out.println("deserializing the second token");
         Biscuit deser2 = Biscuit.from_bytes(data2, root.public_key());
 
-        System.out.println(deser2.print());
+        out.println(deser2.print());
 
         // THIRD BLOCK
-        System.out.println("preparing the third block");
+        out.println("preparing the third block");
 
         KeyPair keypair3 = new KeyPair(rng);
 
         Block builder3 = deser2.create_block();
         builder3.add_check(check(rule(
                 "caveat2",
-                Arrays.asList(s("file1")),
-                Arrays.asList(
-                        pred("resource", Arrays.asList(s("file1")))
+                List.of(s("file1")),
+                List.of(
+                        pred("resource", List.of(s("file1")))
                 )
         )));
 
         Biscuit b3 = deser2.attenuate(rng, keypair3, builder3);
 
-        System.out.println(b3.print());
+        out.println(b3.print());
 
-        System.out.println("serializing the third token");
+        out.println("serializing the third token");
 
         byte[] data3 = b3.serialize();
 
-        System.out.print("data len: ");
-        System.out.println(data3.length);
-        System.out.println(hex(data3));
+        out.print("data len: ");
+        out.println(data3.length);
+        out.println(hex(data3));
 
-        System.out.println("deserializing the third token");
+        out.println("deserializing the third token");
         Biscuit final_token = Biscuit.from_bytes(data3, root.public_key());
 
-        System.out.println(final_token.print());
+        out.println(final_token.print());
 
         // check
-        System.out.println("will check the token for resource=file1 and operation=read");
+        out.println("will check the token for resource=file1 and operation=read");
 
         Authorizer authorizer = final_token.authorizer();
         authorizer.add_fact("resource(\"file1\")");
@@ -464,7 +463,7 @@ public class BiscuitTest {
         authorizer.add_policy("allow if true");
         authorizer.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
 
-        System.out.println("will check the token for resource=file2 and operation=write");
+        out.println("will check the token for resource=file2 and operation=write");
 
         Authorizer authorizer2 = final_token.authorizer();
         authorizer2.add_fact("resource(\"file2\")");
@@ -474,7 +473,7 @@ public class BiscuitTest {
         try {
             authorizer2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         } catch (Error e) {
-            System.out.println(e);
+            e.printStackTrace(out);
             assertEquals(
                     new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                             new FailedCheck.FailedBlock(1, 0, "check if resource($resource), operation(\"read\"), namespace:right($resource, \"read\")"),
@@ -485,102 +484,101 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testBasicWithNamespacesWithAddAuthorityFact() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, CloneNotSupportedException, Error {
+    public void testBasicWithNamespacesWithAddAuthorityFact() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
-        System.out.println("preparing the authority block");
+        out.println("preparing the authority block");
 
         KeyPair root = new KeyPair(rng);
 
-        SymbolTable symbols = Biscuit.default_symbol_table();
         org.biscuitsec.biscuit.token.builder.Biscuit o = new org.biscuitsec.biscuit.token.builder.Biscuit(rng, root);
         o.add_authority_fact("namespace:right(\"file1\",\"read\")");
         o.add_authority_fact("namespace:right(\"file1\",\"write\")");
         o.add_authority_fact("namespace:right(\"file2\",\"read\")");
         Biscuit b = o.build();
 
-        System.out.println(b.print());
+        out.println(b.print());
 
-        System.out.println("serializing the first token");
+        out.println("serializing the first token");
 
         byte[] data = b.serialize();
 
-        System.out.print("data len: ");
-        System.out.println(data.length);
-        System.out.println(hex(data));
+        out.print("data len: ");
+        out.println(data.length);
+        out.println(hex(data));
 
-        System.out.println("deserializing the first token");
+        out.println("deserializing the first token");
         Biscuit deser = Biscuit.from_bytes(data, root.public_key());
 
-        System.out.println(deser.print());
+        out.println(deser.print());
 
         // SECOND BLOCK
-        System.out.println("preparing the second block");
+        out.println("preparing the second block");
 
         KeyPair keypair2 = new KeyPair(rng);
 
         Block builder = deser.create_block();
         builder.add_check(check(rule(
                 "caveat1",
-                Arrays.asList(var("resource")),
+                List.of(var("resource")),
                 Arrays.asList(
-                        pred("resource", Arrays.asList(var("resource"))),
-                        pred("operation", Arrays.asList(s("read"))),
+                        pred("resource", List.of(var("resource"))),
+                        pred("operation", List.of(s("read"))),
                         pred("namespace:right", Arrays.asList(var("resource"), s("read")))
                 )
         )));
 
         Biscuit b2 = deser.attenuate(rng, keypair2, builder);
 
-        System.out.println(b2.print());
+        out.println(b2.print());
 
-        System.out.println("serializing the second token");
+        out.println("serializing the second token");
 
         byte[] data2 = b2.serialize();
 
-        System.out.print("data len: ");
-        System.out.println(data2.length);
-        System.out.println(hex(data2));
+        out.print("data len: ");
+        out.println(data2.length);
+        out.println(hex(data2));
 
-        System.out.println("deserializing the second token");
+        out.println("deserializing the second token");
         Biscuit deser2 = Biscuit.from_bytes(data2, root.public_key());
 
-        System.out.println(deser2.print());
+        out.println(deser2.print());
 
         // THIRD BLOCK
-        System.out.println("preparing the third block");
+        out.println("preparing the third block");
 
         KeyPair keypair3 = new KeyPair(rng);
 
         Block builder3 = deser2.create_block();
         builder3.add_check(check(rule(
                 "caveat2",
-                Arrays.asList(s("file1")),
-                Arrays.asList(
-                        pred("resource", Arrays.asList(s("file1")))
+                List.of(s("file1")),
+                List.of(
+                        pred("resource", List.of(s("file1")))
                 )
         )));
 
         Biscuit b3 = deser2.attenuate(rng, keypair3, builder3);
 
-        System.out.println(b3.print());
+        out.println(b3.print());
 
-        System.out.println("serializing the third token");
+        out.println("serializing the third token");
 
         byte[] data3 = b3.serialize();
 
-        System.out.print("data len: ");
-        System.out.println(data3.length);
-        System.out.println(hex(data3));
+        out.print("data len: ");
+        out.println(data3.length);
+        out.println(hex(data3));
 
-        System.out.println("deserializing the third token");
+        out.println("deserializing the third token");
         Biscuit final_token = Biscuit.from_bytes(data3, root.public_key());
 
-        System.out.println(final_token.print());
+        out.println(final_token.print());
 
         // check
-        System.out.println("will check the token for resource=file1 and operation=read");
+        out.println("will check the token for resource=file1 and operation=read");
 
         Authorizer authorizer = final_token.authorizer();
         authorizer.add_fact("resource(\"file1\")");
@@ -588,7 +586,7 @@ public class BiscuitTest {
         authorizer.add_policy("allow if true");
         authorizer.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
 
-        System.out.println("will check the token for resource=file2 and operation=write");
+        out.println("will check the token for resource=file2 and operation=write");
 
         Authorizer authorizer2 = final_token.authorizer();
         authorizer2.add_fact("resource(\"file2\")");
@@ -597,7 +595,7 @@ public class BiscuitTest {
         try {
             authorizer2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         } catch (Error e) {
-            System.out.println(e);
+            e.printStackTrace(out);
             assertEquals(
                     new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                             new FailedCheck.FailedBlock(1, 0, "check if resource($resource), operation(\"read\"), namespace:right($resource, \"read\")"),
@@ -608,11 +606,11 @@ public class BiscuitTest {
     }
 
     @Test
-    public void testRootKeyId() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, CloneNotSupportedException, Error {
+    public void testRootKeyId() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
-        System.out.println("preparing the authority block");
+        out.println("preparing the authority block");
 
         KeyPair root = new KeyPair(rng);
 
@@ -624,50 +622,33 @@ public class BiscuitTest {
 
         Biscuit b = Biscuit.make(rng, root, 1, authority_builder.build());
 
-        System.out.println(b.print());
+        out.println(b.print());
 
-        System.out.println("serializing the first token");
+        out.println("serializing the first token");
 
         byte[] data = b.serialize();
 
-        System.out.print("data len: ");
-        System.out.println(data.length);
-        System.out.println(hex(data));
+        out.print("data len: ");
+        out.println(data.length);
+        out.println(hex(data));
 
-        System.out.println("deserializing the first token");
+        out.println("deserializing the first token");
 
-        assertThrows(InvalidKeyException.class, () -> {
-            Biscuit deser = Biscuit.from_bytes(data, new KeyDelegate() {
-                @Override
-                public Option<PublicKey> root_key(Option<Integer> key_id) {
-                    return Option.none();
-                }
-            });
-        });
+        assertThrows(InvalidKeyException.class, () -> Biscuit.from_bytes(data, key_id -> Option.none()));
 
 
-        assertThrows(Error.FormatError.Signature.InvalidSignature.class, () -> {
-            Biscuit deser = Biscuit.from_bytes(data, new KeyDelegate() {
-                @Override
-                public Option<PublicKey> root_key(Option<Integer> key_id) {
+        assertThrows(Error.FormatError.Signature.InvalidSignature.class, () -> Biscuit.from_bytes(data, key_id -> {
+            KeyPair root1 = new KeyPair(rng);
+            return Option.some(root1.public_key());
+        }));
 
-                    KeyPair root = new KeyPair(rng);
-                    return Option.some(root.public_key());
-                }
-            });
-        });
-
-        Biscuit deser = Biscuit.from_bytes(data, new KeyDelegate() {
-            @Override
-            public Option<PublicKey> root_key(Option<Integer> key_id) {
-                if (key_id.get() == 1) {
-                    return Option.some(root.public_key());
-                } else {
-                    return Option.none();
-                }
+        Biscuit.from_bytes(data, key_id -> {
+            if (key_id.get() == 1) {
+                return Option.some(root.public_key());
+            } else {
+                return Option.none();
             }
         });
-
     }
 
     @Test
@@ -675,7 +656,7 @@ public class BiscuitTest {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
-        System.out.println("preparing the authority block");
+        out.println("preparing the authority block");
 
         KeyPair root = new KeyPair(rng);
 
@@ -691,10 +672,10 @@ public class BiscuitTest {
         try {
             authorizer.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         } catch(Error.FailedLogic e) {
-            System.out.println(e);
+            e.printStackTrace(out);
             assertEquals(new Error.FailedLogic(new LogicError.Unauthorized(
                     new LogicError.MatchedPolicy.Allow(0),
-                    Arrays.asList(
+                    List.of(
                             new FailedCheck.FailedBlock(0, 0, "check all operation($op), allowed_operations($allowed), $allowed.contains($op)")
                     )
             )), e);
