@@ -441,7 +441,7 @@ public class WorldTest {
            Fact f = it.next();
            System.out.println("\t" + syms.print_fact(f));
        }
-      assertTrue(res.size() == 0);
+       assertEquals(0, res.size());
 
       final long caveat2 = syms.insert("caveat2");
       final long var0_id = syms.insert("var0");
@@ -462,6 +462,6 @@ public class WorldTest {
            Fact f = it.next();
            System.out.println("\t" + syms.print_fact(f));
        }
-      assertTrue(res.size() == 0);
+       assertEquals(0, res.size());
    }
 }
