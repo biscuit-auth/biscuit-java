@@ -227,7 +227,7 @@ public class WorldTest {
         assertEquals(expected, res);
 
         res = testSuffix(w, syms, suff, route, "example.com");
-        res.stream().forEach(fact -> System.out.println("\t" + syms.print_fact(fact)));
+        res.stream().forEachOrdered(fact -> System.out.println("\t" + syms.print_fact(fact)));
 
         expected = new FactSet(new Origin(0), new HashSet<>(Arrays.asList(new Fact(new Predicate(suff,
                         Arrays.asList(
@@ -284,7 +284,7 @@ public class WorldTest {
 
         System.out.println("testing r1: " + syms.print_rule(r1));
         FactSet res = w.query_rule(r1, (long) 0, new TrustedOrigins(0), syms);
-        res.stream().forEach(fact -> System.out.println("\t" + syms.print_fact(fact)));
+        res.stream().forEachOrdered(fact -> System.out.println("\t" + syms.print_fact(fact)));
         FactSet expected = new FactSet(new Origin(0), new HashSet<>(List.of(new Fact(new Predicate(before, Arrays.asList(new Term.Date(t1.getEpochSecond()), abc))))));
         assertEquals(expected, res);
 
@@ -310,10 +310,7 @@ public class WorldTest {
 
         System.out.println("testing r2: " + syms.print_rule(r2));
         res = w.query_rule(r2, (long) 0, new TrustedOrigins(0), syms);
-        for (Iterator<Fact> it = res.stream().iterator(); it.hasNext(); ) {
-            Fact f = it.next();
-            System.out.println("\t" + syms.print_fact(f));
-        }
+        res.stream().forEachOrdered(fact -> System.out.println("\t" + syms.print_fact(fact)));
         expected = new FactSet(new Origin(0), new HashSet<>(List.of(new Fact(new Predicate(after, Arrays.asList(new Term.Date(t3.getEpochSecond()), def))))));
         assertEquals(expected, res);
     }
@@ -350,10 +347,7 @@ public class WorldTest {
         );
         System.out.println("testing r1: " + syms.print_rule(r1));
         FactSet res = w.query_rule(r1, (long) 0, new TrustedOrigins(0), syms);
-        for (Iterator<Fact> it = res.stream().iterator(); it.hasNext(); ) {
-            Fact f = it.next();
-            System.out.println("\t" + syms.print_fact(f));
-        }
+        res.stream().forEachOrdered(fact -> System.out.println("\t" + syms.print_fact(fact)));
         FactSet expected = new FactSet(new Origin(0), new HashSet<>(List.of(new Fact(new Predicate(int_set, Arrays.asList(abc, syms.add("test")))))));
         assertEquals(expected, res);
 
@@ -376,10 +370,7 @@ public class WorldTest {
 
         System.out.println("testing r2: " + syms.print_rule(r2));
         res = w.query_rule(r2, (long) 0, new TrustedOrigins(0), syms);
-        for (Iterator<Fact> it = res.stream().iterator(); it.hasNext(); ) {
-            Fact f = it.next();
-            System.out.println("\t" + syms.print_fact(f));
-        }
+        res.stream().forEachOrdered(fact -> System.out.println("\t" + syms.print_fact(fact)));
         expected = new FactSet(new Origin(0), new HashSet<>(List.of(new Fact(new Predicate(symbol_set, Arrays.asList(def, new Term.Integer(2), syms.add("hello")))))));
         assertEquals(expected, res);
 
@@ -396,10 +387,7 @@ public class WorldTest {
         );
         System.out.println("testing r3: " + syms.print_rule(r3));
         res = w.query_rule(r3, (long) 0, new TrustedOrigins(0), syms);
-        for (Iterator<Fact> it = res.stream().iterator(); it.hasNext(); ) {
-            Fact f = it.next();
-            System.out.println("\t" + syms.print_fact(f));
-        }
+        res.stream().forEachOrdered(fact -> System.out.println("\t" + syms.print_fact(fact)));
         expected = new FactSet(new Origin(0), new HashSet<>(List.of(new Fact(new Predicate(string_set, Arrays.asList(abc, new Term.Integer(0), syms.add("test")))))));
         assertEquals(expected, res);
     }
@@ -432,10 +420,7 @@ public class WorldTest {
         System.out.println("testing caveat 1(should return nothing): " + syms.print_rule(r1));
         FactSet res = w.query_rule(r1, (long) 0, new TrustedOrigins(0), syms);
         System.out.println(res);
-        for (Iterator<Fact> it = res.stream().iterator(); it.hasNext(); ) {
-            Fact f = it.next();
-            System.out.println("\t" + syms.print_fact(f));
-        }
+        res.stream().forEachOrdered(fact -> System.out.println("\t" + syms.print_fact(fact)));
         assertEquals(0, res.size());
 
         final long caveat2 = syms.insert("caveat2");
@@ -453,10 +438,7 @@ public class WorldTest {
         System.out.println("testing caveat 2: " + syms.print_rule(r2));
         res = w.query_rule(r2, (long) 0, new TrustedOrigins(0), syms);
         System.out.println(res);
-        for (Iterator<Fact> it = res.stream().iterator(); it.hasNext(); ) {
-            Fact f = it.next();
-            System.out.println("\t" + syms.print_fact(f));
-        }
+        res.stream().forEachOrdered(fact -> System.out.println("\t" + syms.print_fact(fact)));
         assertEquals(0, res.size());
     }
 }
