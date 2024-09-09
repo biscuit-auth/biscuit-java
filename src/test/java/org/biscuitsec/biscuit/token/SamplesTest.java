@@ -392,15 +392,17 @@ class SamplesTest {
             }
             List<RuleSet> rulesets = rules.entrySet().stream()
                     .map(entry -> new RuleSet(entry.getKey(), entry.getValue()))
+                    .sorted()
                     .collect(Collectors.toList());
-            Collections.sort(rulesets);
 
             this.rules = rulesets;
 
             this.checks = authorizer.checks().stream()
                     .map((Tuple2<Long, List<Check>> t) -> {
-                        List<String> checks1 = t._2.stream().map(Check::toString).collect(Collectors.toList());
-                        Collections.sort(checks1);
+                        List<String> checks1 = t._2.stream()
+                                .map(Check::toString)
+                                .sorted()
+                                .collect(Collectors.toList());
                         if (t._1 == null) {
                             return new CheckSet(checks1);
                         } else {
