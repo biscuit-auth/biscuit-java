@@ -161,9 +161,7 @@ class SamplesTest {
                                 authorizer.add_check(f);
                             } else if (f.startsWith("allow if") || f.startsWith("deny if")) {
                                 authorizer.add_policy(f);
-                            } else if (f.startsWith("revocation_id")) {
-                                // do nothing
-                            } else {
+                            } else if (!f.startsWith("revocation_id")) {
                                 authorizer.add_fact(f);
                             }
                         }
