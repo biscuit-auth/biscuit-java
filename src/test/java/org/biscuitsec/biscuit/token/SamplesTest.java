@@ -227,33 +227,9 @@ class SamplesTest {
 
     private static class Block {
         String code;
-        List<String> public_keys;
-        String external_key;
 
         public String getCode() {
             return code;
-        }
-
-        public List<PublicKey> getPublicKeys() {
-            return this.public_keys.stream()
-                    .map(pk ->
-                            Parser.publicKey(pk).fold(e -> {
-                                throw new IllegalArgumentException(e.toString());
-                            }, r -> r._2)
-                    )
-                    .collect(Collectors.toList());
-        }
-
-        public Option<PublicKey> getExternalKey() {
-            if (this.external_key != null) {
-                PublicKey externalKey = Parser.publicKey(this.external_key)
-                        .fold(e -> {
-                            throw new IllegalArgumentException(e.toString());
-                        }, r -> r._2);
-                return Option.of(externalKey);
-            } else {
-                return Option.none();
-            }
         }
     }
 
