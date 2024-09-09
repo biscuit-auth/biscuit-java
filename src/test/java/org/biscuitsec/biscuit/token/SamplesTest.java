@@ -61,8 +61,6 @@ class SamplesTest {
     }
 
     private Biscuit compareBlock(KeyPair root, Option<Biscuit> sampleToken, long sampleBlockIndex, Block sampleBlock, org.biscuitsec.biscuit.token.Block tokenBlock, SymbolTable tokenSymbols) throws Error {
-        Option<PublicKey> sampleExternalKey = sampleBlock.getExternalKey();
-        List<PublicKey> samplePublicKeys = sampleBlock.getPublicKeys();
         String sampleDatalog = sampleBlock.getCode().replace("\"", "\\\"");
 
         Either<Map<Integer, List<org.biscuitsec.biscuit.token.builder.parser.Error>>, org.biscuitsec.biscuit.token.builder.Block> outputSample = Parser.datalog(sampleBlockIndex, sampleDatalog);
@@ -228,25 +226,12 @@ class SamplesTest {
     }
 
     private static class Block {
-        List<String> symbols;
         String code;
         List<String> public_keys;
         String external_key;
 
-        public List<String> getSymbols() {
-            return symbols;
-        }
-
-        public void setSymbols(List<String> symbols) {
-            this.symbols = symbols;
-        }
-
         public String getCode() {
             return code;
-        }
-
-        public void setCode(String code) {
-            this.code = code;
         }
 
         public List<PublicKey> getPublicKeys() {
@@ -256,12 +241,6 @@ class SamplesTest {
                                 throw new IllegalArgumentException(e.toString());
                             }, r -> r._2)
                     )
-                    .collect(Collectors.toList());
-        }
-
-        public void setPublicKeys(List<PublicKey> publicKeys) {
-            this.public_keys = publicKeys.stream()
-                    .map(PublicKey::toString)
                     .collect(Collectors.toList());
         }
 
@@ -276,81 +255,19 @@ class SamplesTest {
                 return Option.none();
             }
         }
-
-        public void setExternalKey(Option<PublicKey> externalKey) {
-            this.external_key = externalKey.map(PublicKey::toString).getOrElse((String) null);
-        }
     }
 
     private static class TestCase {
         String title;
-
-        public String getTitle() {
-            return title;
-        }
-
-        public void setTitle(String title) {
-            this.title = title;
-        }
-
         String filename;
         List<Block> token;
         JsonElement validations;
-
-        public String getFilename() {
-            return filename;
-        }
-
-        public void setFilename(String filename) {
-            this.filename = filename;
-        }
-
-        public List<Block> getToken() {
-            return token;
-        }
-
-        public void setTokens(List<Block> token) {
-            this.token = token;
-        }
-
-        public JsonElement getValidations() {
-            return validations;
-        }
-
-        public void setValidations(JsonElement validations) {
-            this.validations = validations;
-        }
     }
 
     private static class Sample {
         String root_private_key;
-
-        public String getRoot_public_key() {
-            return root_public_key;
-        }
-
-        public void setRoot_public_key(String root_public_key) {
-            this.root_public_key = root_public_key;
-        }
-
         String root_public_key;
         List<TestCase> testcases;
-
-        public String getRoot_private_key() {
-            return root_private_key;
-        }
-
-        public void setRoot_private_key(String root_private_key) {
-            this.root_private_key = root_private_key;
-        }
-
-        public List<TestCase> getTestcases() {
-            return testcases;
-        }
-
-        public void setTestcases(List<TestCase> testcases) {
-            this.testcases = testcases;
-        }
     }
 
     private static class World {
