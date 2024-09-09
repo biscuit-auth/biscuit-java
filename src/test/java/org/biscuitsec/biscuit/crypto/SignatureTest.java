@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SignatureTest {
 
     @Test
-    public void testSerialize() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void testSerialize() {
         byte[] seed = {1, 2, 3, 4};
         SecureRandom rng = new SecureRandom(seed);
 
