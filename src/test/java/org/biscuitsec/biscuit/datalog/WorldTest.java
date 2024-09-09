@@ -284,10 +284,7 @@ public class WorldTest {
 
         System.out.println("testing r1: " + syms.print_rule(r1));
         FactSet res = w.query_rule(r1, (long) 0, new TrustedOrigins(0), syms);
-        for (Iterator<Fact> it = res.stream().iterator(); it.hasNext(); ) {
-            Fact f = it.next();
-            System.out.println("\t" + syms.print_fact(f));
-        }
+        res.stream().forEach(fact -> System.out.println("\t" + syms.print_fact(fact)));
         FactSet expected = new FactSet(new Origin(0), new HashSet<>(List.of(new Fact(new Predicate(before, Arrays.asList(new Term.Date(t1.getEpochSecond()), abc))))));
         assertEquals(expected, res);
 
