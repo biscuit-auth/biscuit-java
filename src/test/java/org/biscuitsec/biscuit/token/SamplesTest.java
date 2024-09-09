@@ -354,10 +354,10 @@ class SamplesTest {
     }
 
     private class World {
-        List<FactSet> facts;
-        List<RuleSet> rules;
-        List<CheckSet> checks;
-        List<String> policies;
+        final List<FactSet> facts;
+        final List<RuleSet> rules;
+        final List<CheckSet> checks;
+        final List<String> policies;
 
         public World(List<FactSet> facts, List<RuleSet> rules, List<CheckSet> checks, List<String> policies) {
             this.facts = facts;
@@ -447,8 +447,8 @@ class SamplesTest {
     }
 
     private class FactSet {
-        List<Long> origin;
-        List<String> facts;
+        final List<Long> origin;
+        final List<String> facts;
 
         public FactSet(List<Long> origin, List<String> facts) {
             this.origin = origin;
@@ -494,7 +494,7 @@ class SamplesTest {
 
     private class RuleSet implements Comparable<RuleSet> {
         Long origin;
-        List<String> rules;
+        final List<String> rules;
 
         public RuleSet(Long origin, List<String> rules) {
             this.origin = origin;
@@ -549,7 +549,7 @@ class SamplesTest {
 
     private class CheckSet implements Comparable<CheckSet> {
         Long origin;
-        List<String> checks;
+        final List<String> checks;
 
         public CheckSet(Long origin, List<String> checks) {
             this.origin = origin;
