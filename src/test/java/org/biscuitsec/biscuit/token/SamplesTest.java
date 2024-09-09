@@ -389,12 +389,11 @@ class SamplesTest {
             for (Map.Entry<Long, List<String>> entry : rules.entrySet()) {
                 Collections.sort(entry.getValue());
             }
-            List<RuleSet> rulesets = rules.entrySet().stream()
+
+            this.rules = rules.entrySet().stream()
                     .map(entry -> new RuleSet(entry.getKey(), entry.getValue()))
                     .sorted()
                     .collect(Collectors.toList());
-
-            this.rules = rulesets;
 
             this.checks = authorizer.checks().stream()
                     .map((Tuple2<Long, List<Check>> t) -> {
