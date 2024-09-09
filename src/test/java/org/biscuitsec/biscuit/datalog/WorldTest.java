@@ -38,8 +38,8 @@ public class WorldTest {
 
       System.out.println("testing r1: " + syms.print_rule(r1));
       FactSet query_rule_result = w.query_rule(r1, (long)0, new TrustedOrigins(0), syms);
-      System.out.println("grandparents query_rules: [" + String.join(", ", query_rule_result.stream().map(syms::print_fact).collect(Collectors.toList())) + "]");
-      System.out.println("current facts: [" + String.join(", ", w.facts().stream().map(syms::print_fact).collect(Collectors.toList())) + "]");
+      System.out.println("grandparents query_rules: [" + query_rule_result.stream().map(syms::print_fact).collect(Collectors.joining(", ")) + "]");
+      System.out.println("current facts: [" + w.facts().stream().map(syms::print_fact).collect(Collectors.joining(", ")) + "]");
 
       final Rule r2 = new Rule(new Predicate(grandparent,
               Arrays.asList(new Term.Variable(syms.insert("grandparent")), new Term.Variable(syms.insert("grandchild")))), Arrays.asList(
