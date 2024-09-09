@@ -183,7 +183,7 @@ public class WorldTest {
       assertEquals(expected, res);
    }
 
-   private final FactSet testSuffix(final World w, SymbolTable syms, final long suff, final long route, final String suffix) throws Error {
+   private FactSet testSuffix(final World w, SymbolTable syms, final long suff, final long route, final String suffix) throws Error {
       return w.query_rule(new Rule(new Predicate(suff,
               Arrays.asList(new Term.Variable(syms.insert("app_id")), new Term.Variable(syms.insert("domain")))),
               List.of(
