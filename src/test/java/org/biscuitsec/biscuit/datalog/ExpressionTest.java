@@ -4,12 +4,13 @@ import org.biscuitsec.biscuit.datalog.expressions.Expression;
 import org.biscuitsec.biscuit.datalog.expressions.Op;
 import org.biscuitsec.biscuit.error.Error;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ExpressionTest {
 
@@ -63,7 +64,7 @@ public class ExpressionTest {
 
         assertEquals(
                 new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET + 2),
-                e.evaluate(new HashMap<>(),  new TemporarySymbolTable(symbols))
+                e.evaluate(new HashMap<>(), new TemporarySymbolTable(symbols))
         );
     }
 
@@ -87,7 +88,7 @@ public class ExpressionTest {
 
         assertEquals(
                 new Term.Bool(true),
-                e.evaluate(new HashMap<>(),  new TemporarySymbolTable(symbols))
+                e.evaluate(new HashMap<>(), new TemporarySymbolTable(symbols))
         );
     }
 
@@ -112,7 +113,7 @@ public class ExpressionTest {
 
         assertEquals(
                 new Term.Bool(false),
-                e.evaluate(new HashMap<>(),  new TemporarySymbolTable(symbols))
+                e.evaluate(new HashMap<>(), new TemporarySymbolTable(symbols))
         );
     }
 
@@ -135,7 +136,7 @@ public class ExpressionTest {
 
         assertEquals(
                 new Term.Bool(true),
-                e.evaluate(new HashMap<>(),  new TemporarySymbolTable(symbols))
+                e.evaluate(new HashMap<>(), new TemporarySymbolTable(symbols))
         );
     }
 }
