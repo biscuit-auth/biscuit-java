@@ -38,8 +38,8 @@ public class WorldTest {
 
       System.out.println("testing r1: " + syms.print_rule(r1));
       FactSet query_rule_result = w.query_rule(r1, (long)0, new TrustedOrigins(0), syms);
-      System.out.println("grandparents query_rules: [" + String.join(", ", query_rule_result.stream().map((f) -> syms.print_fact(f)).collect(Collectors.toList())) + "]");
-      System.out.println("current facts: [" + String.join(", ", w.facts().stream().map((f) -> syms.print_fact(f)).collect(Collectors.toList())) + "]");
+      System.out.println("grandparents query_rules: [" + String.join(", ", query_rule_result.stream().map(syms::print_fact).collect(Collectors.toList())) + "]");
+      System.out.println("current facts: [" + String.join(", ", w.facts().stream().map(syms::print_fact).collect(Collectors.toList())) + "]");
 
       final Rule r2 = new Rule(new Predicate(grandparent,
               Arrays.asList(new Term.Variable(syms.insert("grandparent")), new Term.Variable(syms.insert("grandchild")))), Arrays.asList(
@@ -67,7 +67,7 @@ public class WorldTest {
               new ArrayList<>());
       System.out.println("parents of B: [" + String.join(", ",
               w.query_rule(query2, (long) 0, new TrustedOrigins(0), syms)
-                      .stream().map((f) -> syms.print_fact(f)).collect(Collectors.toSet())) + "]");
+                      .stream().map(syms::print_fact).collect(Collectors.toSet())) + "]");
       final Rule query3 = new Rule(new Predicate(grandparent, Arrays.asList(new Term.Variable(syms.insert("grandparent")),
               new Term.Variable(syms.insert("grandchild")))),
               List.of(new Predicate(grandparent, Arrays.asList(new Term.Variable(syms.insert("grandparent")),
@@ -75,7 +75,7 @@ public class WorldTest {
               new ArrayList<>());
       System.out.println("grandparents: [" + String.join(", ",
               w.query_rule(query3, (long) 0, new TrustedOrigins(0), syms)
-                      .stream().map((f) -> syms.print_fact(f)).collect(Collectors.toSet())) + "]");
+                      .stream().map(syms::print_fact).collect(Collectors.toSet())) + "]");
 
       w.add_fact(new Origin(0), new Fact(new Predicate(parent, Arrays.asList(c, e))));
       w.run(syms);
@@ -87,7 +87,7 @@ public class WorldTest {
               new ArrayList<>());
       final FactSet res = w.query_rule(query4, (long) 0, new TrustedOrigins(0), syms);
       System.out.println("grandparents after inserting parent(C, E): [" + String.join(", ",
-              res.stream().map((f) -> syms.print_fact(f)).collect(Collectors.toSet())) + "]");
+              res.stream().map(syms::print_fact).collect(Collectors.toSet())) + "]");
 
       final FactSet expected = new FactSet(new Origin(0), new HashSet<>(Arrays.asList(
               new Fact(new Predicate(grandparent, Arrays.asList(a, c))),
@@ -111,7 +111,7 @@ public class WorldTest {
               new ArrayList<>());
       System.out.println("siblings: [" + String.join(", ",
               w.query_rule(query5, (long) 0, new TrustedOrigins(0), syms)
-                      .stream().map((f) -> syms.print_fact(f)).collect(Collectors.toSet())) + "]");
+                      .stream().map(syms::print_fact).collect(Collectors.toSet())) + "]");
    }
 
    @Test
