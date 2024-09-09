@@ -414,8 +414,6 @@ public class WorldTest {
       final World w = new World();
       final SymbolTable syms = new SymbolTable();
 
-      final Term authority = syms.add("authority");
-      final Term ambient = syms.add("ambient");
       final long resource = syms.insert("resource");
       final long operation = syms.insert("operation");
       final long right = syms.insert("right");
