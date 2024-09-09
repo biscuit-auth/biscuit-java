@@ -347,7 +347,7 @@ public class WorldTest {
       ),
               Arrays.asList(
                       new Expression(new ArrayList<Op>(Arrays.asList(
-                              new Op.Value(new Term.Set(new HashSet<>(Arrays.asList(new Term.Integer(0l), new Term.Integer(1l))))),
+                              new Op.Value(new Term.Set(new HashSet<>(Arrays.asList(new Term.Integer(0L), new Term.Integer(1L))))),
                               new Op.Value(new Term.Variable(syms.insert("int"))),
                               new Op.Binary(Op.BinaryOp.Contains)
                       )))
