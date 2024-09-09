@@ -120,6 +120,7 @@ class SamplesTest {
                     Biscuit token = Biscuit.from_bytes(data, publicKey);
                     assertArrayEquals(token.serialize(), data);
 
+                    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
                     List<org.biscuitsec.biscuit.token.Block> allBlocks = new ArrayList<>();
                     allBlocks.add(token.authority);
                     allBlocks.addAll(token.blocks);
@@ -243,6 +244,7 @@ class SamplesTest {
     private static class Sample {
         String root_private_key;
         String root_public_key;
+        @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
         List<TestCase> testcases;
     }
 
