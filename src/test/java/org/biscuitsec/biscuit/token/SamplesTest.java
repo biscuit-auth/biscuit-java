@@ -31,6 +31,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.lang.System.out;
 import static java.lang.Thread.currentThread;
 import static java.util.Objects.requireNonNull;
 import static org.biscuitsec.biscuit.token.Block.from_bytes;
@@ -93,10 +94,10 @@ class SamplesTest {
             generatedSampleBlock = newSampleToken.blocks.get((int) sampleBlockIndex - 1);
         }
 
-        System.out.println("generated block: ");
-        System.out.println(generatedSampleBlock.print(newSampleToken.symbols));
-        System.out.println("deserialized block: ");
-        System.out.println(tokenBlock.print(newSampleToken.symbols));
+        out.println("generated block: ");
+        out.println(generatedSampleBlock.print(newSampleToken.symbols));
+        out.println("deserialized block: ");
+        out.println(tokenBlock.print(newSampleToken.symbols));
 
         SymbolTable generatedBlockSymbols = newSampleToken.symbols;
         assertEquals(generatedSampleBlock.printCode(generatedBlockSymbols), tokenBlock.printCode(tokenSymbols));
@@ -111,8 +112,8 @@ class SamplesTest {
 
     private DynamicTest processTestcase(final TestCase testCase, final PublicKey publicKey, final KeyPair privateKey) {
         return DynamicTest.dynamicTest(testCase.title + ": " + testCase.filename, () -> {
-            System.out.println("Testcase name: \"" + testCase.title + "\"");
-            System.out.println("filename: \"" + testCase.filename + "\"");
+            out.println("Testcase name: \"" + testCase.title + "\"");
+            out.println("filename: \"" + testCase.filename + "\"");
             InputStream inputStream = currentThread().getContextClassLoader().getResourceAsStream("samples/" + testCase.filename);
             byte[] data = new byte[requireNonNull(inputStream, "InputStream cannot be null").available()];
 
@@ -135,8 +136,8 @@ class SamplesTest {
                     compareBlocks(privateKey, testCase.token, token);
 
                     byte[] ser_block_authority = token.authority.to_bytes().get();
-                    System.out.println(Arrays.toString(ser_block_authority));
-                    System.out.println(Arrays.toString(token.serializedBiscuit.authority.block));
+                    out.println(Arrays.toString(ser_block_authority));
+                    out.println(Arrays.toString(token.serializedBiscuit.authority.block));
                     org.biscuitsec.biscuit.token.Block deser_block_authority = from_bytes(ser_block_authority, token.authority.externalKey).get();
                     assertEquals(token.authority.print(token.symbols), deser_block_authority.print(token.symbols));
                     assert (Arrays.equals(ser_block_authority, token.serializedBiscuit.authority.block));
@@ -160,7 +161,7 @@ class SamplesTest {
                     // TODO Add check of the token
 
                     Authorizer authorizer = token.authorizer();
-                    System.out.println(token.print());
+                    out.println(token.print());
                     for (String f : authorizer_facts) {
                         f = f.trim();
                         if (!f.isEmpty()) {
@@ -173,7 +174,7 @@ class SamplesTest {
                             }
                         }
                     }
-                    System.out.println(authorizer.print_world());
+                    out.println(authorizer.print_world());
                     try {
                         Long authorizeResult = authorizer.authorize(runLimits);
 
@@ -208,7 +209,7 @@ class SamplesTest {
 
                 if (expected_result.has("Ok")) {
                     if (res.isLeft()) {
-                        System.out.println("validation '" + validationName + "' expected result Ok(" + expected_result.getAsJsonPrimitive("Ok").getAsLong() + "), got error");
+                        out.println("validation '" + validationName + "' expected result Ok(" + expected_result.getAsJsonPrimitive("Ok").getAsLong() + "), got error");
                         throw res.getLeft();
                     } else {
                         assertEquals(expected_result.getAsJsonPrimitive("Ok").getAsLong(), res.get());
@@ -217,7 +218,7 @@ class SamplesTest {
                     if (res.isLeft()) {
                         if (res.getLeft() instanceof Error) {
                             Error e = (Error) res.getLeft();
-                            System.out.println("validation '" + validationName + "' got error: " + e);
+                            out.println("validation '" + validationName + "' got error: " + e);
                             JsonElement err_json = e.toJson();
                             assertEquals(expected_result.get("Err"), err_json);
                         } else {
