@@ -22,6 +22,7 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
 import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.SecureRandom;
@@ -30,22 +31,25 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.lang.Thread.currentThread;
 import static java.util.Objects.requireNonNull;
 import static org.biscuitsec.biscuit.token.Block.from_bytes;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class SamplesTest {
     final RunLimits runLimits = new RunLimits(500, 100, Duration.ofMillis(500));
 
     @TestFactory
     Stream<DynamicTest> jsonTest() {
-        InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("samples/samples.json");
-        Gson gson = new Gson();
-        Sample sample = gson.fromJson(new InputStreamReader(
-                        new BufferedInputStream(requireNonNull(inputStream, "InputStream cannot be null"))),
-                Sample.class);
+        Sample sample = null;
+        // Using try-with-resources block automatically closes InputStream after try-catch block.
+        try (InputStream inputStream = currentThread().getContextClassLoader().getResourceAsStream("samples/samples.json")) {
+            sample = new Gson().fromJson(new InputStreamReader(
+                            new BufferedInputStream(requireNonNull(inputStream, "InputStream resource cannot be found"))),
+                    Sample.class);
+        } catch (IOException e) {
+            fail(e);
+        }
         PublicKey publicKey = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, sample.root_public_key);
         KeyPair keyPair = new KeyPair(sample.root_private_key);
         return sample.testcases.stream().map(t -> processTestcase(t, publicKey, keyPair));
@@ -109,7 +113,7 @@ class SamplesTest {
         return DynamicTest.dynamicTest(testCase.title + ": " + testCase.filename, () -> {
             System.out.println("Testcase name: \"" + testCase.title + "\"");
             System.out.println("filename: \"" + testCase.filename + "\"");
-            InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("samples/" + testCase.filename);
+            InputStream inputStream = currentThread().getContextClassLoader().getResourceAsStream("samples/" + testCase.filename);
             byte[] data = new byte[requireNonNull(inputStream, "InputStream cannot be null").available()];
 
             for (Map.Entry<String, JsonElement> validationEntry : testCase.validations.getAsJsonObject().entrySet()) {
