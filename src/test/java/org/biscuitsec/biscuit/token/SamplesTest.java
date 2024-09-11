@@ -29,11 +29,15 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static java.lang.String.format;
 import static java.lang.System.out;
 import static java.lang.Thread.currentThread;
+import static java.util.Collections.sort;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.biscuitsec.biscuit.token.Block.from_bytes;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -53,7 +57,7 @@ class SamplesTest {
         }
         PublicKey publicKey = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, sample.root_public_key);
         KeyPair keyPair = new KeyPair(sample.root_private_key);
-        return sample.testcases.stream().map(t -> processTestcase(t, publicKey, keyPair));
+        return sample.testcases.stream().map(t -> processTestCase(t, publicKey, keyPair));
     }
 
     private void compareBlocks(KeyPair root, List<Block> sampleBlocks, Biscuit token) throws Error {
@@ -80,7 +84,11 @@ class SamplesTest {
 
         Biscuit newSampleToken;
         if (!sampleToken.isDefined()) {
-            org.biscuitsec.biscuit.token.builder.Biscuit builder = new org.biscuitsec.biscuit.token.builder.Biscuit(new SecureRandom(), root, Option.none(), outputSample.get());
+            org.biscuitsec.biscuit.token.builder.Biscuit builder =
+                    new org.biscuitsec.biscuit.token.builder.Biscuit(new SecureRandom(),
+                            root,
+                            Option.none(),
+                            outputSample.get());
             newSampleToken = builder.build();
         } else {
             Biscuit s = sampleToken.get();
@@ -110,7 +118,7 @@ class SamplesTest {
         return newSampleToken;
     }
 
-    private DynamicTest processTestcase(final TestCase testCase, final PublicKey publicKey, final KeyPair privateKey) {
+    private DynamicTest processTestCase(final TestCase testCase, final PublicKey publicKey, final KeyPair privateKey) {
         return DynamicTest.dynamicTest(testCase.title + ": " + testCase.filename, () -> {
             out.println("Testcase name: \"" + testCase.title + "\"");
             out.println("filename: \"" + testCase.filename + "\"");
@@ -121,115 +129,159 @@ class SamplesTest {
                 String validationName = validationEntry.getKey();
                 JsonObject validation = validationEntry.getValue().getAsJsonObject();
 
-                JsonObject expected_result = validation.getAsJsonObject("result");
-                String[] authorizer_facts = validation.getAsJsonPrimitive("authorizer_code").getAsString().split(";");
-                Either<Throwable, Long> res = Try.of(() -> {
+                JsonObject validationResult = validation.getAsJsonObject("result");
+                String[] authorizerFacts = validation.getAsJsonPrimitive("authorizer_code").getAsString().split(";");
+
+                Either<Throwable, Long> authorizerResult = Try.of(() -> {
                     int ignoreNumBytesRead = inputStream.read(data);
                     Biscuit token = Biscuit.from_bytes(data, publicKey);
                     assertArrayEquals(token.serialize(), data);
 
-                    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
-                    List<org.biscuitsec.biscuit.token.Block> allBlocks = new ArrayList<>();
-                    allBlocks.add(token.authority);
-                    allBlocks.addAll(token.blocks);
-
                     compareBlocks(privateKey, testCase.token, token);
-
-                    byte[] ser_block_authority = token.authority.to_bytes().get();
-                    out.println(Arrays.toString(ser_block_authority));
-                    out.println(Arrays.toString(token.serializedBiscuit.authority.block));
-                    org.biscuitsec.biscuit.token.Block deser_block_authority = from_bytes(ser_block_authority, token.authority.externalKey).get();
-                    assertEquals(token.authority.print(token.symbols), deser_block_authority.print(token.symbols));
-                    assert (Arrays.equals(ser_block_authority, token.serializedBiscuit.authority.block));
-
-                    for (int i = 0; i < token.blocks.size() - 1; i++) {
-                        org.biscuitsec.biscuit.token.Block block = token.blocks.get(i);
-                        SignedBlock signed_block = token.serializedBiscuit.blocks.get(i);
-                        byte[] ser_block = block.to_bytes().get();
-                        org.biscuitsec.biscuit.token.Block deser_block = from_bytes(ser_block, block.externalKey).get();
-                        assertEquals(block.print(token.symbols), deser_block.print(token.symbols));
-                        assert (Arrays.equals(ser_block, signed_block.block));
-                    }
-
-                    List<RevocationIdentifier> revocationIds = token.revocation_identifiers();
-                    JsonArray validationRevocationIds = validation.getAsJsonArray("revocation_ids");
-                    assertEquals(revocationIds.size(), validationRevocationIds.size());
-                    for (int i = 0; i < revocationIds.size(); i++) {
-                        assertEquals(validationRevocationIds.get(i).getAsString(), revocationIds.get(i).toHex());
-                    }
+                    checkAuthorityBlockSerialization(token);
+                    checkTokenBlockSerialization(token);
+                    checkRevocationIdentifiers(token, validation);
 
                     // TODO Add check of the token
 
-                    Authorizer authorizer = token.authorizer();
                     out.println(token.print());
-                    for (String f : authorizer_facts) {
-                        f = f.trim();
-                        if (!f.isEmpty()) {
-                            if (f.startsWith("check if") || f.startsWith("check all")) {
-                                authorizer.add_check(f);
-                            } else if (f.startsWith("allow if") || f.startsWith("deny if")) {
-                                authorizer.add_policy(f);
-                            } else if (!f.startsWith("revocation_id")) {
-                                authorizer.add_fact(f);
-                            }
-                        }
-                    }
-                    out.println(authorizer.print_world());
-                    try {
-                        Long authorizeResult = authorizer.authorize(runLimits);
-
-                        if (validation.has("world") && !validation.get("world").isJsonNull()) {
-                            World world = new Gson().fromJson(validation.get("world").getAsJsonObject(), World.class);
-                            world.fixOrigin();
-
-                            World authorizerWorld = new World(authorizer);
-                            assertEquals(world.factMap(), authorizerWorld.factMap());
-                            assertEquals(world.rules, authorizerWorld.rules);
-                            assertEquals(world.checks, authorizerWorld.checks);
-                            assertEquals(world.policies, authorizerWorld.policies);
-                        }
-
-                        return authorizeResult;
-                    } catch (Exception e) {
-
-                        if (validation.has("world") && !validation.get("world").isJsonNull()) {
-                            World world = new Gson().fromJson(validation.get("world").getAsJsonObject(), World.class);
-                            world.fixOrigin();
-
-                            World authorizerWorld = new World(authorizer);
-                            assertEquals(world.factMap(), authorizerWorld.factMap());
-                            assertEquals(world.rules, authorizerWorld.rules);
-                            assertEquals(world.checks, authorizerWorld.checks);
-                            assertEquals(world.policies, authorizerWorld.policies);
-                        }
-
-                        throw e;
-                    }
+                    Authorizer authorizer = token.authorizer();
+                    checkAuthorizerFacts(authorizer, authorizerFacts);
+                    return attemptAuthorization(authorizer, validation);
                 }).toEither();
 
-                if (expected_result.has("Ok")) {
-                    if (res.isLeft()) {
-                        out.println("validation '" + validationName + "' expected result Ok(" + expected_result.getAsJsonPrimitive("Ok").getAsLong() + "), got error");
-                        throw res.getLeft();
-                    } else {
-                        assertEquals(expected_result.getAsJsonPrimitive("Ok").getAsLong(), res.get());
-                    }
+                if (validationResult.has("Ok")) {
+                    processValidationPassResult(validationResult, validationName, authorizerResult);
                 } else {
-                    if (res.isLeft()) {
-                        if (res.getLeft() instanceof Error) {
-                            Error e = (Error) res.getLeft();
-                            out.println("validation '" + validationName + "' got error: " + e);
-                            JsonElement err_json = e.toJson();
-                            assertEquals(expected_result.get("Err"), err_json);
-                        } else {
-                            throw res.getLeft();
-                        }
-                    } else {
-                        throw new Exception("validation '" + validationName + "' expected result error(" + expected_result.get("Err") + "), got success: " + res.get());
-                    }
+                    processValidationErrorResult(validationResult, validationName, authorizerResult);
+                }
+            }
+
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    System.err.printf("Unable to close InputStream", e);
                 }
             }
         });
+    }
+
+    private Long attemptAuthorization(Authorizer authorizer, JsonObject validation) throws Exception {
+        Long authorizeResult = null;
+        try {
+            authorizeResult = authorizer.authorize(runLimits);
+            processSuccessfulAuthorization(authorizer, validation);
+        } catch (Exception ex) {
+            processFailedAuthorization(authorizer, validation, ex);
+        }
+        return authorizeResult;
+    }
+
+    private void processSuccessfulAuthorization(Authorizer authorizer, JsonObject validation) {
+        if (validation.has("world") && !validation.get("world").isJsonNull()) {
+            World world = new Gson().fromJson(validation.get("world").getAsJsonObject(), World.class);
+            world.fixOrigin();
+
+            World authorizerWorld = new World(authorizer);
+            assertEquals(world.factMap(), authorizerWorld.factMap());
+            assertEquals(world.rules, authorizerWorld.rules);
+            assertEquals(world.checks, authorizerWorld.checks);
+            assertEquals(world.policies, authorizerWorld.policies);
+        }
+    }
+
+    private void processFailedAuthorization(Authorizer authorizer,
+                                            JsonObject validation,
+                                            Exception ex) throws Exception {
+        if (validation.has("world") && !validation.get("world").isJsonNull()) {
+            World world = new Gson().fromJson(validation.get("world").getAsJsonObject(), World.class);
+            world.fixOrigin();
+
+            World authorizerWorld = new World(authorizer);
+            assertEquals(world.factMap(), authorizerWorld.factMap());
+            assertEquals(world.rules, authorizerWorld.rules);
+            assertEquals(world.checks, authorizerWorld.checks);
+            assertEquals(world.policies, authorizerWorld.policies);
+        }
+        throw ex;
+    }
+
+    private void checkAuthorizerFacts(Authorizer authorizer, String[] authorizerFacts) throws Error.Parser {
+        for (String fact : authorizerFacts) {
+            fact = fact.trim();
+            if (!fact.isEmpty()) {
+                if (fact.startsWith("check if") || fact.startsWith("check all")) {
+                    authorizer.add_check(fact);
+                } else if (fact.startsWith("allow if") || fact.startsWith("deny if")) {
+                    authorizer.add_policy(fact);
+                } else if (!fact.startsWith("revocation_id")) {
+                    authorizer.add_fact(fact);
+                }
+            }
+        }
+        out.println(authorizer.print_world());
+    }
+
+    private void checkAuthorityBlockSerialization(Biscuit token) {
+        byte[] serBlockAuthority = token.authority.to_bytes().get();
+        out.println(Arrays.toString(serBlockAuthority));
+        out.println(Arrays.toString(token.serializedBiscuit.authority.block));
+        org.biscuitsec.biscuit.token.Block deserBlockAuthority = from_bytes(serBlockAuthority, token.authority.externalKey).get();
+        assertEquals(token.authority.print(token.symbols), deserBlockAuthority.print(token.symbols));
+        assertArrayEquals(serBlockAuthority, token.serializedBiscuit.authority.block);
+    }
+
+    private void checkRevocationIdentifiers(Biscuit token, JsonObject validation) {
+        List<RevocationIdentifier> revocationIds = token.revocation_identifiers();
+        JsonArray validationRevocationIds = validation.getAsJsonArray("revocation_ids");
+        assertEquals(revocationIds.size(), validationRevocationIds.size());
+        IntStream.range(0, revocationIds.size()).forEach(idx ->
+                assertEquals(validationRevocationIds.get(idx).getAsString(), revocationIds.get(idx).toHex()));
+    }
+
+    private void checkTokenBlockSerialization(Biscuit token) {
+        IntStream.range(0, token.blocks.size()).forEach(idx -> {
+            org.biscuitsec.biscuit.token.Block block = token.blocks.get(idx);
+            SignedBlock signedBlock = token.serializedBiscuit.blocks.get(idx);
+            byte[] serBlock = block.to_bytes().get();
+            org.biscuitsec.biscuit.token.Block deserBlock = from_bytes(serBlock, block.externalKey).get();
+            assertEquals(block.print(token.symbols), deserBlock.print(token.symbols));
+            assertArrayEquals(serBlock, signedBlock.block);
+        });
+    }
+
+    private void processValidationPassResult(JsonObject validationResult,
+                                             String validationName,
+                                             Either<Throwable, Long> authorizerResult) throws Throwable {
+        if (authorizerResult.isLeft()) {
+            out.printf("validation '%s' expected result Ok(%d), got error%n",
+                    validationName,
+                    validationResult.getAsJsonPrimitive("Ok").getAsLong());
+            throw authorizerResult.getLeft();
+        } else {
+            assertEquals(validationResult.getAsJsonPrimitive("Ok").getAsLong(), authorizerResult.get());
+        }
+    }
+
+    private void processValidationErrorResult(JsonObject validationResult,
+                                              String validationName,
+                                              Either<Throwable, Long> authorizerResult) throws Throwable {
+        if (authorizerResult.isLeft()) {
+            if (authorizerResult.getLeft() instanceof Error) {
+                Error e = (Error) authorizerResult.getLeft();
+                out.printf("validation '%s' got error: %s%n", validationName, e);
+                JsonElement errJson = e.toJson();
+                assertEquals(validationResult.get("Err"), errJson);
+            } else {
+                throw authorizerResult.getLeft();
+            }
+        } else {
+            throw new Exception(format("validation '%s' expected result error(%s), got success: %d",
+                    validationName,
+                    validationResult.get("Err"),
+                    authorizerResult.get()));
+        }
     }
 
     private static class Block {
@@ -270,13 +322,13 @@ class SamplesTest {
         public World(Authorizer authorizer) {
             this.facts = authorizer.facts().facts().entrySet().stream().map(entry -> {
                 ArrayList<Long> origin = new ArrayList<>(entry.getKey().inner);
-                Collections.sort(origin);
+                sort(origin);
                 ArrayList<String> facts = entry.getValue().stream()
                         .map(f -> authorizer.symbols.print_fact(f))
                         .sorted()
                         .collect(Collectors.toCollection(ArrayList::new));
                 return new FactSet(origin, facts);
-            }).collect(Collectors.toList());
+            }).collect(toList());
 
             HashMap<Long, List<String>> rules = new HashMap<>();
             for (List<Tuple2<Long, Rule>> l : authorizer.rules().rules.values()) {
@@ -288,29 +340,29 @@ class SamplesTest {
                 }
             }
             for (Map.Entry<Long, List<String>> entry : rules.entrySet()) {
-                Collections.sort(entry.getValue());
+                sort(entry.getValue());
             }
 
             this.rules = rules.entrySet().stream()
                     .map(entry -> new RuleSet(entry.getKey(), entry.getValue()))
                     .sorted()
-                    .collect(Collectors.toList());
+                    .collect(toList());
 
             this.checks = authorizer.checks().stream()
                     .map((Tuple2<Long, List<Check>> t) -> {
                         List<String> checks1 = t._2.stream()
                                 .map(Check::toString)
                                 .sorted()
-                                .collect(Collectors.toList());
+                                .collect(toList());
                         if (t._1 == null) {
                             return new CheckSet(checks1);
                         } else {
                             return new CheckSet(t._1, checks1);
                         }
-                    }).collect(Collectors.toList());
-            this.policies = authorizer.policies().stream().map(Policy::toString).collect(Collectors.toList());
-            Collections.sort(this.rules);
-            Collections.sort(this.checks);
+                    }).collect(toList());
+            this.policies = authorizer.policies().stream().map(Policy::toString).collect(toList());
+            sort(this.rules);
+            sort(this.checks);
         }
 
         public void fixOrigin() {
@@ -320,11 +372,11 @@ class SamplesTest {
             for (RuleSet r : this.rules) {
                 r.fixOrigin();
             }
-            Collections.sort(this.rules);
+            sort(this.rules);
             for (CheckSet c : this.checks) {
                 c.fixOrigin();
             }
-            Collections.sort(this.checks);
+            sort(this.checks);
         }
 
         public HashMap<List<Long>, List<String>> factMap() {
@@ -363,7 +415,7 @@ class SamplesTest {
                     this.origin.set(i, Long.MAX_VALUE);
                 }
             }
-            Collections.sort(this.origin);
+            sort(this.origin);
         }
 
         @Override
