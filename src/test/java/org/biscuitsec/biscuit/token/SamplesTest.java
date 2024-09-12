@@ -60,6 +60,55 @@ class SamplesTest {
         return sample.testcases.stream().map(t -> processTestCase(t, publicKey, keyPair));
     }
 
+    private DynamicTest processTestCase(final TestCase testCase, final PublicKey publicKey, final KeyPair privateKey) {
+        return DynamicTest.dynamicTest(testCase.title + ": " + testCase.filename, () -> {
+            out.println("Testcase name: \"" + testCase.title + "\"");
+            out.println("filename: \"" + testCase.filename + "\"");
+            InputStream inputStream = currentThread().getContextClassLoader().getResourceAsStream("samples/" + testCase.filename);
+            byte[] data = new byte[requireNonNull(inputStream, "InputStream cannot be null").available()];
+
+            for (Map.Entry<String, JsonElement> validationEntry : testCase.validations.getAsJsonObject().entrySet()) {
+                String validationName = validationEntry.getKey();
+                JsonObject validation = validationEntry.getValue().getAsJsonObject();
+
+                JsonObject validationResult = validation.getAsJsonObject("result");
+                String[] authorizerFacts = validation.getAsJsonPrimitive("authorizer_code").getAsString().split(";");
+
+                Either<Throwable, Long> authorizerResult = Try.of(() -> {
+                    int ignoreNumBytesRead = inputStream.read(data);
+                    Biscuit token = Biscuit.from_bytes(data, publicKey);
+                    assertArrayEquals(token.serialize(), data);
+
+                    compareBlocks(privateKey, testCase.token, token);
+                    checkAuthorityBlockSerialization(token);
+                    checkTokenBlockSerialization(token);
+                    checkRevocationIdentifiers(token, validation);
+
+                    // TODO Add check of the token
+
+                    out.println(token.print());
+                    Authorizer authorizer = token.authorizer();
+                    checkAuthorizerFacts(authorizer, authorizerFacts);
+                    return attemptAuthorization(authorizer, validation);
+                }).toEither();
+
+                if (validationResult.has("Ok")) {
+                    processValidationPassResult(validationResult, validationName, authorizerResult);
+                } else {
+                    processValidationErrorResult(validationResult, validationName, authorizerResult);
+                }
+            }
+
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    System.err.printf("Unable to close InputStream", e);
+                }
+            }
+        });
+    }
+
     private void compareBlocks(KeyPair root, List<Block> sampleBlocks, Biscuit token) throws Error {
         assertEquals(sampleBlocks.size(), 1 + token.blocks.size());
         Option<Biscuit> sampleToken = Option.none();
@@ -116,55 +165,6 @@ class SamplesTest {
         */
 
         return newSampleToken;
-    }
-
-    private DynamicTest processTestCase(final TestCase testCase, final PublicKey publicKey, final KeyPair privateKey) {
-        return DynamicTest.dynamicTest(testCase.title + ": " + testCase.filename, () -> {
-            out.println("Testcase name: \"" + testCase.title + "\"");
-            out.println("filename: \"" + testCase.filename + "\"");
-            InputStream inputStream = currentThread().getContextClassLoader().getResourceAsStream("samples/" + testCase.filename);
-            byte[] data = new byte[requireNonNull(inputStream, "InputStream cannot be null").available()];
-
-            for (Map.Entry<String, JsonElement> validationEntry : testCase.validations.getAsJsonObject().entrySet()) {
-                String validationName = validationEntry.getKey();
-                JsonObject validation = validationEntry.getValue().getAsJsonObject();
-
-                JsonObject validationResult = validation.getAsJsonObject("result");
-                String[] authorizerFacts = validation.getAsJsonPrimitive("authorizer_code").getAsString().split(";");
-
-                Either<Throwable, Long> authorizerResult = Try.of(() -> {
-                    int ignoreNumBytesRead = inputStream.read(data);
-                    Biscuit token = Biscuit.from_bytes(data, publicKey);
-                    assertArrayEquals(token.serialize(), data);
-
-                    compareBlocks(privateKey, testCase.token, token);
-                    checkAuthorityBlockSerialization(token);
-                    checkTokenBlockSerialization(token);
-                    checkRevocationIdentifiers(token, validation);
-
-                    // TODO Add check of the token
-
-                    out.println(token.print());
-                    Authorizer authorizer = token.authorizer();
-                    checkAuthorizerFacts(authorizer, authorizerFacts);
-                    return attemptAuthorization(authorizer, validation);
-                }).toEither();
-
-                if (validationResult.has("Ok")) {
-                    processValidationPassResult(validationResult, validationName, authorizerResult);
-                } else {
-                    processValidationErrorResult(validationResult, validationName, authorizerResult);
-                }
-            }
-
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    System.err.printf("Unable to close InputStream", e);
-                }
-            }
-        });
     }
 
     private Long attemptAuthorization(Authorizer authorizer, JsonObject validation) throws Exception {
