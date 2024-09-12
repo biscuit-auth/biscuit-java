@@ -3,8 +3,10 @@ package org.biscuitsec.biscuit.token;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.datalog.RunLimits;
 import org.biscuitsec.biscuit.error.Error;
-import org.biscuitsec.biscuit.error.FailedCheck;
-import org.biscuitsec.biscuit.error.LogicError;
+import org.biscuitsec.biscuit.error.Error.FailedLogic;
+import org.biscuitsec.biscuit.error.FailedCheck.FailedBlock;
+import org.biscuitsec.biscuit.error.LogicError.MatchedPolicy.Allow;
+import org.biscuitsec.biscuit.error.LogicError.Unauthorized;
 import org.biscuitsec.biscuit.token.builder.Block;
 import org.biscuitsec.biscuit.token.builder.Utils;
 import org.junit.jupiter.api.Test;
@@ -139,9 +141,9 @@ public class UnverifiedBiscuitTest {
         } catch (Error e) {
             out.println(e);
             assertEquals(
-                    new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
-                            new FailedCheck.FailedBlock(1, 0, "check if resource($resource), operation(\"read\"), right($resource, \"read\")"),
-                            new FailedCheck.FailedBlock(2, 0, "check if resource(\"file1\")")
+                    new FailedLogic(new Unauthorized(new Allow(0), Arrays.asList(
+                            new FailedBlock(1, 0, "check if resource($resource), operation(\"read\"), right($resource, \"read\")"),
+                            new FailedBlock(2, 0, "check if resource(\"file1\")")
                     ))),
                     e);
         }
