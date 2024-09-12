@@ -4,7 +4,6 @@ import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.datalog.RunLimits;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.error.FailedCheck;
-import org.biscuitsec.biscuit.error.LogicError;
 import org.biscuitsec.biscuit.token.builder.Block;
 import org.junit.jupiter.api.Test;
 
@@ -17,6 +16,8 @@ import java.time.Duration;
 import java.util.List;
 
 import static java.lang.System.out;
+import static org.biscuitsec.biscuit.error.LogicError.MatchedPolicy;
+import static org.biscuitsec.biscuit.error.LogicError.Unauthorized;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ThirdPartyTest {
@@ -72,7 +73,7 @@ public class ThirdPartyTest {
         } catch (Error e) {
             out.println(e);
             assertEquals(
-                    new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), List.of(
+                    new Error.FailedLogic(new Unauthorized(new MatchedPolicy.Allow(0), List.of(
                             new FailedCheck.FailedBlock(1, 0, "check if resource(\"file1\")")
                     ))),
                     e);
@@ -156,7 +157,7 @@ public class ThirdPartyTest {
         } catch (Error e) {
             out.println(e);
             assertEquals(
-                    new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), List.of(
+                    new Error.FailedLogic(new Unauthorized(new MatchedPolicy.Allow(0), List.of(
                             new FailedCheck.FailedBlock(3, 0, "check if resource(\"file1\")")
                     ))),
                     e);
@@ -211,7 +212,7 @@ public class ThirdPartyTest {
         } catch (Error e) {
             out.println(e);
             assertEquals(
-                    new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), List.of(
+                    new Error.FailedLogic(new Unauthorized(new MatchedPolicy.Allow(0), List.of(
                             new FailedCheck.FailedBlock(1, 0, "check if resource(\"file1\")")
                     ))),
                     e);
