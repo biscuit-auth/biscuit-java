@@ -16,6 +16,7 @@ import java.security.SignatureException;
 import java.time.Duration;
 import java.util.Arrays;
 
+import static java.lang.System.out;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -25,11 +26,11 @@ public class ThirdPartyTest {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
-        System.out.println("preparing the authority block");
+        out.println("preparing the authority block");
 
         KeyPair root = new KeyPair(rng);
         KeyPair external = new KeyPair(rng);
-        System.out.println("external: ed25519/"+external.public_key().toHex());
+        out.println("external: ed25519/"+external.public_key().toHex());
 
         Block authority_builder = new Block();
         authority_builder.add_fact("right(\"read\")");
@@ -56,13 +57,13 @@ public class ThirdPartyTest {
         Biscuit deser = Biscuit.from_bytes(data, root.public_key());
         assertEquals(b2.print(), deser.print());
 
-        System.out.println("will check the token for resource=file1");
+        out.println("will check the token for resource=file1");
         Authorizer authorizer = deser.authorizer();
         authorizer.add_fact("resource(\"file1\")");
         authorizer.add_policy("allow if true");
         authorizer.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
 
-        System.out.println("will check the token for resource=file2");
+        out.println("will check the token for resource=file2");
         Authorizer authorizer2 = deser.authorizer();
         authorizer2.add_fact("resource(\"file2\")");
         authorizer2.add_policy("allow if true");
@@ -70,7 +71,7 @@ public class ThirdPartyTest {
         try {
             authorizer2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         } catch (Error e) {
-            System.out.println(e);
+            out.println(e);
             assertEquals(
                     new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                             new FailedCheck.FailedBlock(1, 0, "check if resource(\"file1\")")
@@ -86,7 +87,7 @@ public class ThirdPartyTest {
         byte[] seed = {0, 0, 0, 0};
         rng.setSeed(seed);
 
-        System.out.println("preparing the authority block");
+        out.println("preparing the authority block");
 
         KeyPair root = new KeyPair(rng);
         KeyPair external1 = new KeyPair(rng);
@@ -99,9 +100,9 @@ public class ThirdPartyTest {
         authority_builder.add_check("check if first(\"admin\") trusting ed25519/"+external1.public_key().toHex());
 
         org.biscuitsec.biscuit.token.Block authority_block =  authority_builder.build();
-        System.out.println(authority_block);
+        out.println(authority_block);
         Biscuit b1 = Biscuit.make(rng, root, authority_block);
-        System.out.println("TOKEN: "+b1.print());
+        out.println("TOKEN: "+b1.print());
 
         ThirdPartyBlockRequest request1 = b1.thirdPartyRequest();
         Block builder = new Block();
@@ -113,7 +114,7 @@ public class ThirdPartyTest {
         byte[] data = b2.serialize();
         Biscuit deser2 = Biscuit.from_bytes(data, root.public_key());
         assertEquals(b2.print(), deser2.print());
-        System.out.println("TOKEN: "+deser2.print());
+        out.println("TOKEN: "+deser2.print());
 
         ThirdPartyBlockRequest request2 = deser2.thirdPartyRequest();
         Block builder2 = new Block();
@@ -124,7 +125,7 @@ public class ThirdPartyTest {
         byte[] data2 = b3.serialize();
         Biscuit deser3 = Biscuit.from_bytes(data2, root.public_key());
         assertEquals(b3.print(), deser3.print());
-        System.out.println("TOKEN: "+deser3.print());
+        out.println("TOKEN: "+deser3.print());
 
 
         ThirdPartyBlockRequest request3 = deser3.thirdPartyRequest();
@@ -136,26 +137,26 @@ public class ThirdPartyTest {
         byte[] data3 = b4.serialize();
         Biscuit deser4 = Biscuit.from_bytes(data3, root.public_key());
         assertEquals(b4.print(), deser4.print());
-        System.out.println("TOKEN: "+deser4.print());
+        out.println("TOKEN: "+deser4.print());
 
 
-        System.out.println("will check the token for resource=file1");
+        out.println("will check the token for resource=file1");
         Authorizer authorizer = deser4.authorizer();
         authorizer.add_fact("resource(\"file1\")");
         authorizer.add_policy("allow if true");
-        System.out.println("Authorizer world:\n"+authorizer.print_world());
+        out.println("Authorizer world:\n"+authorizer.print_world());
         authorizer.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
 
-        System.out.println("will check the token for resource=file2");
+        out.println("will check the token for resource=file2");
         Authorizer authorizer2 = deser4.authorizer();
         authorizer2.add_fact("resource(\"file2\")");
         authorizer2.add_policy("allow if true");
-        System.out.println("Authorizer world 2:\n"+authorizer2.print_world());
+        out.println("Authorizer world 2:\n"+authorizer2.print_world());
 
         try {
             authorizer2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         } catch (Error e) {
-            System.out.println(e);
+            out.println(e);
             assertEquals(
                     new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                             new FailedCheck.FailedBlock(3, 0, "check if resource(\"file1\")")
@@ -169,11 +170,11 @@ public class ThirdPartyTest {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
-        System.out.println("preparing the authority block");
+        out.println("preparing the authority block");
 
         KeyPair root = new KeyPair(rng);
         KeyPair external = new KeyPair(rng);
-        System.out.println("external: ed25519/"+external.public_key().toHex());
+        out.println("external: ed25519/"+external.public_key().toHex());
 
         Block authority_builder = new Block();
         authority_builder.add_fact("right(\"read\")");
@@ -194,15 +195,15 @@ public class ThirdPartyTest {
         Biscuit deser = Biscuit.from_bytes(data, root.public_key());
         assertEquals(b2.print(), deser.print());
 
-        System.out.println("will check the token for resource=file1");
+        out.println("will check the token for resource=file1");
         Authorizer authorizer = deser.authorizer();
         authorizer.add_fact("resource(\"file1\")");
         authorizer.add_policy("allow if true");
         authorizer.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
-        System.out.println("Authorizer world:\n"+authorizer.print_world());
+        out.println("Authorizer world:\n"+authorizer.print_world());
 
 
-        System.out.println("will check the token for resource=file2");
+        out.println("will check the token for resource=file2");
         Authorizer authorizer2 = deser.authorizer();
         authorizer2.add_fact("resource(\"file2\")");
         authorizer2.add_policy("allow if true");
@@ -210,7 +211,7 @@ public class ThirdPartyTest {
         try {
             authorizer2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         } catch (Error e) {
-            System.out.println(e);
+            out.println(e);
             assertEquals(
                     new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                             new FailedCheck.FailedBlock(1, 0, "check if resource(\"file1\")")
