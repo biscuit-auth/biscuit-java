@@ -14,7 +14,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.time.Duration;
-import java.util.Arrays;
+import java.util.List;
 
 import static java.lang.System.out;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -72,7 +72,7 @@ public class ThirdPartyTest {
         } catch (Error e) {
             out.println(e);
             assertEquals(
-                    new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
+                    new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), List.of(
                             new FailedCheck.FailedBlock(1, 0, "check if resource(\"file1\")")
                     ))),
                     e);
@@ -156,7 +156,7 @@ public class ThirdPartyTest {
         } catch (Error e) {
             out.println(e);
             assertEquals(
-                    new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
+                    new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), List.of(
                             new FailedCheck.FailedBlock(3, 0, "check if resource(\"file1\")")
                     ))),
                     e);
@@ -211,7 +211,7 @@ public class ThirdPartyTest {
         } catch (Error e) {
             out.println(e);
             assertEquals(
-                    new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
+                    new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), List.of(
                             new FailedCheck.FailedBlock(1, 0, "check if resource(\"file1\")")
                     ))),
                     e);
