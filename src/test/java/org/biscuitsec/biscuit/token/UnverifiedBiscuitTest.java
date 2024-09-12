@@ -2,7 +2,6 @@ package org.biscuitsec.biscuit.token;
 
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.datalog.RunLimits;
-import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.error.FailedCheck;
 import org.biscuitsec.biscuit.error.LogicError;
@@ -20,7 +19,6 @@ import java.util.List;
 
 import static java.lang.System.out;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class UnverifiedBiscuitTest {
 
