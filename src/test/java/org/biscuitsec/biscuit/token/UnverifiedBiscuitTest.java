@@ -31,8 +31,8 @@ public class UnverifiedBiscuitTest {
 
         KeyPair keypair0 = new KeyPair(rng);
 
-       // org.biscuitsec.biscuit.token.builder.Block block0 = new org.biscuitsec.biscuit.token.builder.Block(0);
-       org.biscuitsec.biscuit.token.builder.Biscuit block0 = Biscuit.builder(rng, keypair0);
+        // org.biscuitsec.biscuit.token.builder.Block block0 = new org.biscuitsec.biscuit.token.builder.Block(0);
+        org.biscuitsec.biscuit.token.builder.Biscuit block0 = Biscuit.builder(rng, keypair0);
         block0.add_authority_fact(Utils.fact("right", List.of(Utils.s("file1"), Utils.s("read"))));
         block0.add_authority_fact(Utils.fact("right", List.of(Utils.s("file2"), Utils.s("read"))));
         block0.add_authority_fact(Utils.fact("right", List.of(Utils.s("file1"), Utils.s("write"))));
