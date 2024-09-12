@@ -343,7 +343,7 @@ public class UnverifiedBiscuit {
         SerializedBiscuit serializedBiscuit = this.serializedBiscuit;
 
 
-        Option<PublicKey> root = delegate.root_key(root_key_id);
+        Option<PublicKey> root = delegate.rootKey(root_key_id);
         if(root.isEmpty()) {
             throw new InvalidKeyException("unknown root key id");
         }

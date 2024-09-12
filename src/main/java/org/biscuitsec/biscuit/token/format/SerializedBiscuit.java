@@ -4,13 +4,11 @@ import biscuit.format.schema.Schema;
 import io.vavr.Tuple2;
 import org.biscuitsec.biscuit.crypto.KeyDelegate;
 import org.biscuitsec.biscuit.crypto.KeyPair;
-import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.token.Block;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import io.vavr.Tuple3;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 import net.i2p.crypto.eddsa.EdDSAEngine;
@@ -68,7 +66,7 @@ public class SerializedBiscuit {
                 root_key_id = Option.some(data.getRootKeyId());
             }
 
-            Option<org.biscuitsec.biscuit.crypto.PublicKey> root = delegate.root_key(root_key_id);
+            Option<org.biscuitsec.biscuit.crypto.PublicKey> root = delegate.rootKey(root_key_id);
             if (root.isEmpty()) {
                 throw new InvalidKeyException("unknown root key id");
             }
