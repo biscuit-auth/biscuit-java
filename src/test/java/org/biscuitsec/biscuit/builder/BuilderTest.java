@@ -13,28 +13,26 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
+import static java.lang.System.out;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BuilderTest {
 
     @Test
-    public void testBuild() throws Error.Language, Error.SymbolTableOverlap, Error.FormatError {
+    public void testBuild() throws Error.Language, Error.FormatError {
         SecureRandom rng = new SecureRandom();
         KeyPair root = new KeyPair(rng);
         SymbolTable symbols = Biscuit.default_symbol_table();
 
         Block authority_builder = new Block();
-        authority_builder.add_fact(Utils.fact("revocation_id", Arrays.asList(Utils.date(Date.from(Instant.now())))));
-        authority_builder.add_fact(Utils.fact("right", Arrays.asList(Utils.s("admin"))));
+        authority_builder.add_fact(Utils.fact("revocation_id", List.of(Utils.date(Date.from(Instant.now())))));
+        authority_builder.add_fact(Utils.fact("right", List.of(Utils.s("admin"))));
         authority_builder.add_rule(Utils.constrained_rule("right",
                 Arrays.asList(Utils.s("namespace"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("operation")),
-                Arrays.asList(Utils.pred("ns_operation", Arrays.asList(Utils.s("namespace"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("operation")))),
-                Arrays.asList(
+                List.of(Utils.pred("ns_operation", Arrays.asList(Utils.s("namespace"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("operation")))),
+                List.of(
                         new Expression.Binary(
                                 Expression.Op.Contains,
                                 new Expression.Value(Utils.var("operation")),
@@ -47,12 +45,12 @@ public class BuilderTest {
         ));
         authority_builder.add_rule(Utils.constrained_rule("right",
                 Arrays.asList(Utils.s("topic"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("topic"), Utils.var("operation")),
-                Arrays.asList(Utils.pred("topic_operation", Arrays.asList(Utils.s("topic"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("topic"), Utils.var("operation")))),
-                Arrays.asList(
+                List.of(Utils.pred("topic_operation", Arrays.asList(Utils.s("topic"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("topic"), Utils.var("operation")))),
+                List.of(
                         new Expression.Binary(
                                 Expression.Op.Contains,
                                 new Expression.Value(Utils.var("operation")),
-                                new Expression.Value(new Term.Set(new HashSet<>(Arrays.asList(
+                                new Expression.Value(new Term.Set(new HashSet<>(List.of(
                                         Utils.s("lookup")
                                 )))))
                 )
@@ -61,24 +59,24 @@ public class BuilderTest {
         org.biscuitsec.biscuit.token.Block authority = authority_builder.build(symbols);
         Biscuit rootBiscuit = Biscuit.make(rng, root, authority);
 
-        System.out.println(rootBiscuit.print());
+        out.println(rootBiscuit.print());
 
         assertNotNull(rootBiscuit);
     }
 
     @Test
     public void testStringValueOfAStringTerm() {
-        assertEquals( "\"hello\"", new Term.Str("hello").toString() );
+        assertEquals("\"hello\"", new Term.Str("hello").toString());
     }
 
     @Test
     public void testStringValueOfAnIntegerTerm() {
-        assertEquals( "123", new Term.Integer(123).toString() );
+        assertEquals("123", new Term.Integer(123).toString());
     }
 
     @Test
     public void testStringValueOfAVariableTerm() {
-        assertEquals( "$hello", new Term.Variable("hello").toString() );
+        assertEquals("$hello", new Term.Variable("hello").toString());
     }
 
     @Test
@@ -101,7 +99,7 @@ public class BuilderTest {
     public void testArrayValueIsCopy() {
         byte[] someBytes = "Hello".getBytes(StandardCharsets.UTF_8);
         Term.Bytes term = new Term.Bytes(someBytes);
-        assertTrue(Arrays.equals(someBytes, term.getValue()), "same content");
-        assertNotEquals(System.identityHashCode(someBytes), System.identityHashCode(term.getValue()), "different objects");
+        assertArrayEquals(someBytes, term.getValue(), "content not the same");
+        assertNotEquals(System.identityHashCode(someBytes), System.identityHashCode(term.getValue()), "objects not different");
     }
 }

@@ -11,7 +11,7 @@ This API implements [Biscuit 2.0](https://www.biscuitsec.org/blog/biscuit-2-0/).
 
 ## Usage
 
-```java
+```xml
 <!-- https://mvnrepository.com/artifact/org.biscuitsec/biscuit -->
 <dependency>
     <groupId>org.biscuitsec</groupId>
@@ -25,7 +25,7 @@ This API implements [Biscuit 2.0](https://www.biscuitsec.org/blog/biscuit-2-0/).
 ### Requirements
 
 * JDK v11
-* the Protobuf compiler command `protoc` v3+ is required in `$PATH`.
+* The Protobuf compiler binary `protoc` v3+ is required in `$PATH`.
 
 ### Build
 

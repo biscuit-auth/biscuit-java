@@ -4,12 +4,13 @@ import org.biscuitsec.biscuit.datalog.expressions.Expression;
 import org.biscuitsec.biscuit.datalog.expressions.Op;
 import org.biscuitsec.biscuit.error.Error;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ExpressionTest {
 
@@ -21,7 +22,7 @@ public class ExpressionTest {
         symbols.add("var");
 
 
-        Expression e = new Expression(new ArrayList<Op>(Arrays.asList(
+        Expression e = new Expression(new ArrayList<>(Arrays.asList(
                 new Op.Value(new Term.Integer(1)),
                 new Op.Value(new Term.Variable(SymbolTable.DEFAULT_SYMBOLS_OFFSET + 2)),
                 new Op.Binary(Op.BinaryOp.LessThan),
@@ -50,7 +51,7 @@ public class ExpressionTest {
         symbols.add("ab");
 
 
-        Expression e = new Expression(new ArrayList<Op>(Arrays.asList(
+        Expression e = new Expression(new ArrayList<>(Arrays.asList(
                 new Op.Value(new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET)),
                 new Op.Value(new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET + 1)),
                 new Op.Binary(Op.BinaryOp.Add)
@@ -63,7 +64,7 @@ public class ExpressionTest {
 
         assertEquals(
                 new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET + 2),
-                e.evaluate(new HashMap<>(),  new TemporarySymbolTable(symbols))
+                e.evaluate(new HashMap<>(), new TemporarySymbolTable(symbols))
         );
     }
 
@@ -74,7 +75,7 @@ public class ExpressionTest {
         symbols.add("b");
 
 
-        Expression e = new Expression(new ArrayList<Op>(Arrays.asList(
+        Expression e = new Expression(new ArrayList<>(Arrays.asList(
                 new Op.Value(new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET)),
                 new Op.Value(new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET + 1)),
                 new Op.Binary(Op.BinaryOp.Contains)
@@ -87,7 +88,7 @@ public class ExpressionTest {
 
         assertEquals(
                 new Term.Bool(true),
-                e.evaluate(new HashMap<>(),  new TemporarySymbolTable(symbols))
+                e.evaluate(new HashMap<>(), new TemporarySymbolTable(symbols))
         );
     }
 
@@ -98,7 +99,7 @@ public class ExpressionTest {
         symbols.add("b");
 
 
-        Expression e = new Expression(new ArrayList<Op>(Arrays.asList(
+        Expression e = new Expression(new ArrayList<>(Arrays.asList(
                 new Op.Value(new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET)),
                 new Op.Value(new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET + 1)),
                 new Op.Binary(Op.BinaryOp.Contains),
@@ -112,7 +113,7 @@ public class ExpressionTest {
 
         assertEquals(
                 new Term.Bool(false),
-                e.evaluate(new HashMap<>(),  new TemporarySymbolTable(symbols))
+                e.evaluate(new HashMap<>(), new TemporarySymbolTable(symbols))
         );
     }
 
@@ -120,7 +121,7 @@ public class ExpressionTest {
     public void testIntersectionAndContains() throws Error.Execution {
         SymbolTable symbols = new SymbolTable();
 
-        Expression e = new Expression(new ArrayList<Op>(Arrays.asList(
+        Expression e = new Expression(new ArrayList<>(Arrays.asList(
                 new Op.Value(new Term.Set(new HashSet<>(Arrays.asList(new Term.Integer(1), new Term.Integer(2), new Term.Integer(3))))),
                 new Op.Value(new Term.Set(new HashSet<>(Arrays.asList(new Term.Integer(1), new Term.Integer(2))))),
                 new Op.Binary(Op.BinaryOp.Intersection),
@@ -135,7 +136,7 @@ public class ExpressionTest {
 
         assertEquals(
                 new Term.Bool(true),
-                e.evaluate(new HashMap<>(),  new TemporarySymbolTable(symbols))
+                e.evaluate(new HashMap<>(), new TemporarySymbolTable(symbols))
         );
     }
 }

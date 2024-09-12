@@ -1,24 +1,23 @@
 package org.biscuitsec.biscuit.builder.parser;
 
 import biscuit.format.schema.Schema;
+import io.vavr.Tuple2;
+import io.vavr.control.Either;
 import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.datalog.TemporarySymbolTable;
 import org.biscuitsec.biscuit.datalog.expressions.Op;
-import org.biscuitsec.biscuit.token.Biscuit;
+import org.biscuitsec.biscuit.token.builder.*;
 import org.biscuitsec.biscuit.token.builder.parser.Error;
 import org.biscuitsec.biscuit.token.builder.parser.Parser;
-import io.vavr.Tuple2;
-import io.vavr.control.Either;
-import io.vavr.control.Option;
-import org.biscuitsec.biscuit.token.builder.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.biscuitsec.biscuit.datalog.Check.Kind.One;
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.*;
+
+import static org.biscuitsec.biscuit.datalog.Check.Kind.One;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ParserTest {
 
@@ -59,7 +58,7 @@ class ParserTest {
     void testFact() throws org.biscuitsec.biscuit.error.Error.Language {
         Either<Error, Tuple2<String, Fact>> res = Parser.fact("right( \"file1\", \"read\" )");
         assertEquals(Either.right(new Tuple2<>("",
-                Utils.fact("right", Arrays.asList(Utils.string("file1"), Utils.s("read"))))),
+                        Utils.fact("right", Arrays.asList(Utils.string("file1"), Utils.s("read"))))),
                 res);
 
         Either<Error, Tuple2<String, Fact>> res2 = Parser.fact("right( $var, \"read\" )");
@@ -93,7 +92,7 @@ class ParserTest {
 
     @Test
     void testRuleWithExpression() {
-            Either<Error, Tuple2<String, Rule>> res =
+        Either<Error, Tuple2<String, Rule>> res =
                 Parser.rule("valid_date(\"file1\") <- time($0 ), resource( \"file1\"), $0 <= 2019-12-04T09:46:41Z");
         assertEquals(Either.right(new Tuple2<>("",
                         Utils.constrained_rule("valid_date",
@@ -101,7 +100,7 @@ class ParserTest {
                                 Arrays.asList(
                                         Utils.pred("time", List.of(Utils.var("0"))),
                                         Utils.pred("resource", List.of(Utils.string("file1")))
-                                        ),
+                                ),
                                 List.of(
                                         new Expression.Binary(
                                                 Expression.Op.LessOrEqual,
@@ -159,12 +158,12 @@ class ParserTest {
                 new Expression.Binary(
                         Expression.Op.Equal,
                         new Expression.Unary(
-                            Expression.Op.Length,
-                            new Expression.Binary(
-                                    Expression.Op.Intersection,
-                                    new Expression.Value(Utils.set(new HashSet<>(Arrays.asList(Utils.integer(1), Utils.integer(2), Utils.integer(3))))),
-                                    new Expression.Value(Utils.set(new HashSet<>(Arrays.asList(Utils.integer(1), Utils.integer(2)))))
-                            )
+                                Expression.Op.Length,
+                                new Expression.Binary(
+                                        Expression.Op.Intersection,
+                                        new Expression.Value(Utils.set(new HashSet<>(Arrays.asList(Utils.integer(1), Utils.integer(2), Utils.integer(3))))),
+                                        new Expression.Value(Utils.set(new HashSet<>(Arrays.asList(Utils.integer(1), Utils.integer(2)))))
+                                )
                         ),
                         new Expression.Value(Utils.integer(2))
                 ))), res);
@@ -176,20 +175,20 @@ class ParserTest {
                 Parser.check("check if !false && true");
         assertEquals(Either.right(new Tuple2<>("",
                         Utils.check(
-                        Utils.constrained_rule("query",
-                                new ArrayList<>(),
-                                new ArrayList<>(),
-                                List.of(
-                                        new Expression.Binary(
-                                                Expression.Op.And,
-                                                new Expression.Unary(
-                                                        Expression.Op.Negate,
-                                                        new Expression.Value(new Term.Bool(false))
-                                                ),
-                                                new Expression.Value(new Term.Bool(true))
+                                Utils.constrained_rule("query",
+                                        new ArrayList<>(),
+                                        new ArrayList<>(),
+                                        List.of(
+                                                new Expression.Binary(
+                                                        Expression.Op.And,
+                                                        new Expression.Unary(
+                                                                Expression.Op.Negate,
+                                                                new Expression.Value(new Term.Bool(false))
+                                                        ),
+                                                        new Expression.Value(new Term.Bool(true))
+                                                )
                                         )
-                                )
-                        )))),
+                                )))),
                 res);
     }
 
@@ -215,7 +214,7 @@ class ParserTest {
                                         "valid_date",
                                         List.of(Utils.string("file1")
                                         )),
-                                Arrays.asList(
+                                List.of(
                                         Utils.pred("resource", List.of(Utils.string("file1")))
                                 ),
                                 new ArrayList<>(),
@@ -232,22 +231,22 @@ class ParserTest {
         Either<Error, Tuple2<String, Check>> res =
                 Parser.check("check if resource($0), operation(\"read\") or admin()");
         assertEquals(Either.right(new Tuple2<>("", new Check(
-                One,
-                Arrays.asList(
-                    Utils.rule("query",
-                            new ArrayList<>(),
-                            Arrays.asList(
-                                    Utils.pred("resource", List.of(Utils.var("0"))),
-                                    Utils.pred("operation", List.of(Utils.s("read")))
-                            )
-                    ),
-                    Utils.rule("query",
-                            new ArrayList<>(),
-                            List.of(
-                                    Utils.pred("admin", List.of())
-                            )
-                    )
-                    )))),
+                        One,
+                        Arrays.asList(
+                                Utils.rule("query",
+                                        new ArrayList<>(),
+                                        Arrays.asList(
+                                                Utils.pred("resource", List.of(Utils.var("0"))),
+                                                Utils.pred("operation", List.of(Utils.s("read")))
+                                        )
+                                ),
+                                Utils.rule("query",
+                                        new ArrayList<>(),
+                                        List.of(
+                                                Utils.pred("admin", List.of())
+                                        )
+                                )
+                        )))),
                 res);
     }
 
@@ -257,7 +256,7 @@ class ParserTest {
                 Parser.expression(" -1 ");
 
         assertEquals(new Tuple2<String, Expression>("",
-                new Expression.Value(Utils.integer(-1))),
+                        new Expression.Value(Utils.integer(-1))),
                 res.get());
 
         Either<Error, Tuple2<String, Expression>> res2 =
@@ -447,8 +446,6 @@ class ParserTest {
 
     @Test
     void testDatalogSucceedsArrays() throws org.biscuitsec.biscuit.error.Error.Parser {
-        SymbolTable symbols = Biscuit.default_symbol_table();
-
         String l1 = "check if [2, 3].union([2])";
         String toParse = String.join(";", List.of(l1));
 
@@ -465,12 +462,10 @@ class ParserTest {
 
     @Test
     void testDatalogSucceedsArraysContains() throws org.biscuitsec.biscuit.error.Error.Parser {
-        SymbolTable symbols = Biscuit.default_symbol_table();
-
         String l1 = "check if [2019-12-04T09:46:41Z, 2020-12-04T09:46:41Z].contains(2020-12-04T09:46:41Z)";
         String toParse = String.join(";", List.of(l1));
 
-        Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1,  toParse);
+        Either<Map<Integer, List<Error>>, Block> output = Parser.datalog(1, toParse);
         assertTrue(output.isRight());
 
         Block validBlock = new Block();
@@ -483,8 +478,6 @@ class ParserTest {
 
     @Test
     void testDatalogFailed() {
-        SymbolTable symbols = Biscuit.default_symbol_table();
-
         String l1 = "fact(1)";
         String l2 = "check fact(1)"; // typo missing "if"
         String toParse = String.join(";", Arrays.asList(l1, l2));
@@ -494,9 +487,7 @@ class ParserTest {
     }
 
     @Test
-    void testDatalogRemoveComment() throws org.biscuitsec.biscuit.error.Error.Parser {
-        SymbolTable symbols = Biscuit.default_symbol_table();
-
+    void testDatalogRemoveComment() {
         String l0 = "// test comment";
         String l1 = "fact1(1, 2);";
         String l2 = "fact2(\"2\");";

@@ -1,6 +1,8 @@
 package org.biscuitsec.biscuit.crypto;
 
 import biscuit.format.schema.Schema;
+import org.biscuitsec.biscuit.error.Error;
+import org.junit.jupiter.api.Test;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -9,9 +11,7 @@ import java.security.SignatureException;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
-
-import org.biscuitsec.biscuit.error.Error;
-import org.junit.jupiter.api.Test;
+import static java.lang.System.out;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SignatureTest {
 
     @Test
-    public void testSerialize() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void testSerialize() {
         byte[] seed = {1, 2, 3, 4};
         SecureRandom rng = new SecureRandom(seed);
 
@@ -36,11 +36,11 @@ public class SignatureTest {
         assertEquals(32, serializedSecretKey.length);
         assertEquals(32, serializedPublicKey.length);
 
-        System.out.println(keypair.toHex());
-        System.out.println(deserializedSecretKey.toHex());
+        out.println(keypair.toHex());
+        out.println(deserializedSecretKey.toHex());
         assertEquals(keypair.toBytes(), deserializedSecretKey.toBytes());
-        System.out.println(pubkey.toHex());
-        System.out.println(deserializedPublicKey.toHex());
+        out.println(pubkey.toHex());
+        out.println(deserializedPublicKey.toHex());
         assertEquals(pubkey.toHex(), deserializedPublicKey.toHex());
     }
 
@@ -52,10 +52,10 @@ public class SignatureTest {
         String message1 = "hello";
         KeyPair root = new KeyPair(rng);
         KeyPair keypair2 = new KeyPair(rng);
-        System.out.println("root key: " + root.toHex());
-        System.out.println("keypair2: " + keypair2.toHex());
-        System.out.println("root key public: " + root.public_key().toHex());
-        System.out.println("keypair2 public: " + keypair2.public_key().toHex());
+        out.println("root key: " + root.toHex());
+        out.println("keypair2: " + keypair2.toHex());
+        out.println("root key public: " + root.public_key().toHex());
+        out.println("keypair2 public: " + keypair2.public_key().toHex());
 
         Token token1 = new Token(root, message1.getBytes(), keypair2);
         assertEquals(Right(null), token1.verify(root.public_key()));

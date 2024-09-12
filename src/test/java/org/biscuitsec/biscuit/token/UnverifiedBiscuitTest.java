@@ -2,10 +2,11 @@ package org.biscuitsec.biscuit.token;
 
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.datalog.RunLimits;
-import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.error.Error;
-import org.biscuitsec.biscuit.error.FailedCheck;
-import org.biscuitsec.biscuit.error.LogicError;
+import org.biscuitsec.biscuit.error.Error.FailedLogic;
+import org.biscuitsec.biscuit.error.FailedCheck.FailedBlock;
+import org.biscuitsec.biscuit.error.LogicError.MatchedPolicy.Allow;
+import org.biscuitsec.biscuit.error.LogicError.Unauthorized;
 import org.biscuitsec.biscuit.token.builder.Block;
 import org.biscuitsec.biscuit.token.builder.Utils;
 import org.junit.jupiter.api.Test;
@@ -18,8 +19,8 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 
+import static java.lang.System.out;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class UnverifiedBiscuitTest {
 
@@ -28,12 +29,12 @@ public class UnverifiedBiscuitTest {
         byte[] seed = {0, 0, 0, 0};
         SecureRandom rng = new SecureRandom(seed);
 
-        System.out.println("preparing the authority block, block0");
+        out.println("preparing the authority block, block0");
 
         KeyPair keypair0 = new KeyPair(rng);
 
-       // org.biscuitsec.biscuit.token.builder.Block block0 = new org.biscuitsec.biscuit.token.builder.Block(0);
-       org.biscuitsec.biscuit.token.builder.Biscuit block0 = Biscuit.builder(rng, keypair0);
+        // org.biscuitsec.biscuit.token.builder.Block block0 = new org.biscuitsec.biscuit.token.builder.Block(0);
+        org.biscuitsec.biscuit.token.builder.Biscuit block0 = Biscuit.builder(rng, keypair0);
         block0.add_authority_fact(Utils.fact("right", List.of(Utils.s("file1"), Utils.s("read"))));
         block0.add_authority_fact(Utils.fact("right", List.of(Utils.s("file2"), Utils.s("read"))));
         block0.add_authority_fact(Utils.fact("right", List.of(Utils.s("file1"), Utils.s("write"))));
@@ -41,21 +42,21 @@ public class UnverifiedBiscuitTest {
 
         Biscuit biscuit0 = block0.build();
 
-        System.out.println(biscuit0.print());
-        System.out.println("serializing the first token");
+        out.println(biscuit0.print());
+        out.println("serializing the first token");
 
         String data = biscuit0.serialize_b64url();
 
-        System.out.print("data len: ");
-        System.out.println(data.length());
-        System.out.println(data);
+        out.print("data len: ");
+        out.println(data.length());
+        out.println(data);
 
-        System.out.println("deserializing the first token");
+        out.println("deserializing the first token");
         UnverifiedBiscuit deser0 = UnverifiedBiscuit.from_b64url(data);
-        System.out.println(deser0.print());
+        out.println(deser0.print());
 
         // SECOND BLOCK
-        System.out.println("preparing the second block");
+        out.println("preparing the second block");
 
         KeyPair keypair1 = new KeyPair(rng);
         org.biscuitsec.biscuit.token.builder.Block block1 = deser0.create_block();
@@ -70,23 +71,23 @@ public class UnverifiedBiscuitTest {
         )));
         UnverifiedBiscuit unverifiedBiscuit1 = deser0.attenuate(rng, keypair1, block1.build());
 
-        System.out.println(unverifiedBiscuit1.print());
+        out.println(unverifiedBiscuit1.print());
 
-        System.out.println("serializing the second token");
+        out.println("serializing the second token");
 
         String data1 = unverifiedBiscuit1.serialize_b64url();
 
-        System.out.print("data len: ");
-        System.out.println(data1.length());
-        System.out.println(data1);
+        out.print("data len: ");
+        out.println(data1.length());
+        out.println(data1);
 
-        System.out.println("deserializing the second token");
+        out.println("deserializing the second token");
         UnverifiedBiscuit deser1 = UnverifiedBiscuit.from_b64url(data1);
 
-        System.out.println(deser1.print());
+        out.println(deser1.print());
 
         // THIRD BLOCK
-        System.out.println("preparing the third block");
+        out.println("preparing the third block");
 
         KeyPair keypair2 = new KeyPair(rng);
 
@@ -101,26 +102,26 @@ public class UnverifiedBiscuitTest {
 
         UnverifiedBiscuit unverifiedBiscuit2 = unverifiedBiscuit1.attenuate(rng, keypair2, block2);
 
-        System.out.println(unverifiedBiscuit2.print());
+        out.println(unverifiedBiscuit2.print());
 
-        System.out.println("serializing the third token");
+        out.println("serializing the third token");
 
         String data2 = unverifiedBiscuit2.serialize_b64url();
 
-        System.out.print("data len: ");
-        System.out.println(data2.length());
-        System.out.println(data2);
+        out.print("data len: ");
+        out.println(data2.length());
+        out.println(data2);
 
-        System.out.println("deserializing the third token");
+        out.println("deserializing the third token");
         UnverifiedBiscuit finalUnverifiedBiscuit = UnverifiedBiscuit.from_b64url(data2);
 
-        System.out.println(finalUnverifiedBiscuit.print());
+        out.println(finalUnverifiedBiscuit.print());
 
         // Crate Biscuit from UnverifiedBiscuit
         Biscuit finalBiscuit = finalUnverifiedBiscuit.verify(keypair0.public_key());
 
         // check
-        System.out.println("will check the token for resource=file1 and operation=read");
+        out.println("will check the token for resource=file1 and operation=read");
 
         Authorizer authorizer = finalBiscuit.authorizer();
         authorizer.add_fact("resource(\"file1\")");
@@ -128,7 +129,7 @@ public class UnverifiedBiscuitTest {
         authorizer.add_policy("allow if true");
         authorizer.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
 
-        System.out.println("will check the token for resource=file2 and operation=write");
+        out.println("will check the token for resource=file2 and operation=write");
 
         Authorizer authorizer2 = finalBiscuit.authorizer();
         authorizer2.add_fact("resource(\"file2\")");
@@ -138,11 +139,11 @@ public class UnverifiedBiscuitTest {
         try {
             authorizer2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         } catch (Error e) {
-            System.out.println(e);
+            out.println(e);
             assertEquals(
-                    new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
-                            new FailedCheck.FailedBlock(1, 0, "check if resource($resource), operation(\"read\"), right($resource, \"read\")"),
-                            new FailedCheck.FailedBlock(2, 0, "check if resource(\"file1\")")
+                    new FailedLogic(new Unauthorized(new Allow(0), Arrays.asList(
+                            new FailedBlock(1, 0, "check if resource($resource), operation(\"read\"), right($resource, \"read\")"),
+                            new FailedBlock(2, 0, "check if resource(\"file1\")")
                     ))),
                     e);
         }
