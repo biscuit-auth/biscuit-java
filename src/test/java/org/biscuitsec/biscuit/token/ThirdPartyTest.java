@@ -3,7 +3,6 @@ package org.biscuitsec.biscuit.token;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.datalog.RunLimits;
 import org.biscuitsec.biscuit.error.Error;
-import org.biscuitsec.biscuit.error.FailedCheck;
 import org.biscuitsec.biscuit.error.FailedCheck.FailedBlock;
 import org.biscuitsec.biscuit.token.builder.Block;
 import org.junit.jupiter.api.Test;
@@ -17,7 +16,6 @@ import java.time.Duration;
 import java.util.List;
 
 import static java.lang.System.out;
-import static org.biscuitsec.biscuit.error.LogicError.MatchedPolicy;
 import static org.biscuitsec.biscuit.error.LogicError.MatchedPolicy.*;
 import static org.biscuitsec.biscuit.error.LogicError.Unauthorized;
 import static org.junit.jupiter.api.Assertions.assertEquals;
