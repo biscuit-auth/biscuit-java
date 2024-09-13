@@ -490,7 +490,7 @@ public abstract class Op {
                     break;
                 case Intersection:
                     if (right instanceof Term.Set && left instanceof Term.Set) {
-                        HashSet<Term> intersec = new HashSet<Term>();
+                        HashSet<Term> intersec = new HashSet<>();
                         HashSet<Term> _right = ((Term.Set) right).value();
                         HashSet<Term> _left = ((Term.Set) left).value();
                         for (Term _id : _right) {
@@ -503,7 +503,7 @@ public abstract class Op {
                     break;
                 case Union:
                     if (right instanceof Term.Set && left instanceof Term.Set) {
-                        HashSet<Term> union = new HashSet<Term>();
+                        HashSet<Term> union = new HashSet<>();
                         HashSet<Term> _right = ((Term.Set) right).value();
                         HashSet<Term> _left = ((Term.Set) left).value();
                         union.addAll(_right);
