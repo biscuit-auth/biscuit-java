@@ -358,7 +358,7 @@ public class WorldTest {
                                 new Op.Value(new Term.Set(new HashSet<>(Arrays.asList(new Term.Str(abc_sym_id), new Term.Str(ghi_sym_id))))),
                                 new Op.Value(new Term.Variable(syms.insert("sym"))),
                                 new Op.Binary(Op.BinaryOp.Contains),
-                                new Op.Unary(Op.UnaryOp.Negate)
+                                new Op.Unary(Op.UnaryOp.NEGATE)
                         )))
                 )
         );

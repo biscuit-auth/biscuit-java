@@ -100,9 +100,9 @@ public abstract class Op {
     }
 
     public enum UnaryOp {
-        Negate,
-        Parens,
-        Length,
+        NEGATE,
+        PARENS,
+        LENGTH,
     }
 
     public final static class Unary extends Op {
@@ -120,7 +120,7 @@ public abstract class Op {
         public void evaluate(Deque<Term> stack, Map<Long, Term> variables, TemporarySymbolTable symbols) throws Error.Execution {
             Term value = stack.pop();
             switch (this.op) {
-                case Negate:
+                case NEGATE:
                     if (value instanceof Term.Bool) {
                         Term.Bool b = (Term.Bool) value;
                         stack.push(new Term.Bool(!b.value()));
@@ -128,10 +128,10 @@ public abstract class Op {
                         throw new Error.Execution("invalid type for negate op, expected boolean");
                     }
                     break;
-                case Parens:
+                case PARENS:
                     stack.push(value);
                     break;
-                case Length:
+                case LENGTH:
                     if (value instanceof Term.Str) {
                         Option<String> s = symbols.get_s((int)((Term.Str) value).value());
                         if(s.isEmpty()) {
@@ -158,15 +158,15 @@ public abstract class Op {
             String prec = stack.pop();
             String _s = "";
             switch (this.op) {
-                case Negate:
+                case NEGATE:
                     _s = "!" + prec;
                     stack.push(_s);
                     break;
-                case Parens:
+                case PARENS:
                     _s = "(" + prec + ")";
                     stack.push(_s);
                     break;
-                case Length:
+                case LENGTH:
                     _s = prec+".length()";
                     stack.push(_s);
                     break;
@@ -181,13 +181,13 @@ public abstract class Op {
             Schema.OpUnary.Builder b1 = Schema.OpUnary.newBuilder();
 
             switch (this.op) {
-                case Negate:
+                case NEGATE:
                     b1.setKind(Schema.OpUnary.Kind.Negate);
                     break;
-                case Parens:
+                case PARENS:
                     b1.setKind(Schema.OpUnary.Kind.Parens);
                     break;
-                case Length:
+                case LENGTH:
                     b1.setKind(Schema.OpUnary.Kind.Length);
                     break;
             }
@@ -199,12 +199,13 @@ public abstract class Op {
 
         static public Either<Error.FormatError, Op> deserializeV2(Schema.OpUnary op) {
             switch (op.getKind()) {
+                // TODO Java based protobuf enums should be made ALL_CAPS.
                 case Negate:
-                    return Right(new Op.Unary(UnaryOp.Negate));
+                    return Right(new Op.Unary(UnaryOp.NEGATE));
                 case Parens:
-                    return Right(new Op.Unary(UnaryOp.Parens));
+                    return Right(new Op.Unary(UnaryOp.PARENS));
                 case Length:
-                    return Right(new Op.Unary(UnaryOp.Length));
+                    return Right(new Op.Unary(UnaryOp.LENGTH));
             }
 
             return Left(new Error.FormatError.DeserializationError("invalid unary operation"));

@@ -408,7 +408,7 @@ class ParserTest {
                         new Op.Value(new org.biscuitsec.biscuit.datalog.Term.Integer(1)),
                         new Op.Value(new org.biscuitsec.biscuit.datalog.Term.Integer(2)),
                         new Op.Binary(Op.BinaryOp.Add),
-                        new Op.Unary(Op.UnaryOp.Parens),
+                        new Op.Unary(Op.UnaryOp.PARENS),
                         new Op.Value(new org.biscuitsec.biscuit.datalog.Term.Integer(3)),
                         new Op.Binary(Op.BinaryOp.Mul)
                 ),

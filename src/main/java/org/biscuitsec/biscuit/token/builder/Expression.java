@@ -24,13 +24,13 @@ public abstract class Expression {
                 Expression e1 = stack.pop();
 
                 switch (v.getOp()) {
-                    case Length:
+                    case LENGTH:
                         stack.push(new Expression.Unary(Op.Length, e1));
                         break;
-                    case Negate:
+                    case NEGATE:
                         stack.push(new Expression.Unary(Op.Negate, e1));
                         break;
-                    case Parens:
+                    case PARENS:
                         stack.push(new Expression.Unary(Op.Parens, e1));
                         break;
                     default:
@@ -196,13 +196,13 @@ public abstract class Expression {
 
             switch (this.op) {
                 case Negate:
-                    ops.add(new org.biscuitsec.biscuit.datalog.expressions.Op.Unary(org.biscuitsec.biscuit.datalog.expressions.Op.UnaryOp.Negate));
+                    ops.add(new org.biscuitsec.biscuit.datalog.expressions.Op.Unary(org.biscuitsec.biscuit.datalog.expressions.Op.UnaryOp.NEGATE));
                     break;
                 case Parens:
-                    ops.add(new org.biscuitsec.biscuit.datalog.expressions.Op.Unary(org.biscuitsec.biscuit.datalog.expressions.Op.UnaryOp.Parens));
+                    ops.add(new org.biscuitsec.biscuit.datalog.expressions.Op.Unary(org.biscuitsec.biscuit.datalog.expressions.Op.UnaryOp.PARENS));
                     break;
                 case Length:
-                    ops.add(new org.biscuitsec.biscuit.datalog.expressions.Op.Unary(org.biscuitsec.biscuit.datalog.expressions.Op.UnaryOp.Length));
+                    ops.add(new org.biscuitsec.biscuit.datalog.expressions.Op.Unary(org.biscuitsec.biscuit.datalog.expressions.Op.UnaryOp.LENGTH));
                     break;
             }
         }
