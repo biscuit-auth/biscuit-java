@@ -135,10 +135,6 @@ public final class Combinator implements Serializable, Iterator<Tuple2<Origin, M
                 }
             }
 
-            if (this.currentIt == null) {
-                return Option.none();
-            }
-
             Option<Tuple2<Origin, Map<Long, Term>>> opt = this.currentIt.getNext();
 
             if (opt.isDefined()) {
