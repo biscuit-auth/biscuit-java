@@ -1,8 +1,8 @@
 package org.biscuitsec.biscuit.datalog;
 
 import biscuit.format.schema.Schema;
-import org.biscuitsec.biscuit.error.Error;
 import io.vavr.control.Either;
+import org.biscuitsec.biscuit.error.Error;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,9 +66,9 @@ public class Check {
                 break;
         }
 
-        for (Schema.RuleV2 query: check.getQueriesList()) {
+        for (Schema.RuleV2 query : check.getQueriesList()) {
             Either<Error.FormatError, Rule> res = Rule.deserializeV2(query);
-            if(res.isLeft()) {
+            if (res.isLeft()) {
                 Error.FormatError e = res.getLeft();
                 return Left(e);
             } else {
