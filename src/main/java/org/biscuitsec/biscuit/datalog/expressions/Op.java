@@ -140,7 +140,7 @@ public abstract class Op {
                             try {
                                 stack.push(new Term.Integer(s.get().getBytes("UTF-8").length));
                             } catch (UnsupportedEncodingException e) {
-                                throw new Error.Execution("cannot calculate string length: "+e.toString());
+                                throw new Error.Execution("cannot calculate string length: "+ e);
                             }
                         }
                     } else if (value instanceof Term.Bytes) {
