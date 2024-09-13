@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
-class Token {
+final class Token {
     public final ArrayList<byte[]> blocks;
     public final ArrayList<PublicKey> keys;
     public final ArrayList<byte[]> signatures;
