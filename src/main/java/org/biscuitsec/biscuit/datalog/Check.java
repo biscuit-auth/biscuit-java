@@ -57,12 +57,10 @@ public class Check {
 
         Kind kind;
         switch (check.getKind()) {
-            case One:
-                kind = Kind.One;
-                break;
             case All:
                 kind = Kind.All;
                 break;
+            case One:
             default:
                 kind = Kind.One;
                 break;
