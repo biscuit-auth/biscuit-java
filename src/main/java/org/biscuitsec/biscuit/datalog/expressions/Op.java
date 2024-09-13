@@ -233,6 +233,10 @@ public abstract class Op {
         }
     }
 
+    // TODO In Java, enum declarations should be ALL_CAPS (snake_case to separate words).
+    //  E.g., LESS_THAN, GREATER_THAN, BITWISE_AND, BITWISE_XOR, etc.
+    //  Also, Protobuf Enums should also be declared using PascalCase, i.e, CAPITALS_WITH_UNDERSCORES.
+    //  See the protobuf reference:   https://protobuf.dev/programming-guides/style/#enums
     public enum BinaryOp {
         LessThan,
         GreaterThan,
