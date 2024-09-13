@@ -125,7 +125,10 @@ public final class Combinator implements Serializable, Iterator<Tuple2<Origin, M
                             this.currentOrigin = currentOrigin;
                             // we found a matching fact, we create a new combinator over the rest of the predicates
                             // no need to copy all the expressions at all levels
-                            this.currentIt = new Combinator(vars, predicates.subList(1, predicates.size()), this.allFacts, this.symbols);
+                            this.currentIt = new Combinator(vars,
+                                    predicates.subList(1, predicates.size()),
+                                    this.allFacts,
+                                    this.symbols);
                         }
                         break;
 
