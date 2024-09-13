@@ -25,7 +25,7 @@ public abstract class Op {
 
     static public Either<Error.FormatError, Op> deserializeV2(Schema.Op op) {
         if (op.hasValue()) {
-            return Term.deserialize_enumV2(op.getValue()).map(v -> new Op.Value(v));
+            return Term.deserialize_enumV2(op.getValue()).map(Value::new);
         } else if (op.hasUnary()) {
             return Op.Unary.deserializeV2(op.getUnary());
         } else if (op.hasBinary()) {
