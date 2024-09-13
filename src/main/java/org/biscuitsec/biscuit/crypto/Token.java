@@ -20,12 +20,12 @@ final class Token {
 
     public Token(KeyPair rootKeyPair, byte[] message, KeyPair next) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         Signature sgr = new EdDSAEngine(MessageDigest.getInstance(KeyPair.ed25519.getHashAlgorithm()));
-        ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-        algo_buf.putInt(Integer.valueOf(next.publicKey().algorithm.getNumber()));
-        algo_buf.flip();
+        ByteBuffer algoBuf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
+        algoBuf.putInt(next.publicKey().algorithm.getNumber());
+        algoBuf.flip();
         sgr.initSign(rootKeyPair.privateKey);
         sgr.update(message);
-        sgr.update(algo_buf);
+        sgr.update(algoBuf);
         sgr.update(next.publicKey().toBytes());
 
         byte[] signature = sgr.sign();
@@ -50,11 +50,11 @@ final class Token {
     public Token append(KeyPair keyPair, byte[] message) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         Signature sgr = new EdDSAEngine(MessageDigest.getInstance(KeyPair.ed25519.getHashAlgorithm()));
         sgr.initSign(this.next.privateKey);
-        ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-        algo_buf.putInt(Integer.valueOf(next.publicKey().algorithm.getNumber()));
-        algo_buf.flip();
+        ByteBuffer algoBuf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
+        algoBuf.putInt(next.publicKey().algorithm.getNumber());
+        algoBuf.flip();
         sgr.update(message);
-        sgr.update(algo_buf);
+        sgr.update(algoBuf);
         sgr.update(keyPair.publicKey().toBytes());
 
         byte[] signature = sgr.sign();
@@ -69,29 +69,29 @@ final class Token {
 
     // FIXME: rust version returns a Result<(), error::Signature>
     public Either<Error, Void> verify(PublicKey root) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-        PublicKey current_key = root;
+        PublicKey currentKey = root;
         for(int i = 0; i < this.blocks.size(); i++) {
             byte[] block = this.blocks.get(i);
-            PublicKey next_key  = this.keys.get(i);
+            PublicKey nextKey  = this.keys.get(i);
             byte[] signature = this.signatures.get(i);
 
             Signature sgr = new EdDSAEngine(MessageDigest.getInstance(KeyPair.ed25519.getHashAlgorithm()));
-            ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-            algo_buf.putInt(Integer.valueOf(next.publicKey().algorithm.getNumber()));
-            algo_buf.flip();
-            sgr.initVerify(current_key.key);
+            ByteBuffer algoBuf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
+            algoBuf.putInt(next.publicKey().algorithm.getNumber());
+            algoBuf.flip();
+            sgr.initVerify(currentKey.key);
             sgr.update(block);
-            sgr.update(algo_buf);
-            sgr.update(next_key.toBytes());
+            sgr.update(algoBuf);
+            sgr.update(nextKey.toBytes());
 
             if (sgr.verify(signature)) {
-                current_key = next_key;
+                currentKey = nextKey;
             } else {
                 return Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"));
             }
         }
 
-        if(this.next.publicKey == current_key.key) {
+        if(this.next.publicKey == currentKey.key) {
             return Right(null);
         } else {
             return Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"));
