@@ -9,6 +9,7 @@ import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.datalog.TemporarySymbolTable;
 import org.biscuitsec.biscuit.datalog.Term;
 import org.biscuitsec.biscuit.error.Error;
+import org.biscuitsec.biscuit.error.Error.FormatError.DeserializationError;
 
 import java.util.*;
 
@@ -31,7 +32,7 @@ public abstract class Op {
         } else if (op.hasBinary()) {
             return Op.Binary.deserializeV1(op.getBinary());
         } else {
-            return Left(new Error.FormatError.DeserializationError("invalid unary operation"));
+            return Left(new DeserializationError("invalid unary operation"));
         }
     }
 
@@ -208,7 +209,7 @@ public abstract class Op {
                     return Right(new Op.Unary(UnaryOp.LENGTH));
             }
 
-            return Left(new Error.FormatError.DeserializationError("invalid unary operation"));
+            return Left(new DeserializationError("invalid unary operation"));
         }
 
         @Override
@@ -755,7 +756,7 @@ public abstract class Op {
                     return Right(new Op.Binary(BinaryOp.BitwiseXor));
             }
 
-            return Left(new Error.FormatError.DeserializationError("invalid binary operation: " + op.getKind()));
+            return Left(new DeserializationError("invalid binary operation: " + op.getKind()));
         }
 
         @Override
