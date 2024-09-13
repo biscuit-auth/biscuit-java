@@ -30,11 +30,11 @@ public class ThirdPartyTest {
 
         KeyPair root = new KeyPair(rng);
         KeyPair external = new KeyPair(rng);
-        out.println("external: ed25519/" + external.public_key().toHex());
+        out.println("external: ed25519/" + external.publicKey().toHex());
 
         Block authorityBuilder = new Block();
         authorityBuilder.add_fact("right(\"read\")");
-        authorityBuilder.add_check("check if group(\"admin\") trusting ed25519/" + external.public_key().toHex());
+        authorityBuilder.add_check("check if group(\"admin\") trusting ed25519/" + external.publicKey().toHex());
 
         Biscuit b1 = Biscuit.make(rng, root, authorityBuilder.build());
         ThirdPartyBlockRequest request = b1.thirdPartyRequest();
@@ -51,10 +51,10 @@ public class ThirdPartyTest {
         ThirdPartyBlockContents responseDeser = ThirdPartyBlockContents.fromBytes(responseBytes);
         assertEquals(blockResponse, responseDeser);
 
-        Biscuit b2 = b1.appendThirdPartyBlock(external.public_key(), blockResponse);
+        Biscuit b2 = b1.appendThirdPartyBlock(external.publicKey(), blockResponse);
 
         byte[] data = b2.serialize();
-        Biscuit deser = Biscuit.from_bytes(data, root.public_key());
+        Biscuit deser = Biscuit.from_bytes(data, root.publicKey());
         assertEquals(b2.print(), deser.print());
 
         out.println("will check the token for resource=file1");
@@ -93,11 +93,11 @@ public class ThirdPartyTest {
         KeyPair external1 = new KeyPair(rng);
         KeyPair external2 = new KeyPair(rng);
         KeyPair external3 = new KeyPair(rng);
-        //System.out.println("external: ed25519/"+external.public_key().toHex());
+        //System.out.println("external: ed25519/"+external.publicKey().toHex());
 
         Block authorityBuilder = new Block();
         authorityBuilder.add_fact("right(\"read\")");
-        authorityBuilder.add_check("check if first(\"admin\") trusting ed25519/" + external1.public_key().toHex());
+        authorityBuilder.add_check("check if first(\"admin\") trusting ed25519/" + external1.publicKey().toHex());
 
         org.biscuitsec.biscuit.token.Block authority_block = authorityBuilder.build();
         out.println(authority_block);
@@ -108,22 +108,22 @@ public class ThirdPartyTest {
         Block builder = new Block();
         builder.add_fact("first(\"admin\")");
         builder.add_fact("second(\"A\")");
-        builder.add_check("check if third(3) trusting ed25519/" + external2.public_key().toHex());
+        builder.add_check("check if third(3) trusting ed25519/" + external2.publicKey().toHex());
         ThirdPartyBlockContents blockResponse = request1.createBlock(external1, builder).get();
-        Biscuit b2 = b1.appendThirdPartyBlock(external1.public_key(), blockResponse);
+        Biscuit b2 = b1.appendThirdPartyBlock(external1.publicKey(), blockResponse);
         byte[] data = b2.serialize();
-        Biscuit deser2 = Biscuit.from_bytes(data, root.public_key());
+        Biscuit deser2 = Biscuit.from_bytes(data, root.publicKey());
         assertEquals(b2.print(), deser2.print());
         out.println("TOKEN: " + deser2.print());
 
         ThirdPartyBlockRequest request2 = deser2.thirdPartyRequest();
         Block builder2 = new Block();
         builder2.add_fact("third(3)");
-        builder2.add_check("check if fourth(1) trusting ed25519/" + external3.public_key().toHex() + ", ed25519/" + external1.public_key().toHex());
+        builder2.add_check("check if fourth(1) trusting ed25519/" + external3.publicKey().toHex() + ", ed25519/" + external1.publicKey().toHex());
         ThirdPartyBlockContents blockResponse2 = request2.createBlock(external2, builder2).get();
-        Biscuit b3 = deser2.appendThirdPartyBlock(external2.public_key(), blockResponse2);
+        Biscuit b3 = deser2.appendThirdPartyBlock(external2.publicKey(), blockResponse2);
         byte[] data2 = b3.serialize();
-        Biscuit deser3 = Biscuit.from_bytes(data2, root.public_key());
+        Biscuit deser3 = Biscuit.from_bytes(data2, root.publicKey());
         assertEquals(b3.print(), deser3.print());
         out.println("TOKEN: " + deser3.print());
 
@@ -133,9 +133,9 @@ public class ThirdPartyTest {
         builder3.add_fact("fourth(1)");
         builder3.add_check("check if resource(\"file1\")");
         ThirdPartyBlockContents blockResponse3 = request3.createBlock(external1, builder3).get();
-        Biscuit b4 = deser3.appendThirdPartyBlock(external1.public_key(), blockResponse3);
+        Biscuit b4 = deser3.appendThirdPartyBlock(external1.publicKey(), blockResponse3);
         byte[] data3 = b4.serialize();
-        Biscuit deser4 = Biscuit.from_bytes(data3, root.public_key());
+        Biscuit deser4 = Biscuit.from_bytes(data3, root.publicKey());
         assertEquals(b4.print(), deser4.print());
         out.println("TOKEN: " + deser4.print());
 
@@ -173,11 +173,11 @@ public class ThirdPartyTest {
 
         KeyPair root = new KeyPair(rng);
         KeyPair external = new KeyPair(rng);
-        out.println("external: ed25519/" + external.public_key().toHex());
+        out.println("external: ed25519/" + external.publicKey().toHex());
 
         Block authorityBuilder = new Block();
         authorityBuilder.add_fact("right(\"read\")");
-        authorityBuilder.add_check("check if group(\"admin\") trusting ed25519/" + external.public_key().toHex());
+        authorityBuilder.add_check("check if group(\"admin\") trusting ed25519/" + external.publicKey().toHex());
 
         Biscuit b1 = Biscuit.make(rng, root, authorityBuilder.build());
         ThirdPartyBlockRequest request = b1.thirdPartyRequest();
@@ -188,10 +188,10 @@ public class ThirdPartyTest {
         builder.add_check("check if right(\"read\")");
 
         ThirdPartyBlockContents blockResponse = request.createBlock(external, builder).get();
-        Biscuit b2 = b1.appendThirdPartyBlock(external.public_key(), blockResponse);
+        Biscuit b2 = b1.appendThirdPartyBlock(external.publicKey(), blockResponse);
 
         byte[] data = b2.serialize();
-        Biscuit deser = Biscuit.from_bytes(data, root.public_key());
+        Biscuit deser = Biscuit.from_bytes(data, root.publicKey());
         assertEquals(b2.print(), deser.print());
 
         out.println("will check the token for resource=file1");

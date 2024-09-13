@@ -55,7 +55,7 @@ public class BiscuitTest {
         out.println(hex(data));
 
         out.println("deserializing the first token");
-        Biscuit deser = Biscuit.from_bytes(data, root.public_key());
+        Biscuit deser = Biscuit.from_bytes(data, root.publicKey());
 
         out.println(deser.print());
 
@@ -88,7 +88,7 @@ public class BiscuitTest {
         out.println(hex(data2));
 
         out.println("deserializing the second token");
-        Biscuit deser2 = Biscuit.from_bytes(data2, root.public_key());
+        Biscuit deser2 = Biscuit.from_bytes(data2, root.publicKey());
 
         out.println(deser2.print());
 
@@ -119,7 +119,7 @@ public class BiscuitTest {
         out.println(hex(data3));
 
         out.println("deserializing the third token");
-        Biscuit final_token = Biscuit.from_bytes(data3, root.public_key());
+        Biscuit final_token = Biscuit.from_bytes(data3, root.publicKey());
 
         out.println(final_token.print());
 
@@ -240,11 +240,11 @@ public class BiscuitTest {
 
         out.println("attenuated: " + attenuatedB64);
 
-        Biscuit.from_b64url(attenuatedB64, root.public_key());
+        Biscuit.from_b64url(attenuatedB64, root.publicKey());
         String attenuated2B64 = biscuit.attenuate(rng, new KeyPair(rng), builder).serialize_b64url();
 
         out.println("attenuated2: " + attenuated2B64);
-        Biscuit.from_b64url(attenuated2B64, root.public_key());
+        Biscuit.from_b64url(attenuated2B64, root.publicKey());
     }
 
     @Test
@@ -383,7 +383,7 @@ public class BiscuitTest {
         out.println(hex(data));
 
         out.println("deserializing the first token");
-        Biscuit deser = Biscuit.from_bytes(data, root.public_key());
+        Biscuit deser = Biscuit.from_bytes(data, root.publicKey());
 
         out.println(deser.print());
 
@@ -416,7 +416,7 @@ public class BiscuitTest {
         out.println(hex(data2));
 
         out.println("deserializing the second token");
-        Biscuit deser2 = Biscuit.from_bytes(data2, root.public_key());
+        Biscuit deser2 = Biscuit.from_bytes(data2, root.publicKey());
 
         out.println(deser2.print());
 
@@ -447,7 +447,7 @@ public class BiscuitTest {
         out.println(hex(data3));
 
         out.println("deserializing the third token");
-        Biscuit final_token = Biscuit.from_bytes(data3, root.public_key());
+        Biscuit final_token = Biscuit.from_bytes(data3, root.publicKey());
 
         out.println(final_token.print());
 
@@ -506,7 +506,7 @@ public class BiscuitTest {
         out.println(hex(data));
 
         out.println("deserializing the first token");
-        Biscuit deser = Biscuit.from_bytes(data, root.public_key());
+        Biscuit deser = Biscuit.from_bytes(data, root.publicKey());
 
         out.println(deser.print());
 
@@ -539,7 +539,7 @@ public class BiscuitTest {
         out.println(hex(data2));
 
         out.println("deserializing the second token");
-        Biscuit deser2 = Biscuit.from_bytes(data2, root.public_key());
+        Biscuit deser2 = Biscuit.from_bytes(data2, root.publicKey());
 
         out.println(deser2.print());
 
@@ -570,7 +570,7 @@ public class BiscuitTest {
         out.println(hex(data3));
 
         out.println("deserializing the third token");
-        Biscuit final_token = Biscuit.from_bytes(data3, root.public_key());
+        Biscuit final_token = Biscuit.from_bytes(data3, root.publicKey());
 
         out.println(final_token.print());
 
@@ -636,12 +636,12 @@ public class BiscuitTest {
 
         assertThrows(Error.FormatError.Signature.InvalidSignature.class, () -> Biscuit.from_bytes(data, key_id -> {
             KeyPair root1 = new KeyPair(rng);
-            return Option.some(root1.public_key());
+            return Option.some(root1.publicKey());
         }));
 
         Biscuit.from_bytes(data, key_id -> {
             if (key_id.get() == 1) {
-                return Option.some(root.public_key());
+                return Option.some(root.publicKey());
             } else {
                 return Option.none();
             }
@@ -660,7 +660,7 @@ public class BiscuitTest {
         Biscuit biscuit = Biscuit.builder(root)
                 .add_authority_check("check all operation($op), allowed_operations($allowed), $allowed.contains($op)")
                 .build();
-        Authorizer authorizer = biscuit.verify(root.public_key()).authorizer();
+        Authorizer authorizer = biscuit.verify(root.publicKey()).authorizer();
         authorizer.add_fact("operation(\"read\")");
         authorizer.add_fact("operation(\"write\")");
         authorizer.add_fact("allowed_operations([\"write\"])");
@@ -678,7 +678,7 @@ public class BiscuitTest {
             )), e);
         }
 
-        Authorizer authorizer2 = biscuit.verify(root.public_key()).authorizer();
+        Authorizer authorizer2 = biscuit.verify(root.publicKey()).authorizer();
         authorizer2.add_fact("operation(\"read\")");
         authorizer2.add_fact("operation(\"write\")");
         authorizer2.add_fact("allowed_operations([\"read\", \"write\"])");

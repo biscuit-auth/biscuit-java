@@ -235,13 +235,13 @@ public class SerializedBiscuit {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             b.writeTo(stream);
             byte[] block = stream.toByteArray();
-            org.biscuitsec.biscuit.crypto.PublicKey next_key = next.public_key();
+            org.biscuitsec.biscuit.crypto.PublicKey next_key = next.publicKey();
             ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
             algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
             algo_buf.flip();
 
-            Signature sgr = KeyPair.generateSignature(root.public_key().algorithm);
-            sgr.initSign(root.private_key);
+            Signature sgr = KeyPair.generateSignature(root.publicKey().algorithm);
+            sgr.initSign(root.privateKey);
             sgr.update(block);
             sgr.update(algo_buf);
             sgr.update(next_key.toBytes());
@@ -268,13 +268,13 @@ public class SerializedBiscuit {
             b.writeTo(stream);
 
             byte[] block = stream.toByteArray();
-            org.biscuitsec.biscuit.crypto.PublicKey next_key = next.public_key();
+            org.biscuitsec.biscuit.crypto.PublicKey next_key = next.publicKey();
             ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
             algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
             algo_buf.flip();
 
             Signature sgr = new EdDSAEngine(MessageDigest.getInstance(org.biscuitsec.biscuit.crypto.KeyPair.ed25519.getHashAlgorithm()));
-            sgr.initSign(this.proof.secretKey.get().private_key);
+            sgr.initSign(this.proof.secretKey.get().privateKey);
             sgr.update(block);
             if(externalSignature.isDefined()) {
                 sgr.update(externalSignature.get().signature);
@@ -325,8 +325,8 @@ public class SerializedBiscuit {
         if (!this.proof.secretKey.isEmpty()) {
             //System.out.println("checking secret key");
             //System.out.println("current key: "+current_key.toHex());
-            //System.out.println("key from proof: "+this.proof.secretKey.get().public_key().toHex());
-            if (this.proof.secretKey.get().public_key().equals(current_key)) {
+            //System.out.println("key from proof: "+this.proof.secretKey.get().publicKey().toHex());
+            if (this.proof.secretKey.get().publicKey().equals(current_key)) {
                 //System.out.println("public keys are equal");
 
                 return Right(null);
@@ -482,7 +482,7 @@ public class SerializedBiscuit {
         algo_buf.flip();
 
 
-        sgr.initSign(this.proof.secretKey.get().private_key);
+        sgr.initSign(this.proof.secretKey.get().privateKey);
         sgr.update(block.block);
         sgr.update(algo_buf);
         sgr.update(block.key.toBytes());

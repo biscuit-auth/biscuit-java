@@ -24,7 +24,7 @@ public class ExampleTest {
     }
 
     public Long authorize(KeyPair root, byte[] serializedToken) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
-        return Biscuit.from_bytes(serializedToken, root.public_key()).authorizer()
+        return Biscuit.from_bytes(serializedToken, root.publicKey()).authorizer()
                 .add_fact("resource(\"/folder1/file1\")")
                 .add_fact("operation(\"read\")")
                 .allow()
@@ -32,7 +32,7 @@ public class ExampleTest {
     }
 
     public Biscuit attenuate(KeyPair root, byte[] serializedToken) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
-        Biscuit token = Biscuit.from_bytes(serializedToken, root.public_key());
+        Biscuit token = Biscuit.from_bytes(serializedToken, root.publicKey());
         Block block = token.create_block().add_check("check if operation(\"read\")");
         return token.attenuate(block);
     }

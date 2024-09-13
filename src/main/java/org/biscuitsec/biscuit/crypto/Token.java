@@ -21,19 +21,19 @@ class Token {
     public Token(KeyPair rootKeyPair, byte[] message, KeyPair next) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         Signature sgr = new EdDSAEngine(MessageDigest.getInstance(KeyPair.ed25519.getHashAlgorithm()));
         ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-        algo_buf.putInt(Integer.valueOf(next.public_key().algorithm.getNumber()));
+        algo_buf.putInt(Integer.valueOf(next.publicKey().algorithm.getNumber()));
         algo_buf.flip();
-        sgr.initSign(rootKeyPair.private_key);
+        sgr.initSign(rootKeyPair.privateKey);
         sgr.update(message);
         sgr.update(algo_buf);
-        sgr.update(next.public_key().toBytes());
+        sgr.update(next.publicKey().toBytes());
 
         byte[] signature = sgr.sign();
 
         this.blocks = new ArrayList<>();
         this.blocks.add(message);
         this.keys = new ArrayList<>();
-        this.keys.add(next.public_key());
+        this.keys.add(next.publicKey());
         this.signatures = new ArrayList<>();
         this.signatures.add(signature);
         this.next = next;
@@ -49,20 +49,20 @@ class Token {
 
     public Token append(KeyPair keyPair, byte[] message) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         Signature sgr = new EdDSAEngine(MessageDigest.getInstance(KeyPair.ed25519.getHashAlgorithm()));
-        sgr.initSign(this.next.private_key);
+        sgr.initSign(this.next.privateKey);
         ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-        algo_buf.putInt(Integer.valueOf(next.public_key().algorithm.getNumber()));
+        algo_buf.putInt(Integer.valueOf(next.publicKey().algorithm.getNumber()));
         algo_buf.flip();
         sgr.update(message);
         sgr.update(algo_buf);
-        sgr.update(keyPair.public_key().toBytes());
+        sgr.update(keyPair.publicKey().toBytes());
 
         byte[] signature = sgr.sign();
 
         Token token = new Token(this.blocks, this.keys, this.signatures, keyPair);
         token.blocks.add(message);
         token.signatures.add(signature);
-        token.keys.add(keyPair.public_key());
+        token.keys.add(keyPair.publicKey());
 
         return token;
     }
@@ -77,7 +77,7 @@ class Token {
 
             Signature sgr = new EdDSAEngine(MessageDigest.getInstance(KeyPair.ed25519.getHashAlgorithm()));
             ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-            algo_buf.putInt(Integer.valueOf(next.public_key().algorithm.getNumber()));
+            algo_buf.putInt(Integer.valueOf(next.publicKey().algorithm.getNumber()));
             algo_buf.flip();
             sgr.initVerify(current_key.key);
             sgr.update(block);
@@ -91,7 +91,7 @@ class Token {
             }
         }
 
-        if(this.next.public_key == current_key.key) {
+        if(this.next.publicKey == current_key.key) {
             return Right(null);
         } else {
             return Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"));

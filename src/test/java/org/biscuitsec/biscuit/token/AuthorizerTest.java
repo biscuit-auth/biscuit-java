@@ -52,8 +52,8 @@ public class AuthorizerTest {
                 .add_authority_fact("perms([1,2,3])")
                 .build();
 
-        Authorizer authorizer = Biscuit.from_b64url(token.serialize_b64url(), keypair.public_key())
-                .verify(keypair.public_key())
+        Authorizer authorizer = Biscuit.from_b64url(token.serialize_b64url(), keypair.publicKey())
+                .verify(keypair.publicKey())
                 .authorizer();
 
         Term emailTerm = queryFirstResult(authorizer, "emailfact($name) <- email($name)");

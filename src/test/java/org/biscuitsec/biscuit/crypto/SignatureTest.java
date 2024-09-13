@@ -25,7 +25,7 @@ public class SignatureTest {
         SecureRandom rng = new SecureRandom(seed);
 
         KeyPair keypair = new KeyPair(rng);
-        PublicKey pubkey = keypair.public_key();
+        PublicKey pubkey = keypair.publicKey();
 
         byte[] serializedSecretKey = keypair.toBytes();
         byte[] serializedPublicKey = pubkey.toBytes();
@@ -54,21 +54,21 @@ public class SignatureTest {
         KeyPair keypair2 = new KeyPair(rng);
         out.println("root key: " + root.toHex());
         out.println("keypair2: " + keypair2.toHex());
-        out.println("root key public: " + root.public_key().toHex());
-        out.println("keypair2 public: " + keypair2.public_key().toHex());
+        out.println("root key public: " + root.publicKey().toHex());
+        out.println("keypair2 public: " + keypair2.publicKey().toHex());
 
         Token token1 = new Token(root, message1.getBytes(), keypair2);
-        assertEquals(Right(null), token1.verify(root.public_key()));
+        assertEquals(Right(null), token1.verify(root.publicKey()));
 
         String message2 = "world";
         KeyPair keypair3 = new KeyPair(rng);
         Token token2 = token1.append(keypair3, message2.getBytes());
-        assertEquals(Right(null), token2.verify(root.public_key()));
+        assertEquals(Right(null), token2.verify(root.publicKey()));
 
         String message3 = "!!";
         KeyPair keypair4 = new KeyPair(rng);
         Token token3 = token2.append(keypair4, message3.getBytes());
-        assertEquals(Right(null), token3.verify(root.public_key()));
+        assertEquals(Right(null), token3.verify(root.publicKey()));
     }
 
     @Test
@@ -80,19 +80,19 @@ public class SignatureTest {
         KeyPair root = new KeyPair(rng);
         KeyPair keypair2 = new KeyPair(rng);
         Token token1 = new Token(root, message1.getBytes(), keypair2);
-        assertEquals(Right(null), token1.verify(new PublicKey(Schema.PublicKey.Algorithm.Ed25519, root.public_key)));
+        assertEquals(Right(null), token1.verify(new PublicKey(Schema.PublicKey.Algorithm.Ed25519, root.publicKey)));
 
         String message2 = "world";
         KeyPair keypair3 = new KeyPair(rng);
         Token token2 = token1.append(keypair3, message2.getBytes());
         token2.blocks.set(1, "you".getBytes());
         assertEquals(Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied")),
-                token2.verify(new PublicKey(Schema.PublicKey.Algorithm.Ed25519, root.public_key)));
+                token2.verify(new PublicKey(Schema.PublicKey.Algorithm.Ed25519, root.publicKey)));
 
         String message3 = "!!";
         KeyPair keypair4 = new KeyPair(rng);
         Token token3 = token2.append(keypair4, message3.getBytes());
         assertEquals(Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied")),
-                token3.verify(new PublicKey(Schema.PublicKey.Algorithm.Ed25519, root.public_key)));
+                token3.verify(new PublicKey(Schema.PublicKey.Algorithm.Ed25519, root.publicKey)));
     }
 }

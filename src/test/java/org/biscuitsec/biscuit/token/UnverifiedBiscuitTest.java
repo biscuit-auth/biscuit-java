@@ -118,7 +118,7 @@ public class UnverifiedBiscuitTest {
         out.println(finalUnverifiedBiscuit.print());
 
         // Crate Biscuit from UnverifiedBiscuit
-        Biscuit finalBiscuit = finalUnverifiedBiscuit.verify(keypair0.public_key());
+        Biscuit finalBiscuit = finalUnverifiedBiscuit.verify(keypair0.publicKey());
 
         // check
         out.println("will check the token for resource=file1 and operation=read");
