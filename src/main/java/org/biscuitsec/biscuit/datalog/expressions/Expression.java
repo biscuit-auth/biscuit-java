@@ -26,7 +26,7 @@ public class Expression {
 
     //FIXME: should return a Result<Term, error::Expression>
     public Term evaluate(Map<Long, Term> variables, TemporarySymbolTable symbols) throws Error.Execution {
-        Deque<Term> stack = new ArrayDeque<Term>(16); //Default value
+        Deque<Term> stack = new ArrayDeque<>(16); //Default value
         for(Op op: ops){
             op.evaluate(stack,variables, symbols);
         }
