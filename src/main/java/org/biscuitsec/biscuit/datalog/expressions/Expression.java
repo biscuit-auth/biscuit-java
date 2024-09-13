@@ -7,6 +7,7 @@ import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.datalog.TemporarySymbolTable;
 import org.biscuitsec.biscuit.datalog.Term;
 import org.biscuitsec.biscuit.error.Error;
+import org.biscuitsec.biscuit.error.Error.FormatError;
 
 import java.util.*;
 
@@ -59,14 +60,14 @@ public class Expression {
         return b.build();
     }
 
-    static public Either<Error.FormatError, Expression> deserializeV2(Schema.ExpressionV2 e) {
+    static public Either<FormatError, Expression> deserializeV2(Schema.ExpressionV2 e) {
         ArrayList<Op> ops = new ArrayList<>();
 
         for (Schema.Op op : e.getOpsList()) {
-            Either<Error.FormatError, Op> res = Op.deserializeV2(op);
+            Either<FormatError, Op> res = Op.deserializeV2(op);
 
             if (res.isLeft()) {
-                Error.FormatError err = res.getLeft();
+                FormatError err = res.getLeft();
                 return Left(err);
             } else {
                 ops.add(res.get());
