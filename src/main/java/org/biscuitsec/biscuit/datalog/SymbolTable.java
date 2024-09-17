@@ -21,7 +21,7 @@ public final class SymbolTable implements Serializable {
     /**
      * According to <a href="https://github.com/biscuit-auth/biscuit/blob/master/SPECIFICATIONS.md#symbol-table">the specification</a>,
      * We need two symbols tables:
-     * * one for the defaults symbols indexed from 0 et 1023 in <code>defaultSymbols</code> list
+     * * one for the defaults symbols indexed from 0 et 1023 in <code>DEFAULT_SYMBOLS</code> list
      * * one for the usages symbols indexed from 1024 in <code>symbols</code> list
      */
     public static final List<String> DEFAULT_SYMBOLS = List.of(
