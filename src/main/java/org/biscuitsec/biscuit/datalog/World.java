@@ -40,8 +40,7 @@ public class World implements Serializable {
     public void addFact(final Origin origin, final Fact fact) {
         this.facts.add(origin, fact);
     }
-
-
+    
     public void addRule(Long origin, TrustedOrigins scope, Rule rule) {
         this.rules.add(origin, scope, rule);
     }
