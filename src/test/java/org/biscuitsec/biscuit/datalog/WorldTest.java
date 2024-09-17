@@ -27,9 +27,9 @@ public class WorldTest {
         final long grandparent = syms.insert("grandparent");
         final long sibling = syms.insert("siblings");
 
-        w.add_fact(new Origin(0), new Fact(new Predicate(parent, Arrays.asList(a, b))));
-        w.add_fact(new Origin(0), new Fact(new Predicate(parent, Arrays.asList(b, c))));
-        w.add_fact(new Origin(0), new Fact(new Predicate(parent, Arrays.asList(c, d))));
+        w.addFact(new Origin(0), new Fact(new Predicate(parent, Arrays.asList(a, b))));
+        w.addFact(new Origin(0), new Fact(new Predicate(parent, Arrays.asList(b, c))));
+        w.addFact(new Origin(0), new Fact(new Predicate(parent, Arrays.asList(c, d))));
 
         final Rule r1 = new Rule(new Predicate(grandparent,
                 Arrays.asList(new Term.Variable(syms.insert("grandparent")), new Term.Variable(syms.insert("grandchild")))), Arrays.asList(
@@ -49,7 +49,7 @@ public class WorldTest {
         ), new ArrayList<>());
 
         out.println("adding r2: " + syms.printRule(r2));
-        w.add_rule((long) 0, new TrustedOrigins(0), r2);
+        w.addRule((long) 0, new TrustedOrigins(0), r2);
         w.run(syms);
 
         out.println("parents:");
@@ -78,7 +78,7 @@ public class WorldTest {
                 w.query_rule(query3, (long) 0, new TrustedOrigins(0), syms)
                         .stream().map(syms::printFact).collect(Collectors.toSet())) + "]");
 
-        w.add_fact(new Origin(0), new Fact(new Predicate(parent, Arrays.asList(c, e))));
+        w.addFact(new Origin(0), new Fact(new Predicate(parent, Arrays.asList(c, e))));
         w.run(syms);
 
         final Rule query4 = new Rule(new Predicate(grandparent,
@@ -96,7 +96,7 @@ public class WorldTest {
                 new Fact(new Predicate(grandparent, Arrays.asList(b, e))))));
         assertEquals(expected, res);
 
-        w.add_rule((long) 0, new TrustedOrigins(0), new Rule(new Predicate(sibling,
+        w.addRule((long) 0, new TrustedOrigins(0), new Rule(new Predicate(sibling,
                 Arrays.asList(new Term.Variable(syms.insert("sibling1")), new Term.Variable(syms.insert("sibling2")))), Arrays.asList(
                 new Predicate(parent, Arrays.asList(new Term.Variable(syms.insert("parent")), new Term.Variable(syms.insert("sibling1")))),
                 new Predicate(parent, Arrays.asList(new Term.Variable(syms.insert("parent")), new Term.Variable(syms.insert("sibling2"))))
@@ -132,15 +132,15 @@ public class WorldTest {
         final long t2 = syms.insert("t2");
         final long join = syms.insert("join");
 
-        w.add_fact(new Origin(0), new Fact(new Predicate(t1, Arrays.asList(new Term.Integer(0), abc))));
-        w.add_fact(new Origin(0), new Fact(new Predicate(t1, Arrays.asList(new Term.Integer(1), def))));
-        w.add_fact(new Origin(0), new Fact(new Predicate(t1, Arrays.asList(new Term.Integer(2), ghi))));
-        w.add_fact(new Origin(0), new Fact(new Predicate(t1, Arrays.asList(new Term.Integer(3), jkl))));
-        w.add_fact(new Origin(0), new Fact(new Predicate(t1, Arrays.asList(new Term.Integer(4), mno))));
+        w.addFact(new Origin(0), new Fact(new Predicate(t1, Arrays.asList(new Term.Integer(0), abc))));
+        w.addFact(new Origin(0), new Fact(new Predicate(t1, Arrays.asList(new Term.Integer(1), def))));
+        w.addFact(new Origin(0), new Fact(new Predicate(t1, Arrays.asList(new Term.Integer(2), ghi))));
+        w.addFact(new Origin(0), new Fact(new Predicate(t1, Arrays.asList(new Term.Integer(3), jkl))));
+        w.addFact(new Origin(0), new Fact(new Predicate(t1, Arrays.asList(new Term.Integer(4), mno))));
 
-        w.add_fact(new Origin(0), new Fact(new Predicate(t2, Arrays.asList(new Term.Integer(0), aaa, new Term.Integer(0)))));
-        w.add_fact(new Origin(0), new Fact(new Predicate(t2, Arrays.asList(new Term.Integer(1), bbb, new Term.Integer(0)))));
-        w.add_fact(new Origin(0), new Fact(new Predicate(t2, Arrays.asList(new Term.Integer(2), ccc, new Term.Integer(1)))));
+        w.addFact(new Origin(0), new Fact(new Predicate(t2, Arrays.asList(new Term.Integer(0), aaa, new Term.Integer(0)))));
+        w.addFact(new Origin(0), new Fact(new Predicate(t2, Arrays.asList(new Term.Integer(1), bbb, new Term.Integer(0)))));
+        w.addFact(new Origin(0), new Fact(new Predicate(t2, Arrays.asList(new Term.Integer(2), ccc, new Term.Integer(1)))));
 
         FactSet res = w.query_rule(new Rule(new Predicate(join,
                         Arrays.asList(new Term.Variable(syms.insert("left")), new Term.Variable(syms.insert("right")))
@@ -209,11 +209,11 @@ public class WorldTest {
         final long route = syms.insert("route");
         final long suff = syms.insert("route suffix");
 
-        w.add_fact(new Origin(0), new Fact(new Predicate(route, Arrays.asList(new Term.Integer(0), app_0, syms.add("example.com")))));
-        w.add_fact(new Origin(0), new Fact(new Predicate(route, Arrays.asList(new Term.Integer(1), app_1, syms.add("test.com")))));
-        w.add_fact(new Origin(0), new Fact(new Predicate(route, Arrays.asList(new Term.Integer(2), app_2, syms.add("test.fr")))));
-        w.add_fact(new Origin(0), new Fact(new Predicate(route, Arrays.asList(new Term.Integer(3), app_0, syms.add("www.example.com")))));
-        w.add_fact(new Origin(0), new Fact(new Predicate(route, Arrays.asList(new Term.Integer(4), app_1, syms.add("mx.example.com")))));
+        w.addFact(new Origin(0), new Fact(new Predicate(route, Arrays.asList(new Term.Integer(0), app_0, syms.add("example.com")))));
+        w.addFact(new Origin(0), new Fact(new Predicate(route, Arrays.asList(new Term.Integer(1), app_1, syms.add("test.com")))));
+        w.addFact(new Origin(0), new Fact(new Predicate(route, Arrays.asList(new Term.Integer(2), app_2, syms.add("test.fr")))));
+        w.addFact(new Origin(0), new Fact(new Predicate(route, Arrays.asList(new Term.Integer(3), app_0, syms.add("www.example.com")))));
+        w.addFact(new Origin(0), new Fact(new Predicate(route, Arrays.asList(new Term.Integer(4), app_1, syms.add("mx.example.com")))));
 
         FactSet res = testSuffix(w, syms, suff, route, ".fr");
         res.stream().forEachOrdered(fact -> out.println("\t" + syms.printFact(fact)));
@@ -254,8 +254,8 @@ public class WorldTest {
         final long before = syms.insert("before");
         final long after = syms.insert("after");
 
-        w.add_fact(new Origin(0), new Fact(new Predicate(x, Arrays.asList(new Term.Date(t1.getEpochSecond()), abc))));
-        w.add_fact(new Origin(0), new Fact(new Predicate(x, Arrays.asList(new Term.Date(t3.getEpochSecond()), def))));
+        w.addFact(new Origin(0), new Fact(new Predicate(x, Arrays.asList(new Term.Date(t1.getEpochSecond()), abc))));
+        w.addFact(new Origin(0), new Fact(new Predicate(x, Arrays.asList(new Term.Date(t3.getEpochSecond()), def))));
 
         final Rule r1 = new Rule(new Predicate(
                 before,
@@ -322,8 +322,8 @@ public class WorldTest {
         final long symbol_set = syms.insert("symbol_set");
         final long string_set = syms.insert("string_set");
 
-        w.add_fact(new Origin(0), new Fact(new Predicate(x, Arrays.asList(abc, new Term.Integer(0), syms.add("test")))));
-        w.add_fact(new Origin(0), new Fact(new Predicate(x, Arrays.asList(def, new Term.Integer(2), syms.add("hello")))));
+        w.addFact(new Origin(0), new Fact(new Predicate(x, Arrays.asList(abc, new Term.Integer(0), syms.add("test")))));
+        w.addFact(new Origin(0), new Fact(new Predicate(x, Arrays.asList(def, new Term.Integer(2), syms.add("hello")))));
 
         final Rule r1 = new Rule(new Predicate(
                 int_set,
@@ -401,9 +401,9 @@ public class WorldTest {
         final Term write = syms.add("write");
 
 
-        w.add_fact(new Origin(0), new Fact(new Predicate(right, Arrays.asList(file1, read))));
-        w.add_fact(new Origin(0), new Fact(new Predicate(right, Arrays.asList(file2, read))));
-        w.add_fact(new Origin(0), new Fact(new Predicate(right, Arrays.asList(file1, write))));
+        w.addFact(new Origin(0), new Fact(new Predicate(right, Arrays.asList(file1, read))));
+        w.addFact(new Origin(0), new Fact(new Predicate(right, Arrays.asList(file2, read))));
+        w.addFact(new Origin(0), new Fact(new Predicate(right, Arrays.asList(file1, write))));
 
         final long caveat1 = syms.insert("caveat1");
         //r1: caveat2(#file1) <- resource(#ambient, #file1)

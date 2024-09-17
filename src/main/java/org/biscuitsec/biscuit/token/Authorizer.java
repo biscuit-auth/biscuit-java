@@ -114,7 +114,7 @@ public class Authorizer {
 
             for (org.biscuitsec.biscuit.datalog.Fact fact : token.authority.facts) {
                 org.biscuitsec.biscuit.datalog.Fact converted_fact = org.biscuitsec.biscuit.token.builder.Fact.convert_from(fact, token.symbols).convert(this.symbols);
-                world.add_fact(new Origin(0), converted_fact);
+                world.addFact(new Origin(0), converted_fact);
             }
             for (org.biscuitsec.biscuit.datalog.Rule rule : token.authority.rules) {
                 org.biscuitsec.biscuit.token.builder.Rule _rule = org.biscuitsec.biscuit.token.builder.Rule.convert_from(rule, token.symbols);
@@ -130,7 +130,7 @@ public class Authorizer {
                         0,
                         this.publicKeyToBlockId
                 );
-                world.add_rule((long) 0, ruleTrustedOrigins, converted_rule);
+                world.addRule((long) 0, ruleTrustedOrigins, converted_rule);
             }
 
             for(long i =0; i < token.blocks.size(); i++) {
@@ -150,7 +150,7 @@ public class Authorizer {
 
                 for (org.biscuitsec.biscuit.datalog.Fact fact : block.facts) {
                     org.biscuitsec.biscuit.datalog.Fact converted_fact = org.biscuitsec.biscuit.token.builder.Fact.convert_from(fact, blockSymbols).convert(this.symbols);
-                    world.add_fact(new Origin(i + 1), converted_fact);
+                    world.addFact(new Origin(i + 1), converted_fact);
                 }
 
                 for (org.biscuitsec.biscuit.datalog.Rule rule : block.rules) {
@@ -167,7 +167,7 @@ public class Authorizer {
                             i + 1,
                             this.publicKeyToBlockId
                     );
-                    world.add_rule((long) i + 1, ruleTrustedOrigins, converted_rule);
+                    world.addRule((long) i + 1, ruleTrustedOrigins, converted_rule);
                 }
             }
         }
@@ -184,7 +184,7 @@ public class Authorizer {
     }
 
     public Authorizer add_fact(org.biscuitsec.biscuit.token.builder.Fact fact) {
-        world.add_fact(Origin.authorizer(), fact.convert(symbols));
+        world.addFact(Origin.authorizer(), fact.convert(symbols));
         return this;
     }
 
@@ -209,7 +209,7 @@ public class Authorizer {
                 Long.MAX_VALUE,
                 this.publicKeyToBlockId
             );
-        world.add_rule(Long.MAX_VALUE, ruleTrustedOrigins, r);
+        world.addRule(Long.MAX_VALUE, ruleTrustedOrigins, r);
         return this;
     }
 
@@ -254,7 +254,7 @@ public class Authorizer {
     }
 
     public Authorizer set_time() throws Error.Language {
-        world.add_fact(Origin.authorizer(), Utils.fact("time", List.of(Utils.date(new Date()))).convert(symbols));
+        world.addFact(Origin.authorizer(), Utils.fact("time", List.of(Utils.date(new Date()))).convert(symbols));
         return this;
     }
 
@@ -411,10 +411,10 @@ public class Authorizer {
                 );
                 switch (c.kind()) {
                     case One:
-                        res = world.query_match(query, Long.MAX_VALUE, ruleTrustedOrigins, symbols);
+                        res = world.queryMatch(query, Long.MAX_VALUE, ruleTrustedOrigins, symbols);
                         break;
                     case All:
-                        res = world.query_match_all(query, ruleTrustedOrigins, symbols);
+                        res = world.queryMatchAll(query, ruleTrustedOrigins, symbols);
                         break;
                 }
 
@@ -458,10 +458,10 @@ public class Authorizer {
                     );
                     switch (check.kind()) {
                         case One:
-                            res = world.query_match(query, (long)0, ruleTrustedOrigins, symbols);
+                            res = world.queryMatch(query, (long)0, ruleTrustedOrigins, symbols);
                             break;
                         case All:
-                            res = world.query_match_all(query, ruleTrustedOrigins, symbols);
+                            res = world.queryMatchAll(query, ruleTrustedOrigins, symbols);
                             break;
                     }
 
@@ -493,7 +493,7 @@ public class Authorizer {
                         Long.MAX_VALUE,
                         this.publicKeyToBlockId
                 );
-                boolean res = world.query_match(query, Long.MAX_VALUE, policyTrustedOrigins, symbols);
+                boolean res = world.queryMatch(query, Long.MAX_VALUE, policyTrustedOrigins, symbols);
 
                 if (Instant.now().compareTo(timeLimit) >= 0) {
                     throw new Error.Timeout();
@@ -541,10 +541,10 @@ public class Authorizer {
                         );
                         switch (check.kind()) {
                             case One:
-                                res = world.query_match(query, (long)i+1, ruleTrustedOrigins, symbols);
+                                res = world.queryMatch(query, (long)i+1, ruleTrustedOrigins, symbols);
                                 break;
                             case All:
-                                res = world.query_match_all(query, ruleTrustedOrigins, symbols);
+                                res = world.queryMatchAll(query, ruleTrustedOrigins, symbols);
                                 break;
                         }
 
