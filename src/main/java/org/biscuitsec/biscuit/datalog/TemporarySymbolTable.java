@@ -26,7 +26,7 @@ public class TemporarySymbolTable {
                 return Option.none();
             }
         } else {
-            return this.base.get_s(i);
+            return this.base.getS(i);
         }
     }
 

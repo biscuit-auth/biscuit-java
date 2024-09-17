@@ -2,7 +2,6 @@ package org.biscuitsec.biscuit.token;
 
 import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.datalog.*;
-import org.biscuitsec.biscuit.datalog.Rule;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.error.FailedCheck;
 import org.biscuitsec.biscuit.error.LogicError;
@@ -12,7 +11,6 @@ import io.vavr.control.Either;
 import io.vavr.control.Option;
 import org.biscuitsec.biscuit.datalog.Scope;
 import org.biscuitsec.biscuit.token.builder.Check;
-import org.biscuitsec.biscuit.token.builder.Fact;
 import org.biscuitsec.biscuit.token.builder.Term;
 import org.biscuitsec.biscuit.token.builder.parser.Parser;
 
@@ -124,7 +122,7 @@ public class Authorizer {
 
                 Either<String, org.biscuitsec.biscuit.token.builder.Rule> res = _rule.validate_variables();
                 if(res.isLeft()){
-                    throw new Error.FailedLogic(new LogicError.InvalidBlockRule(0, token.symbols.print_rule(converted_rule)));
+                    throw new Error.FailedLogic(new LogicError.InvalidBlockRule(0, token.symbols.printRule(converted_rule)));
                 }
                 TrustedOrigins ruleTrustedOrigins = TrustedOrigins.fromScopes(
                         converted_rule.scopes(),
@@ -161,7 +159,7 @@ public class Authorizer {
 
                     Either<String, org.biscuitsec.biscuit.token.builder.Rule> res = _rule.validate_variables();
                     if (res.isLeft()) {
-                        throw new Error.FailedLogic(new LogicError.InvalidBlockRule(0, this.symbols.print_rule(converted_rule)));
+                        throw new Error.FailedLogic(new LogicError.InvalidBlockRule(0, this.symbols.printRule(converted_rule)));
                     }
                     TrustedOrigins ruleTrustedOrigins = TrustedOrigins.fromScopes(
                             converted_rule.scopes(),
@@ -431,7 +429,7 @@ public class Authorizer {
             }
 
             if (!successful) {
-                errors.add(new FailedCheck.FailedAuthorizer(i, symbols.print_check(c)));
+                errors.add(new FailedCheck.FailedAuthorizer(i, symbols.printCheck(c)));
             }
         }
 
@@ -478,7 +476,7 @@ public class Authorizer {
                 }
 
                 if (!successful) {
-                    errors.add(new FailedCheck.FailedBlock(0, j, symbols.print_check(check)));
+                    errors.add(new FailedCheck.FailedBlock(0, j, symbols.printCheck(check)));
                 }
             }
         }
@@ -561,7 +559,7 @@ public class Authorizer {
                     }
 
                     if (!successful) {
-                        errors.add(new FailedCheck.FailedBlock(i + 1, j, symbols.print_check(check)));
+                        errors.add(new FailedCheck.FailedBlock(i + 1, j, symbols.printCheck(check)));
                     }
                 }
             }
@@ -589,10 +587,10 @@ public class Authorizer {
             facts.append("\n\t\t"+entry.getKey()+":");
             for(org.biscuitsec.biscuit.datalog.Fact f: entry.getValue()) {
                 facts.append("\n\t\t\t");
-                facts.append(this.symbols.print_fact(f));
+                facts.append(this.symbols.printFact(f));
             }
         }
-        final List<String> rules = this.world.rules().stream().map((r) -> this.symbols.print_rule(r)).collect(Collectors.toList());
+        final List<String> rules = this.world.rules().stream().map((r) -> this.symbols.printRule(r)).collect(Collectors.toList());
 
         List<String> checks = new ArrayList<>();
 
@@ -602,7 +600,7 @@ public class Authorizer {
 
         if (this.token != null) {
             for (int j = 0; j < this.token.authority.checks.size(); j++) {
-                checks.add("Block[0][" + j + "]: " + token.symbols.print_check(this.token.authority.checks.get(j)));
+                checks.add("Block[0][" + j + "]: " + token.symbols.printCheck(this.token.authority.checks.get(j)));
             }
 
             for (int i = 0; i < this.token.blocks.size(); i++) {
@@ -614,7 +612,7 @@ public class Authorizer {
                 }
 
                 for (int j = 0; j < b.checks.size(); j++) {
-                    checks.add("Block[" + (i+1) + "][" + j + "]: " + blockSymbols.print_check(b.checks.get(j)));
+                    checks.add("Block[" + (i+1) + "][" + j + "]: " + blockSymbols.printCheck(b.checks.get(j)));
                 }
             }
         }

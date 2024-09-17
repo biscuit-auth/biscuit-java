@@ -115,22 +115,22 @@ public class Block {
         s.append("\n\t\tscopes: [");
         for (Scope scope : this.scopes) {
             s.append("\n\t\t\t");
-            s.append(symbol_table.print_scope(scope));
+            s.append(symbol_table.printScope(scope));
         }
         s.append("\n\t\t]\n\t\tfacts: [");
         for (Fact f : this.facts) {
             s.append("\n\t\t\t");
-            s.append(local_symbols.print_fact(f));
+            s.append(local_symbols.printFact(f));
         }
         s.append("\n\t\t]\n\t\trules: [");
         for (Rule r : this.rules) {
             s.append("\n\t\t\t");
-            s.append(local_symbols.print_rule(r));
+            s.append(local_symbols.printRule(r));
         }
         s.append("\n\t\t]\n\t\tchecks: [");
         for (Check c : this.checks) {
             s.append("\n\t\t\t");
-            s.append(local_symbols.print_check(c));
+            s.append(local_symbols.printCheck(c));
         }
         s.append("\n\t\t]\n\t}");
 
@@ -163,16 +163,16 @@ public class Block {
             s.append(this.externalKey.get().toString());
         }*/
         for (Scope scope : this.scopes) {
-            s.append("trusting "+local_symbols.print_scope(scope)+"\n");
+            s.append("trusting "+local_symbols.printScope(scope)+"\n");
         }
         for (Fact f : this.facts) {
-            s.append(local_symbols.print_fact(f)+";\n");
+            s.append(local_symbols.printFact(f)+";\n");
         }
         for (Rule r : this.rules) {
-            s.append(local_symbols.print_rule(r)+";\n");
+            s.append(local_symbols.printRule(r)+";\n");
         }
         for (Check c : this.checks) {
-            s.append(local_symbols.print_check(c)+";\n");
+            s.append(local_symbols.printCheck(c)+";\n");
         }
 
         return s.toString();

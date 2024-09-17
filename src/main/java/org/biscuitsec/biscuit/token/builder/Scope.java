@@ -76,7 +76,7 @@ public class Scope {
                 return new Scope(Kind.Previous);
             case PublicKey:
                 //FIXME error management should bubble up here
-                return new Scope(Kind.PublicKey, symbols.get_pk((int) scope.publicKey()).get());
+                return new Scope(Kind.PublicKey, symbols.getPk((int) scope.publicKey()).get());
         }
 
         //FIXME error management should bubble up here

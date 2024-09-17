@@ -264,7 +264,7 @@ public abstract class Term implements Serializable {
       }
 
       public org.biscuitsec.biscuit.token.builder.Term toTerm(SymbolTable symbols) {
-         return new org.biscuitsec.biscuit.token.builder.Term.Str(symbols.print_symbol((int) this.value));
+         return new org.biscuitsec.biscuit.token.builder.Term.Str(symbols.printSymbol((int) this.value));
       }
    }
 
@@ -317,7 +317,7 @@ public abstract class Term implements Serializable {
       }
 
       public org.biscuitsec.biscuit.token.builder.Term toTerm(SymbolTable symbols) {
-         return new org.biscuitsec.biscuit.token.builder.Term.Variable(symbols.print_symbol((int) this.value));
+         return new org.biscuitsec.biscuit.token.builder.Term.Variable(symbols.printSymbol((int) this.value));
       }
    }
 

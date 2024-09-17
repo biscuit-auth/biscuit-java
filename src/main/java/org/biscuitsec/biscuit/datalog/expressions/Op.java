@@ -67,7 +67,7 @@ public abstract class Op {
 
         @Override
         public String print(Deque<String> stack, SymbolTable symbols) {
-            String s = symbols.print_term(value);
+            String s = symbols.printTerm(value);
             stack.push(s);
             return s;
         }

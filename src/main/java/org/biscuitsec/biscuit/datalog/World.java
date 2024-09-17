@@ -140,7 +140,7 @@ public class World implements Serializable {
          s.append("\n\t\t\t"+entry.getKey()+":");
          for(Fact f: entry.getValue()) {
             s.append("\n\t\t\t\t");
-            s.append(symbol_table.print_fact(f));
+            s.append(symbol_table.printFact(f));
          }
       }
 
@@ -148,7 +148,7 @@ public class World implements Serializable {
        for (Iterator<Rule> it = this.rules.stream().iterator(); it.hasNext(); ) {
            Rule r = it.next();
            s.append("\n\t\t\t");
-           s.append(symbol_table.print_rule(r));
+           s.append(symbol_table.printRule(r));
        }
 
       s.append("\n\t\t]\n\t}");

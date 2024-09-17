@@ -37,10 +37,10 @@ public class WorldTest {
                 new Predicate(parent, Arrays.asList(new Term.Variable(syms.insert("parent")), new Term.Variable(syms.insert("grandchild"))))
         ), new ArrayList<>());
 
-        out.println("testing r1: " + syms.print_rule(r1));
+        out.println("testing r1: " + syms.printRule(r1));
         FactSet query_rule_result = w.query_rule(r1, (long) 0, new TrustedOrigins(0), syms);
-        out.println("grandparents query_rules: [" + query_rule_result.stream().map(syms::print_fact).collect(Collectors.joining(", ")) + "]");
-        out.println("current facts: [" + w.facts().stream().map(syms::print_fact).collect(Collectors.joining(", ")) + "]");
+        out.println("grandparents query_rules: [" + query_rule_result.stream().map(syms::printFact).collect(Collectors.joining(", ")) + "]");
+        out.println("current facts: [" + w.facts().stream().map(syms::printFact).collect(Collectors.joining(", ")) + "]");
 
         final Rule r2 = new Rule(new Predicate(grandparent,
                 Arrays.asList(new Term.Variable(syms.insert("grandparent")), new Term.Variable(syms.insert("grandchild")))), Arrays.asList(
@@ -48,7 +48,7 @@ public class WorldTest {
                 new Predicate(parent, Arrays.asList(new Term.Variable(syms.insert("parent")), new Term.Variable(syms.insert("grandchild"))))
         ), new ArrayList<>());
 
-        out.println("adding r2: " + syms.print_rule(r2));
+        out.println("adding r2: " + syms.printRule(r2));
         w.add_rule((long) 0, new TrustedOrigins(0), r2);
         w.run(syms);
 
@@ -61,14 +61,14 @@ public class WorldTest {
 
         for (Iterator<Fact> it = w.query_rule(query1, (long) 0, new TrustedOrigins(0), syms).stream().iterator(); it.hasNext(); ) {
             Fact fact = it.next();
-            out.println("\t" + syms.print_fact(fact));
+            out.println("\t" + syms.printFact(fact));
         }
         final Rule query2 = new Rule(new Predicate(parent, Arrays.asList(new Term.Variable(syms.insert("parent")), b)),
                 List.of(new Predicate(parent, Arrays.asList(new Term.Variable(syms.insert("parent")), b))),
                 new ArrayList<>());
         out.println("parents of B: [" + String.join(", ",
                 w.query_rule(query2, (long) 0, new TrustedOrigins(0), syms)
-                        .stream().map(syms::print_fact).collect(Collectors.toSet())) + "]");
+                        .stream().map(syms::printFact).collect(Collectors.toSet())) + "]");
         final Rule query3 = new Rule(new Predicate(grandparent, Arrays.asList(new Term.Variable(syms.insert("grandparent")),
                 new Term.Variable(syms.insert("grandchild")))),
                 List.of(new Predicate(grandparent, Arrays.asList(new Term.Variable(syms.insert("grandparent")),
@@ -76,7 +76,7 @@ public class WorldTest {
                 new ArrayList<>());
         out.println("grandparents: [" + String.join(", ",
                 w.query_rule(query3, (long) 0, new TrustedOrigins(0), syms)
-                        .stream().map(syms::print_fact).collect(Collectors.toSet())) + "]");
+                        .stream().map(syms::printFact).collect(Collectors.toSet())) + "]");
 
         w.add_fact(new Origin(0), new Fact(new Predicate(parent, Arrays.asList(c, e))));
         w.run(syms);
@@ -88,7 +88,7 @@ public class WorldTest {
                 new ArrayList<>());
         final FactSet res = w.query_rule(query4, (long) 0, new TrustedOrigins(0), syms);
         out.println("grandparents after inserting parent(C, E): [" + String.join(", ",
-                res.stream().map(syms::print_fact).collect(Collectors.toSet())) + "]");
+                res.stream().map(syms::printFact).collect(Collectors.toSet())) + "]");
 
         final FactSet expected = new FactSet(new Origin(0), new HashSet<>(Arrays.asList(
                 new Fact(new Predicate(grandparent, Arrays.asList(a, c))),
@@ -112,7 +112,7 @@ public class WorldTest {
                 new ArrayList<>());
         out.println("siblings: [" + String.join(", ",
                 w.query_rule(query5, (long) 0, new TrustedOrigins(0), syms)
-                        .stream().map(syms::print_fact).collect(Collectors.toSet())) + "]");
+                        .stream().map(syms::printFact).collect(Collectors.toSet())) + "]");
     }
 
     @Test
@@ -154,7 +154,7 @@ public class WorldTest {
                 (long) 0, new TrustedOrigins(0), syms);
         for (Iterator<Fact> it = res.stream().iterator(); it.hasNext(); ) {
             Fact f = it.next();
-            out.println("\t" + syms.print_fact(f));
+            out.println("\t" + syms.printFact(f));
         }
         FactSet expected = new FactSet(new Origin(0), new HashSet<>(Arrays.asList(new Fact(new Predicate(join, Arrays.asList(abc, aaa))),
                 new Fact(new Predicate(join, Arrays.asList(abc, bbb))),
@@ -175,7 +175,7 @@ public class WorldTest {
                         new Op.Binary(Op.BinaryOp.LessThan)
                 ))))
         ), (long) 0, new TrustedOrigins(0), syms);
-        res.stream().forEachOrdered(fact -> out.println("\t" + syms.print_fact(fact)));
+        res.stream().forEachOrdered(fact -> out.println("\t" + syms.printFact(fact)));
         expected = new FactSet(new Origin(0),
                 new HashSet<>(Arrays.asList(new Fact(new Predicate(join, Arrays.asList(abc, aaa))), new Fact(new Predicate(join, Arrays.asList(abc, bbb))))));
         assertEquals(expected, res);
@@ -216,13 +216,13 @@ public class WorldTest {
         w.add_fact(new Origin(0), new Fact(new Predicate(route, Arrays.asList(new Term.Integer(4), app_1, syms.add("mx.example.com")))));
 
         FactSet res = testSuffix(w, syms, suff, route, ".fr");
-        res.stream().forEachOrdered(fact -> out.println("\t" + syms.print_fact(fact)));
+        res.stream().forEachOrdered(fact -> out.println("\t" + syms.printFact(fact)));
         FactSet expected = new FactSet(new Origin(0),
                 new HashSet<>(List.of(new Fact(new Predicate(suff, Arrays.asList(app_2, syms.add("test.fr")))))));
         assertEquals(expected, res);
 
         res = testSuffix(w, syms, suff, route, "example.com");
-        res.stream().forEachOrdered(fact -> out.println("\t" + syms.print_fact(fact)));
+        res.stream().forEachOrdered(fact -> out.println("\t" + syms.printFact(fact)));
 
         expected = new FactSet(new Origin(0), new HashSet<>(Arrays.asList(new Fact(new Predicate(suff,
                         Arrays.asList(
@@ -277,9 +277,9 @@ public class WorldTest {
                 )
         );
 
-        out.println("testing r1: " + syms.print_rule(r1));
+        out.println("testing r1: " + syms.printRule(r1));
         FactSet res = w.query_rule(r1, (long) 0, new TrustedOrigins(0), syms);
-        res.stream().forEachOrdered(fact -> out.println("\t" + syms.print_fact(fact)));
+        res.stream().forEachOrdered(fact -> out.println("\t" + syms.printFact(fact)));
         FactSet expected = new FactSet(new Origin(0), new HashSet<>(List.of(new Fact(new Predicate(before, Arrays.asList(new Term.Date(t1.getEpochSecond()), abc))))));
         assertEquals(expected, res);
 
@@ -303,9 +303,9 @@ public class WorldTest {
                 )
         );
 
-        out.println("testing r2: " + syms.print_rule(r2));
+        out.println("testing r2: " + syms.printRule(r2));
         res = w.query_rule(r2, (long) 0, new TrustedOrigins(0), syms);
-        res.stream().forEachOrdered(fact -> out.println("\t" + syms.print_fact(fact)));
+        res.stream().forEachOrdered(fact -> out.println("\t" + syms.printFact(fact)));
         expected = new FactSet(new Origin(0), new HashSet<>(List.of(new Fact(new Predicate(after, Arrays.asList(new Term.Date(t3.getEpochSecond()), def))))));
         assertEquals(expected, res);
     }
@@ -340,9 +340,9 @@ public class WorldTest {
                         )))
                 )
         );
-        out.println("testing r1: " + syms.print_rule(r1));
+        out.println("testing r1: " + syms.printRule(r1));
         FactSet res = w.query_rule(r1, (long) 0, new TrustedOrigins(0), syms);
-        res.stream().forEachOrdered(fact -> out.println("\t" + syms.print_fact(fact)));
+        res.stream().forEachOrdered(fact -> out.println("\t" + syms.printFact(fact)));
         FactSet expected = new FactSet(new Origin(0), new HashSet<>(List.of(new Fact(new Predicate(int_set, Arrays.asList(abc, syms.add("test")))))));
         assertEquals(expected, res);
 
@@ -363,9 +363,9 @@ public class WorldTest {
                 )
         );
 
-        out.println("testing r2: " + syms.print_rule(r2));
+        out.println("testing r2: " + syms.printRule(r2));
         res = w.query_rule(r2, (long) 0, new TrustedOrigins(0), syms);
-        res.stream().forEachOrdered(fact -> out.println("\t" + syms.print_fact(fact)));
+        res.stream().forEachOrdered(fact -> out.println("\t" + syms.printFact(fact)));
         expected = new FactSet(new Origin(0), new HashSet<>(List.of(new Fact(new Predicate(symbol_set, Arrays.asList(def, new Term.Integer(2), syms.add("hello")))))));
         assertEquals(expected, res);
 
@@ -380,9 +380,9 @@ public class WorldTest {
                         )))
                 )
         );
-        out.println("testing r3: " + syms.print_rule(r3));
+        out.println("testing r3: " + syms.printRule(r3));
         res = w.query_rule(r3, (long) 0, new TrustedOrigins(0), syms);
-        res.stream().forEachOrdered(fact -> out.println("\t" + syms.print_fact(fact)));
+        res.stream().forEachOrdered(fact -> out.println("\t" + syms.printFact(fact)));
         expected = new FactSet(new Origin(0), new HashSet<>(List.of(new Fact(new Predicate(string_set, Arrays.asList(abc, new Term.Integer(0), syms.add("test")))))));
         assertEquals(expected, res);
     }
@@ -412,10 +412,10 @@ public class WorldTest {
                 List.of(new Predicate(resource, List.of(file1))
                 ), new ArrayList<>());
 
-        out.println("testing caveat 1(should return nothing): " + syms.print_rule(r1));
+        out.println("testing caveat 1(should return nothing): " + syms.printRule(r1));
         FactSet res = w.query_rule(r1, (long) 0, new TrustedOrigins(0), syms);
         out.println(res);
-        res.stream().forEachOrdered(fact -> out.println("\t" + syms.print_fact(fact)));
+        res.stream().forEachOrdered(fact -> out.println("\t" + syms.printFact(fact)));
         assertEquals(0, res.size());
 
         final long caveat2 = syms.insert("caveat2");
@@ -430,10 +430,10 @@ public class WorldTest {
                         new Predicate(right, Arrays.asList(var0, read))
                 ), new ArrayList<>());
 
-        out.println("testing caveat 2: " + syms.print_rule(r2));
+        out.println("testing caveat 2: " + syms.printRule(r2));
         res = w.query_rule(r2, (long) 0, new TrustedOrigins(0), syms);
         out.println(res);
-        res.stream().forEachOrdered(fact -> out.println("\t" + syms.print_fact(fact)));
+        res.stream().forEachOrdered(fact -> out.println("\t" + syms.printFact(fact)));
         assertEquals(0, res.size());
     }
 }

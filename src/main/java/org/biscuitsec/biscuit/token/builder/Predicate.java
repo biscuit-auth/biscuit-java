@@ -35,7 +35,7 @@ public class Predicate implements Cloneable {
     }
 
     public static Predicate convert_from(org.biscuitsec.biscuit.datalog.Predicate p, SymbolTable symbols) {
-        String name = symbols.print_symbol((int) p.name());
+        String name = symbols.printSymbol((int) p.name());
         List<Term> terms = new ArrayList<>();
         for(org.biscuitsec.biscuit.datalog.Term t: p.terms()) {
             terms.add(t.toTerm(symbols));

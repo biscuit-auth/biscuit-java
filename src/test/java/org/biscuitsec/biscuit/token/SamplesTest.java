@@ -319,7 +319,7 @@ class SamplesTest {
                 ArrayList<Long> origin = new ArrayList<>(entry.getKey().inner);
                 sort(origin);
                 ArrayList<String> facts = entry.getValue().stream()
-                        .map(f -> authorizer.symbols.print_fact(f))
+                        .map(f -> authorizer.symbols.printFact(f))
                         .sorted()
                         .collect(Collectors.toCollection(ArrayList::new));
                 return new FactSet(origin, facts);
@@ -331,7 +331,7 @@ class SamplesTest {
                     if (!rules.containsKey(t._1)) {
                         rules.put(t._1, new ArrayList<>());
                     }
-                    rules.get(t._1).add(authorizer.symbols.print_rule(t._2));
+                    rules.get(t._1).add(authorizer.symbols.printRule(t._2));
                 }
             }
             for (Map.Entry<Long, List<String>> entry : rules.entrySet()) {
