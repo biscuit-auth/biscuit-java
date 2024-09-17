@@ -1,9 +1,10 @@
 package org.biscuitsec.biscuit.datalog;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Objects;
 
 public class Origin {
-    public HashSet<Long> inner;
+    public final HashSet<Long> inner;
 
     public Origin() {
         inner = new HashSet<>();
@@ -20,15 +21,17 @@ public class Origin {
 
     public Origin(int i) {
         this.inner = new HashSet<>();
-        this.inner.add((long)i);
+        this.inner.add((long) i);
     }
 
     public static Origin authorizer() {
         return new Origin(Long.MAX_VALUE);
     }
+
     public void add(int i) {
         inner.add((long) i);
     }
+
     public void add(long i) {
         inner.add(i);
     }
@@ -39,6 +42,7 @@ public class Origin {
         return o;
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     public Origin clone() {
         final HashSet<Long> newInner = new HashSet<>(this.inner);
         return new Origin(newInner);
