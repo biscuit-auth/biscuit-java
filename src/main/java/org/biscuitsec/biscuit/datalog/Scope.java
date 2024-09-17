@@ -17,8 +17,8 @@ public class Scope {
         PublicKey
     }
 
-    Kind kind;
-    long publicKey;
+    final Kind kind;
+    final long publicKey;
 
     private Scope(Kind kind, long publicKey) {
         this.kind = kind;
