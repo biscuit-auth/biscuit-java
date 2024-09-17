@@ -250,10 +250,16 @@ public final class Rule implements Serializable {
 
       Rule rule = (Rule) o;
 
-      if (!Objects.equals(head, rule.head)) return false;
-      if (!Objects.equals(body, rule.body)) return false;
-      if (!Objects.equals(expressions, rule.expressions)) return false;
-       return Objects.equals(scopes, rule.scopes);
+      if (!Objects.equals(head, rule.head)) {
+          return false;
+      }
+      if (!Objects.equals(body, rule.body)) {
+          return false;
+      }
+      if (!Objects.equals(expressions, rule.expressions)) {
+          return false;
+      }
+      return Objects.equals(scopes, rule.scopes);
    }
 
    @Override
