@@ -53,6 +53,7 @@ public class World implements Serializable {
         this.run(new RunLimits(), symbols);
     }
 
+    @SuppressWarnings("unchecked")
     public void run(RunLimits limits, final SymbolTable symbols) throws Error {
         int iterations = 0;
         Instant limit = Instant.now().plus(limits.maxTime);
@@ -107,6 +108,7 @@ public class World implements Serializable {
         return this.rules;
     }
 
+    @SuppressWarnings("unchecked")
     public final FactSet query_rule(final Rule rule, Long origin, TrustedOrigins scope, SymbolTable symbols) throws Error {
         final FactSet newFacts = new FactSet();
 
