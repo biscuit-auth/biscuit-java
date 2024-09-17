@@ -185,13 +185,13 @@ public final class Rule implements Serializable {
       Schema.RuleV2.Builder b = Schema.RuleV2.newBuilder()
               .setHead(this.head.serialize());
 
-      for (int i = 0; i < this.body.size(); i++) {
-         b.addBody(this.body.get(i).serialize());
-      }
+       for (Predicate predicate : this.body) {
+           b.addBody(predicate.serialize());
+       }
 
-      for (int i = 0; i < this.expressions.size(); i++) {
-         b.addExpressions(this.expressions.get(i).serialize());
-      }
+       for (Expression expression : this.expressions) {
+           b.addExpressions(expression.serialize());
+       }
 
       for (Scope scope: this.scopes) {
          b.addScope(scope.serialize());
