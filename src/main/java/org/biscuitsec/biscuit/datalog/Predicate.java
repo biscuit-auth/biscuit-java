@@ -22,11 +22,11 @@ public final class Predicate implements Serializable {
       return this.name;
    }
 
-   public final List<Term> terms() {
+   public List<Term> terms() {
       return this.terms;
    }
 
-   public final ListIterator<Term> ids_iterator() {
+   public ListIterator<Term> ids_iterator() {
       return this.terms.listIterator();
    }
 
