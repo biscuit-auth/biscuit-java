@@ -24,7 +24,7 @@ public final class SymbolTable implements Serializable {
      * * one for the defaults symbols indexed from 0 et 1023 in <code>defaultSymbols</code> list
      * * one for the usages symbols indexed from 1024 in <code>symbols</code> list
      */
-    public final static List<String> defaultSymbols = List.of(
+    public static final List<String> DEFAULT_SYMBOLS = List.of(
             "read",
             "write",
             "resource",
@@ -103,7 +103,7 @@ public final class SymbolTable implements Serializable {
 
     public Option<Long> get(final String symbol) {
         // looking for symbol in default symbols
-        long index = defaultSymbols.indexOf(symbol);
+        long index = DEFAULT_SYMBOLS.indexOf(symbol);
         if (index == -1) {
             // looking for symbol in usages defined symbols
             index = this.symbols.indexOf(symbol);
@@ -119,7 +119,7 @@ public final class SymbolTable implements Serializable {
 
     public List<String> getAllSymbols() {
         ArrayList<String> allSymbols = new ArrayList<>();
-        allSymbols.addAll(defaultSymbols);
+        allSymbols.addAll(DEFAULT_SYMBOLS);
         allSymbols.addAll(symbols);
         return allSymbols;
     }
@@ -133,8 +133,8 @@ public final class SymbolTable implements Serializable {
     }
 
     public Option<String> getS(int i) {
-        if (i >= 0 && i < defaultSymbols.size() && i < DEFAULT_SYMBOLS_OFFSET) {
-            return Option.some(defaultSymbols.get(i));
+        if (i >= 0 && i < DEFAULT_SYMBOLS.size() && i < DEFAULT_SYMBOLS_OFFSET) {
+            return Option.some(DEFAULT_SYMBOLS.get(i));
         } else if (i >= DEFAULT_SYMBOLS_OFFSET && i < this.symbols.size() + DEFAULT_SYMBOLS_OFFSET) {
             return Option.some(this.symbols.get(i - DEFAULT_SYMBOLS_OFFSET));
         } else {
@@ -143,7 +143,7 @@ public final class SymbolTable implements Serializable {
     }
 
     public long insert(final String symbol) {
-        int index = defaultSymbols.indexOf(symbol);
+        int index = DEFAULT_SYMBOLS.indexOf(symbol);
         if (index == -1) {
             index = this.symbols.indexOf(symbol);
             if (index == -1) {
