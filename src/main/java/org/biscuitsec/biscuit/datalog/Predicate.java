@@ -26,19 +26,19 @@ public final class Predicate implements Serializable {
       return this.terms;
    }
 
-   public ListIterator<Term> ids_iterator() {
+   public ListIterator<Term> idsIterator() {
       return this.terms.listIterator();
    }
 
-   public boolean match(final Predicate rule_predicate) {
-      if (this.name != rule_predicate.name) {
+   public boolean match(final Predicate rulePredicate) {
+      if (this.name != rulePredicate.name) {
          return false;
       }
-      if (this.terms.size() != rule_predicate.terms.size()) {
+      if (this.terms.size() != rulePredicate.terms.size()) {
          return false;
       }
       for (int i = 0; i < this.terms.size(); ++i) {
-         if (!this.terms.get(i).match(rule_predicate.terms.get(i))) {
+         if (!this.terms.get(i).match(rulePredicate.terms.get(i))) {
             return false;
          }
       }
