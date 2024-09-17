@@ -104,11 +104,11 @@ public class World implements Serializable {
    }
 
    public final boolean query_match(final Rule rule, Long origin, TrustedOrigins scope, SymbolTable symbols) throws Error {
-      return rule.find_match(this.facts, origin, scope, symbols);
+      return rule.findMatch(this.facts, origin, scope, symbols);
    }
 
    public final boolean query_match_all(final Rule rule, TrustedOrigins scope, SymbolTable symbols) throws Error {
-      return rule.check_match_all(this.facts, scope, symbols);
+      return rule.checkMatchAll(this.facts, scope, symbols);
    }
 
 

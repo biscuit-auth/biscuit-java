@@ -6,7 +6,6 @@ import org.biscuitsec.biscuit.error.Error;
 import io.vavr.Tuple2;
 import io.vavr.Tuple3;
 import io.vavr.control.Either;
-import io.vavr.control.Option;
 
 import java.io.Serializable;
 import java.util.*;
@@ -108,7 +107,7 @@ public final class Rule implements Serializable {
    }
 
    // do not produce new facts, only find one matching set of facts
-   public boolean find_match(final FactSet facts, Long origin, TrustedOrigins scope, SymbolTable symbols) throws Error {
+   public boolean findMatch(final FactSet facts, Long origin, TrustedOrigins scope, SymbolTable symbols) throws Error {
       MatchedVariables variables = variablesSet();
 
       if(this.body.isEmpty()) {
@@ -133,7 +132,7 @@ public final class Rule implements Serializable {
    }
 
    // verifies that the expressions return true for every matching set of facts
-   public boolean check_match_all(final FactSet facts, TrustedOrigins scope, SymbolTable symbols) throws Error {
+   public boolean checkMatchAll(final FactSet facts, TrustedOrigins scope, SymbolTable symbols) throws Error {
       MatchedVariables variables = variablesSet();
 
       if(this.body.isEmpty()) {
