@@ -40,7 +40,7 @@ public class World implements Serializable {
     public void addFact(final Origin origin, final Fact fact) {
         this.facts.add(origin, fact);
     }
-    
+
     public void addRule(Long origin, TrustedOrigins scope, Rule rule) {
         this.rules.add(origin, scope, rule);
     }
@@ -142,16 +142,14 @@ public class World implements Serializable {
         for (Map.Entry<Origin, HashSet<Fact>> entry : this.facts.facts().entrySet()) {
             s.append("\n\t\t\t" + entry.getKey() + ":");
             for (Fact f : entry.getValue()) {
-                s.append("\n\t\t\t\t");
-                s.append(symbol_table.printFact(f));
+                s.append("\n\t\t\t\t").append(symbol_table.printFact(f));
             }
         }
 
         s.append("\n\t\t]\n\t\trules: [");
         for (Iterator<Rule> it = this.rules.stream().iterator(); it.hasNext(); ) {
             Rule r = it.next();
-            s.append("\n\t\t\t");
-            s.append(symbol_table.printRule(r));
+            s.append("\n\t\t\t").append(symbol_table.printRule(r));
         }
 
         s.append("\n\t\t]\n\t}");
