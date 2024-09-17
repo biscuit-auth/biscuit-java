@@ -54,6 +54,7 @@ public final class Rule implements Serializable {
         return scopes;
     }
 
+    @SuppressWarnings("unchecked")
     public Stream<Either<Error, Tuple2<Origin, Fact>>> apply(
             final Supplier<Stream<Tuple2<Origin, Fact>>> factsSupplier, Long ruleOrigin, SymbolTable symbols) {
         MatchedVariables variables = variablesSet();
@@ -129,6 +130,7 @@ public final class Rule implements Serializable {
             return variables.check_expressions(this.expressions, symbols).isDefined();
         }
 
+        @SuppressWarnings("unchecked")
         Supplier<Stream<Tuple2<Origin, Fact>>> factsSupplier = () -> facts.stream(scope);
         Stream<Either<Error, Tuple2<Origin, Fact>>> stream = this.apply(factsSupplier, origin, symbols);
 
@@ -154,6 +156,7 @@ public final class Rule implements Serializable {
             return variables.check_expressions(this.expressions, symbols).isDefined();
         }
 
+        @SuppressWarnings("unchecked")
         Supplier<Stream<Tuple2<Origin, Fact>>> factsSupplier = () -> facts.stream(scope);
         Combinator combinator = new Combinator(variables, this.body, factsSupplier, symbols);
         boolean found = false;
