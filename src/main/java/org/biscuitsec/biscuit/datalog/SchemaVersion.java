@@ -1,9 +1,9 @@
 package org.biscuitsec.biscuit.datalog;
 
+import io.vavr.control.Either;
 import org.biscuitsec.biscuit.datalog.expressions.Expression;
 import org.biscuitsec.biscuit.datalog.expressions.Op;
 import org.biscuitsec.biscuit.error.Error;
-import io.vavr.control.Either;
 import org.biscuitsec.biscuit.token.format.SerializedBiscuit;
 
 import java.util.List;
@@ -101,5 +101,4 @@ public class SchemaVersion {
         }
         return false;
     }
-
 }
