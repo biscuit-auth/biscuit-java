@@ -236,6 +236,7 @@ public final class SymbolTable implements Serializable {
         final List<String> facts = w.facts().stream().map((f) -> this.print_fact(f)).collect(Collectors.toList());
         final List<String> rules = w.rules().stream().map((r) -> this.print_rule(r)).collect(Collectors.toList());
 
+        @SuppressWarnings("StringBufferReplaceableByString")
         StringBuilder b = new StringBuilder();
         b.append("World {\n\tfacts: [\n\t\t");
         b.append(String.join(",\n\t\t", facts));
