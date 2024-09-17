@@ -9,6 +9,8 @@ import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
 public class Scope {
+    // TODO Use all-caps naming convention for enums.
+    //  This convention also applies to protobuf enums.
     public enum Kind {
         Authority,
         Previous,
