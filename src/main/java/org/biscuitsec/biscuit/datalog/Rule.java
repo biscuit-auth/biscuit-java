@@ -23,6 +23,21 @@ public final class Rule implements Serializable {
     private final List<Expression> expressions;
     private final List<Scope> scopes;
 
+    public Rule(final Predicate head, final List<Predicate> body, final List<Expression> expressions) {
+        this.head = head;
+        this.body = body;
+        this.expressions = expressions;
+        this.scopes = new ArrayList<>();
+    }
+
+    public Rule(final Predicate head, final List<Predicate> body, final List<Expression> expressions,
+                final List<Scope> scopes) {
+        this.head = head;
+        this.body = body;
+        this.expressions = expressions;
+        this.scopes = scopes;
+    }
+
     public Predicate head() {
         return this.head;
     }
@@ -164,21 +179,6 @@ public final class Rule implements Serializable {
             }
         }
         return found;
-    }
-
-    public Rule(final Predicate head, final List<Predicate> body, final List<Expression> expressions) {
-        this.head = head;
-        this.body = body;
-        this.expressions = expressions;
-        this.scopes = new ArrayList<>();
-    }
-
-    public Rule(final Predicate head, final List<Predicate> body, final List<Expression> expressions,
-                final List<Scope> scopes) {
-        this.head = head;
-        this.body = body;
-        this.expressions = expressions;
-        this.scopes = scopes;
     }
 
     public Schema.RuleV2 serialize() {
