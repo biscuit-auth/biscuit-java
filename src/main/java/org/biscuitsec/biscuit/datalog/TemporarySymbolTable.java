@@ -18,7 +18,7 @@ public class TemporarySymbolTable {
         this.symbols = new ArrayList<>();
     }
 
-    public Option<String> get_s(int i) {
+    public Option<String> getS(int i) {
         if (i >= this.offset) {
             if (i - this.offset < this.symbols.size()) {
                 return Option.some(this.symbols.get(i - this.offset));
