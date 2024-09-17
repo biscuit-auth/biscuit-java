@@ -1,9 +1,8 @@
 package org.biscuitsec.biscuit.datalog;
 
 import biscuit.format.schema.Schema;
-import org.biscuitsec.biscuit.error.Error;
 import io.vavr.control.Either;
-
+import org.biscuitsec.biscuit.error.Error;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
