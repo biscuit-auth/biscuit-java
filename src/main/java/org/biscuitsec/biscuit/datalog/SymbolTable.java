@@ -17,7 +17,7 @@ import static java.util.stream.Collectors.toList;
 
 public final class SymbolTable implements Serializable {
 
-    public final static short DEFAULT_SYMBOLS_OFFSET = 1024;
+    public static final short DEFAULT_SYMBOLS_OFFSET = 1024;
     /**
      * According to <a href="https://github.com/biscuit-auth/biscuit/blob/master/SPECIFICATIONS.md#symbol-table">the specification</a>,
      * We need two symbols tables:
