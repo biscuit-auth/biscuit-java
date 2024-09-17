@@ -93,7 +93,7 @@ public final class Rule implements Serializable {
                  }
 
                  origin.add(ruleOrigin);
-                 return Either.right(new Tuple2<Origin, Fact>(origin, new Fact(p)));
+                 return Either.right(new Tuple2<>(origin, new Fact(p)));
               });
    }
 
