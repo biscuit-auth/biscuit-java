@@ -16,7 +16,10 @@ public class SchemaVersion {
     private boolean containsCheckAll;
     private boolean containsV4;
 
-    public SchemaVersion(List<Fact> facts, List<Rule> rules, List<Check> checks, List<Scope> scopes) {
+    public SchemaVersion(@SuppressWarnings("unused") List<Fact> facts,
+                         List<Rule> rules,
+                         List<Check> checks,
+                         List<Scope> scopes) {
         containsScopes = !scopes.isEmpty();
 
         if (!containsScopes) {
