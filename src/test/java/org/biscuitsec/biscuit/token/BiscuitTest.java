@@ -207,7 +207,7 @@ public class BiscuitTest {
             fail();
         } catch (Error e) {
             out.println(v3.print_world());
-            for (FailedCheck f : e.failed_checks().get()) {
+            for (FailedCheck f : e.failedChecks().get()) {
                 out.println(f.toString());
             }
             assertEquals(
@@ -305,7 +305,7 @@ public class BiscuitTest {
         Error e = (Error) Try.of(v4::authorize).getCause();
 
         out.println(v4.print_world());
-        e.failed_checks().get().stream().forEach(fc -> out.println(fc.toString()));
+        e.failedChecks().get().stream().forEach(fc -> out.println(fc.toString()));
         assertEquals(
                 new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                         new FailedCheck.FailedBlock(1, 0, "check if resource($resource), $resource.starts_with(\"/folder1/\")"),
