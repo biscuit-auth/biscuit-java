@@ -153,7 +153,7 @@ public class FailedCheck {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
                 UnknownVariable b = (UnknownVariable) o;
-                return this.message == b.message && message.equals(b.message);
+                return this.message.equals(b.message) && message.equals(b.message);
             }
 
             @Override
