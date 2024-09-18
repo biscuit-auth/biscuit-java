@@ -105,10 +105,10 @@ public class FailedCheck {
         }
 
         public static class Builder extends LanguageError {
-            List<String> invalid_variables;
+            final List<String> invalidVariables;
 
-            public Builder(List<String> invalid_variables) {
-                this.invalid_variables = invalid_variables;
+            public Builder(List<String> invalidVariables) {
+                this.invalidVariables = invalidVariables;
             }
 
             @Override
@@ -116,24 +116,24 @@ public class FailedCheck {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
                 Builder b = (Builder) o;
-                return invalid_variables == b.invalid_variables && invalid_variables.equals(b.invalid_variables);
+                return invalidVariables == b.invalidVariables && invalidVariables.equals(b.invalidVariables);
             }
 
             @Override
             public int hashCode() {
-                return Objects.hash(invalid_variables);
+                return Objects.hash(invalidVariables);
             }
 
             @Override
             public String toString() {
-                return "InvalidVariables { message: " + invalid_variables + " }";
+                return "InvalidVariables { message: " + invalidVariables + " }";
             }
 
             @Override
             public JsonElement toJson() {
                 JsonObject authorizer = new JsonObject();
                 JsonArray ja = new JsonArray();
-                for (String s : invalid_variables) {
+                for (String s : invalidVariables) {
                     ja.add(s);
                 }
                 authorizer.add("InvalidVariables", ja);
