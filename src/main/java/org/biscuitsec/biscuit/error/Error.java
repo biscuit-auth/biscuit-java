@@ -474,7 +474,7 @@ public class Error extends Exception {
 
         @Override
         public Option<List<FailedCheck>> failedChecks() {
-            return this.error.failed_checks();
+            return this.error.failedChecks();
         }
 
         @Override

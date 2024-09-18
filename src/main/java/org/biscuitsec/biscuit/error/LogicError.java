@@ -7,9 +7,11 @@ import com.google.gson.*;
 import io.vavr.control.Option;
 
 public class LogicError {
-    public Option<List<FailedCheck>> failed_checks() {
+
+    public Option<List<FailedCheck>> failedChecks() {
         return Option.none();
     }
+
     public JsonElement toJson() {
         return new JsonObject();
     }
@@ -170,7 +172,7 @@ public class LogicError {
             this.policy = policy;
         }
 
-        public Option<List<FailedCheck>> failed_checks() {
+        public Option<List<FailedCheck>> failedChecks() {
             return Option.some(errors);
         }
 
@@ -227,7 +229,7 @@ public class LogicError {
         }
 
         @Override
-        public Option<List<FailedCheck>> failed_checks() {
+        public Option<List<FailedCheck>> failedChecks() {
             return Option.some(errors);
         }
 
