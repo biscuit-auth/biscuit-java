@@ -270,7 +270,6 @@ public class LogicError {
     public static class AuthorizerNotEmpty extends LogicError {
 
         public AuthorizerNotEmpty() {
-
         }
 
         @Override
