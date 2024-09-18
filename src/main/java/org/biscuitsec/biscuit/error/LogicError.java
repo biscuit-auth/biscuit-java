@@ -27,16 +27,16 @@ public class LogicError {
         }
 
         @Override
+        public int hashCode() {
+            return Objects.hash(e);
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             InvalidAuthorityFact other = (InvalidAuthorityFact) o;
             return e.equals(other.e);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(e);
         }
 
         @Override
@@ -59,16 +59,16 @@ public class LogicError {
         }
 
         @Override
+        public int hashCode() {
+            return Objects.hash(e);
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             InvalidAmbientFact other = (InvalidAmbientFact) o;
             return e.equals(other.e);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(e);
         }
 
         @Override
@@ -96,16 +96,16 @@ public class LogicError {
         }
 
         @Override
+        public int hashCode() {
+            return Objects.hash(id, e);
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             InvalidBlockFact other = (InvalidBlockFact) o;
             return id == other.id && e.equals(other.e);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(id, e);
         }
 
         @Override
@@ -136,16 +136,16 @@ public class LogicError {
         }
 
         @Override
+        public int hashCode() {
+            return Objects.hash(id, e);
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             InvalidBlockRule other = (InvalidBlockRule) o;
             return id == other.id && e.equals(other.e);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(id, e);
         }
 
         @Override
@@ -180,6 +180,25 @@ public class LogicError {
         }
 
         @Override
+        public JsonElement toJson() {
+            JsonObject jo = new JsonObject();
+            JsonObject unauthorized = new JsonObject();
+            unauthorized.add("policy", this.policy.toJson());
+            JsonArray ja = new JsonArray();
+            for (FailedCheck t : this.errors) {
+                ja.add(t.toJson());
+            }
+            unauthorized.add("checks", ja);
+            jo.add("Unauthorized", unauthorized);
+            return jo;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(errors);
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
@@ -196,27 +215,8 @@ public class LogicError {
         }
 
         @Override
-        public int hashCode() {
-            return Objects.hash(errors);
-        }
-
-        @Override
         public String toString() {
             return "Unauthorized( policy = " + policy + " errors = " + errors + ")";
-        }
-
-        @Override
-        public JsonElement toJson() {
-            JsonObject jo = new JsonObject();
-            JsonObject unauthorized = new JsonObject();
-            unauthorized.add("policy", this.policy.toJson());
-            JsonArray ja = new JsonArray();
-            for (FailedCheck t : this.errors) {
-                ja.add(t.toJson());
-            }
-            unauthorized.add("checks", ja);
-            jo.add("Unauthorized", unauthorized);
-            return jo;
         }
     }
 
@@ -228,13 +228,24 @@ public class LogicError {
         }
 
         @Override
-        public int hashCode() {
-            return Objects.hash(errors);
+        public Option<List<FailedCheck>> failedChecks() {
+            return Option.some(errors);
         }
 
         @Override
-        public Option<List<FailedCheck>> failedChecks() {
-            return Option.some(errors);
+        public JsonElement toJson() {
+            JsonObject jo = new JsonObject();
+            JsonArray ja = new JsonArray();
+            for (FailedCheck t : this.errors) {
+                ja.add(t.toJson());
+            }
+            jo.add("NoMatchingPolicy", ja);
+            return jo;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(errors);
         }
 
         @Override
@@ -255,21 +266,9 @@ public class LogicError {
             return true;
         }
 
-
         @Override
         public String toString() {
             return "NoMatchingPolicy{}";
-        }
-
-        @Override
-        public JsonElement toJson() {
-            JsonObject jo = new JsonObject();
-            JsonArray ja = new JsonArray();
-            for (FailedCheck t : this.errors) {
-                ja.add(t.toJson());
-            }
-            jo.add("NoMatchingPolicy", ja);
-            return jo;
         }
     }
 
@@ -299,15 +298,15 @@ public class LogicError {
                 this.nb = nb;
             }
 
-            @Override
-            public String toString() {
-                return "Allow(" + this.nb + ")";
-            }
-
             public JsonElement toJson() {
                 JsonObject jo = new JsonObject();
                 jo.addProperty("Allow", this.nb);
                 return jo;
+            }
+
+            @Override
+            public String toString() {
+                return "Allow(" + this.nb + ")";
             }
         }
 
@@ -318,15 +317,15 @@ public class LogicError {
                 this.nb = nb;
             }
 
-            @Override
-            public String toString() {
-                return "Deny(" + this.nb + ")";
-            }
-
             public JsonElement toJson() {
                 JsonObject jo = new JsonObject();
                 jo.addProperty("Deny", this.nb);
                 return jo;
+            }
+
+            @Override
+            public String toString() {
+                return "Deny(" + this.nb + ")";
             }
         }
     }
