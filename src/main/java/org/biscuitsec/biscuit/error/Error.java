@@ -295,11 +295,6 @@ public class Error extends Exception {
             }
 
             @Override
-            public int hashCode() {
-                return super.hashCode();
-            }
-
-            @Override
             public String toString() {
                 return "Version{" +
                         "minimum=" + minimum +
