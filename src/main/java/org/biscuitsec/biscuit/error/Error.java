@@ -146,6 +146,11 @@ public class Error extends Exception {
             }
 
             @Override
+            public int hashCode() {
+                return Objects.hash(e);
+            }
+
+            @Override
             public boolean equals(Object o) {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
@@ -154,20 +159,15 @@ public class Error extends Exception {
             }
 
             @Override
-            public int hashCode() {
-                return Objects.hash(e);
+            public JsonElement toJson() {
+                JsonObject jo = new JsonObject();
+                jo.addProperty("DeserializationError", this.e);
+                return FormatError.jsonWrapper(jo);
             }
 
             @Override
             public String toString() {
                 return "Err(Format(DeserializationError(\"" + this.e + "\"))";
-            }
-
-            @Override
-            public JsonElement toJson() {
-                JsonObject jo = new JsonObject();
-                jo.addProperty("DeserializationError", this.e);
-                return FormatError.jsonWrapper(jo);
             }
 
         }
@@ -180,6 +180,11 @@ public class Error extends Exception {
             }
 
             @Override
+            public int hashCode() {
+                return Objects.hash(e);
+            }
+
+            @Override
             public boolean equals(Object o) {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
@@ -188,20 +193,15 @@ public class Error extends Exception {
             }
 
             @Override
-            public int hashCode() {
-                return Objects.hash(e);
+            public JsonElement toJson() {
+                JsonObject jo = new JsonObject();
+                jo.addProperty("SerializationError", this.e);
+                return FormatError.jsonWrapper(jo);
             }
 
             @Override
             public String toString() {
                 return "Err(Format(SerializationError(\"" + this.e + "\"))";
-            }
-
-            @Override
-            public JsonElement toJson() {
-                JsonObject jo = new JsonObject();
-                jo.addProperty("SerializationError", this.e);
-                return FormatError.jsonWrapper(jo);
             }
         }
 
@@ -213,6 +213,11 @@ public class Error extends Exception {
             }
 
             @Override
+            public int hashCode() {
+                return Objects.hash(e);
+            }
+
+            @Override
             public boolean equals(Object o) {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
@@ -221,20 +226,15 @@ public class Error extends Exception {
             }
 
             @Override
-            public int hashCode() {
-                return Objects.hash(e);
+            public JsonElement toJson() {
+                JsonObject jo = new JsonObject();
+                jo.addProperty("BlockDeserializationError", this.e);
+                return FormatError.jsonWrapper(jo);
             }
 
             @Override
             public String toString() {
                 return "Err(FormatError.BlockDeserializationError{ error: " + e + " }";
-            }
-
-            @Override
-            public JsonElement toJson() {
-                JsonObject jo = new JsonObject();
-                jo.addProperty("BlockDeserializationError", this.e);
-                return FormatError.jsonWrapper(jo);
             }
         }
 
@@ -246,6 +246,11 @@ public class Error extends Exception {
             }
 
             @Override
+            public int hashCode() {
+                return Objects.hash(e);
+            }
+
+            @Override
             public boolean equals(Object o) {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
@@ -254,20 +259,15 @@ public class Error extends Exception {
             }
 
             @Override
-            public int hashCode() {
-                return Objects.hash(e);
+            public JsonElement toJson() {
+                JsonObject jo = new JsonObject();
+                jo.addProperty("BlockSerializationError", this.e);
+                return FormatError.jsonWrapper(jo);
             }
 
             @Override
             public String toString() {
                 return "Err(FormatError.BlockSerializationError{ error: " + e + " }";
-            }
-
-            @Override
-            public JsonElement toJson() {
-                JsonObject jo = new JsonObject();
-                jo.addProperty("BlockSerializationError", this.e);
-                return FormatError.jsonWrapper(jo);
             }
         }
 
@@ -295,15 +295,6 @@ public class Error extends Exception {
             }
 
             @Override
-            public String toString() {
-                return "Version{" +
-                        "minimum=" + minimum +
-                        ", maximum=" + maximum +
-                        ", actual=" + actual +
-                        '}';
-            }
-
-            @Override
             public JsonElement toJson() {
                 JsonObject child = new JsonObject();
                 child.addProperty("minimum", this.minimum);
@@ -313,6 +304,15 @@ public class Error extends Exception {
                 jo.add("Version", child);
                 return FormatError.jsonWrapper(jo);
             }
+
+            @Override
+            public String toString() {
+                return "Version{" +
+                        "minimum=" + minimum +
+                        ", maximum=" + maximum +
+                        ", actual=" + actual +
+                        '}';
+            }
         }
 
         public static class InvalidSignatureSize extends FormatError {
@@ -320,6 +320,11 @@ public class Error extends Exception {
 
             public InvalidSignatureSize(int size) {
                 this.size = size;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(size);
             }
 
             @Override
@@ -333,8 +338,10 @@ public class Error extends Exception {
             }
 
             @Override
-            public int hashCode() {
-                return Objects.hash(size);
+            public JsonElement toJson() {
+                JsonObject jo = new JsonObject();
+                jo.add("InvalidSignatureSize", new JsonPrimitive(size));
+                return FormatError.jsonWrapper(jo);
             }
 
             @Override
@@ -342,13 +349,6 @@ public class Error extends Exception {
                 return "InvalidSignatureSize{" +
                         "size=" + size +
                         '}';
-            }
-
-            @Override
-            public JsonElement toJson() {
-                JsonObject jo = new JsonObject();
-                jo.add("InvalidSignatureSize", new JsonPrimitive(size));
-                return FormatError.jsonWrapper(jo);
             }
         }
     }
@@ -361,21 +361,16 @@ public class Error extends Exception {
         }
 
         @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            InvalidAuthorityIndex other = (InvalidAuthorityIndex) o;
-            return index == other.index;
-        }
-
-        @Override
         public int hashCode() {
             return Objects.hash(index);
         }
 
         @Override
-        public String toString() {
-            return "Err(InvalidAuthorityIndex{ index: " + index + " }";
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            InvalidAuthorityIndex other = (InvalidAuthorityIndex) o;
+            return index == other.index;
         }
 
         @Override
@@ -385,6 +380,11 @@ public class Error extends Exception {
             JsonObject jo = new JsonObject();
             jo.add("InvalidAuthorityIndex", child);
             return jo;
+        }
+
+        @Override
+        public String toString() {
+            return "Err(InvalidAuthorityIndex{ index: " + index + " }";
         }
     }
 
@@ -398,21 +398,16 @@ public class Error extends Exception {
         }
 
         @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            InvalidBlockIndex other = (InvalidBlockIndex) o;
-            return expected == other.expected && found == other.found;
-        }
-
-        @Override
         public int hashCode() {
             return Objects.hash(expected, found);
         }
 
         @Override
-        public String toString() {
-            return "Err(InvalidBlockIndex{ expected: " + expected + ", found: " + found + " }";
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            InvalidBlockIndex other = (InvalidBlockIndex) o;
+            return expected == other.expected && found == other.found;
         }
 
         @Override
@@ -423,6 +418,11 @@ public class Error extends Exception {
             JsonObject jo = new JsonObject();
             jo.add("InvalidBlockIndex", child);
             return jo;
+        }
+
+        @Override
+        public String toString() {
+            return "Err(InvalidBlockIndex{ expected: " + expected + ", found: " + found + " }";
         }
     }
 
@@ -473,24 +473,6 @@ public class Error extends Exception {
         }
 
         @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            FailedLogic other = (FailedLogic) o;
-            return error.equals(other.error);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(error);
-        }
-
-        @Override
-        public String toString() {
-            return "Err(FailedLogic(" + error + "))";
-        }
-
-        @Override
         public Option<List<FailedCheck>> failedChecks() {
             return this.error.failed_checks();
         }
@@ -502,6 +484,23 @@ public class Error extends Exception {
             return jo;
         }
 
+        @Override
+        public int hashCode() {
+            return Objects.hash(error);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            FailedLogic other = (FailedLogic) o;
+            return error.equals(other.error);
+        }
+
+        @Override
+        public String toString() {
+            return "Err(FailedLogic(" + error + "))";
+        }
     }
 
     public static class Language extends Error {
@@ -565,16 +564,9 @@ public class Error extends Exception {
     }
 
     public static class Execution extends Error {
-        public enum Kind {
-            Execution,
-            Overflow
-
-        }
-
         final Expression e;
         final Kind kind;
         final String message;
-
         public Execution(Expression ex, String msg) {
             e = ex;
             message = msg;
@@ -612,6 +604,12 @@ public class Error extends Exception {
             return "Execution error when evaluating expression '" + e +
                     "': " + message;
         }
+
+        public enum Kind {
+            Execution,
+            Overflow
+
+        }
     }
 
     public static class InvalidType extends Error {
@@ -635,6 +633,11 @@ public class Error extends Exception {
         }
 
         @Override
+        public int hashCode() {
+            return error.hashCode();
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
@@ -645,8 +648,10 @@ public class Error extends Exception {
         }
 
         @Override
-        public int hashCode() {
-            return error.hashCode();
+        public JsonElement toJson() {
+            JsonObject error = new JsonObject();
+            error.add("error", this.error.toJson());
+            return error;
         }
 
         @Override
@@ -654,13 +659,6 @@ public class Error extends Exception {
             return "Parser{" +
                     "error=" + error +
                     '}';
-        }
-
-        @Override
-        public JsonElement toJson() {
-            JsonObject error = new JsonObject();
-            error.add("error", this.error.toJson());
-            return error;
         }
     }
 }
