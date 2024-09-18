@@ -142,7 +142,7 @@ public class FailedCheck {
         }
 
         public static class UnknownVariable extends LanguageError {
-            String message;
+            final String message;
 
             public UnknownVariable(String message) {
                 this.message = message;
