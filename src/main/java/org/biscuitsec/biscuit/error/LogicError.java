@@ -237,6 +237,8 @@ public class LogicError {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
+            // TODO Fix probably bug indicated by IDE code analysis:
+            //  Casting 'o' to 'Unauthorized' will produce 'ClassCastException' for any non-null value
             Unauthorized other = (Unauthorized) o;
             if(errors.size() != other.errors.size()) {
                 return false;
