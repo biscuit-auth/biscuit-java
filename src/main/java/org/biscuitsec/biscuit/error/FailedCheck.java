@@ -7,7 +7,9 @@ import java.util.Objects;
 
 public class FailedCheck {
 
-    public JsonElement toJson(){ return new JsonObject();}
+    public JsonElement toJson() {
+        return new JsonObject();
+    }
 
     public static class FailedBlock extends FailedCheck {
         final public long blockId;
@@ -35,7 +37,7 @@ public class FailedCheck {
 
         @Override
         public String toString() {
-            return "Block(FailedBlockCheck " + new Gson().toJson(toJson())+")";
+            return "Block(FailedBlockCheck " + new Gson().toJson(toJson()) + ")";
         }
 
         @Override
@@ -74,8 +76,8 @@ public class FailedCheck {
 
         @Override
         public String toString() {
-            return "FailedCaveat.FailedAuthorizer { check_id: "+ checkId +
-                    ", rule: "+rule+" }";
+            return "FailedCaveat.FailedAuthorizer { check_id: " + checkId +
+                    ", rule: " + rule + " }";
         }
 
         @Override
@@ -101,8 +103,10 @@ public class FailedCheck {
                 return new JsonPrimitive("ParseError");
             }
         }
+
         public static class Builder extends LanguageError {
             List<String> invalid_variables;
+
             public Builder(List<String> invalid_variables) {
                 this.invalid_variables = invalid_variables;
             }
@@ -122,14 +126,14 @@ public class FailedCheck {
 
             @Override
             public String toString() {
-                return "InvalidVariables { message: "+invalid_variables+" }";
+                return "InvalidVariables { message: " + invalid_variables + " }";
             }
 
             @Override
             public JsonElement toJson() {
                 JsonObject authorizer = new JsonObject();
                 JsonArray ja = new JsonArray();
-                for(String s : invalid_variables){
+                for (String s : invalid_variables) {
                     ja.add(s);
                 }
                 authorizer.add("InvalidVariables", ja);
@@ -139,6 +143,7 @@ public class FailedCheck {
 
         public static class UnknownVariable extends LanguageError {
             String message;
+
             public UnknownVariable(String message) {
                 this.message = message;
             }
@@ -158,7 +163,7 @@ public class FailedCheck {
 
             @Override
             public String toString() {
-                return "LanguageError.UnknownVariable { message: "+message+ " }";
+                return "LanguageError.UnknownVariable { message: " + message + " }";
             }
 
             @Override
