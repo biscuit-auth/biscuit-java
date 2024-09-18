@@ -576,10 +576,9 @@ public class Error extends Exception {
 
         }
 
-        Expression e;
-        String message;
-
-        Kind kind;
+        final Expression e;
+        final Kind kind;
+        final String message;
 
         public Execution(Expression ex, String msg) {
             e = ex;
