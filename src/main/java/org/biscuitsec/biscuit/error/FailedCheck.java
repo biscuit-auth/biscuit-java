@@ -23,16 +23,16 @@ public class FailedCheck {
         }
 
         @Override
+        public int hashCode() {
+            return Objects.hash(blockId, checkId, rule);
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             FailedBlock b = (FailedBlock) o;
             return blockId == b.blockId && checkId == b.checkId && rule.equals(b.rule);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(blockId, checkId, rule);
         }
 
         @Override
@@ -62,16 +62,16 @@ public class FailedCheck {
         }
 
         @Override
+        public int hashCode() {
+            return Objects.hash(checkId, rule);
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             FailedAuthorizer b = (FailedAuthorizer) o;
             return checkId == b.checkId && rule.equals(b.rule);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(checkId, rule);
         }
 
         @Override
@@ -112,16 +112,16 @@ public class FailedCheck {
             }
 
             @Override
+            public int hashCode() {
+                return Objects.hash(invalidVariables);
+            }
+
+            @Override
             public boolean equals(Object o) {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
                 Builder b = (Builder) o;
                 return invalidVariables == b.invalidVariables && invalidVariables.equals(b.invalidVariables);
-            }
-
-            @Override
-            public int hashCode() {
-                return Objects.hash(invalidVariables);
             }
 
             @Override
@@ -149,16 +149,16 @@ public class FailedCheck {
             }
 
             @Override
+            public int hashCode() {
+                return Objects.hash(message);
+            }
+
+            @Override
             public boolean equals(Object o) {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
                 UnknownVariable b = (UnknownVariable) o;
                 return this.message.equals(b.message);
-            }
-
-            @Override
-            public int hashCode() {
-                return Objects.hash(message);
             }
 
             @Override
