@@ -100,7 +100,7 @@ public class Biscuit extends UnverifiedBiscuit {
             throw container.getLeft();
         } else {
             SerializedBiscuit s = container.get();
-            List<byte[]> revocation_ids = s.revocation_identifiers();
+            List<byte[]> revocation_ids = s.revocationIdentifiers();
 
             Option<SerializedBiscuit> c = Option.some(s);
             return new Biscuit(authority, blocks, authority.symbols, s, revocation_ids, root_key_id);
@@ -216,7 +216,7 @@ public class Biscuit extends UnverifiedBiscuit {
      */
     static public Biscuit from_bytes_with_symbols(byte[] data, PublicKey root, SymbolTable symbols) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         //System.out.println("will deserialize and verify token");
-        SerializedBiscuit ser = SerializedBiscuit.from_bytes(data, root);
+        SerializedBiscuit ser = SerializedBiscuit.fromBytes(data, root);
         //System.out.println("deserialized token, will populate Biscuit structure");
 
         return Biscuit.from_serialized_biscuit(ser, symbols);
@@ -235,7 +235,7 @@ public class Biscuit extends UnverifiedBiscuit {
      */
     static public Biscuit from_bytes_with_symbols(byte[] data, KeyDelegate delegate, SymbolTable symbols) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         //System.out.println("will deserialize and verify token");
-        SerializedBiscuit ser = SerializedBiscuit.from_bytes(data, delegate);
+        SerializedBiscuit ser = SerializedBiscuit.fromBytes(data, delegate);
         //System.out.println("deserialized token, will populate Biscuit structure");
 
         return Biscuit.from_serialized_biscuit(ser, symbols);
@@ -251,7 +251,7 @@ public class Biscuit extends UnverifiedBiscuit {
         Block authority = t._1;
         ArrayList<Block> blocks = t._2;
 
-        List<byte[]> revocation_ids = ser.revocation_identifiers();
+        List<byte[]> revocation_ids = ser.revocationIdentifiers();
 
         return new Biscuit(authority, blocks, symbols, ser, revocation_ids);
     }
@@ -350,7 +350,7 @@ public class Biscuit extends UnverifiedBiscuit {
         }
         blocks.add(block);
 
-        List<byte[]> revocation_ids = container.revocation_identifiers();
+        List<byte[]> revocation_ids = container.revocationIdentifiers();
 
         return new Biscuit(copiedBiscuit.authority, blocks, symbols, container, revocation_ids);
     }

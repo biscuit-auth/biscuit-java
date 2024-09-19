@@ -82,7 +82,7 @@ public class UnverifiedBiscuit {
      * @return UnverifiedBiscuit
      */
     static public UnverifiedBiscuit from_bytes_with_symbols(byte[] data, SymbolTable symbols) throws Error {
-        SerializedBiscuit ser = SerializedBiscuit.unsafe_deserialize(data);
+        SerializedBiscuit ser = SerializedBiscuit.unsafeDeserialize(data);
         return UnverifiedBiscuit.from_serialized_biscuit(ser, symbols);
     }
 
@@ -96,7 +96,7 @@ public class UnverifiedBiscuit {
         Block authority = t._1;
         ArrayList<Block> blocks = t._2;
 
-        List<byte[]> revocation_ids = ser.revocation_identifiers();
+        List<byte[]> revocation_ids = ser.revocationIdentifiers();
 
         return new UnverifiedBiscuit(authority, blocks, symbols, ser, revocation_ids);
     }
@@ -179,7 +179,7 @@ public class UnverifiedBiscuit {
         }
         blocks.add(block);
 
-        List<byte[]> revocation_ids = container.revocation_identifiers();
+        List<byte[]> revocation_ids = container.revocationIdentifiers();
 
         return new UnverifiedBiscuit(copiedBiscuit.authority, blocks, symbols, container, revocation_ids);
     }
@@ -293,7 +293,7 @@ public class UnverifiedBiscuit {
         }
         blocks.add(block);
 
-        List<byte[]> revocation_ids = container.revocation_identifiers();
+        List<byte[]> revocation_ids = container.revocationIdentifiers();
         return new UnverifiedBiscuit(copiedBiscuit.authority, blocks, symbols, container, revocation_ids);
     }
 
