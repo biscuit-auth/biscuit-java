@@ -52,7 +52,8 @@ public class SerializedBiscuit {
     }
 
     public Either<Error.FormatError, SerializedBiscuit> append(final org.biscuitsec.biscuit.crypto.KeyPair next,
-                                                               final Block newBlock, Option<ExternalSignature> externalSignature) {
+                                                               final Block newBlock,
+                                                               Option<ExternalSignature> externalSignature) {
         if (this.proof.secretKey.isEmpty()) {
             return Left(new Error.FormatError.SerializationError("the token is sealed"));
         }
