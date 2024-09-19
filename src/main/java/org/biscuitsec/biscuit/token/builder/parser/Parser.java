@@ -102,7 +102,7 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<String, Fact>> fact(String s) {
-        Either<Error, Tuple2<String, Predicate>> res = fact_predicate(s);
+        Either<Error, Tuple2<String, Predicate>> res = factPredicate(s);
         if (res.isLeft()) {
             return Either.left(res.getLeft());
         } else {
@@ -133,7 +133,7 @@ public class Parser {
 
         s = s.substring(2);
 
-        Either<Error, Tuple4<String, List<Predicate>, List<Expression>, List<Scope>>> bodyRes = rule_body(s);
+        Either<Error, Tuple4<String, List<Predicate>, List<Expression>, List<Scope>>> bodyRes = ruleBody(s);
         if (bodyRes.isLeft()) {
             return Either.left(bodyRes.getLeft());
         }
@@ -166,7 +166,7 @@ public class Parser {
             return Either.left(new Error(s, "missing check prefix"));
         }
 
-        Either<Error, Tuple2<String, List<Rule>>> bodyRes = check_body(s);
+        Either<Error, Tuple2<String, List<Rule>>> bodyRes = checkBody(s);
         if (bodyRes.isLeft()) {
             return Either.left(bodyRes.getLeft());
         }
@@ -194,7 +194,7 @@ public class Parser {
             return Either.left(new Error(s, "missing policy prefix"));
         }
 
-        Either<Error, Tuple2<String, List<Rule>>> bodyRes = check_body(s);
+        Either<Error, Tuple2<String, List<Rule>>> bodyRes = checkBody(s);
         if (bodyRes.isLeft()) {
             return Either.left(bodyRes.getLeft());
         }
@@ -208,9 +208,9 @@ public class Parser {
         return Either.right(new Tuple2<>(t._1, new Policy(t._2, p)));
     }
 
-    public static Either<Error, Tuple2<String, List<Rule>>> check_body(String s) {
+    public static Either<Error, Tuple2<String, List<Rule>>> checkBody(String s) {
         List<Rule> queries = new ArrayList<>();
-        Either<Error, Tuple4<String, List<Predicate>, List<Expression>, List<Scope>>> bodyRes = rule_body(s);
+        Either<Error, Tuple4<String, List<Predicate>, List<Expression>, List<Scope>>> bodyRes = ruleBody(s);
         if (bodyRes.isLeft()) {
             return Either.left(bodyRes.getLeft());
         }
@@ -234,7 +234,7 @@ public class Parser {
             }
             s = s.substring(2);
 
-            Either<Error, Tuple4<String, List<Predicate>, List<Expression>, List<Scope>>> bodyRes2 = rule_body(s);
+            Either<Error, Tuple4<String, List<Predicate>, List<Expression>, List<Scope>>> bodyRes2 = ruleBody(s);
             if (bodyRes2.isLeft()) {
                 return Either.left(bodyRes2.getLeft());
             }
@@ -248,7 +248,7 @@ public class Parser {
         return Either.right(new Tuple2<>(s, queries));
     }
 
-    public static Either<Error, Tuple4<String, List<Predicate>, List<Expression>, List<Scope>>> rule_body(String s) {
+    public static Either<Error, Tuple4<String, List<Predicate>, List<Expression>, List<Scope>>> ruleBody(String s) {
         List<Predicate> predicates = new ArrayList<>();
         List<Expression> expressions = new ArrayList<>();
 
@@ -292,7 +292,7 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<String, Predicate>> predicate(String s) {
-        Tuple2<String, String> tn = take_while(s, (c) -> Character.isAlphabetic(c) || Character.isDigit(c) || c == '_' || c == ':');
+        Tuple2<String, String> tn = takeWhile(s, (c) -> Character.isAlphabetic(c) || Character.isDigit(c) || c == '_' || c == ':');
         String name = tn._1;
         s = tn._2;
 
@@ -410,8 +410,8 @@ public class Parser {
         return Either.right(new Tuple2<>(t._1, new PublicKey(Schema.PublicKey.Algorithm.Ed25519, t._2)));
     }
 
-    public static Either<Error, Tuple2<String, Predicate>> fact_predicate(String s) {
-        Tuple2<String, String> tn = take_while(s, (c) -> Character.isAlphabetic(c) || Character.isDigit(c) || c == '_' || c == ':');
+    public static Either<Error, Tuple2<String, Predicate>> factPredicate(String s) {
+        Tuple2<String, String> tn = takeWhile(s, (c) -> Character.isAlphabetic(c) || Character.isDigit(c) || c == '_' || c == ':');
         String name = tn._1;
         s = tn._2;
 
@@ -426,7 +426,7 @@ public class Parser {
 
             s = space(s);
 
-            Either<Error, Tuple2<String, Term>> res = fact_term(s);
+            Either<Error, Tuple2<String, Term>> res = factTerm(s);
             if (res.isLeft()) {
                 break;
             }
@@ -454,7 +454,7 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<String, String>> name(String s) {
-        Tuple2<String, String> t = take_while(s, (c) -> Character.isAlphabetic(c) || c == '_');
+        Tuple2<String, String> t = takeWhile(s, (c) -> Character.isAlphabetic(c) || c == '_');
         String name = t._1;
         String remaining = t._2;
 
@@ -508,7 +508,7 @@ public class Parser {
         return Either.left(new Error(s, "unrecognized value"));
     }
 
-    public static Either<Error, Tuple2<String, Term>> fact_term(String s) {
+    public static Either<Error, Tuple2<String, Term>> factTerm(String s) {
         if (s.length() > 0 && s.charAt(0) == '$') {
             return Either.left(new Error(s, "variables are not allowed in facts"));
         }
@@ -613,7 +613,7 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<String, Term.Date>> date(String s) {
-        Tuple2<String, String> t = take_while(s, (c) -> c != ' ' && c != ',' && c != ')' && c != ']');
+        Tuple2<String, String> t = takeWhile(s, (c) -> c != ' ' && c != ',' && c != ')' && c != ']');
 
         try {
             OffsetDateTime d = OffsetDateTime.parse(t._1);
@@ -630,7 +630,7 @@ public class Parser {
             return Either.left(new Error(s, "not a variable"));
         }
 
-        Tuple2<String, String> t = take_while(s.substring(1), (c) -> Character.isAlphabetic(c) || Character.isDigit(c) || c == '_');
+        Tuple2<String, String> t = takeWhile(s.substring(1), (c) -> Character.isAlphabetic(c) || Character.isDigit(c) || c == '_');
 
         return Either.right(new Tuple2<>(t._2, (Term.Variable) Utils.var(t._1)));
     }
@@ -662,7 +662,7 @@ public class Parser {
 
             s = space(s);
 
-            Either<Error, Tuple2<String, Term>> res = fact_term(s);
+            Either<Error, Tuple2<String, Term>> res = factTerm(s);
             if (res.isLeft()) {
                 break;
             }
@@ -740,7 +740,7 @@ public class Parser {
         return s.substring(index);
     }
 
-    public static Tuple2<String, String> take_while(String s, Function<Character, Boolean> f) {
+    public static Tuple2<String, String> takeWhile(String s, Function<Character, Boolean> f) {
         int index = s.length();
         for (int i = 0; i < s.length(); i++) {
             Character c = s.charAt(i);
@@ -770,12 +770,12 @@ public class Parser {
                 // Find the end of the multiline comment
                 remaining = remaining.substring(2); // Skip "/*"
                 String finalRemaining = remaining;
-                Tuple2<String, String> split = take_while(remaining, c -> !finalRemaining.startsWith("*/"));
+                Tuple2<String, String> split = takeWhile(remaining, c -> !finalRemaining.startsWith("*/"));
                 remaining = split._2.length() > 2 ? split._2.substring(2) : ""; // Skip "*/"
             } else if (remaining.startsWith("//")) {
                 // Find the end of the single-line comment
                 remaining = remaining.substring(2); // Skip "//"
-                Tuple2<String, String> split = take_while(remaining, c -> c != '\n' && c != '\r');
+                Tuple2<String, String> split = takeWhile(remaining, c -> c != '\n' && c != '\r');
                 remaining = split._2;
                 if (!remaining.isEmpty()) {
                     result.append(remaining.charAt(0)); // Preserve line break
@@ -784,7 +784,7 @@ public class Parser {
             } else {
                 // Take non-comment text until the next comment or end of string
                 String finalRemaining = remaining;
-                Tuple2<String, String> split = take_while(remaining, c -> !finalRemaining.startsWith("/*") && !finalRemaining.startsWith("//"));
+                Tuple2<String, String> split = takeWhile(remaining, c -> !finalRemaining.startsWith("/*") && !finalRemaining.startsWith("//"));
                 result.append(split._1);
                 remaining = split._2;
             }
