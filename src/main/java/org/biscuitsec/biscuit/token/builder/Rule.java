@@ -78,14 +78,14 @@ public class Rule implements Cloneable {
                     this.head.terms = this.head.terms.stream().flatMap(t -> {
                         if (t instanceof Term.Variable) {
                             Option<Term> term = vars.getOrDefault(((Term.Variable) t).value, Option.none());
-                            return term.map(_t -> Stream.of(_t)).getOrElse(Stream.of(t));
+                            return term.map(Stream::of).getOrElse(Stream.of(t));
                         } else return Stream.of(t);
                     }).collect(Collectors.toList());
                     for (Predicate p : this.body) {
                         p.terms = p.terms.stream().flatMap(t -> {
                             if (t instanceof Term.Variable) {
                                 Option<Term> term = vars.getOrDefault(((Term.Variable) t).value, Option.none());
-                                return term.map(_t -> Stream.of(_t)).getOrElse(Stream.of(t));
+                                return term.map(Stream::of).getOrElse(Stream.of(t));
                             } else return Stream.of(t);
                         }).collect(Collectors.toList());
                     }
@@ -208,7 +208,7 @@ public class Rule implements Cloneable {
         String res = "";
 
         if(!r.body.isEmpty()) {
-            final List<String> b = r.body.stream().map((pred) -> pred.toString()).collect(Collectors.toList());
+            final List<String> b = r.body.stream().map(Predicate::toString).collect(Collectors.toList());
              res += String.join(", ", b);
         }
 
@@ -216,7 +216,7 @@ public class Rule implements Cloneable {
             if(!r.body.isEmpty()) {
                 res += ", ";
             }
-            final List<String> e = r.expressions.stream().map((expression) -> expression.toString()).collect(Collectors.toList());
+            final List<String> e = r.expressions.stream().map(Object::toString).collect(Collectors.toList());
             res += String.join(", ", e);
         }
 
@@ -224,7 +224,7 @@ public class Rule implements Cloneable {
             if(!r.body.isEmpty() || !r.expressions.isEmpty()) {
                 res += " ";
             }
-            final List<String> e = r.scopes.stream().map((scope) -> scope.toString()).collect(Collectors.toList());
+            final List<String> e = r.scopes.stream().map(Scope::toString).collect(Collectors.toList());
             res += "trusting " + String.join(", ", e);
         }
 
