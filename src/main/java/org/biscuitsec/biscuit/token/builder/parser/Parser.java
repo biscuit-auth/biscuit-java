@@ -131,7 +131,6 @@ public class Parser {
             return Either.left(new Error(s, "rule arrow not found"));
         }
 
-        List<Predicate> predicates = new ArrayList<Predicate>();
         s = s.substring(2);
 
         Either<Error, Tuple4<String, List<Predicate>, List<Expression>, List<Scope>>> bodyRes = rule_body(s);
