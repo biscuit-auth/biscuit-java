@@ -3,6 +3,8 @@ package org.biscuitsec.biscuit.token.builder.parser;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import java.util.Objects;
+
 public class Error extends Exception {
     final String input;
     final String message;
@@ -22,13 +24,19 @@ public class Error extends Exception {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         Error error = (Error) o;
+        if (!Objects.equals(input, error.input)) {
+            return false;
+        }
 
-        if (input != null ? !input.equals(error.input) : error.input != null) return false;
-        return message != null ? message.equals(error.message) : error.message == null;
+        return Objects.equals(message, error.message);
     }
 
     public JsonElement toJson() {
