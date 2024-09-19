@@ -10,7 +10,7 @@ import static org.biscuitsec.biscuit.datalog.Check.Kind.One;
 
 public class Check {
     private final org.biscuitsec.biscuit.datalog.Check.Kind kind;
-    List<Rule> queries;
+    final List<Rule> queries;
 
     public Check(org.biscuitsec.biscuit.datalog.Check.Kind kind, List<Rule> queries) {
         this.kind = kind;
