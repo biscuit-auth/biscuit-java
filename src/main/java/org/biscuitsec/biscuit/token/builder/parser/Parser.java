@@ -223,7 +223,7 @@ public class Parser {
 
         int i = 0;
         while (true) {
-            if (s.length() == 0) {
+            if (s.isEmpty()) {
                 break;
             }
 
@@ -273,7 +273,7 @@ public class Parser {
 
             s = space(s);
 
-            if (s.length() == 0 || s.charAt(0) != ',') {
+            if (s.isEmpty() || s.charAt(0) != ',') {
                 break;
             } else {
                 s = s.substring(1);
@@ -297,7 +297,7 @@ public class Parser {
         s = tn._2;
 
         s = space(s);
-        if (s.length() == 0 || s.charAt(0) != '(') {
+        if (s.isEmpty() || s.charAt(0) != '(') {
             return Either.left(new Error(s, "opening parens not found for predicate "+name));
         }
         s = s.substring(1);
@@ -318,7 +318,7 @@ public class Parser {
 
             s = space(s);
 
-            if (s.length() == 0 || s.charAt(0) != ',') {
+            if (s.isEmpty() || s.charAt(0) != ',') {
                 break;
             } else {
                 s = s.substring(1);
@@ -326,7 +326,7 @@ public class Parser {
         }
 
         s = space(s);
-        if (0 == s.length() || s.charAt(0) != ')') {
+        if (s.isEmpty() || s.charAt(0) != ')') {
             return Either.left(new Error(s, "closing parens not found"));
         }
         String remaining = s.substring(1);
@@ -357,7 +357,7 @@ public class Parser {
 
             s = space(s);
 
-            if (s.length() == 0 || s.charAt(0) != ',') {
+            if (s.isEmpty() || s.charAt(0) != ',') {
                 break;
             } else {
                 s = s.substring(1);
@@ -378,14 +378,14 @@ public class Parser {
             return Either.right(new Tuple2<>(s, Scope.previous()));
         }
 
-        if (0 < s.length() && s.charAt(0) == '{') {
+        if (!s.isEmpty() && s.charAt(0) == '{') {
             String remaining = s.substring(1);
             Either<Error, Tuple2<String, String>> res = name(remaining);
             if (res.isLeft()) {
                 return Either.left(new Error(s, "unrecognized parameter"));
             }
             Tuple2<String, String> t = res.get();
-            if (0 < s.length() && s.charAt(0) == '}') {
+            if (!s.isEmpty() && s.charAt(0) == '}') {
                 return Either.right(new Tuple2<>(t._1, Scope.parameter(t._2)));
             } else {
                 return Either.left(new Error(s, "unrecognized parameter end"));
@@ -416,7 +416,7 @@ public class Parser {
         s = tn._2;
 
         s = space(s);
-        if (s.length() == 0 || s.charAt(0) != '(') {
+        if (s.isEmpty() || s.charAt(0) != '(') {
             return Either.left(new Error(s, "opening parens not found for fact "+name));
         }
         s = s.substring(1);
@@ -437,7 +437,7 @@ public class Parser {
 
             s = space(s);
 
-            if (s.length() == 0 || s.charAt(0) != ',') {
+            if (s.isEmpty() || s.charAt(0) != ',') {
                 break;
             } else {
                 s = s.substring(1);
@@ -445,7 +445,7 @@ public class Parser {
         }
 
         s = space(s);
-        if (0 == s.length() || s.charAt(0) != ')') {
+        if (s.isEmpty() || s.charAt(0) != ')') {
             return Either.left(new Error(s, "closing parens not found"));
         }
         String remaining = s.substring(1);
@@ -509,7 +509,7 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<String, Term>> factTerm(String s) {
-        if (s.length() > 0 && s.charAt(0) == '$') {
+        if (!s.isEmpty() && s.charAt(0) == '$') {
             return Either.left(new Error(s, "variables are not allowed in facts"));
         }
 
@@ -651,7 +651,7 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<String, Term.Set>> set(String s) {
-        if (s.length() == 0 || s.charAt(0) != '[') {
+        if (s.isEmpty() || s.charAt(0) != '[') {
             return Either.left(new Error(s, "not a set"));
         }
 
@@ -678,7 +678,7 @@ public class Parser {
 
             s = space(s);
 
-            if (s.length() == 0 || s.charAt(0) != ',') {
+            if (s.isEmpty() || s.charAt(0) != ',') {
                 break;
             } else {
                 s = s.substring(1);
@@ -686,7 +686,7 @@ public class Parser {
         }
 
         s = space(s);
-        if (0 == s.length() || s.charAt(0) != ']') {
+        if (s.isEmpty() || s.charAt(0) != ']') {
             return Either.left(new Error(s, "closing square bracket not found"));
         }
 
