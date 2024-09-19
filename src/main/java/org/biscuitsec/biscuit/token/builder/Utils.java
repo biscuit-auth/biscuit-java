@@ -33,7 +33,7 @@ public class Utils {
     }
 
     public static Check check(Rule rule) {
-        return new Check(One,rule);
+        return new Check(One, rule);
     }
 
     public static Term integer(long i) {
@@ -61,7 +61,7 @@ public class Utils {
     }
 
     public static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
-    
+
     public static String byteArrayToHexString(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
         for (int j = 0; j < bytes.length; j++) {
@@ -75,10 +75,10 @@ public class Utils {
     public static byte[] hexStringToByteArray(String hex) {
         hex = hex.toUpperCase();
         int l = hex.length();
-        byte[] data = new byte[l/2];
+        byte[] data = new byte[l / 2];
         for (int i = 0; i < l; i += 2) {
-            data[i/2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4)
-                    + Character.digit(hex.charAt(i+1), 16));
+            data[i / 2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4)
+                    + Character.digit(hex.charAt(i + 1), 16));
         }
         return data;
     }
