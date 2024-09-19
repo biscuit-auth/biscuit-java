@@ -254,14 +254,14 @@ public class SerializedBiscuit {
             b.writeTo(stream);
             byte[] block = stream.toByteArray();
             org.biscuitsec.biscuit.crypto.PublicKey next_key = next.publicKey();
-            ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-            algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
-            algo_buf.flip();
+            ByteBuffer algoBuf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
+            algoBuf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
+            algoBuf.flip();
 
             Signature sgr = KeyPair.generateSignature(root.publicKey().algorithm);
             sgr.initSign(root.privateKey);
             sgr.update(block);
-            sgr.update(algo_buf);
+            sgr.update(algoBuf);
             sgr.update(next_key.toBytes());
             byte[] signature = sgr.sign();
 
