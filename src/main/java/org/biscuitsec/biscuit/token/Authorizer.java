@@ -444,7 +444,7 @@ public class Authorizer {
             for (int j = 0; j < token.authority.checks.size(); j++) {
                 boolean successful = false;
 
-                org.biscuitsec.biscuit.token.builder.Check c = org.biscuitsec.biscuit.token.builder.Check.convert_from(token.authority.checks.get(j), token.symbols);
+                org.biscuitsec.biscuit.token.builder.Check c = org.biscuitsec.biscuit.token.builder.Check.convertFrom(token.authority.checks.get(j), token.symbols);
                 org.biscuitsec.biscuit.datalog.Check check = c.convert(symbols);
 
                 for (int k = 0; k < check.queries().size(); k++) {
@@ -527,7 +527,7 @@ public class Authorizer {
                 for (int j = 0; j < b.checks.size(); j++) {
                     boolean successful = false;
 
-                    org.biscuitsec.biscuit.token.builder.Check c = org.biscuitsec.biscuit.token.builder.Check.convert_from(b.checks.get(j), blockSymbols);
+                    org.biscuitsec.biscuit.token.builder.Check c = org.biscuitsec.biscuit.token.builder.Check.convertFrom(b.checks.get(j), blockSymbols);
                     org.biscuitsec.biscuit.datalog.Check check = c.convert(symbols);
 
                     for (int k = 0; k < check.queries().size(); k++) {
@@ -643,7 +643,7 @@ public class Authorizer {
 
         List<Check> authorityChecks = new ArrayList<>();
         for(org.biscuitsec.biscuit.datalog.Check check: this.token.authority.checks) {
-            authorityChecks.add(Check.convert_from(check, this.token.symbols));
+            authorityChecks.add(Check.convertFrom(check, this.token.symbols));
         }
         if(!authorityChecks.isEmpty()) {
             allChecks.add(new Tuple2<>((long) 0, authorityChecks));
@@ -656,11 +656,11 @@ public class Authorizer {
             if(block.externalKey.isDefined()) {
                 SymbolTable blockSymbols = new SymbolTable(block.symbols.symbols, block.publicKeys());
                 for(org.biscuitsec.biscuit.datalog.Check check: block.checks) {
-                    blockChecks.add(Check.convert_from(check, blockSymbols));
+                    blockChecks.add(Check.convertFrom(check, blockSymbols));
                 }
             } else {
                 for(org.biscuitsec.biscuit.datalog.Check check: block.checks) {
-                    blockChecks.add(Check.convert_from(check, token.symbols));
+                    blockChecks.add(Check.convertFrom(check, token.symbols));
                 }
             }
             if(!blockChecks.isEmpty()) {
