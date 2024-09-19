@@ -75,7 +75,7 @@ public class Predicate implements Cloneable {
     @Override
     public Predicate clone(){
         String name = this.name;
-        List<Term> terms = new ArrayList<Term>(this.terms.size());
+        List<Term> terms = new ArrayList<>(this.terms.size());
         terms.addAll(this.terms);
         return new Predicate(name, terms);
     }
