@@ -512,7 +512,7 @@ public class Parser {
         }
 
         Rule rule = new Rule(head, body._2, body._3, body._4);
-        Either<String, Rule> valid = rule.validate_variables();
+        Either<String, Rule> valid = rule.validateVariables();
         if (valid.isLeft()) {
             return Either.left(new Error(s, valid.getLeft()));
         }

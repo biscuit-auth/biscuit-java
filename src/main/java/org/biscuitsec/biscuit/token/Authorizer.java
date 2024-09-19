@@ -117,10 +117,10 @@ public class Authorizer {
                 world.addFact(new Origin(0), converted_fact);
             }
             for (org.biscuitsec.biscuit.datalog.Rule rule : token.authority.rules) {
-                org.biscuitsec.biscuit.token.builder.Rule _rule = org.biscuitsec.biscuit.token.builder.Rule.convert_from(rule, token.symbols);
+                org.biscuitsec.biscuit.token.builder.Rule _rule = org.biscuitsec.biscuit.token.builder.Rule.convertFrom(rule, token.symbols);
                 org.biscuitsec.biscuit.datalog.Rule converted_rule = _rule.convert(this.symbols);
 
-                Either<String, org.biscuitsec.biscuit.token.builder.Rule> res = _rule.validate_variables();
+                Either<String, org.biscuitsec.biscuit.token.builder.Rule> res = _rule.validateVariables();
                 if(res.isLeft()){
                     throw new Error.FailedLogic(new LogicError.InvalidBlockRule(0, token.symbols.printRule(converted_rule)));
                 }
@@ -154,10 +154,10 @@ public class Authorizer {
                 }
 
                 for (org.biscuitsec.biscuit.datalog.Rule rule : block.rules) {
-                    org.biscuitsec.biscuit.token.builder.Rule _rule = org.biscuitsec.biscuit.token.builder.Rule.convert_from(rule, blockSymbols);
+                    org.biscuitsec.biscuit.token.builder.Rule _rule = org.biscuitsec.biscuit.token.builder.Rule.convertFrom(rule, blockSymbols);
                     org.biscuitsec.biscuit.datalog.Rule converted_rule = _rule.convert(this.symbols);
 
-                    Either<String, org.biscuitsec.biscuit.token.builder.Rule> res = _rule.validate_variables();
+                    Either<String, org.biscuitsec.biscuit.token.builder.Rule> res = _rule.validateVariables();
                     if (res.isLeft()) {
                         throw new Error.FailedLogic(new LogicError.InvalidBlockRule(0, this.symbols.printRule(converted_rule)));
                     }

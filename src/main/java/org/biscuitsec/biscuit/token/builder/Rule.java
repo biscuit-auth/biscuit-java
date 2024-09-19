@@ -70,19 +70,19 @@ public class Rule implements Cloneable {
         }
     }
 
-    public void apply_variables() {
+    public void applyVariables() {
         this.variables.forEach(
-                _variables -> {
+                vars -> {
                     this.head.terms = this.head.terms.stream().flatMap(t -> {
                         if (t instanceof Term.Variable) {
-                            Option<Term> term = _variables.getOrDefault(((Term.Variable) t).value, Option.none());
+                            Option<Term> term = vars.getOrDefault(((Term.Variable) t).value, Option.none());
                             return term.map(_t -> Stream.of(_t)).getOrElse(Stream.of(t));
                         } else return Stream.of(t);
                     }).collect(Collectors.toList());
                     for (Predicate p : this.body) {
                         p.terms = p.terms.stream().flatMap(t -> {
                             if (t instanceof Term.Variable) {
-                                Option<Term> term = _variables.getOrDefault(((Term.Variable) t).value, Option.none());
+                                Option<Term> term = vars.getOrDefault(((Term.Variable) t).value, Option.none());
                                 return term.map(_t -> Stream.of(_t)).getOrElse(Stream.of(t));
                             } else return Stream.of(t);
                         }).collect(Collectors.toList());
@@ -92,7 +92,7 @@ public class Rule implements Cloneable {
                                 if (e instanceof Expression.Value) {
                                     Expression.Value ev = (Expression.Value) e;
                                     if (ev.value instanceof Term.Variable) {
-                                        Option<Term> t = _variables.getOrDefault(((Term.Variable) ev.value).value, Option.none());
+                                        Option<Term> t = vars.getOrDefault(((Term.Variable) ev.value).value, Option.none());
                                         if (t.isDefined()) {
                                             return Stream.of(new Expression.Value(t.get()));
                                         }
@@ -103,37 +103,37 @@ public class Rule implements Cloneable {
                 });
     }
 
-    public Either<String, Rule> validate_variables() {
-        Set<String> free_variables = this.head.terms.stream().flatMap(t -> {
+    public Either<String, Rule> validateVariables() {
+        Set<String> freeVariables = this.head.terms.stream().flatMap(t -> {
             if (t instanceof Term.Variable) {
                 return Stream.of(((Term.Variable) t).value);
             } else return Stream.empty();
         }).collect(Collectors.toSet());
 
         for(Expression e: this.expressions) {
-            e.gatherVariables(free_variables);
+            e.gatherVariables(freeVariables);
         }
-        if (free_variables.isEmpty()) {
+        if (freeVariables.isEmpty()) {
             return Either.right(this);
         }
 
         for (Predicate p : this.body) {
             for (Term term : p.terms) {
                 if (term instanceof Term.Variable) {
-                    free_variables.remove(((Term.Variable) term).value);
-                    if (free_variables.isEmpty()) {
+                    freeVariables.remove(((Term.Variable) term).value);
+                    if (freeVariables.isEmpty()) {
                         return Either.right(this);
                     }
                 }
             }
         }
 
-        return Either.left("rule head or expressions contains variables that are not used in predicates of the rule's body: " + free_variables.toString());
+        return Either.left("rule head or expressions contains variables that are not used in predicates of the rule's body: " + freeVariables);
     }
 
     public org.biscuitsec.biscuit.datalog.Rule convert(SymbolTable symbols) {
         Rule r = this.clone();
-        r.apply_variables();
+        r.applyVariables();
         org.biscuitsec.biscuit.datalog.Predicate head = r.head.convert(symbols);
         ArrayList<org.biscuitsec.biscuit.datalog.Predicate> body = new ArrayList<>();
         ArrayList<org.biscuitsec.biscuit.datalog.expressions.Expression> expressions = new ArrayList<>();
@@ -155,7 +155,7 @@ public class Rule implements Cloneable {
         return new org.biscuitsec.biscuit.datalog.Rule(head, body, expressions, scopes);
     }
 
-    public static Rule convert_from(org.biscuitsec.biscuit.datalog.Rule r, SymbolTable symbols) {
+    public static Rule convertFrom(org.biscuitsec.biscuit.datalog.Rule r, SymbolTable symbols) {
         Predicate head = Predicate.convertFrom(r.head(), symbols);
 
         ArrayList<Predicate> body = new ArrayList<>();
@@ -202,7 +202,7 @@ public class Rule implements Cloneable {
 
     public String bodyToString() {
         Rule r = this.clone();
-        r.apply_variables();
+        r.applyVariables();
         String res = "";
 
         if(!r.body.isEmpty()) {
@@ -231,7 +231,7 @@ public class Rule implements Cloneable {
     @Override
     public String toString() {
         Rule r = this.clone();
-        r.apply_variables();
+        r.applyVariables();
         return r.head.toString() + " <- " + bodyToString();
     }
 }

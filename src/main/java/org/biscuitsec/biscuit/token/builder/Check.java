@@ -40,7 +40,7 @@ public class Check {
         ArrayList<Rule> queries = new ArrayList<>();
 
         for (org.biscuitsec.biscuit.datalog.Rule q : r.queries()) {
-            queries.add(Rule.convert_from(q, symbols));
+            queries.add(Rule.convertFrom(q, symbols));
         }
 
         return new Check(r.kind(), queries);
