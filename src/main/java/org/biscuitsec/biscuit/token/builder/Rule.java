@@ -1,10 +1,10 @@
 package org.biscuitsec.biscuit.token.builder;
 
+import io.vavr.control.Either;
+import io.vavr.control.Option;
 import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.error.FailedCheck;
-import io.vavr.control.Either;
-import io.vavr.control.Option;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -111,7 +111,7 @@ public class Rule implements Cloneable {
             } else return Stream.empty();
         }).collect(Collectors.toSet());
 
-        for(Expression e: this.expressions) {
+        for (Expression e : this.expressions) {
             e.gatherVariables(freeVariables);
         }
         if (freeVariables.isEmpty()) {
@@ -206,21 +206,21 @@ public class Rule implements Cloneable {
         r.applyVariables();
         String res = "";
 
-        if(!r.body.isEmpty()) {
+        if (!r.body.isEmpty()) {
             final List<String> b = r.body.stream().map(Predicate::toString).collect(toList());
-             res += String.join(", ", b);
+            res += String.join(", ", b);
         }
 
         if (!r.expressions.isEmpty()) {
-            if(!r.body.isEmpty()) {
+            if (!r.body.isEmpty()) {
                 res += ", ";
             }
             final List<String> e = r.expressions.stream().map(Object::toString).collect(toList());
             res += String.join(", ", e);
         }
 
-        if(!r.scopes.isEmpty()) {
-            if(!r.body.isEmpty() || !r.expressions.isEmpty()) {
+        if (!r.scopes.isEmpty()) {
+            if (!r.body.isEmpty() || !r.expressions.isEmpty()) {
                 res += " ";
             }
             final List<String> e = r.scopes.stream().map(Scope::toString).collect(toList());
@@ -229,6 +229,7 @@ public class Rule implements Cloneable {
 
         return res;
     }
+
     @Override
     public String toString() {
         Rule r = this.clone();
