@@ -54,6 +54,7 @@ public class Fact implements Cloneable{
         }
     }
 
+    @SuppressWarnings("unused")
     public Fact set(String name, Term term) throws Error.Language {
         if (this.variables.isEmpty()) {
             throw new Error.Language(new FailedCheck.LanguageError.UnknownVariable(name));
@@ -96,6 +97,7 @@ public class Fact implements Cloneable{
         return  f.predicate.toString();
     }
 
+    @SuppressWarnings("unused")
     public String name() {
         return this.predicate.name;
     }
