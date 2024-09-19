@@ -4,6 +4,7 @@ import org.biscuitsec.biscuit.datalog.SymbolTable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.stream.Collectors.toList;
 
@@ -58,8 +59,8 @@ public class Predicate implements Cloneable {
 
         Predicate predicate = (Predicate) o;
 
-        if (name != null ? !name.equals(predicate.name) : predicate.name != null) return false;
-        return terms != null ? terms.equals(predicate.terms) : predicate.terms == null;
+        if (!Objects.equals(name, predicate.name)) return false;
+        return Objects.equals(terms, predicate.terms);
     }
 
     @Override
