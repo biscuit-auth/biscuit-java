@@ -32,7 +32,7 @@ public class Predicate implements Cloneable {
         long name = symbols.insert(this.name);
         ArrayList<org.biscuitsec.biscuit.datalog.Term> terms = new ArrayList<>();
 
-        for(Term a: this.terms) {
+        for (Term a : this.terms) {
             terms.add(a.convert(symbols));
         }
 
@@ -42,7 +42,7 @@ public class Predicate implements Cloneable {
     public static Predicate convertFrom(org.biscuitsec.biscuit.datalog.Predicate p, SymbolTable symbols) {
         String name = symbols.printSymbol((int) p.name());
         List<Term> terms = new ArrayList<>();
-        for(org.biscuitsec.biscuit.datalog.Term t: p.terms()) {
+        for (org.biscuitsec.biscuit.datalog.Term t : p.terms()) {
             terms.add(t.toTerm(symbols));
         }
 
@@ -52,7 +52,7 @@ public class Predicate implements Cloneable {
     @Override
     public String toString() {
         final List<String> i = terms.stream().map(Object::toString).collect(toList());
-        return name+"("+ join(", ", i)+")";
+        return name + "(" + join(", ", i) + ")";
     }
 
     @Override
@@ -75,7 +75,7 @@ public class Predicate implements Cloneable {
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
-    public Predicate clone(){
+    public Predicate clone() {
         String name = this.name;
         List<Term> terms = new ArrayList<>(this.terms.size());
         terms.addAll(this.terms);
