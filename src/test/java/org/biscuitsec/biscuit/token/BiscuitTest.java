@@ -163,11 +163,11 @@ public class BiscuitTest {
 
         org.biscuitsec.biscuit.token.builder.Biscuit builder = Biscuit.builder(rng, root);
 
-        builder.add_right("/folder1/file1", "read");
-        builder.add_right("/folder1/file1", "write");
-        builder.add_right("/folder1/file2", "read");
-        builder.add_right("/folder1/file2", "write");
-        builder.add_right("/folder2/file3", "read");
+        builder.addRight("/folder1/file1", "read");
+        builder.addRight("/folder1/file1", "write");
+        builder.addRight("/folder1/file2", "read");
+        builder.addRight("/folder1/file2", "write");
+        builder.addRight("/folder2/file3", "read");
 
         out.println(builder.build());
         Biscuit b = builder.build();
@@ -258,11 +258,11 @@ public class BiscuitTest {
 
         org.biscuitsec.biscuit.token.builder.Biscuit builder = Biscuit.builder(rng, root);
 
-        builder.add_right("/folder1/file1", "read");
-        builder.add_right("/folder1/file1", "write");
-        builder.add_right("/folder1/file2", "read");
-        builder.add_right("/folder1/file2", "write");
-        builder.add_right("/folder2/file3", "read");
+        builder.addRight("/folder1/file1", "read");
+        builder.addRight("/folder1/file1", "write");
+        builder.addRight("/folder1/file2", "read");
+        builder.addRight("/folder1/file2", "write");
+        builder.addRight("/folder2/file3", "read");
 
         out.println(builder.build());
         Biscuit b = builder.build();
@@ -325,11 +325,11 @@ public class BiscuitTest {
 
         org.biscuitsec.biscuit.token.builder.Biscuit builder = Biscuit.builder(rng, root);
 
-        builder.add_right("/folder1/file1", "read");
-        builder.add_right("/folder1/file1", "write");
-        builder.add_right("/folder1/file2", "read");
-        builder.add_right("/folder1/file2", "write");
-        builder.add_right("/folder2/file3", "read");
+        builder.addRight("/folder1/file1", "read");
+        builder.addRight("/folder1/file1", "write");
+        builder.addRight("/folder1/file2", "read");
+        builder.addRight("/folder1/file2", "write");
+        builder.addRight("/folder2/file3", "read");
 
         out.println(builder.build());
         Biscuit b = builder.build();
@@ -490,9 +490,9 @@ public class BiscuitTest {
         KeyPair root = new KeyPair(rng);
 
         org.biscuitsec.biscuit.token.builder.Biscuit o = new org.biscuitsec.biscuit.token.builder.Biscuit(rng, root);
-        o.add_authority_fact("namespace:right(\"file1\",\"read\")");
-        o.add_authority_fact("namespace:right(\"file1\",\"write\")");
-        o.add_authority_fact("namespace:right(\"file2\",\"read\")");
+        o.addAuthorityFact("namespace:right(\"file1\",\"read\")");
+        o.addAuthorityFact("namespace:right(\"file1\",\"write\")");
+        o.addAuthorityFact("namespace:right(\"file2\",\"read\")");
         Biscuit b = o.build();
 
         out.println(b.print());
@@ -658,7 +658,7 @@ public class BiscuitTest {
         KeyPair root = new KeyPair(rng);
 
         Biscuit biscuit = Biscuit.builder(root)
-                .add_authority_check("check all operation($op), allowed_operations($allowed), $allowed.contains($op)")
+                .addAuthorityCheck("check all operation($op), allowed_operations($allowed), $allowed.contains($op)")
                 .build();
         Authorizer authorizer = biscuit.verify(root.publicKey()).authorizer();
         authorizer.add_fact("operation(\"read\")");

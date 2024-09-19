@@ -18,8 +18,8 @@ public class ExampleTest {
 
     public Biscuit createToken(KeyPair root) throws Error {
         return Biscuit.builder(root)
-                .add_authority_fact("user(\"1234\")")
-                .add_authority_check("check if operation(\"read\")")
+                .addAuthorityFact("user(\"1234\")")
+                .addAuthorityCheck("check if operation(\"read\")")
                 .build();
     }
 

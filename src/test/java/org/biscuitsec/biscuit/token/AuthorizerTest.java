@@ -46,10 +46,10 @@ public class AuthorizerTest {
         KeyPair keypair = new KeyPair();
 
         Biscuit token = Biscuit.builder(keypair)
-                .add_authority_fact("email(\"bob@example.com\")")
-                .add_authority_fact("id(123)")
-                .add_authority_fact("enabled(true)")
-                .add_authority_fact("perms([1,2,3])")
+                .addAuthorityFact("email(\"bob@example.com\")")
+                .addAuthorityFact("id(123)")
+                .addAuthorityFact("enabled(true)")
+                .addAuthorityFact("perms([1,2,3])")
                 .build();
 
         Authorizer authorizer = Biscuit.from_b64url(token.serialize_b64url(), keypair.publicKey())
