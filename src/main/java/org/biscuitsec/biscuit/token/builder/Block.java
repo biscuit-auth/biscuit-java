@@ -91,6 +91,7 @@ public class Block {
         return this;
     }
 
+    @SuppressWarnings("unused")
     public Block setContext(String context) {
         this.context = context;
         return this;
@@ -100,6 +101,7 @@ public class Block {
         return build(default_symbol_table(), Option.none());
     }
 
+    @SuppressWarnings("unused")
     public org.biscuitsec.biscuit.token.Block build(final Option<PublicKey> externalKey) {
         return build(default_symbol_table(), externalKey);
     }
@@ -199,6 +201,7 @@ public class Block {
         return this.addCheck(new org.biscuitsec.biscuit.token.builder.Check(One, queries));
     }
 
+    @SuppressWarnings("unused")
     public Block resourceSuffix(String suffix) {
         ArrayList<org.biscuitsec.biscuit.token.builder.Rule> queries = new ArrayList<>();
 
@@ -212,6 +215,7 @@ public class Block {
         return this.addCheck(new org.biscuitsec.biscuit.token.builder.Check(One, queries));
     }
 
+    @SuppressWarnings("unused")
     public Block expirationDate(Date d) {
         ArrayList<org.biscuitsec.biscuit.token.builder.Rule> queries = new ArrayList<>();
 
