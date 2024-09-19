@@ -70,6 +70,7 @@ public class Predicate implements Cloneable {
         return result;
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public Predicate clone(){
         String name = this.name;
