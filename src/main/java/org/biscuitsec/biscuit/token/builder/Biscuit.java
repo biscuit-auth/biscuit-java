@@ -129,8 +129,8 @@ public class Biscuit {
         return this;
     }
 
-    public void setRootKeyId(Integer i) {
-        this.rootKeyId = Option.some(i);
+    public void setRootKeyId(Integer rootKeyId) {
+        this.rootKeyId = Option.some(rootKeyId);
     }
 
     public org.biscuitsec.biscuit.token.Biscuit build() throws Error {
