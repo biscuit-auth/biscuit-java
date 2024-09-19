@@ -35,8 +35,8 @@ public abstract class Term {
         }
 
         @Override
-        public String toString() {
-            return "\"" + value + "\"";
+        public int hashCode() {
+            return value.hashCode();
         }
 
         @Override
@@ -48,8 +48,8 @@ public abstract class Term {
         }
 
         @Override
-        public int hashCode() {
-            return value.hashCode();
+        public String toString() {
+            return "\"" + value + "\"";
         }
     }
 
@@ -71,8 +71,8 @@ public abstract class Term {
         }
 
         @Override
-        public String toString() {
-            return "$" + value;
+        public int hashCode() {
+            return value.hashCode();
         }
 
         @Override
@@ -86,8 +86,8 @@ public abstract class Term {
         }
 
         @Override
-        public int hashCode() {
-            return value.hashCode();
+        public String toString() {
+            return "$" + value;
         }
     }
 
@@ -98,18 +98,18 @@ public abstract class Term {
             this.value = value;
         }
 
-        public long getValue() {
-            return value;
-        }
-
         @Override
         public org.biscuitsec.biscuit.datalog.Term convert(SymbolTable symbols) {
             return new org.biscuitsec.biscuit.datalog.Term.Integer(this.value);
         }
 
+        public long getValue() {
+            return value;
+        }
+
         @Override
-        public String toString() {
-            return String.valueOf(value);
+        public int hashCode() {
+            return Long.hashCode(value);
         }
 
         @Override
@@ -123,8 +123,8 @@ public abstract class Term {
         }
 
         @Override
-        public int hashCode() {
-            return Long.hashCode(value);
+        public String toString() {
+            return String.valueOf(value);
         }
     }
 
@@ -145,8 +145,8 @@ public abstract class Term {
         }
 
         @Override
-        public String toString() {
-            return "hex:" + Utils.byteArrayToHexString(value).toLowerCase();
+        public int hashCode() {
+            return Arrays.hashCode(value);
         }
 
         @Override
@@ -160,8 +160,8 @@ public abstract class Term {
         }
 
         @Override
-        public int hashCode() {
-            return Arrays.hashCode(value);
+        public String toString() {
+            return "hex:" + Utils.byteArrayToHexString(value).toLowerCase();
         }
     }
 
@@ -183,9 +183,8 @@ public abstract class Term {
         }
 
         @Override
-        public String toString() {
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_INSTANT;
-            return Instant.ofEpochSecond(value).atOffset(ZoneOffset.ofTotalSeconds(0)).format(dateTimeFormatter);
+        public int hashCode() {
+            return Long.hashCode(value);
         }
 
         @Override
@@ -199,8 +198,9 @@ public abstract class Term {
         }
 
         @Override
-        public int hashCode() {
-            return Long.hashCode(value);
+        public String toString() {
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_INSTANT;
+            return Instant.ofEpochSecond(value).atOffset(ZoneOffset.ofTotalSeconds(0)).format(dateTimeFormatter);
         }
     }
 
@@ -221,12 +221,8 @@ public abstract class Term {
         }
 
         @Override
-        public String toString() {
-            if (value) {
-                return "true";
-            } else {
-                return "false";
-            }
+        public int hashCode() {
+            return Boolean.hashCode(value);
         }
 
         @Override
@@ -240,8 +236,12 @@ public abstract class Term {
         }
 
         @Override
-        public int hashCode() {
-            return Boolean.hashCode(value);
+        public String toString() {
+            if (value) {
+                return "true";
+            } else {
+                return "false";
+            }
         }
     }
 
@@ -268,8 +268,8 @@ public abstract class Term {
         }
 
         @Override
-        public String toString() {
-            return value.toString();
+        public int hashCode() {
+            return value != null ? value.hashCode() : 0;
         }
 
         @Override
@@ -283,8 +283,8 @@ public abstract class Term {
         }
 
         @Override
-        public int hashCode() {
-            return value != null ? value.hashCode() : 0;
+        public String toString() {
+            return value.toString();
         }
     }
 }
