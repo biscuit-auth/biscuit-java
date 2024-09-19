@@ -14,11 +14,11 @@ public abstract class Expression {
 
     public static Expression convertFrom(org.biscuitsec.biscuit.datalog.expressions.Expression e, SymbolTable symbols) {
         Deque<Expression> stack = new ArrayDeque<>(16);
-        for(org.biscuitsec.biscuit.datalog.expressions.Op op: e.getOps()){
-            if(op instanceof org.biscuitsec.biscuit.datalog.expressions.Op.Value) {
+        for (org.biscuitsec.biscuit.datalog.expressions.Op op : e.getOps()) {
+            if (op instanceof org.biscuitsec.biscuit.datalog.expressions.Op.Value) {
                 org.biscuitsec.biscuit.datalog.expressions.Op.Value v = (org.biscuitsec.biscuit.datalog.expressions.Op.Value) op;
                 stack.push(new Expression.Value(Term.convert_from(v.getValue(), symbols)));
-            } else if(op instanceof org.biscuitsec.biscuit.datalog.expressions.Op.Unary) {
+            } else if (op instanceof org.biscuitsec.biscuit.datalog.expressions.Op.Unary) {
                 org.biscuitsec.biscuit.datalog.expressions.Op.Unary v = (org.biscuitsec.biscuit.datalog.expressions.Op.Unary) op;
                 Expression e1 = stack.pop();
 
@@ -114,6 +114,7 @@ public abstract class Expression {
     }
 
     public abstract void toOpcodes(SymbolTable symbols, List<org.biscuitsec.biscuit.datalog.expressions.Op> ops);
+
     public abstract void gatherVariables(Set<String> variables);
 
     // TODO Use all-caps naming convention for enums.
@@ -156,8 +157,8 @@ public abstract class Expression {
             ops.add(new org.biscuitsec.biscuit.datalog.expressions.Op.Value(this.value.convert(symbols)));
         }
 
-        public  void gatherVariables(Set<String> variables) {
-            if(this.value instanceof Term.Variable) {
+        public void gatherVariables(Set<String> variables) {
+            if (this.value instanceof Term.Variable) {
                 variables.add(((Term.Variable) this.value).value);
             }
         }
@@ -208,7 +209,7 @@ public abstract class Expression {
             }
         }
 
-        public  void gatherVariables(Set<String> variables) {
+        public void gatherVariables(Set<String> variables) {
             this.arg1.gatherVariables(variables);
         }
 
@@ -232,13 +233,13 @@ public abstract class Expression {
 
         @Override
         public String toString() {
-            switch(op) {
+            switch (op) {
                 case Negate:
-                    return "!"+arg1;
+                    return "!" + arg1;
                 case Parens:
-                    return "("+arg1+")";
+                    return "(" + arg1 + ")";
                 case Length:
-                    return arg1.toString()+".length()";
+                    return arg1.toString() + ".length()";
             }
             return "";
         }
@@ -326,7 +327,7 @@ public abstract class Expression {
             }
         }
 
-        public  void gatherVariables(Set<String> variables) {
+        public void gatherVariables(Set<String> variables) {
             this.arg1.gatherVariables(variables);
             this.arg2.gatherVariables(variables);
         }
@@ -353,7 +354,7 @@ public abstract class Expression {
 
         @Override
         public String toString() {
-            switch(op) {
+            switch (op) {
                 case LessThan:
                     return arg1.toString() + " < " + arg2.toString();
                 case GreaterThan:
@@ -367,13 +368,13 @@ public abstract class Expression {
                 case NotEqual:
                     return arg1.toString() + " != " + arg2.toString();
                 case Contains:
-                    return arg1.toString() + ".contains(" + arg2.toString()+")";
+                    return arg1.toString() + ".contains(" + arg2.toString() + ")";
                 case Prefix:
-                    return arg1.toString() + ".starts_with(" + arg2.toString()+")";
+                    return arg1.toString() + ".starts_with(" + arg2.toString() + ")";
                 case Suffix:
-                    return arg1.toString() + ".ends_with(" + arg2.toString()+")";
+                    return arg1.toString() + ".ends_with(" + arg2.toString() + ")";
                 case Regex:
-                    return arg1.toString() + ".matches(" + arg2.toString()+")";
+                    return arg1.toString() + ".matches(" + arg2.toString() + ")";
                 case Add:
                     return arg1.toString() + " + " + arg2.toString();
                 case Sub:
@@ -387,9 +388,9 @@ public abstract class Expression {
                 case Or:
                     return arg1.toString() + " || " + arg2.toString();
                 case Intersection:
-                    return arg1.toString() + ".intersection(" + arg2.toString()+")";
+                    return arg1.toString() + ".intersection(" + arg2.toString() + ")";
                 case Union:
-                    return arg1.toString() + ".union(" + arg2.toString()+")";
+                    return arg1.toString() + ".union(" + arg2.toString() + ")";
                 case BitwiseAnd:
                     return arg1.toString() + " & " + arg2.toString();
                 case BitwiseOr:
