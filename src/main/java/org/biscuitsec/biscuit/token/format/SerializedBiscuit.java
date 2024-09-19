@@ -238,6 +238,7 @@ public class SerializedBiscuit {
         }
     }
 
+    @SuppressWarnings("unused")
     static public Either<Error.FormatError, SerializedBiscuit> make(final org.biscuitsec.biscuit.crypto.KeyPair root,
                                                                     final Block authority,
                                                                     final org.biscuitsec.biscuit.crypto.KeyPair next) {
@@ -483,6 +484,7 @@ public class SerializedBiscuit {
         return new Tuple2<>(authority, blocks);
     }
 
+    @SuppressWarnings("unused")
     public Either<Error, Void> seal() throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {
         if (this.proof.secretKey.isEmpty()) {
             return Left(new Error.Sealed());
@@ -499,7 +501,6 @@ public class SerializedBiscuit {
         ByteBuffer algoBuf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
         algoBuf.putInt(Integer.valueOf(block.key.algorithm.getNumber()));
         algoBuf.flip();
-
 
         sgr.initSign(this.proof.secretKey.get().privateKey);
         sgr.update(block.block);
