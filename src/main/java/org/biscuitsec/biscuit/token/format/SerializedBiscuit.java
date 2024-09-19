@@ -23,6 +23,7 @@ import java.util.List;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
+import static org.biscuitsec.biscuit.crypto.KeyPair.ed25519;
 
 /**
  * Intermediate representation of a token before full serialization
@@ -69,7 +70,7 @@ public class SerializedBiscuit {
             algo_buf.putInt(nextKey.algorithm.getNumber());
             algo_buf.flip();
 
-            Signature sgr = new EdDSAEngine(MessageDigest.getInstance(org.biscuitsec.biscuit.crypto.KeyPair.ed25519.getHashAlgorithm()));
+            Signature sgr = new EdDSAEngine(MessageDigest.getInstance(ed25519.getHashAlgorithm()));
             sgr.initSign(this.proof.secretKey.get().privateKey);
             sgr.update(block);
             if (externalSignature.isDefined()) {
@@ -245,7 +246,7 @@ public class SerializedBiscuit {
             block = this.blocks.get(this.blocks.size() - 1);
         }
 
-        Signature sgr = new EdDSAEngine(MessageDigest.getInstance(KeyPair.ed25519.getHashAlgorithm()));
+        Signature sgr = new EdDSAEngine(MessageDigest.getInstance(ed25519.getHashAlgorithm()));
         ByteBuffer algoBuf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
         algoBuf.putInt(block.key.algorithm.getNumber());
         algoBuf.flip();
@@ -391,7 +392,7 @@ public class SerializedBiscuit {
             algoBuf.putInt(nextKey.algorithm.getNumber());
             algoBuf.flip();
 
-            Signature sgr = new EdDSAEngine(MessageDigest.getInstance(org.biscuitsec.biscuit.crypto.KeyPair.ed25519.getHashAlgorithm()));
+            Signature sgr = new EdDSAEngine(MessageDigest.getInstance(ed25519.getHashAlgorithm()));
 
             sgr.initVerify(currentKey.key);
             sgr.update(block);
@@ -456,7 +457,7 @@ public class SerializedBiscuit {
             algoBuf2.putInt(publicKey.algorithm.getNumber());
             algoBuf2.flip();
 
-            Signature sgr2 = new EdDSAEngine(MessageDigest.getInstance(KeyPair.ed25519.getHashAlgorithm()));
+            Signature sgr2 = new EdDSAEngine(MessageDigest.getInstance(ed25519.getHashAlgorithm()));
             sgr2.initVerify(signedBlock.externalSignature.get().key.key);
             sgr2.update(block);
             sgr2.update(algoBuf2);
