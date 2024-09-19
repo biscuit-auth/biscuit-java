@@ -18,18 +18,18 @@ import static org.biscuitsec.biscuit.token.builder.Utils.*;
 import java.util.*;
 
 public class Block {
+    final List<Fact> facts;
+    final List<Rule> rules;
+    final List<Check> checks;
+    final List<Scope> scopes;
     String context;
-    List<Fact> facts;
-    List<Rule> rules;
-    List<Check> checks;
-    List<Scope> scopes;
 
     public Block() {
-        this.context = "";
         this.facts = new ArrayList<>();
         this.rules = new ArrayList<>();
         this.checks = new ArrayList<>();
         this.scopes = new ArrayList<>();
+        this.context = "";
     }
 
     public Block addFact(org.biscuitsec.biscuit.token.builder.Fact f) {
