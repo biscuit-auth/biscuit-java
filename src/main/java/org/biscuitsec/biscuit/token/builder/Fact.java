@@ -38,7 +38,7 @@ public class Fact implements Cloneable{
 
     public void validate() throws Error.Language {
         if (!this.variables.isEmpty()) {
-            List<String> invalid_variables = variables.get().entrySet().stream().flatMap(
+            List<String> invalidVariables = variables.get().entrySet().stream().flatMap(
                     e -> {
                         if (e.getValue().isEmpty()) {
                             return Stream.of(e.getKey());
@@ -46,8 +46,8 @@ public class Fact implements Cloneable{
                             return Stream.empty();
                         }
                     }).collect(Collectors.toList());
-            if (!invalid_variables.isEmpty()) {
-                throw new Error.Language(new FailedCheck.LanguageError.Builder(invalid_variables));
+            if (!invalidVariables.isEmpty()) {
+                throw new Error.Language(new FailedCheck.LanguageError.Builder(invalidVariables));
             }
         }
     }
@@ -56,22 +56,22 @@ public class Fact implements Cloneable{
         if (this.variables.isEmpty()) {
             throw new Error.Language(new FailedCheck.LanguageError.UnknownVariable(name));
         }
-        Map<String, Option<Term>> _variables = this.variables.get();
-        Option<Term> r = _variables.get(name);
+        Map<String, Option<Term>> vars = this.variables.get();
+        Option<Term> r = vars.get(name);
         if (r != null) {
-            _variables.put(name, Option.some(term));
+            vars.put(name, Option.some(term));
         } else {
             throw new Error.Language(new FailedCheck.LanguageError.UnknownVariable(name));
         }
         return this;
     }
 
-    public Fact apply_variables() {
+    public Fact applyVariables() {
         this.variables.forEach(
-                _variables -> {
+                vars -> {
                     this.predicate.terms = this.predicate.terms.stream().flatMap(t -> {
                         if(t instanceof Term.Variable){
-                            Option<Term> term = _variables.getOrDefault(((Term.Variable) t).value, Option.none());
+                            Option<Term> term = vars.getOrDefault(((Term.Variable) t).value, Option.none());
                             return term.map(_t -> Stream.of(_t)).getOrElse(Stream.empty());
                         } else return Stream.of(t);
                     }).collect(Collectors.toList());
@@ -81,7 +81,7 @@ public class Fact implements Cloneable{
 
     public org.biscuitsec.biscuit.datalog.Fact convert(SymbolTable symbols) {
         Fact f = this.clone();
-        f.apply_variables();
+        f.applyVariables();
         return new org.biscuitsec.biscuit.datalog.Fact(f.predicate.convert(symbols));
     }
 
@@ -92,7 +92,7 @@ public class Fact implements Cloneable{
     @Override
     public String toString() {
         Fact f = this.clone();
-        f.apply_variables();
+        f.applyVariables();
         return  f.predicate.toString();
     }
 
@@ -122,12 +122,12 @@ public class Fact implements Cloneable{
     @Override
     public Fact clone(){
         Predicate p = this.predicate.clone();
-        Option<Map<String, Option<Term>>> variables = this.variables.map(_v ->
+        Option<Map<String, Option<Term>>> vars = this.variables.map(_v ->
         {
             Map<String, Option<Term>> m = new HashMap<>();
             m.putAll(_v);
             return m;
         });
-        return new Fact(p, variables);
+        return new Fact(p, vars);
     }
 }
