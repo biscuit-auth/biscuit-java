@@ -15,7 +15,7 @@ import java.util.*;
 import java.util.function.Function;
 
 public class Parser {
-    
+
     public static Either<Error, Tuple2<String, Term.Bool>> bool(String s) {
         boolean b;
         if (s.startsWith("true")) {
@@ -560,7 +560,6 @@ public class Parser {
             return Either.right(new Tuple4<>(t._1, predicates, expressions, t._2));
 
         }
-
     }
 
     public static Either<Error, Tuple2<String, Scope>> scope(String s) {
