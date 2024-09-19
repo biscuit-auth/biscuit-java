@@ -1,7 +1,7 @@
 package org.biscuitsec.biscuit.token.format;
 
-import org.biscuitsec.biscuit.crypto.PublicKey;
 import io.vavr.control.Option;
+import org.biscuitsec.biscuit.crypto.PublicKey;
 
 public class SignedBlock {
     public final byte[] block;
