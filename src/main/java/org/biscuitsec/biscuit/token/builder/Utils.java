@@ -11,7 +11,7 @@ import static org.biscuitsec.biscuit.datalog.Check.Kind.One;
 
 public class Utils {
 
-    public static Fact fact(String name, List<Term> ids) throws Error.Language {
+    public static Fact fact(String name, List<Term> ids) {
         return new Fact(name, ids);
     }
 
