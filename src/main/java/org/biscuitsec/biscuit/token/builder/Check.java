@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static java.lang.String.join;
 import static java.util.stream.Collectors.toList;
 import static org.biscuitsec.biscuit.datalog.Check.Kind.One;
 
@@ -65,9 +66,9 @@ public class Check {
         final List<String> qs = queries.stream().map(Rule::bodyToString).collect(toList());
 
         if (kind == One) {
-            return "check if " + String.join(" or ", qs);
+            return "check if " + join(" or ", qs);
         } else {
-            return "check all " + String.join(" or ", qs);
+            return "check all " + join(" or ", qs);
         }
     }
 }
