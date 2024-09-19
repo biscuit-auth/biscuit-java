@@ -10,8 +10,8 @@ import static java.util.stream.Collectors.toList;
 import static org.biscuitsec.biscuit.datalog.Check.Kind.One;
 
 public class Check {
-    private final org.biscuitsec.biscuit.datalog.Check.Kind kind;
     final List<Rule> queries;
+    private final org.biscuitsec.biscuit.datalog.Check.Kind kind;
 
     public Check(org.biscuitsec.biscuit.datalog.Check.Kind kind, List<Rule> queries) {
         this.kind = kind;
@@ -46,14 +46,8 @@ public class Check {
     }
 
     @Override
-    public String toString() {
-        final List<String> qs = queries.stream().map(Rule::bodyToString).collect(toList());
-
-        if (kind == One) {
-            return "check if " + String.join(" or ", qs);
-        } else {
-            return "check all " + String.join(" or ", qs);
-        }
+    public int hashCode() {
+        return queries != null ? queries.hashCode() : 0;
     }
 
     @Override
@@ -67,7 +61,13 @@ public class Check {
     }
 
     @Override
-    public int hashCode() {
-        return queries != null ? queries.hashCode() : 0;
+    public String toString() {
+        final List<String> qs = queries.stream().map(Rule::bodyToString).collect(toList());
+
+        if (kind == One) {
+            return "check if " + String.join(" or ", qs);
+        } else {
+            return "check all " + String.join(" or ", qs);
+        }
     }
 }
