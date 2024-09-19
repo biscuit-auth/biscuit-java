@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
 import static org.biscuitsec.biscuit.datalog.Check.Kind.One;
 
 public class Check {
@@ -46,7 +47,7 @@ public class Check {
 
     @Override
     public String toString() {
-        final List<String> qs = queries.stream().map(Rule::bodyToString).collect(Collectors.toList());
+        final List<String> qs = queries.stream().map(Rule::bodyToString).collect(toList());
 
         if(kind == One) {
             return "check if " + String.join(" or ", qs);
