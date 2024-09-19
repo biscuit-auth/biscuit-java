@@ -2,9 +2,7 @@ package org.biscuitsec.biscuit.token.builder;
 
 import org.biscuitsec.biscuit.datalog.SymbolTable;
 
-import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -16,7 +14,7 @@ public abstract class Term {
 
     public abstract org.biscuitsec.biscuit.datalog.Term convert(SymbolTable symbols);
 
-    static public Term convert_from(org.biscuitsec.biscuit.datalog.Term id, SymbolTable symbols) {
+    static public Term convertFrom(org.biscuitsec.biscuit.datalog.Term id, SymbolTable symbols) {
         return id.toTerm(symbols);
     }
 
