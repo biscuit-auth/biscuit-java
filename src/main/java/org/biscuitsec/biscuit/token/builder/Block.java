@@ -167,10 +167,10 @@ public class Block {
     @Override
     public int hashCode() {
         int result = context != null ? context.hashCode() : 0;
-        result = 31 * result + (facts != null ? facts.hashCode() : 0);
-        result = 31 * result + (rules != null ? rules.hashCode() : 0);
-        result = 31 * result + (checks != null ? checks.hashCode() : 0);
-        result = 31 * result + (scopes != null ? scopes.hashCode() : 0);
+        result = 31 * result + facts.hashCode();
+        result = 31 * result + rules.hashCode();
+        result = 31 * result + checks.hashCode();
+        result = 31 * result + scopes.hashCode();
         return result;
     }
 
