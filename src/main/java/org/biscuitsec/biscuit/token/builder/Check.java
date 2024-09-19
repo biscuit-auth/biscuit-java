@@ -4,6 +4,7 @@ import org.biscuitsec.biscuit.datalog.SymbolTable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.stream.Collectors.toList;
 import static org.biscuitsec.biscuit.datalog.Check.Kind.One;
@@ -62,7 +63,7 @@ public class Check {
 
         Check check = (Check) o;
 
-        return queries != null ? queries.equals(check.queries) : check.queries == null;
+        return Objects.equals(queries, check.queries);
     }
 
     @Override
