@@ -221,7 +221,6 @@ public class Parser {
         //FIXME: parse scopes
         queries.add(new Rule(new Predicate("query", new ArrayList<>()), body._2, body._3,  body._4));
 
-        int i = 0;
         while (true) {
             if (s.isEmpty()) {
                 break;
