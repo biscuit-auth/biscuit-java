@@ -38,37 +38,6 @@ public class Fact implements Cloneable {
         this.variables = variables;
     }
 
-    public void validate() throws Error.Language {
-        if (!this.variables.isEmpty()) {
-            List<String> invalidVariables = variables.get().entrySet().stream().flatMap(
-                    e -> {
-                        if (e.getValue().isEmpty()) {
-                            return Stream.of(e.getKey());
-                        } else {
-                            return Stream.empty();
-                        }
-                    }).collect(toList());
-            if (!invalidVariables.isEmpty()) {
-                throw new Error.Language(new FailedCheck.LanguageError.Builder(invalidVariables));
-            }
-        }
-    }
-
-    @SuppressWarnings("unused")
-    public Fact set(String name, Term term) throws Error.Language {
-        if (this.variables.isEmpty()) {
-            throw new Error.Language(new FailedCheck.LanguageError.UnknownVariable(name));
-        }
-        Map<String, Option<Term>> vars = this.variables.get();
-        Option<Term> r = vars.get(name);
-        if (r != null) {
-            vars.put(name, Option.some(term));
-        } else {
-            throw new Error.Language(new FailedCheck.LanguageError.UnknownVariable(name));
-        }
-        return this;
-    }
-
     public Fact applyVariables() {
         this.variables.forEach(
                 vars -> this.predicate.terms = this.predicate.terms.stream().flatMap(t -> {
@@ -91,19 +60,8 @@ public class Fact implements Cloneable {
     }
 
     @Override
-    public String toString() {
-        Fact f = this.clone();
-        f.applyVariables();
-        return f.predicate.toString();
-    }
-
-    @SuppressWarnings("unused")
-    public String name() {
-        return this.predicate.name;
-    }
-
-    public List<Term> terms() {
-        return this.predicate.terms;
+    public int hashCode() {
+        return predicate != null ? predicate.hashCode() : 0;
     }
 
     @Override
@@ -116,16 +74,58 @@ public class Fact implements Cloneable {
         return Objects.equals(predicate, fact.predicate);
     }
 
-    @Override
-    public int hashCode() {
-        return predicate != null ? predicate.hashCode() : 0;
-    }
-
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public Fact clone() {
         Predicate p = this.predicate.clone();
         Option<Map<String, Option<Term>>> vars = this.variables.map(HashMap::new);
         return new Fact(p, vars);
+    }
+
+    @Override
+    public String toString() {
+        Fact f = this.clone();
+        f.applyVariables();
+        return f.predicate.toString();
+    }
+
+    @SuppressWarnings("unused")
+    public String name() {
+        return this.predicate.name;
+    }
+
+    @SuppressWarnings("unused")
+    public Fact set(String name, Term term) throws Error.Language {
+        if (this.variables.isEmpty()) {
+            throw new Error.Language(new FailedCheck.LanguageError.UnknownVariable(name));
+        }
+        Map<String, Option<Term>> vars = this.variables.get();
+        Option<Term> r = vars.get(name);
+        if (r != null) {
+            vars.put(name, Option.some(term));
+        } else {
+            throw new Error.Language(new FailedCheck.LanguageError.UnknownVariable(name));
+        }
+        return this;
+    }
+
+    public List<Term> terms() {
+        return this.predicate.terms;
+    }
+
+    public void validate() throws Error.Language {
+        if (!this.variables.isEmpty()) {
+            List<String> invalidVariables = variables.get().entrySet().stream().flatMap(
+                    e -> {
+                        if (e.getValue().isEmpty()) {
+                            return Stream.of(e.getKey());
+                        } else {
+                            return Stream.empty();
+                        }
+                    }).collect(toList());
+            if (!invalidVariables.isEmpty()) {
+                throw new Error.Language(new FailedCheck.LanguageError.Builder(invalidVariables));
+            }
+        }
     }
 }
