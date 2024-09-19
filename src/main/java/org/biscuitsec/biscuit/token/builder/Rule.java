@@ -15,9 +15,9 @@ import static java.util.stream.Collectors.toList;
 public class Rule implements Cloneable {
     final Predicate head;
     final List<Predicate> body;
-    List<Expression> expressions;
     final Option<Map<String, Option<Term>>> variables;
     final List<Scope> scopes;
+    List<Expression> expressions;
 
     public Rule(Predicate head, List<Predicate> body, List<Expression> expressions, List<Scope> scopes) {
         Map<String, Option<Term>> variables = new HashMap<>();
@@ -45,30 +45,6 @@ public class Rule implements Cloneable {
             }
         }
         this.variables = Option.some(variables);
-    }
-
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
-    @Override
-    public Rule clone() {
-        Predicate head = this.head.clone();
-        List<Predicate> body = new ArrayList<>(this.body);
-        List<Expression> expressions = new ArrayList<>(this.expressions);
-        List<Scope> scopes = new ArrayList<>(this.scopes);
-        return new Rule(head, body, expressions, scopes);
-    }
-
-    @SuppressWarnings("unused")
-    public void set(String name, Term term) throws Error.Language {
-        if (this.variables.isDefined()) {
-            Option<Option<Term>> t = Option.of(this.variables.get().get(name));
-            if (t.isDefined()) {
-                this.variables.get().put(name, Option.some(term));
-            } else {
-                throw new Error.Language(new FailedCheck.LanguageError.UnknownVariable("name"));
-            }
-        } else {
-            throw new Error.Language(new FailedCheck.LanguageError.UnknownVariable("name"));
-        }
     }
 
     public void applyVariables() {
@@ -104,32 +80,33 @@ public class Rule implements Cloneable {
                 });
     }
 
-    public Either<String, Rule> validateVariables() {
-        Set<String> freeVariables = this.head.terms.stream().flatMap(t -> {
-            if (t instanceof Term.Variable) {
-                return Stream.of(((Term.Variable) t).value);
-            } else return Stream.empty();
-        }).collect(Collectors.toSet());
+    public String bodyToString() {
+        Rule r = this.clone();
+        r.applyVariables();
+        String res = "";
 
-        for (Expression e : this.expressions) {
-            e.gatherVariables(freeVariables);
-        }
-        if (freeVariables.isEmpty()) {
-            return Either.right(this);
+        if (!r.body.isEmpty()) {
+            final List<String> b = r.body.stream().map(Predicate::toString).collect(toList());
+            res += String.join(", ", b);
         }
 
-        for (Predicate p : this.body) {
-            for (Term term : p.terms) {
-                if (term instanceof Term.Variable) {
-                    freeVariables.remove(((Term.Variable) term).value);
-                    if (freeVariables.isEmpty()) {
-                        return Either.right(this);
-                    }
-                }
+        if (!r.expressions.isEmpty()) {
+            if (!r.body.isEmpty()) {
+                res += ", ";
             }
+            final List<String> e = r.expressions.stream().map(Object::toString).collect(toList());
+            res += String.join(", ", e);
         }
 
-        return Either.left("rule head or expressions contains variables that are not used in predicates of the rule's body: " + freeVariables);
+        if (!r.scopes.isEmpty()) {
+            if (!r.body.isEmpty() || !r.expressions.isEmpty()) {
+                res += " ";
+            }
+            final List<String> e = r.scopes.stream().map(Scope::toString).collect(toList());
+            res += "trusting " + String.join(", ", e);
+        }
+
+        return res;
     }
 
     public org.biscuitsec.biscuit.datalog.Rule convert(SymbolTable symbols) {
@@ -180,6 +157,15 @@ public class Rule implements Cloneable {
     }
 
     @Override
+    public int hashCode() {
+        int result = head != null ? head.hashCode() : 0;
+        result = 31 * result + (body != null ? body.hashCode() : 0);
+        result = 31 * result + (expressions != null ? expressions.hashCode() : 0);
+        result = 31 * result + (scopes != null ? scopes.hashCode() : 0);
+        return result;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -192,42 +178,14 @@ public class Rule implements Cloneable {
         return Objects.equals(expressions, rule.expressions);
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
-    public int hashCode() {
-        int result = head != null ? head.hashCode() : 0;
-        result = 31 * result + (body != null ? body.hashCode() : 0);
-        result = 31 * result + (expressions != null ? expressions.hashCode() : 0);
-        result = 31 * result + (scopes != null ? scopes.hashCode() : 0);
-        return result;
-    }
-
-    public String bodyToString() {
-        Rule r = this.clone();
-        r.applyVariables();
-        String res = "";
-
-        if (!r.body.isEmpty()) {
-            final List<String> b = r.body.stream().map(Predicate::toString).collect(toList());
-            res += String.join(", ", b);
-        }
-
-        if (!r.expressions.isEmpty()) {
-            if (!r.body.isEmpty()) {
-                res += ", ";
-            }
-            final List<String> e = r.expressions.stream().map(Object::toString).collect(toList());
-            res += String.join(", ", e);
-        }
-
-        if (!r.scopes.isEmpty()) {
-            if (!r.body.isEmpty() || !r.expressions.isEmpty()) {
-                res += " ";
-            }
-            final List<String> e = r.scopes.stream().map(Scope::toString).collect(toList());
-            res += "trusting " + String.join(", ", e);
-        }
-
-        return res;
+    public Rule clone() {
+        Predicate head = this.head.clone();
+        List<Predicate> body = new ArrayList<>(this.body);
+        List<Expression> expressions = new ArrayList<>(this.expressions);
+        List<Scope> scopes = new ArrayList<>(this.scopes);
+        return new Rule(head, body, expressions, scopes);
     }
 
     @Override
@@ -235,5 +193,47 @@ public class Rule implements Cloneable {
         Rule r = this.clone();
         r.applyVariables();
         return r.head.toString() + " <- " + bodyToString();
+    }
+
+    @SuppressWarnings("unused")
+    public void set(String name, Term term) throws Error.Language {
+        if (this.variables.isDefined()) {
+            Option<Option<Term>> t = Option.of(this.variables.get().get(name));
+            if (t.isDefined()) {
+                this.variables.get().put(name, Option.some(term));
+            } else {
+                throw new Error.Language(new FailedCheck.LanguageError.UnknownVariable("name"));
+            }
+        } else {
+            throw new Error.Language(new FailedCheck.LanguageError.UnknownVariable("name"));
+        }
+    }
+
+    public Either<String, Rule> validateVariables() {
+        Set<String> freeVariables = this.head.terms.stream().flatMap(t -> {
+            if (t instanceof Term.Variable) {
+                return Stream.of(((Term.Variable) t).value);
+            } else return Stream.empty();
+        }).collect(Collectors.toSet());
+
+        for (Expression e : this.expressions) {
+            e.gatherVariables(freeVariables);
+        }
+        if (freeVariables.isEmpty()) {
+            return Either.right(this);
+        }
+
+        for (Predicate p : this.body) {
+            for (Term term : p.terms) {
+                if (term instanceof Term.Variable) {
+                    freeVariables.remove(((Term.Variable) term).value);
+                    if (freeVariables.isEmpty()) {
+                        return Either.right(this);
+                    }
+                }
+            }
+        }
+
+        return Either.left("rule head or expressions contains variables that are not used in predicates of the rule's body: " + freeVariables);
     }
 }
