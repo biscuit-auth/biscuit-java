@@ -14,8 +14,8 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toList;
 
 public class Fact implements Cloneable{
-    Predicate predicate;
-    Option<Map<String, Option<Term>>> variables;
+    final Predicate predicate;
+    final Option<Map<String, Option<Term>>> variables;
 
     public Fact(String name, List<Term> terms) {
         Map<String, Option<Term>> variables = new HashMap<>();
