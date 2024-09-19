@@ -46,7 +46,7 @@ public class Check {
 
     @Override
     public String toString() {
-        final List<String> qs = queries.stream().map((q) -> q.bodyToString()).collect(Collectors.toList());
+        final List<String> qs = queries.stream().map(Rule::bodyToString).collect(Collectors.toList());
 
         if(kind == One) {
             return "check if " + String.join(" or ", qs);
