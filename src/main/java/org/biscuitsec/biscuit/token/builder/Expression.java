@@ -168,7 +168,7 @@ public abstract class Expression {
 
             Value value1 = (Value) o;
 
-            return value != null ? value.equals(value1.value) : value1.value == null;
+            return Objects.equals(value, value1.value);
         }
 
         @Override
