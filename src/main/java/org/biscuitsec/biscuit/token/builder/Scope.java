@@ -6,6 +6,9 @@ import org.biscuitsec.biscuit.datalog.SymbolTable;
 import java.util.Objects;
 
 public class Scope {
+
+    // TODO Use all-caps naming convention for enums.
+    //  This convention also applies to protobuf enums.
     enum Kind {
         Authority,
         Previous,
