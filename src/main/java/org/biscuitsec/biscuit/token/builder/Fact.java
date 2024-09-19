@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
+
 public class Fact implements Cloneable{
     Predicate predicate;
     Option<Map<String, Option<Term>>> variables;
@@ -45,7 +47,7 @@ public class Fact implements Cloneable{
                         } else {
                             return Stream.empty();
                         }
-                    }).collect(Collectors.toList());
+                    }).collect(toList());
             if (!invalidVariables.isEmpty()) {
                 throw new Error.Language(new FailedCheck.LanguageError.Builder(invalidVariables));
             }
@@ -74,7 +76,7 @@ public class Fact implements Cloneable{
                             Option<Term> term = vars.getOrDefault(((Term.Variable) t).value, Option.none());
                             return term.map(_t -> Stream.of(_t)).getOrElse(Stream.empty());
                         } else return Stream.of(t);
-                    }).collect(Collectors.toList());
+                    }).collect(toList());
                 });
         return this;
     }
