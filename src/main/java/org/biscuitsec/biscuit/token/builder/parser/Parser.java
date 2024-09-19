@@ -618,7 +618,7 @@ public class Parser {
         try {
             OffsetDateTime d = OffsetDateTime.parse(t._1);
             String remaining = t._2;
-            return Either.right(new Tuple2<String, Term.Date>(remaining, new Term.Date(d.toEpochSecond())));
+            return Either.right(new Tuple2<>(remaining, new Term.Date(d.toEpochSecond())));
         } catch (DateTimeParseException e) {
             return Either.left(new Error(s, "not a date"));
 
