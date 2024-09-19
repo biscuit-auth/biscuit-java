@@ -9,55 +9,6 @@ import static org.biscuitsec.biscuit.datalog.Check.Kind.One;
 
 public class Utils {
 
-    public static Fact fact(String name, List<Term> ids) {
-        return new Fact(name, ids);
-    }
-
-    public static Predicate pred(String name, List<Term> ids) {
-        return new Predicate(name, ids);
-    }
-
-    public static Rule rule(String headName,
-                            List<Term> headIds,
-                            List<Predicate> predicates) {
-        return new Rule(pred(headName, headIds), predicates, new ArrayList<>(), new ArrayList<>());
-    }
-
-    public static Rule constrainedRule(String headName,
-                                       List<Term> headIds,
-                                       List<Predicate> predicates,
-                                       List<Expression> expressions) {
-        return new Rule(pred(headName, headIds), predicates, expressions, new ArrayList<>());
-    }
-
-    public static Check check(Rule rule) {
-        return new Check(One, rule);
-    }
-
-    public static Term integer(long i) {
-        return new Term.Integer(i);
-    }
-
-    public static Term string(String s) {
-        return new Term.Str(s);
-    }
-
-    public static Term s(String str) {
-        return new Term.Str(str);
-    }
-
-    public static Term date(Date d) {
-        return new Term.Date(d.getTime() / 1000);
-    }
-
-    public static Term var(String name) {
-        return new Term.Variable(name);
-    }
-
-    public static Term set(HashSet<Term> s) {
-        return new Term.Set(s);
-    }
-
     public static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 
     public static String byteArrayToHexString(byte[] bytes) {
@@ -70,6 +21,25 @@ public class Utils {
         return new String(hexChars);
     }
 
+    public static Check check(Rule rule) {
+        return new Check(One, rule);
+    }
+
+    public static Rule constrainedRule(String headName,
+                                       List<Term> headIds,
+                                       List<Predicate> predicates,
+                                       List<Expression> expressions) {
+        return new Rule(pred(headName, headIds), predicates, expressions, new ArrayList<>());
+    }
+
+    public static Term date(Date d) {
+        return new Term.Date(d.getTime() / 1000);
+    }
+
+    public static Fact fact(String name, List<Term> ids) {
+        return new Fact(name, ids);
+    }
+
     public static byte[] hexStringToByteArray(String hex) {
         hex = hex.toUpperCase();
         int l = hex.length();
@@ -79,5 +49,35 @@ public class Utils {
                     + Character.digit(hex.charAt(i + 1), 16));
         }
         return data;
+    }
+
+    public static Term integer(long i) {
+        return new Term.Integer(i);
+    }
+
+    public static Predicate pred(String name, List<Term> ids) {
+        return new Predicate(name, ids);
+    }
+
+    public static Rule rule(String headName,
+                            List<Term> headIds,
+                            List<Predicate> predicates) {
+        return new Rule(pred(headName, headIds), predicates, new ArrayList<>(), new ArrayList<>());
+    }
+
+    public static Term s(String str) {
+        return new Term.Str(str);
+    }
+
+    public static Term set(HashSet<Term> s) {
+        return new Term.Set(s);
+    }
+
+    public static Term string(String s) {
+        return new Term.Str(s);
+    }
+
+    public static Term var(String name) {
+        return new Term.Variable(name);
     }
 }
