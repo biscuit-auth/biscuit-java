@@ -86,7 +86,7 @@ public class Fact implements Cloneable{
         return new org.biscuitsec.biscuit.datalog.Fact(f.predicate.convert(symbols));
     }
 
-    public static Fact convert_from(org.biscuitsec.biscuit.datalog.Fact f, SymbolTable symbols) {
+    public static Fact convertFrom(org.biscuitsec.biscuit.datalog.Fact f, SymbolTable symbols) {
         return new Fact(Predicate.convert_from(f.predicate(), symbols));
     }
 

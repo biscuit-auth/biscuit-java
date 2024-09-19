@@ -113,7 +113,7 @@ public class Authorizer {
             );
 
             for (org.biscuitsec.biscuit.datalog.Fact fact : token.authority.facts) {
-                org.biscuitsec.biscuit.datalog.Fact converted_fact = org.biscuitsec.biscuit.token.builder.Fact.convert_from(fact, token.symbols).convert(this.symbols);
+                org.biscuitsec.biscuit.datalog.Fact converted_fact = org.biscuitsec.biscuit.token.builder.Fact.convertFrom(fact, token.symbols).convert(this.symbols);
                 world.addFact(new Origin(0), converted_fact);
             }
             for (org.biscuitsec.biscuit.datalog.Rule rule : token.authority.rules) {
@@ -149,7 +149,7 @@ public class Authorizer {
                 }
 
                 for (org.biscuitsec.biscuit.datalog.Fact fact : block.facts) {
-                    org.biscuitsec.biscuit.datalog.Fact converted_fact = org.biscuitsec.biscuit.token.builder.Fact.convert_from(fact, blockSymbols).convert(this.symbols);
+                    org.biscuitsec.biscuit.datalog.Fact converted_fact = org.biscuitsec.biscuit.token.builder.Fact.convertFrom(fact, blockSymbols).convert(this.symbols);
                     world.addFact(new Origin(i + 1), converted_fact);
                 }
 
@@ -364,7 +364,7 @@ public class Authorizer {
 
         for (Iterator<org.biscuitsec.biscuit.datalog.Fact> it = facts.stream().iterator(); it.hasNext(); ) {
             org.biscuitsec.biscuit.datalog.Fact f = it.next();
-            s.add(org.biscuitsec.biscuit.token.builder.Fact.convert_from(f, symbols));
+            s.add(org.biscuitsec.biscuit.token.builder.Fact.convertFrom(f, symbols));
         }
 
         return s;
