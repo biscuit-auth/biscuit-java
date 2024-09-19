@@ -5,6 +5,8 @@ import org.biscuitsec.biscuit.datalog.SymbolTable;
 
 import java.util.Objects;
 
+import static java.util.Objects.requireNonNull;
+
 public class Scope {
 
     // TODO Use all-caps naming convention for enums.
@@ -118,7 +120,7 @@ public class Scope {
             case Parameter:
                 return "{" + this.parameter + "}";
             case PublicKey:
-                return this.publicKey.toString();
+                return requireNonNull(this.publicKey, "publicKey cannot be null").toString();
         }
         return null;
     }
