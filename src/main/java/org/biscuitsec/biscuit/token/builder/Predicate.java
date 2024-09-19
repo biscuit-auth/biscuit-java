@@ -9,7 +9,7 @@ import java.util.Objects;
 import static java.util.stream.Collectors.toList;
 
 public class Predicate implements Cloneable {
-    String name;
+    final String name;
     List<Term> terms;
 
     public Predicate(String name, List<Term> terms) {
