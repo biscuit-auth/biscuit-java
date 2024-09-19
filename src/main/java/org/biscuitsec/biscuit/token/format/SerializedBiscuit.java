@@ -407,7 +407,6 @@ public class SerializedBiscuit {
             } else {
                 return Left(new Error.FormatError.Signature.SealedSignature());
             }
-
         }
     }
 
@@ -424,7 +423,6 @@ public class SerializedBiscuit {
         } else {
             return b;
         }
-
     }
 
     static Either<Error, org.biscuitsec.biscuit.crypto.PublicKey> verifyBlockSignature(SignedBlock signedBlock,
