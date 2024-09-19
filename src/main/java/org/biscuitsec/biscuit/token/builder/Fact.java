@@ -8,6 +8,7 @@ import io.vavr.control.Option;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -113,7 +114,7 @@ public class Fact implements Cloneable{
 
         Fact fact = (Fact) o;
 
-        return predicate != null ? predicate.equals(fact.predicate) : fact.predicate == null;
+        return Objects.equals(predicate, fact.predicate);
     }
 
     @Override
