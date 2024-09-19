@@ -178,10 +178,10 @@ public class Block {
         ArrayList<org.biscuitsec.biscuit.token.builder.Rule> queries = new ArrayList<>();
         queries.add(rule(
                 "check_right",
-                Arrays.asList(s(right)),
+                List.of(s(right)),
                 Arrays.asList(
-                        pred("resource", Arrays.asList(var("resource"))),
-                        pred("operation", Arrays.asList(s(right))),
+                        pred("resource", List.of(var("resource"))),
+                        pred("operation", List.of(s(right))),
                         pred("right", Arrays.asList(var("resource"), s(right)))
                 )
         ));
@@ -193,9 +193,9 @@ public class Block {
 
         queries.add(constrained_rule(
                 "prefix",
-                Arrays.asList(var("resource")),
-                Arrays.asList(pred("resource", Arrays.asList(var("resource")))),
-                Arrays.asList(new Expression.Binary(Expression.Op.Prefix, new Expression.Value(var("resource")),
+                List.of(var("resource")),
+                List.of(pred("resource", List.of(var("resource")))),
+                List.of(new Expression.Binary(Expression.Op.Prefix, new Expression.Value(var("resource")),
                         new Expression.Value(string(prefix))))
         ));
         return this.addCheck(new org.biscuitsec.biscuit.token.builder.Check(One, queries));
@@ -207,9 +207,9 @@ public class Block {
 
         queries.add(constrained_rule(
                 "suffix",
-                Arrays.asList(var("resource")),
-                Arrays.asList(pred("resource", Arrays.asList(var("resource")))),
-                Arrays.asList(new Expression.Binary(Expression.Op.Suffix, new Expression.Value(var("resource")),
+                List.of(var("resource")),
+                List.of(pred("resource", List.of(var("resource")))),
+                List.of(new Expression.Binary(Expression.Op.Suffix, new Expression.Value(var("resource")),
                         new Expression.Value(string(suffix))))
         ));
         return this.addCheck(new org.biscuitsec.biscuit.token.builder.Check(One, queries));
@@ -221,9 +221,9 @@ public class Block {
 
         queries.add(constrained_rule(
                 "expiration",
-                Arrays.asList(var("date")),
-                Arrays.asList(pred("time", Arrays.asList(var("date")))),
-                Arrays.asList(new Expression.Binary(Expression.Op.LessOrEqual, new Expression.Value(var("date")),
+                List.of(var("date")),
+                List.of(pred("time", List.of(var("date")))),
+                List.of(new Expression.Binary(Expression.Op.LessOrEqual, new Expression.Value(var("date")),
                         new Expression.Value(date(d))))
         ));
         return this.addCheck(new org.biscuitsec.biscuit.token.builder.Check(One, queries));
