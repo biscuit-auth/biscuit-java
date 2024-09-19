@@ -168,7 +168,7 @@ public class Rule implements Cloneable {
         }
 
         for (org.biscuitsec.biscuit.datalog.expressions.Expression e : r.expressions()) {
-            expressions.add(Expression.convert_from(e, symbols));
+            expressions.add(Expression.convertFrom(e, symbols));
         }
 
         for (org.biscuitsec.biscuit.datalog.Scope s : r.scopes()) {
