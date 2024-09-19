@@ -4,7 +4,6 @@ import org.biscuitsec.biscuit.datalog.SymbolTable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static org.biscuitsec.biscuit.datalog.Check.Kind.One;
