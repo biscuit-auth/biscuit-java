@@ -1,9 +1,9 @@
 package org.biscuitsec.biscuit.token.builder;
 
+import io.vavr.control.Option;
 import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.error.FailedCheck;
-import io.vavr.control.Option;
 
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
-public class Fact implements Cloneable{
+public class Fact implements Cloneable {
     final Predicate predicate;
     final Option<Map<String, Option<Term>>> variables;
 
@@ -33,7 +33,7 @@ public class Fact implements Cloneable{
         this.variables = Option.none();
     }
 
-    private Fact(Predicate predicate, Option<Map<String, Option<Term>>> variables){
+    private Fact(Predicate predicate, Option<Map<String, Option<Term>>> variables) {
         this.predicate = predicate;
         this.variables = variables;
     }
@@ -72,7 +72,7 @@ public class Fact implements Cloneable{
     public Fact applyVariables() {
         this.variables.forEach(
                 vars -> this.predicate.terms = this.predicate.terms.stream().flatMap(t -> {
-                    if(t instanceof Term.Variable){
+                    if (t instanceof Term.Variable) {
                         Option<Term> term = vars.getOrDefault(((Term.Variable) t).value, Option.none());
                         return term.map(Stream::of).getOrElse(Stream.empty());
                     } else return Stream.of(t);
@@ -94,7 +94,7 @@ public class Fact implements Cloneable{
     public String toString() {
         Fact f = this.clone();
         f.applyVariables();
-        return  f.predicate.toString();
+        return f.predicate.toString();
     }
 
     @SuppressWarnings("unused")
@@ -123,7 +123,7 @@ public class Fact implements Cloneable{
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
-    public Fact clone(){
+    public Fact clone() {
         Predicate p = this.predicate.clone();
         Option<Map<String, Option<Term>>> vars = this.variables.map(HashMap::new);
         return new Fact(p, vars);
