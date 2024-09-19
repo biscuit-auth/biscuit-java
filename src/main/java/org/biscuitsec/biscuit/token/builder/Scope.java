@@ -28,14 +28,14 @@ public class Scope {
         this.parameter = "";
     }
 
-    private Scope(Kind kind, PublicKey publicKey) {
-        this.kind = kind;
+    private Scope(PublicKey publicKey) {
+        this.kind = Kind.PublicKey;
         this.publicKey = publicKey;
         this.parameter = "";
     }
 
-    private Scope(Kind kind, String parameter) {
-        this.kind = kind;
+    private Scope(String parameter) {
+        this.kind = Kind.Parameter;
         this.publicKey = null;
         this.parameter = parameter;
     }
@@ -49,11 +49,11 @@ public class Scope {
     }
 
     public static Scope publicKey(PublicKey publicKey) {
-        return new Scope(Kind.PublicKey, publicKey);
+        return new Scope(publicKey);
     }
 
     public static Scope parameter(String parameter) {
-        return new Scope(Kind.Parameter, parameter);
+        return new Scope(parameter);
     }
 
     public org.biscuitsec.biscuit.datalog.Scope convert(SymbolTable symbols) {
@@ -81,7 +81,7 @@ public class Scope {
                 return new Scope(Kind.Previous);
             case PublicKey:
                 //FIXME error management should bubble up here
-                return new Scope(Kind.PublicKey, symbols.getPk((int) scope.publicKey()).get());
+                return new Scope(symbols.getPk((int) scope.publicKey()).get());
         }
 
         //FIXME error management should bubble up here
