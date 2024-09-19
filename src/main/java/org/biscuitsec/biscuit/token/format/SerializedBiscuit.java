@@ -26,6 +26,7 @@ import static io.vavr.API.Right;
 /**
  * Intermediate representation of a token before full serialization
  */
+@SuppressWarnings("JavadocDeclaration")
 public class SerializedBiscuit {
     public final SignedBlock authority;
     public final List<SignedBlock> blocks;
