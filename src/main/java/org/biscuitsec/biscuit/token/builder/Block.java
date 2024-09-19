@@ -31,6 +31,24 @@ public class Block {
         this.context = "";
     }
 
+    public Block addCheck(org.biscuitsec.biscuit.token.builder.Check check) {
+        this.checks.add(check);
+        return this;
+    }
+
+    public Block addCheck(String s) throws Error.Parser {
+        Either<org.biscuitsec.biscuit.token.builder.parser.Error, Tuple2<String, org.biscuitsec.biscuit.token.builder.Check>> res =
+                Parser.check(s);
+
+        if (res.isLeft()) {
+            throw new Error.Parser(res.getLeft());
+        }
+
+        Tuple2<String, org.biscuitsec.biscuit.token.builder.Check> t = res.get();
+
+        return addCheck(t._2);
+    }
+
     public Block addFact(org.biscuitsec.biscuit.token.builder.Fact f) {
         this.facts.add(f);
         return this;
@@ -67,32 +85,8 @@ public class Block {
         return addRule(t._2);
     }
 
-    public Block addCheck(org.biscuitsec.biscuit.token.builder.Check check) {
-        this.checks.add(check);
-        return this;
-    }
-
-    public Block addCheck(String s) throws Error.Parser {
-        Either<org.biscuitsec.biscuit.token.builder.parser.Error, Tuple2<String, org.biscuitsec.biscuit.token.builder.Check>> res =
-                Parser.check(s);
-
-        if (res.isLeft()) {
-            throw new Error.Parser(res.getLeft());
-        }
-
-        Tuple2<String, org.biscuitsec.biscuit.token.builder.Check> t = res.get();
-
-        return addCheck(t._2);
-    }
-
     public Block addScope(org.biscuitsec.biscuit.token.builder.Scope scope) {
         this.scopes.add(scope);
-        return this;
-    }
-
-    @SuppressWarnings("unused")
-    public Block setContext(String context) {
-        this.context = context;
         return this;
     }
 
@@ -149,30 +143,6 @@ public class Block {
                 scopes, publicKeys, externalKey, schemaVersion.version());
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Block block = (Block) o;
-
-        if (!Objects.equals(context, block.context)) return false;
-        if (!Objects.equals(facts, block.facts)) return false;
-        if (!Objects.equals(rules, block.rules)) return false;
-        if (!Objects.equals(checks, block.checks)) return false;
-        return Objects.equals(scopes, block.scopes);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = context != null ? context.hashCode() : 0;
-        result = 31 * result + facts.hashCode();
-        result = 31 * result + rules.hashCode();
-        result = 31 * result + checks.hashCode();
-        result = 31 * result + scopes.hashCode();
-        return result;
-    }
-
     public Block checkRight(String right) {
         ArrayList<org.biscuitsec.biscuit.token.builder.Rule> queries = new ArrayList<>();
         queries.add(rule(
@@ -185,6 +155,44 @@ public class Block {
                 )
         ));
         return this.addCheck(new org.biscuitsec.biscuit.token.builder.Check(One, queries));
+    }
+
+    @SuppressWarnings("unused")
+    public Block expirationDate(Date d) {
+        ArrayList<org.biscuitsec.biscuit.token.builder.Rule> queries = new ArrayList<>();
+
+        queries.add(constrained_rule(
+                "expiration",
+                List.of(var("date")),
+                List.of(pred("time", List.of(var("date")))),
+                List.of(new Expression.Binary(Expression.Op.LessOrEqual, new Expression.Value(var("date")),
+                        new Expression.Value(date(d))))
+        ));
+        return this.addCheck(new org.biscuitsec.biscuit.token.builder.Check(One, queries));
+    }
+
+    @Override
+    public int hashCode() {
+        int result = context != null ? context.hashCode() : 0;
+        result = 31 * result + facts.hashCode();
+        result = 31 * result + rules.hashCode();
+        result = 31 * result + checks.hashCode();
+        result = 31 * result + scopes.hashCode();
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Block block = (Block) o;
+
+        if (!Objects.equals(context, block.context)) return false;
+        if (!Objects.equals(facts, block.facts)) return false;
+        if (!Objects.equals(rules, block.rules)) return false;
+        if (!Objects.equals(checks, block.checks)) return false;
+        return Objects.equals(scopes, block.scopes);
     }
 
     public Block resourcePrefix(String prefix) {
@@ -215,16 +223,8 @@ public class Block {
     }
 
     @SuppressWarnings("unused")
-    public Block expirationDate(Date d) {
-        ArrayList<org.biscuitsec.biscuit.token.builder.Rule> queries = new ArrayList<>();
-
-        queries.add(constrained_rule(
-                "expiration",
-                List.of(var("date")),
-                List.of(pred("time", List.of(var("date")))),
-                List.of(new Expression.Binary(Expression.Op.LessOrEqual, new Expression.Value(var("date")),
-                        new Expression.Value(date(d))))
-        ));
-        return this.addCheck(new org.biscuitsec.biscuit.token.builder.Check(One, queries));
+    public Block setContext(String context) {
+        this.context = context;
+        return this;
     }
 }
