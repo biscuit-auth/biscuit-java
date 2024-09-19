@@ -249,7 +249,7 @@ public class Parser {
     }
 
     public static Either<Error, Tuple4<String, List<Predicate>, List<Expression>, List<Scope>>> rule_body(String s) {
-        List<Predicate> predicates = new ArrayList<Predicate>();
+        List<Predicate> predicates = new ArrayList<>();
         List<Expression> expressions = new ArrayList<>();
 
         while (true) {
@@ -341,7 +341,7 @@ public class Parser {
         s = s.substring("trusting".length());
         s = space(s);
 
-        List<Scope> scopes = new ArrayList<Scope>();
+        List<Scope> scopes = new ArrayList<>();
 
         while (true) {
             s = space(s);
@@ -450,7 +450,7 @@ public class Parser {
         }
         String remaining = s.substring(1);
 
-        return Either.right(new Tuple2<String, Predicate>(remaining, new Predicate(name, terms)));
+        return Either.right(new Tuple2<>(remaining, new Predicate(name, terms)));
     }
 
     public static Either<Error, Tuple2<String, String>> name(String s) {
@@ -458,7 +458,7 @@ public class Parser {
         String name = t._1;
         String remaining = t._2;
 
-        return Either.right(new Tuple2<String, String>(remaining, name));
+        return Either.right(new Tuple2<>(remaining, name));
     }
 
     public static Either<Error, Tuple2<String, Term>> term(String s) {
@@ -583,7 +583,7 @@ public class Parser {
         String string = s.substring(1, index + 1);
         String remaining = s.substring(index + 2);
 
-        return Either.right(new Tuple2<String, Term.Str>(remaining, (Term.Str) Utils.string(string)));
+        return Either.right(new Tuple2<>(remaining, (Term.Str) Utils.string(string)));
     }
 
     public static Either<Error, Tuple2<String, Term.Integer>> integer(String s) {
@@ -609,7 +609,7 @@ public class Parser {
         long i = Long.parseLong(s.substring(0, index2));
         String remaining = s.substring(index2);
 
-        return Either.right(new Tuple2<String, Term.Integer>(remaining, (Term.Integer) Utils.integer(i)));
+        return Either.right(new Tuple2<>(remaining, (Term.Integer) Utils.integer(i)));
     }
 
     public static Either<Error, Tuple2<String, Term.Date>> date(String s) {
