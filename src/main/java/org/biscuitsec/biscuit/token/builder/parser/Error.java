@@ -14,18 +14,10 @@ public class Error extends Exception {
     }
 
     @Override
-    public String toString() {
-        return "Error{" +
-                "input='" + input + '\'' +
-                ", message='" + message + '\'' +
-                '}';
-    }
-
-    public JsonElement toJson(){
-        JsonObject jo = new JsonObject();
-        jo.addProperty("input",this.input);
-        jo.addProperty("message", this.message);
-        return jo;
+    public int hashCode() {
+        int result = input != null ? input.hashCode() : 0;
+        result = 31 * result + (message != null ? message.hashCode() : 0);
+        return result;
     }
 
     @Override
@@ -39,10 +31,18 @@ public class Error extends Exception {
         return message != null ? message.equals(error.message) : error.message == null;
     }
 
+    public JsonElement toJson() {
+        JsonObject jo = new JsonObject();
+        jo.addProperty("input", this.input);
+        jo.addProperty("message", this.message);
+        return jo;
+    }
+
     @Override
-    public int hashCode() {
-        int result = input != null ? input.hashCode() : 0;
-        result = 31 * result + (message != null ? message.hashCode() : 0);
-        return result;
+    public String toString() {
+        return "Error{" +
+                "input='" + input + '\'' +
+                ", message='" + message + '\'' +
+                '}';
     }
 }
