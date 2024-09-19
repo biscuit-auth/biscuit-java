@@ -74,7 +74,7 @@ public class Fact implements Cloneable{
                     this.predicate.terms = this.predicate.terms.stream().flatMap(t -> {
                         if(t instanceof Term.Variable){
                             Option<Term> term = vars.getOrDefault(((Term.Variable) t).value, Option.none());
-                            return term.map(_t -> Stream.of(_t)).getOrElse(Stream.empty());
+                            return term.map(Stream::of).getOrElse(Stream.empty());
                         } else return Stream.of(t);
                     }).collect(toList());
                 });
