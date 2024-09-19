@@ -1,7 +1,5 @@
 package org.biscuitsec.biscuit.token.builder;
 
-import org.biscuitsec.biscuit.error.Error;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
