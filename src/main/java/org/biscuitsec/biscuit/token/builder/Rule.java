@@ -51,12 +51,9 @@ public class Rule implements Cloneable {
     @Override
     public Rule clone() {
         Predicate head = this.head.clone();
-        List<Predicate> body = new ArrayList<>();
-        body.addAll(this.body);
-        List<Expression> expressions = new ArrayList<>();
-        expressions.addAll(this.expressions);
-        List<Scope> scopes = new ArrayList<>();
-        scopes.addAll(this.scopes);
+        List<Predicate> body = new ArrayList<>(this.body);
+        List<Expression> expressions = new ArrayList<>(this.expressions);
+        List<Scope> scopes = new ArrayList<>(this.scopes);
         return new Rule(head, body, expressions, scopes);
     }
 
