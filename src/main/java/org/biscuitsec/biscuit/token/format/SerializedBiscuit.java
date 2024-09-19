@@ -1,24 +1,25 @@
 package org.biscuitsec.biscuit.token.format;
 
 import biscuit.format.schema.Schema;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import io.vavr.Tuple2;
+import io.vavr.control.Either;
+import io.vavr.control.Option;
+import net.i2p.crypto.eddsa.EdDSAEngine;
 import org.biscuitsec.biscuit.crypto.KeyDelegate;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.token.Block;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
-import io.vavr.control.Either;
-import io.vavr.control.Option;
-import net.i2p.crypto.eddsa.EdDSAEngine;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
@@ -134,7 +135,7 @@ public class SerializedBiscuit {
      * @throws Error.FormatError.DeserializationError
      */
     static private SerializedBiscuit deserialize(Schema.Biscuit data) throws Error.FormatError.DeserializationError {
-        if(data.getAuthority().hasExternalSignature()) {
+        if (data.getAuthority().hasExternalSignature()) {
             throw new Error.FormatError.DeserializationError("the authority block must not contain an external signature");
         }
 
@@ -148,8 +149,8 @@ public class SerializedBiscuit {
         ArrayList<SignedBlock> blocks = new ArrayList<>();
         for (Schema.SignedBlock block : data.getBlocksList()) {
             Option<ExternalSignature> external = Option.none();
-            if(block.hasExternalSignature() && block.getExternalSignature().hasPublicKey()
-                && block.getExternalSignature().hasSignature()) {
+            if (block.hasExternalSignature() && block.getExternalSignature().hasPublicKey()
+                    && block.getExternalSignature().hasSignature()) {
                 Schema.ExternalSignature ex = block.getExternalSignature();
                 external = Option.some(new ExternalSignature(
                         org.biscuitsec.biscuit.crypto.PublicKey.deserialize(ex.getPublicKey()),
@@ -296,7 +297,7 @@ public class SerializedBiscuit {
             Signature sgr = new EdDSAEngine(MessageDigest.getInstance(org.biscuitsec.biscuit.crypto.KeyPair.ed25519.getHashAlgorithm()));
             sgr.initSign(this.proof.secretKey.get().privateKey);
             sgr.update(block);
-            if(externalSignature.isDefined()) {
+            if (externalSignature.isDefined()) {
                 sgr.update(externalSignature.get().signature);
             }
             sgr.update(algo_buf);
@@ -321,7 +322,7 @@ public class SerializedBiscuit {
         ByteBuffer algoBuf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
         {
             Either<Error, org.biscuitsec.biscuit.crypto.PublicKey> res = verifyBlockSignature(this.authority, currentKey);
-            if(res.isRight()) {
+            if (res.isRight()) {
                 currentKey = res.get();
             } else {
                 return Left(res.getLeft());
@@ -330,7 +331,7 @@ public class SerializedBiscuit {
 
         for (SignedBlock b : this.blocks) {
             Either<Error, org.biscuitsec.biscuit.crypto.PublicKey> res = verifyBlockSignature(b, currentKey);
-            if(res.isRight()) {
+            if (res.isRight()) {
                 currentKey = res.get();
             } else {
                 return Left(res.getLeft());
@@ -406,7 +407,7 @@ public class SerializedBiscuit {
 
         sgr.initVerify(publicKey.key);
         sgr.update(block);
-        if(signedBlock.externalSignature.isDefined()) {
+        if (signedBlock.externalSignature.isDefined()) {
             sgr.update(signedBlock.externalSignature.get().signature);
         }
         sgr.update(algoBuf);
@@ -415,7 +416,7 @@ public class SerializedBiscuit {
             return Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"));
         }
 
-        if(signedBlock.externalSignature.isDefined()) {
+        if (signedBlock.externalSignature.isDefined()) {
             ByteBuffer algoBuf2 = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
             algoBuf2.putInt(publicKey.algorithm.getNumber());
             algoBuf2.flip();
@@ -442,7 +443,7 @@ public class SerializedBiscuit {
             throw authRes.getLeft();
         }
         Block authority = authRes.get();
-        for(org.biscuitsec.biscuit.crypto.PublicKey pk: authority.publicKeys()) {
+        for (org.biscuitsec.biscuit.crypto.PublicKey pk : authority.publicKeys()) {
             symbols.insert(pk);
         }
         blockExternalKeys.add(Option.none());
@@ -454,7 +455,7 @@ public class SerializedBiscuit {
         ArrayList<Block> blocks = new ArrayList<>();
         for (SignedBlock blockData : this.blocks) {
             Option<org.biscuitsec.biscuit.crypto.PublicKey> externalKey = Option.none();
-            if(blockData.externalSignature.isDefined()) {
+            if (blockData.externalSignature.isDefined()) {
                 externalKey = Option.some(blockData.externalSignature.get().key);
             }
             Either<Error.FormatError, Block> blockRes = Block.from_bytes(blockData.block, externalKey);
@@ -464,7 +465,7 @@ public class SerializedBiscuit {
             Block block = blockRes.get();
 
             // blocks with external signatures keep their own symbol table
-            if(blockData.externalSignature.isDefined()) {
+            if (blockData.externalSignature.isDefined()) {
                 //symbols.insert(blockData.externalSignature.get().key);
                 blockExternalKeys.add(Option.some(blockData.externalSignature.get().key));
             } else {
@@ -472,7 +473,7 @@ public class SerializedBiscuit {
                 for (String s : block.symbols().symbols) {
                     symbols.add(s);
                 }
-                for(org.biscuitsec.biscuit.crypto.PublicKey pk: block.publicKeys()) {
+                for (org.biscuitsec.biscuit.crypto.PublicKey pk : block.publicKeys()) {
                     symbols.insert(pk);
                 }
             }
