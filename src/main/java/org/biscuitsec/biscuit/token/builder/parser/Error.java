@@ -4,8 +4,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public class Error extends Exception {
-    String input;
-    String message;
+    final String input;
+    final String message;
 
     public Error(String input, String message) {
         super(message);
