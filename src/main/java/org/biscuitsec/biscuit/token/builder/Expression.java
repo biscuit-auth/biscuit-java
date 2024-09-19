@@ -113,9 +113,9 @@ public abstract class Expression {
         return stack.pop();
     }
 
-    public abstract void toOpcodes(SymbolTable symbols, List<org.biscuitsec.biscuit.datalog.expressions.Op> ops);
-
     public abstract void gatherVariables(Set<String> variables);
+
+    public abstract void toOpcodes(SymbolTable symbols, List<org.biscuitsec.biscuit.datalog.expressions.Op> ops);
 
     // TODO Use all-caps naming convention for enums.
     //  This convention also applies to protobuf enums.
@@ -153,14 +153,9 @@ public abstract class Expression {
             this.value = value;
         }
 
-        public void toOpcodes(SymbolTable symbols, List<org.biscuitsec.biscuit.datalog.expressions.Op> ops) {
-            ops.add(new org.biscuitsec.biscuit.datalog.expressions.Op.Value(this.value.convert(symbols)));
-        }
-
-        public void gatherVariables(Set<String> variables) {
-            if (this.value instanceof Term.Variable) {
-                variables.add(((Term.Variable) this.value).value);
-            }
+        @Override
+        public int hashCode() {
+            return value != null ? value.hashCode() : 0;
         }
 
         @Override
@@ -174,13 +169,18 @@ public abstract class Expression {
         }
 
         @Override
-        public int hashCode() {
-            return value != null ? value.hashCode() : 0;
-        }
-
-        @Override
         public String toString() {
             return value.toString();
+        }
+
+        public void toOpcodes(SymbolTable symbols, List<org.biscuitsec.biscuit.datalog.expressions.Op> ops) {
+            ops.add(new org.biscuitsec.biscuit.datalog.expressions.Op.Value(this.value.convert(symbols)));
+        }
+
+        public void gatherVariables(Set<String> variables) {
+            if (this.value instanceof Term.Variable) {
+                variables.add(((Term.Variable) this.value).value);
+            }
         }
     }
 
@@ -191,6 +191,37 @@ public abstract class Expression {
         public Unary(Op op, Expression arg1) {
             this.op = op;
             this.arg1 = arg1;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = op.hashCode();
+            result = 31 * result + arg1.hashCode();
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Unary unary = (Unary) o;
+
+            if (op != unary.op) return false;
+            return arg1.equals(unary.arg1);
+        }
+
+        @Override
+        public String toString() {
+            switch (op) {
+                case Negate:
+                    return "!" + arg1;
+                case Parens:
+                    return "(" + arg1 + ")";
+                case Length:
+                    return arg1.toString() + ".length()";
+            }
+            return "";
         }
 
         public void toOpcodes(SymbolTable symbols, List<org.biscuitsec.biscuit.datalog.expressions.Op> ops) {
@@ -212,37 +243,6 @@ public abstract class Expression {
         public void gatherVariables(Set<String> variables) {
             this.arg1.gatherVariables(variables);
         }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            Unary unary = (Unary) o;
-
-            if (op != unary.op) return false;
-            return arg1.equals(unary.arg1);
-        }
-
-        @Override
-        public int hashCode() {
-            int result = op.hashCode();
-            result = 31 * result + arg1.hashCode();
-            return result;
-        }
-
-        @Override
-        public String toString() {
-            switch (op) {
-                case Negate:
-                    return "!" + arg1;
-                case Parens:
-                    return "(" + arg1 + ")";
-                case Length:
-                    return arg1.toString() + ".length()";
-            }
-            return "";
-        }
     }
 
     public final static class Binary extends Expression {
@@ -254,6 +254,75 @@ public abstract class Expression {
             this.op = op;
             this.arg1 = arg1;
             this.arg2 = arg2;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = op.hashCode();
+            result = 31 * result + arg1.hashCode();
+            result = 31 * result + arg2.hashCode();
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Binary binary = (Binary) o;
+
+            if (op != binary.op) return false;
+            if (!arg1.equals(binary.arg1)) return false;
+            return arg2.equals(binary.arg2);
+        }
+
+        @Override
+        public String toString() {
+            switch (op) {
+                case LessThan:
+                    return arg1.toString() + " < " + arg2.toString();
+                case GreaterThan:
+                    return arg1.toString() + " > " + arg2.toString();
+                case LessOrEqual:
+                    return arg1.toString() + " <= " + arg2.toString();
+                case GreaterOrEqual:
+                    return arg1.toString() + " >= " + arg2.toString();
+                case Equal:
+                    return arg1.toString() + " == " + arg2.toString();
+                case NotEqual:
+                    return arg1.toString() + " != " + arg2.toString();
+                case Contains:
+                    return arg1.toString() + ".contains(" + arg2.toString() + ")";
+                case Prefix:
+                    return arg1.toString() + ".starts_with(" + arg2.toString() + ")";
+                case Suffix:
+                    return arg1.toString() + ".ends_with(" + arg2.toString() + ")";
+                case Regex:
+                    return arg1.toString() + ".matches(" + arg2.toString() + ")";
+                case Add:
+                    return arg1.toString() + " + " + arg2.toString();
+                case Sub:
+                    return arg1.toString() + " - " + arg2.toString();
+                case Mul:
+                    return arg1.toString() + " * " + arg2.toString();
+                case Div:
+                    return arg1.toString() + " / " + arg2.toString();
+                case And:
+                    return arg1.toString() + " && " + arg2.toString();
+                case Or:
+                    return arg1.toString() + " || " + arg2.toString();
+                case Intersection:
+                    return arg1.toString() + ".intersection(" + arg2.toString() + ")";
+                case Union:
+                    return arg1.toString() + ".union(" + arg2.toString() + ")";
+                case BitwiseAnd:
+                    return arg1.toString() + " & " + arg2.toString();
+                case BitwiseOr:
+                    return arg1.toString() + " | " + arg2.toString();
+                case BitwiseXor:
+                    return arg1.toString() + " ^ " + arg2.toString();
+            }
+            return "";
         }
 
         public void toOpcodes(SymbolTable symbols, List<org.biscuitsec.biscuit.datalog.expressions.Op> ops) {
@@ -330,75 +399,6 @@ public abstract class Expression {
         public void gatherVariables(Set<String> variables) {
             this.arg1.gatherVariables(variables);
             this.arg2.gatherVariables(variables);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            Binary binary = (Binary) o;
-
-            if (op != binary.op) return false;
-            if (!arg1.equals(binary.arg1)) return false;
-            return arg2.equals(binary.arg2);
-        }
-
-        @Override
-        public int hashCode() {
-            int result = op.hashCode();
-            result = 31 * result + arg1.hashCode();
-            result = 31 * result + arg2.hashCode();
-            return result;
-        }
-
-        @Override
-        public String toString() {
-            switch (op) {
-                case LessThan:
-                    return arg1.toString() + " < " + arg2.toString();
-                case GreaterThan:
-                    return arg1.toString() + " > " + arg2.toString();
-                case LessOrEqual:
-                    return arg1.toString() + " <= " + arg2.toString();
-                case GreaterOrEqual:
-                    return arg1.toString() + " >= " + arg2.toString();
-                case Equal:
-                    return arg1.toString() + " == " + arg2.toString();
-                case NotEqual:
-                    return arg1.toString() + " != " + arg2.toString();
-                case Contains:
-                    return arg1.toString() + ".contains(" + arg2.toString() + ")";
-                case Prefix:
-                    return arg1.toString() + ".starts_with(" + arg2.toString() + ")";
-                case Suffix:
-                    return arg1.toString() + ".ends_with(" + arg2.toString() + ")";
-                case Regex:
-                    return arg1.toString() + ".matches(" + arg2.toString() + ")";
-                case Add:
-                    return arg1.toString() + " + " + arg2.toString();
-                case Sub:
-                    return arg1.toString() + " - " + arg2.toString();
-                case Mul:
-                    return arg1.toString() + " * " + arg2.toString();
-                case Div:
-                    return arg1.toString() + " / " + arg2.toString();
-                case And:
-                    return arg1.toString() + " && " + arg2.toString();
-                case Or:
-                    return arg1.toString() + " || " + arg2.toString();
-                case Intersection:
-                    return arg1.toString() + ".intersection(" + arg2.toString() + ")";
-                case Union:
-                    return arg1.toString() + ".union(" + arg2.toString() + ")";
-                case BitwiseAnd:
-                    return arg1.toString() + " & " + arg2.toString();
-                case BitwiseOr:
-                    return arg1.toString() + " | " + arg2.toString();
-                case BitwiseXor:
-                    return arg1.toString() + " ^ " + arg2.toString();
-            }
-            return "";
         }
     }
 }
