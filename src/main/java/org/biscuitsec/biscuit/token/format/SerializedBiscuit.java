@@ -304,10 +304,7 @@ public class SerializedBiscuit {
 
             SignedBlock signedBlock = new SignedBlock(block, nextKey, signature, externalSignature);
 
-            ArrayList<SignedBlock> blocks = new ArrayList<>();
-            for (SignedBlock bl : this.blocks) {
-                blocks.add(bl);
-            }
+            ArrayList<SignedBlock> blocks = new ArrayList<>(this.blocks);
             blocks.add(signedBlock);
 
             Proof proof = new Proof(next);
