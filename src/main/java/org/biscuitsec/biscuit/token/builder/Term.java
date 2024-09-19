@@ -36,7 +36,7 @@ public abstract class Term {
 
         @Override
         public String toString() {
-            return "\""+value+"\"";
+            return "\"" + value + "\"";
         }
 
         @Override
@@ -72,7 +72,7 @@ public abstract class Term {
 
         @Override
         public String toString() {
-            return "$"+value;
+            return "$" + value;
         }
 
         @Override
@@ -222,7 +222,7 @@ public abstract class Term {
 
         @Override
         public String toString() {
-            if(value) {
+            if (value) {
                 return "true";
             } else {
                 return "false";
@@ -256,7 +256,7 @@ public abstract class Term {
         public org.biscuitsec.biscuit.datalog.Term convert(SymbolTable symbols) {
             HashSet<org.biscuitsec.biscuit.datalog.Term> s = new HashSet<>();
 
-            for(Term t: this.value) {
+            for (Term t : this.value) {
                 s.add(t.convert(symbols));
             }
 
