@@ -18,10 +18,12 @@ public class Predicate implements Cloneable {
         this.terms = terms;
     }
 
+    @SuppressWarnings("unused")
     public String getName() {
         return name;
     }
 
+    @SuppressWarnings("unused")
     public List<Term> getTerms() {
         return terms;
     }
