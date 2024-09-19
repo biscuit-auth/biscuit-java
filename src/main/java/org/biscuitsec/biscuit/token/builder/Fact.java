@@ -70,14 +70,12 @@ public class Fact implements Cloneable{
 
     public Fact applyVariables() {
         this.variables.forEach(
-                vars -> {
-                    this.predicate.terms = this.predicate.terms.stream().flatMap(t -> {
-                        if(t instanceof Term.Variable){
-                            Option<Term> term = vars.getOrDefault(((Term.Variable) t).value, Option.none());
-                            return term.map(Stream::of).getOrElse(Stream.empty());
-                        } else return Stream.of(t);
-                    }).collect(toList());
-                });
+                vars -> this.predicate.terms = this.predicate.terms.stream().flatMap(t -> {
+                    if(t instanceof Term.Variable){
+                        Option<Term> term = vars.getOrDefault(((Term.Variable) t).value, Option.none());
+                        return term.map(Stream::of).getOrElse(Stream.empty());
+                    } else return Stream.of(t);
+                }).collect(toList()));
         return this;
     }
 
