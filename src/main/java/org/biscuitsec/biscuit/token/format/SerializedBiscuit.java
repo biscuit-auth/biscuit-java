@@ -27,9 +27,9 @@ import static io.vavr.API.Right;
  * Intermediate representation of a token before full serialization
  */
 public class SerializedBiscuit {
-    public SignedBlock authority;
-    public List<SignedBlock> blocks;
-    public Proof proof;
+    public final SignedBlock authority;
+    public final List<SignedBlock> blocks;
+    public final Proof proof;
     public Option<Integer> rootKeyId;
 
     public static int MIN_SCHEMA_VERSION = 3;
