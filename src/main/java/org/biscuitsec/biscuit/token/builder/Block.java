@@ -1,21 +1,20 @@
 package org.biscuitsec.biscuit.token.builder;
 
 
-import org.biscuitsec.biscuit.crypto.PublicKey;
-import org.biscuitsec.biscuit.datalog.SymbolTable;
-import org.biscuitsec.biscuit.error.Error;
-import org.biscuitsec.biscuit.datalog.SchemaVersion;
 import io.vavr.Tuple2;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
+import org.biscuitsec.biscuit.crypto.PublicKey;
+import org.biscuitsec.biscuit.datalog.SchemaVersion;
+import org.biscuitsec.biscuit.datalog.SymbolTable;
+import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.token.builder.parser.Parser;
+
+import java.util.*;
 
 import static org.biscuitsec.biscuit.datalog.Check.Kind.One;
 import static org.biscuitsec.biscuit.token.UnverifiedBiscuit.default_symbol_table;
 import static org.biscuitsec.biscuit.token.builder.Utils.*;
-
-
-import java.util.*;
 
 public class Block {
     final List<Fact> facts;
@@ -111,26 +110,26 @@ public class Block {
     }
 
     public org.biscuitsec.biscuit.token.Block build(SymbolTable symbols, final Option<PublicKey> externalKey) {
-        if(externalKey.isDefined()) {
+        if (externalKey.isDefined()) {
             symbols = new SymbolTable();
         }
         int symbolStart = symbols.currentOffset();
         int publicKeyStart = symbols.currentPublicKeyOffset();
 
         List<org.biscuitsec.biscuit.datalog.Fact> facts = new ArrayList<>();
-        for(Fact f: this.facts) {
+        for (Fact f : this.facts) {
             facts.add(f.convert(symbols));
         }
         List<org.biscuitsec.biscuit.datalog.Rule> rules = new ArrayList<>();
-        for(Rule r: this.rules) {
+        for (Rule r : this.rules) {
             rules.add(r.convert(symbols));
         }
         List<org.biscuitsec.biscuit.datalog.Check> checks = new ArrayList<>();
-        for(Check c: this.checks) {
+        for (Check c : this.checks) {
             checks.add(c.convert(symbols));
         }
         List<org.biscuitsec.biscuit.datalog.Scope> scopes = new ArrayList<>();
-        for(Scope s: this.scopes) {
+        for (Scope s : this.scopes) {
             scopes.add(s.convert(symbols));
         }
         SchemaVersion schemaVersion = new SchemaVersion(facts, rules, checks, scopes);
