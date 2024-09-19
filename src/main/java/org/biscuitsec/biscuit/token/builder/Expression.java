@@ -116,6 +116,8 @@ public abstract class Expression {
     public abstract void toOpcodes(SymbolTable symbols, List<org.biscuitsec.biscuit.datalog.expressions.Op> ops);
     public abstract void gatherVariables(Set<String> variables);
 
+    // TODO Use all-caps naming convention for enums.
+    //  This convention also applies to protobuf enums.
     public enum Op {
         Negate,
         Parens,
