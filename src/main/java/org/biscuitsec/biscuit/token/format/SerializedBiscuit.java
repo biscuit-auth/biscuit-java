@@ -23,6 +23,7 @@ import java.util.List;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static org.biscuitsec.biscuit.crypto.KeyPair.ed25519;
 
 /**
@@ -66,7 +67,7 @@ public class SerializedBiscuit {
 
             byte[] block = stream.toByteArray();
             org.biscuitsec.biscuit.crypto.PublicKey nextKey = next.publicKey();
-            ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
+            ByteBuffer algo_buf = ByteBuffer.allocate(4).order(LITTLE_ENDIAN);
             algo_buf.putInt(nextKey.algorithm.getNumber());
             algo_buf.flip();
 
@@ -203,7 +204,7 @@ public class SerializedBiscuit {
             b.writeTo(stream);
             byte[] block = stream.toByteArray();
             org.biscuitsec.biscuit.crypto.PublicKey next_key = next.publicKey();
-            ByteBuffer algoBuf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
+            ByteBuffer algoBuf = ByteBuffer.allocate(4).order(LITTLE_ENDIAN);
             algoBuf.putInt(next_key.algorithm.getNumber());
             algoBuf.flip();
 
@@ -247,7 +248,7 @@ public class SerializedBiscuit {
         }
 
         Signature sgr = new EdDSAEngine(MessageDigest.getInstance(ed25519.getHashAlgorithm()));
-        ByteBuffer algoBuf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
+        ByteBuffer algoBuf = ByteBuffer.allocate(4).order(LITTLE_ENDIAN);
         algoBuf.putInt(block.key.algorithm.getNumber());
         algoBuf.flip();
 
@@ -339,7 +340,7 @@ public class SerializedBiscuit {
 
     public Either<Error, Void> verify(org.biscuitsec.biscuit.crypto.PublicKey root) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         org.biscuitsec.biscuit.crypto.PublicKey currentKey = root;
-        ByteBuffer algoBuf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
+        ByteBuffer algoBuf = ByteBuffer.allocate(4).order(LITTLE_ENDIAN);
         {
             Either<Error, org.biscuitsec.biscuit.crypto.PublicKey> res = verifyBlockSignature(this.authority, currentKey);
             if (res.isRight()) {
@@ -435,7 +436,7 @@ public class SerializedBiscuit {
         if (signature.length != 64) {
             return Either.left(new Error.FormatError.Signature.InvalidSignatureSize(signature.length));
         }
-        ByteBuffer algoBuf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
+        ByteBuffer algoBuf = ByteBuffer.allocate(4).order(LITTLE_ENDIAN);
         algoBuf.putInt(nextKey.algorithm.getNumber());
         algoBuf.flip();
 
@@ -453,7 +454,7 @@ public class SerializedBiscuit {
         }
 
         if (signedBlock.externalSignature.isDefined()) {
-            ByteBuffer algoBuf2 = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
+            ByteBuffer algoBuf2 = ByteBuffer.allocate(4).order(LITTLE_ENDIAN);
             algoBuf2.putInt(publicKey.algorithm.getNumber());
             algoBuf2.flip();
 
