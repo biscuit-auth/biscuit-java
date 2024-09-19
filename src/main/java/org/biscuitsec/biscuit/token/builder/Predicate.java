@@ -18,16 +18,6 @@ public class Predicate implements Cloneable {
         this.terms = terms;
     }
 
-    @SuppressWarnings("unused")
-    public String getName() {
-        return name;
-    }
-
-    @SuppressWarnings("unused")
-    public List<Term> getTerms() {
-        return terms;
-    }
-
     public org.biscuitsec.biscuit.datalog.Predicate convert(SymbolTable symbols) {
         long name = symbols.insert(this.name);
         ArrayList<org.biscuitsec.biscuit.datalog.Term> terms = new ArrayList<>();
@@ -49,10 +39,21 @@ public class Predicate implements Cloneable {
         return new Predicate(name, terms);
     }
 
+    @SuppressWarnings("unused")
+    public String getName() {
+        return name;
+    }
+
+    @SuppressWarnings("unused")
+    public List<Term> getTerms() {
+        return terms;
+    }
+
     @Override
-    public String toString() {
-        final List<String> i = terms.stream().map(Object::toString).collect(toList());
-        return name + "(" + join(", ", i) + ")";
+    public int hashCode() {
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (terms != null ? terms.hashCode() : 0);
+        return result;
     }
 
     @Override
@@ -66,13 +67,6 @@ public class Predicate implements Cloneable {
         return Objects.equals(terms, predicate.terms);
     }
 
-    @Override
-    public int hashCode() {
-        int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (terms != null ? terms.hashCode() : 0);
-        return result;
-    }
-
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public Predicate clone() {
@@ -80,5 +74,11 @@ public class Predicate implements Cloneable {
         List<Term> terms = new ArrayList<>(this.terms.size());
         terms.addAll(this.terms);
         return new Predicate(name, terms);
+    }
+
+    @Override
+    public String toString() {
+        final List<String> i = terms.stream().map(Object::toString).collect(toList());
+        return name + "(" + join(", ", i) + ")";
     }
 }
