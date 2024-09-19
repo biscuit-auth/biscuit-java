@@ -48,7 +48,7 @@ public class Parser {
                int lineNumber = indexedLine._2;
                List<Error> lineErrors = new ArrayList<>();
 
-               boolean parsed = false;
+               boolean parsed;
                parsed = rule(code).fold(e -> {
                    lineErrors.add(e);
                    return false;
