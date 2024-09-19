@@ -88,6 +88,7 @@ public class Biscuit {
         return this;
     }
 
+    @SuppressWarnings("unused")
     public Biscuit addAuthorityRule(String s) throws Error.Parser {
         Either<org.biscuitsec.biscuit.token.builder.parser.Error, Tuple2<String, org.biscuitsec.biscuit.token.builder.Rule>> res =
                 Parser.rule(s);
@@ -119,16 +120,19 @@ public class Biscuit {
         return addAuthorityCheck(t._2);
     }
 
+    @SuppressWarnings("unused")
     public Biscuit setContext(String context) {
         this.context = context;
         return this;
     }
 
+    @SuppressWarnings("unused")
     public Biscuit addScope(org.biscuitsec.biscuit.token.builder.Scope scope) {
         this.scopes.add(scope);
         return this;
     }
 
+    @SuppressWarnings("unused")
     public void setRootKeyId(Integer rootKeyId) {
         this.rootKeyId = Option.some(rootKeyId);
     }
