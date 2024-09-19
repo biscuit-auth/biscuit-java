@@ -16,9 +16,9 @@ public class Scope {
         Parameter,
     }
 
-    Kind kind;
-    PublicKey publicKey;
-    String parameter;
+    final Kind kind;
+    final PublicKey publicKey;
+    final String parameter;
 
     private Scope(Kind kind) {
         this.kind = kind;
