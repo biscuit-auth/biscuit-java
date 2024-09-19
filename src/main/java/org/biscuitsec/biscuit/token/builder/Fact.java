@@ -19,7 +19,7 @@ public class Fact implements Cloneable{
     Option<Map<String, Option<Term>>> variables;
 
     public Fact(String name, List<Term> terms) {
-        Map<String, Option<Term>> variables = new HashMap<String, Option<Term>>();
+        Map<String, Option<Term>> variables = new HashMap<>();
         for (Term term : terms) {
             if (term instanceof Term.Variable) {
                 variables.put(((Term.Variable) term).value, Option.none());
