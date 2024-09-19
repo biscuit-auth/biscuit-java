@@ -13,7 +13,6 @@ public abstract class Expression {
     }
 
     public static Expression convert_from(org.biscuitsec.biscuit.datalog.expressions.Expression e, SymbolTable symbols) {
-        ArrayList<Op> ops = new ArrayList<>();
         Deque<Expression> stack = new ArrayDeque<>(16);
         for(org.biscuitsec.biscuit.datalog.expressions.Op op: e.getOps()){
             if(op instanceof org.biscuitsec.biscuit.datalog.expressions.Op.Value) {
