@@ -301,7 +301,7 @@ public class Parser {
         }
         s = s.substring(1);
 
-        List<Term> terms = new ArrayList<Term>();
+        List<Term> terms = new ArrayList<>();
         while (true) {
 
             s = space(s);
@@ -330,7 +330,7 @@ public class Parser {
         }
         String remaining = s.substring(1);
 
-        return Either.right(new Tuple2<String, Predicate>(remaining, new Predicate(name, terms)));
+        return Either.right(new Tuple2<>(remaining, new Predicate(name, terms)));
     }
 
     public static Either<Error, Tuple2<String, List<Scope>>> scopes(String s) {
@@ -420,7 +420,7 @@ public class Parser {
         }
         s = s.substring(1);
 
-        List<Term> terms = new ArrayList<Term>();
+        List<Term> terms = new ArrayList<>();
         while (true) {
 
             s = space(s);
@@ -656,7 +656,7 @@ public class Parser {
 
         s = s.substring(1);
 
-        HashSet<Term> terms = new HashSet<Term>();
+        HashSet<Term> terms = new HashSet<>();
         while (true) {
 
             s = space(s);
