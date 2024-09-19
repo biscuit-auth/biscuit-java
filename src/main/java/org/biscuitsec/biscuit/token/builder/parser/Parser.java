@@ -384,7 +384,7 @@ public class Parser {
                 return Either.left(new Error(s, "unrecognized parameter"));
             }
             Tuple2<String, String> t = res.get();
-            if (!s.isEmpty() && s.charAt(0) == '}') {
+            if (s.charAt(0) == '}') {
                 return Either.right(new Tuple2<>(t._1, Scope.parameter(t._2)));
             } else {
                 return Either.left(new Error(s, "unrecognized parameter end"));
