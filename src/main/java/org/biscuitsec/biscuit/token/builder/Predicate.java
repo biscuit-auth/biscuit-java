@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 public class Predicate implements Cloneable {
     String name;
     List<Term> terms;
@@ -46,7 +48,7 @@ public class Predicate implements Cloneable {
 
     @Override
     public String toString() {
-        final List<String> i = terms.stream().map((term) -> term.toString()).collect(Collectors.toList());
+        final List<String> i = terms.stream().map((term) -> term.toString()).collect(toList());
         return ""+name+"("+String.join(", ", i)+")";
     }
 
