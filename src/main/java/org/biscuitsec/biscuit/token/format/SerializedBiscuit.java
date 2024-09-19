@@ -16,7 +16,6 @@ import org.biscuitsec.biscuit.token.Block;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.security.*;
 import java.util.ArrayList;
 import java.util.List;
