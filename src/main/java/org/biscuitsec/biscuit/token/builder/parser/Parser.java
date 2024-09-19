@@ -26,7 +26,7 @@ public class Parser {
      * @param s datalog string to parse
      * @return Either<Map<Integer, List<Error>>, Block>
      */
-    public static Either<Map<Integer, List<Error>>, Block> datalog(long index, String s) {
+    public static Either<Map<Integer, List<Error>>, Block> datalog(@SuppressWarnings("unused") long index, String s) {
         Block blockBuilder = new Block();
 
         // empty block code
