@@ -27,9 +27,9 @@ public class BuilderTest {
         SymbolTable symbols = Biscuit.default_symbol_table();
 
         Block authority_builder = new Block();
-        authority_builder.add_fact(Utils.fact("revocation_id", List.of(Utils.date(Date.from(Instant.now())))));
-        authority_builder.add_fact(Utils.fact("right", List.of(Utils.s("admin"))));
-        authority_builder.add_rule(Utils.constrained_rule("right",
+        authority_builder.addFact(Utils.fact("revocation_id", List.of(Utils.date(Date.from(Instant.now())))));
+        authority_builder.addFact(Utils.fact("right", List.of(Utils.s("admin"))));
+        authority_builder.addRule(Utils.constrained_rule("right",
                 Arrays.asList(Utils.s("namespace"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("operation")),
                 List.of(Utils.pred("ns_operation", Arrays.asList(Utils.s("namespace"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("operation")))),
                 List.of(
@@ -43,7 +43,7 @@ public class BuilderTest {
                                 )))))
                 )
         ));
-        authority_builder.add_rule(Utils.constrained_rule("right",
+        authority_builder.addRule(Utils.constrained_rule("right",
                 Arrays.asList(Utils.s("topic"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("topic"), Utils.var("operation")),
                 List.of(Utils.pred("topic_operation", Arrays.asList(Utils.s("topic"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("topic"), Utils.var("operation")))),
                 List.of(

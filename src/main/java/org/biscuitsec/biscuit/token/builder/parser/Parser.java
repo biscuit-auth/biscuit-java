@@ -144,7 +144,7 @@ public class Parser {
                             lineErrors.add(e);
                             return false;
                         }, r -> {
-                            blockBuilder.add_rule(r._2);
+                            blockBuilder.addRule(r._2);
                             return true;
                         });
 
@@ -153,7 +153,7 @@ public class Parser {
                                 lineErrors.add(e);
                                 return false;
                             }, r -> {
-                                blockBuilder.add_fact(r._2);
+                                blockBuilder.addFact(r._2);
                                 return true;
                             });
                         }
@@ -163,7 +163,7 @@ public class Parser {
                                 lineErrors.add(e);
                                 return false;
                             }, r -> {
-                                blockBuilder.add_check(r._2);
+                                blockBuilder.addCheck(r._2);
                                 return true;
                             });
                         }
@@ -173,7 +173,7 @@ public class Parser {
                                 lineErrors.add(e);
                                 return false;
                             }, r -> {
-                                blockBuilder.add_scope(r._2);
+                                blockBuilder.addScope(r._2);
                                 return true;
                             });
                         }

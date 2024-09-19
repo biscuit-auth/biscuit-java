@@ -60,7 +60,7 @@ public class UnverifiedBiscuitTest {
 
         KeyPair keypair1 = new KeyPair(rng);
         org.biscuitsec.biscuit.token.builder.Block block1 = deser0.create_block();
-        block1.add_check(Utils.check(Utils.rule(
+        block1.addCheck(Utils.check(Utils.rule(
                 "caveat1",
                 List.of(Utils.var("resource")),
                 List.of(
@@ -92,7 +92,7 @@ public class UnverifiedBiscuitTest {
         KeyPair keypair2 = new KeyPair(rng);
 
         Block block2 = unverifiedBiscuit1.create_block();
-        block2.add_check(Utils.check(Utils.rule(
+        block2.addCheck(Utils.check(Utils.rule(
                 "caveat2",
                 List.of(Utils.s("file1")),
                 List.of(

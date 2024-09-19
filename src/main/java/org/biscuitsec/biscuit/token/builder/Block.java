@@ -32,12 +32,12 @@ public class Block {
         this.scopes = new ArrayList<>();
     }
 
-    public Block add_fact(org.biscuitsec.biscuit.token.builder.Fact f) {
+    public Block addFact(org.biscuitsec.biscuit.token.builder.Fact f) {
         this.facts.add(f);
         return this;
     }
 
-    public Block add_fact(String s) throws Error.Parser {
+    public Block addFact(String s) throws Error.Parser {
         Either<org.biscuitsec.biscuit.token.builder.parser.Error, Tuple2<String, org.biscuitsec.biscuit.token.builder.Fact>> res =
                 Parser.fact(s);
 
@@ -47,15 +47,15 @@ public class Block {
 
         Tuple2<String, org.biscuitsec.biscuit.token.builder.Fact> t = res.get();
 
-        return add_fact(t._2);
+        return addFact(t._2);
     }
 
-    public Block add_rule(org.biscuitsec.biscuit.token.builder.Rule rule) {
+    public Block addRule(org.biscuitsec.biscuit.token.builder.Rule rule) {
         this.rules.add(rule);
         return this;
     }
 
-    public Block add_rule(String s) throws Error.Parser {
+    public Block addRule(String s) throws Error.Parser {
         Either<org.biscuitsec.biscuit.token.builder.parser.Error, Tuple2<String, org.biscuitsec.biscuit.token.builder.Rule>> res =
                 Parser.rule(s);
 
@@ -65,15 +65,15 @@ public class Block {
 
         Tuple2<String, org.biscuitsec.biscuit.token.builder.Rule> t = res.get();
 
-        return add_rule(t._2);
+        return addRule(t._2);
     }
 
-    public Block add_check(org.biscuitsec.biscuit.token.builder.Check check) {
+    public Block addCheck(org.biscuitsec.biscuit.token.builder.Check check) {
         this.checks.add(check);
         return this;
     }
 
-    public Block add_check(String s) throws Error.Parser {
+    public Block addCheck(String s) throws Error.Parser {
         Either<org.biscuitsec.biscuit.token.builder.parser.Error, Tuple2<String, org.biscuitsec.biscuit.token.builder.Check>> res =
                 Parser.check(s);
 
@@ -83,15 +83,15 @@ public class Block {
 
         Tuple2<String, org.biscuitsec.biscuit.token.builder.Check> t = res.get();
 
-        return add_check(t._2);
+        return addCheck(t._2);
     }
 
-    public Block add_scope(org.biscuitsec.biscuit.token.builder.Scope scope) {
+    public Block addScope(org.biscuitsec.biscuit.token.builder.Scope scope) {
         this.scopes.add(scope);
         return this;
     }
 
-    public Block set_context(String context) {
+    public Block setContext(String context) {
         this.context = context;
         return this;
     }
@@ -133,10 +133,10 @@ public class Block {
         }
         SchemaVersion schemaVersion = new SchemaVersion(facts, rules, checks, scopes);
 
-        SymbolTable block_symbols = new SymbolTable();
+        SymbolTable blockSymbols = new SymbolTable();
 
         for (int i = symbol_start; i < symbols.symbols.size(); i++) {
-            block_symbols.add(symbols.symbols.get(i));
+            blockSymbols.add(symbols.symbols.get(i));
         }
 
         List<PublicKey> publicKeys = new ArrayList<>();
@@ -144,7 +144,7 @@ public class Block {
             publicKeys.add(symbols.publicKeys().get(i));
         }
 
-        return new org.biscuitsec.biscuit.token.Block(block_symbols, this.context, facts, rules, checks,
+        return new org.biscuitsec.biscuit.token.Block(blockSymbols, this.context, facts, rules, checks,
                 scopes, publicKeys, externalKey, schemaVersion.version());
     }
 
@@ -172,7 +172,7 @@ public class Block {
         return result;
     }
 
-    public Block check_right(String right) {
+    public Block checkRight(String right) {
         ArrayList<org.biscuitsec.biscuit.token.builder.Rule> queries = new ArrayList<>();
         queries.add(rule(
                 "check_right",
@@ -183,10 +183,10 @@ public class Block {
                         pred("right", Arrays.asList(var("resource"), s(right)))
                 )
         ));
-        return this.add_check(new org.biscuitsec.biscuit.token.builder.Check(One, queries));
+        return this.addCheck(new org.biscuitsec.biscuit.token.builder.Check(One, queries));
     }
 
-    public Block resource_prefix(String prefix) {
+    public Block resourcePrefix(String prefix) {
         ArrayList<org.biscuitsec.biscuit.token.builder.Rule> queries = new ArrayList<>();
 
         queries.add(constrained_rule(
@@ -196,10 +196,10 @@ public class Block {
                 Arrays.asList(new Expression.Binary(Expression.Op.Prefix, new Expression.Value(var("resource")),
                         new Expression.Value(string(prefix))))
         ));
-        return this.add_check(new org.biscuitsec.biscuit.token.builder.Check(One, queries));
+        return this.addCheck(new org.biscuitsec.biscuit.token.builder.Check(One, queries));
     }
 
-    public Block resource_suffix(String suffix) {
+    public Block resourceSuffix(String suffix) {
         ArrayList<org.biscuitsec.biscuit.token.builder.Rule> queries = new ArrayList<>();
 
         queries.add(constrained_rule(
@@ -209,10 +209,10 @@ public class Block {
                 Arrays.asList(new Expression.Binary(Expression.Op.Suffix, new Expression.Value(var("resource")),
                         new Expression.Value(string(suffix))))
         ));
-        return this.add_check(new org.biscuitsec.biscuit.token.builder.Check(One, queries));
+        return this.addCheck(new org.biscuitsec.biscuit.token.builder.Check(One, queries));
     }
 
-    public Block expiration_date(Date d) {
+    public Block expirationDate(Date d) {
         ArrayList<org.biscuitsec.biscuit.token.builder.Rule> queries = new ArrayList<>();
 
         queries.add(constrained_rule(
@@ -222,6 +222,6 @@ public class Block {
                 Arrays.asList(new Expression.Binary(Expression.Op.LessOrEqual, new Expression.Value(var("date")),
                         new Expression.Value(date(d))))
         ));
-        return this.add_check(new org.biscuitsec.biscuit.token.builder.Check(One, queries));
+        return this.addCheck(new org.biscuitsec.biscuit.token.builder.Check(One, queries));
     }
 }

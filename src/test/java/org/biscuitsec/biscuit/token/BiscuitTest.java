@@ -38,9 +38,9 @@ public class BiscuitTest {
 
         Block authority_builder = new Block();
 
-        authority_builder.add_fact(fact("right", Arrays.asList(s("file1"), s("read"))));
-        authority_builder.add_fact(fact("right", Arrays.asList(s("file2"), s("read"))));
-        authority_builder.add_fact(fact("right", Arrays.asList(s("file1"), s("write"))));
+        authority_builder.addFact(fact("right", Arrays.asList(s("file1"), s("read"))));
+        authority_builder.addFact(fact("right", Arrays.asList(s("file2"), s("read"))));
+        authority_builder.addFact(fact("right", Arrays.asList(s("file1"), s("write"))));
 
         Biscuit b = Biscuit.make(rng, root, authority_builder.build());
 
@@ -65,7 +65,7 @@ public class BiscuitTest {
         KeyPair keypair2 = new KeyPair(rng);
 
         Block builder = deser.create_block();
-        builder.add_check(check(rule(
+        builder.addCheck(check(rule(
                 "caveat1",
                 List.of(var("resource")),
                 Arrays.asList(
@@ -98,7 +98,7 @@ public class BiscuitTest {
         KeyPair keypair3 = new KeyPair(rng);
 
         Block builder3 = deser2.create_block();
-        builder3.add_check(check(rule(
+        builder3.addCheck(check(rule(
                 "caveat2",
                 List.of(s("file1")),
                 List.of(
@@ -175,8 +175,8 @@ public class BiscuitTest {
         out.println(b.print());
 
         Block block2 = b.create_block();
-        block2.resource_prefix("/folder1/");
-        block2.check_right("read");
+        block2.resourcePrefix("/folder1/");
+        block2.checkRight("read");
 
         KeyPair keypair2 = new KeyPair(rng);
         Biscuit b2 = b.attenuate(rng, keypair2, block2);
@@ -226,12 +226,12 @@ public class BiscuitTest {
 
         Block authority_builder = new Block();
         Date date = Date.from(Instant.now());
-        authority_builder.add_fact(fact("revocation_id", List.of(date(date))));
+        authority_builder.addFact(fact("revocation_id", List.of(date(date))));
 
         Biscuit biscuit = Biscuit.make(rng, root, authority_builder.build());
 
         Block builder = biscuit.create_block();
-        builder.add_fact(fact(
+        builder.addFact(fact(
                 "right",
                 Arrays.asList(s("topic"), s("tenant"), s("namespace"), s("topic"), s("produce"))
         ));
@@ -270,8 +270,8 @@ public class BiscuitTest {
         out.println(b.print());
 
         Block block2 = b.create_block();
-        block2.resource_prefix("/folder1/");
-        block2.check_right("read");
+        block2.resourcePrefix("/folder1/");
+        block2.checkRight("read");
 
         KeyPair keypair2 = new KeyPair(rng);
         Biscuit b2 = b.attenuate(rng, keypair2, block2);
@@ -337,8 +337,8 @@ public class BiscuitTest {
         out.println(b.print());
 
         Block block2 = b.create_block();
-        block2.resource_prefix("/folder1/");
-        block2.check_right("read");
+        block2.resourcePrefix("/folder1/");
+        block2.checkRight("read");
 
         KeyPair keypair2 = new KeyPair(rng);
         Biscuit b2 = b.attenuate(rng, keypair2, block2);
@@ -367,9 +367,9 @@ public class BiscuitTest {
 
         Block authority_builder = new Block();
 
-        authority_builder.add_fact(fact("namespace:right", Arrays.asList(s("file1"), s("read"))));
-        authority_builder.add_fact(fact("namespace:right", Arrays.asList(s("file1"), s("write"))));
-        authority_builder.add_fact(fact("namespace:right", Arrays.asList(s("file2"), s("read"))));
+        authority_builder.addFact(fact("namespace:right", Arrays.asList(s("file1"), s("read"))));
+        authority_builder.addFact(fact("namespace:right", Arrays.asList(s("file1"), s("write"))));
+        authority_builder.addFact(fact("namespace:right", Arrays.asList(s("file2"), s("read"))));
         Biscuit b = Biscuit.make(rng, root, authority_builder.build());
 
         out.println(b.print());
@@ -393,7 +393,7 @@ public class BiscuitTest {
         KeyPair keypair2 = new KeyPair(rng);
 
         Block builder = deser.create_block();
-        builder.add_check(check(rule(
+        builder.addCheck(check(rule(
                 "caveat1",
                 List.of(var("resource")),
                 Arrays.asList(
@@ -426,7 +426,7 @@ public class BiscuitTest {
         KeyPair keypair3 = new KeyPair(rng);
 
         Block builder3 = deser2.create_block();
-        builder3.add_check(check(rule(
+        builder3.addCheck(check(rule(
                 "caveat2",
                 List.of(s("file1")),
                 List.of(
@@ -516,7 +516,7 @@ public class BiscuitTest {
         KeyPair keypair2 = new KeyPair(rng);
 
         Block builder = deser.create_block();
-        builder.add_check(check(rule(
+        builder.addCheck(check(rule(
                 "caveat1",
                 List.of(var("resource")),
                 Arrays.asList(
@@ -549,7 +549,7 @@ public class BiscuitTest {
         KeyPair keypair3 = new KeyPair(rng);
 
         Block builder3 = deser2.create_block();
-        builder3.add_check(check(rule(
+        builder3.addCheck(check(rule(
                 "caveat2",
                 List.of(s("file1")),
                 List.of(
@@ -613,9 +613,9 @@ public class BiscuitTest {
 
         Block authority_builder = new Block();
 
-        authority_builder.add_fact(fact("right", Arrays.asList(s("file1"), s("read"))));
-        authority_builder.add_fact(fact("right", Arrays.asList(s("file2"), s("read"))));
-        authority_builder.add_fact(fact("right", Arrays.asList(s("file1"), s("write"))));
+        authority_builder.addFact(fact("right", Arrays.asList(s("file1"), s("read"))));
+        authority_builder.addFact(fact("right", Arrays.asList(s("file2"), s("read"))));
+        authority_builder.addFact(fact("right", Arrays.asList(s("file1"), s("write"))));
 
         Biscuit b = Biscuit.make(rng, root, 1, authority_builder.build());
 

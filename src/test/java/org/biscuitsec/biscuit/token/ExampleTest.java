@@ -33,7 +33,7 @@ public class ExampleTest {
 
     public Biscuit attenuate(KeyPair root, byte[] serializedToken) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         Biscuit token = Biscuit.from_bytes(serializedToken, root.publicKey());
-        Block block = token.create_block().add_check("check if operation(\"read\")");
+        Block block = token.create_block().addCheck("check if operation(\"read\")");
         return token.attenuate(block);
     }
 

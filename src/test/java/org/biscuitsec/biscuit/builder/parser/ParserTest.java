@@ -434,10 +434,10 @@ class ParserTest {
         assertTrue(output.isRight());
 
         Block validBlock = new Block();
-        validBlock.add_fact(l1);
-        validBlock.add_fact(l2);
-        validBlock.add_rule(l3);
-        validBlock.add_check(l4);
+        validBlock.addFact(l1);
+        validBlock.addFact(l2);
+        validBlock.addRule(l3);
+        validBlock.addCheck(l4);
 
         output.forEach(block ->
                 assertEquals(block, validBlock)
@@ -453,7 +453,7 @@ class ParserTest {
         assertTrue(output.isRight());
 
         Block validBlock = new Block();
-        validBlock.add_check(l1);
+        validBlock.addCheck(l1);
 
         output.forEach(block ->
                 assertEquals(block, validBlock)
@@ -469,7 +469,7 @@ class ParserTest {
         assertTrue(output.isRight());
 
         Block validBlock = new Block();
-        validBlock.add_check(l1);
+        validBlock.addCheck(l1);
 
         output.forEach(block ->
                 assertEquals(block, validBlock)
