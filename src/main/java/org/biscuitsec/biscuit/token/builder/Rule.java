@@ -150,7 +150,7 @@ public class Rule implements Cloneable {
         }
 
         for (org.biscuitsec.biscuit.datalog.Scope s : r.scopes()) {
-            scopes.add(Scope.convert_from(s, symbols));
+            scopes.add(Scope.convertFrom(s, symbols));
         }
 
         return new Rule(head, body, expressions, scopes);

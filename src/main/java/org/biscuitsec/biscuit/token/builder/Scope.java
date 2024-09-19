@@ -71,7 +71,7 @@ public class Scope {
         return null;
     }
 
-    public static Scope convert_from(org.biscuitsec.biscuit.datalog.Scope scope, SymbolTable symbols) {
+    public static Scope convertFrom(org.biscuitsec.biscuit.datalog.Scope scope, SymbolTable symbols) {
         switch (scope.kind()) {
             case Authority:
                 return new Scope(Kind.Authority);
