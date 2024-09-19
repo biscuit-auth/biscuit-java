@@ -38,7 +38,7 @@ public class ExpressionParser {
 
         while(true) {
             s = space(s);
-            if(s.length() == 0) {
+            if(s.isEmpty()) {
                 break;
             }
 
@@ -82,7 +82,7 @@ public class ExpressionParser {
 
         while(true) {
             s = space(s);
-            if(s.length() == 0) {
+            if(s.isEmpty()) {
                 break;
             }
 
@@ -166,7 +166,7 @@ public class ExpressionParser {
 
         while(true) {
             s = space(s);
-            if(s.length() == 0) {
+            if(s.isEmpty()) {
                 break;
             }
 
@@ -210,7 +210,7 @@ public class ExpressionParser {
 
         while(true) {
             s = space(s);
-            if(s.length() == 0) {
+            if(s.isEmpty()) {
                 break;
             }
 
@@ -254,7 +254,7 @@ public class ExpressionParser {
 
         while(true) {
             s = space(s);
-            if(s.length() == 0) {
+            if(s.isEmpty()) {
                 break;
             }
 
@@ -298,7 +298,7 @@ public class ExpressionParser {
 
         while(true) {
             s = space(s);
-            if(s.length() == 0) {
+            if(s.isEmpty()) {
                 break;
             }
 
@@ -342,7 +342,7 @@ public class ExpressionParser {
 
         while(true) {
             s = space(s);
-            if(s.length() == 0) {
+            if(s.isEmpty()) {
                 break;
             }
 
