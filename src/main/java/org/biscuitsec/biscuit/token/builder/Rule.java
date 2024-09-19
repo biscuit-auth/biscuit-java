@@ -45,6 +45,7 @@ public class Rule implements Cloneable {
         this.variables = Option.some(variables);
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public Rule clone() {
         Predicate head = this.head.clone();
