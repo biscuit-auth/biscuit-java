@@ -65,6 +65,7 @@ public abstract class Term {
             return new org.biscuitsec.biscuit.datalog.Term.Variable(symbols.insert(this.value));
         }
 
+        @SuppressWarnings("unused")
         public String getValue() {
             return value;
         }
@@ -176,6 +177,7 @@ public abstract class Term {
             return new org.biscuitsec.biscuit.datalog.Term.Date(this.value);
         }
 
+        @SuppressWarnings("unused")
         public long getValue() {
             return value;
         }
