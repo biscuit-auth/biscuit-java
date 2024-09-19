@@ -49,7 +49,7 @@ public class Predicate implements Cloneable {
     @Override
     public String toString() {
         final List<String> i = terms.stream().map((term) -> term.toString()).collect(toList());
-        return ""+name+"("+String.join(", ", i)+")";
+        return name+"("+String.join(", ", i)+")";
     }
 
     @Override
