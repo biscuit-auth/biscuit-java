@@ -3,7 +3,6 @@ package org.biscuitsec.biscuit.token.builder.parser;
 import biscuit.format.schema.Schema;
 import io.vavr.collection.Stream;
 import org.biscuitsec.biscuit.crypto.PublicKey;
-import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.token.Policy;
 import io.vavr.Tuple2;
 import io.vavr.Tuple4;
@@ -168,7 +167,6 @@ public class Parser {
             return Either.left(new Error(s, "missing check prefix"));
         }
 
-        List<Rule> queries = new ArrayList<>();
         Either<Error, Tuple2<String, List<Rule>>> bodyRes = check_body(s);
         if (bodyRes.isLeft()) {
             return Either.left(bodyRes.getLeft());
@@ -197,7 +195,6 @@ public class Parser {
             return Either.left(new Error(s, "missing policy prefix"));
         }
 
-        List<Rule> queries = new ArrayList<>();
         Either<Error, Tuple2<String, List<Rule>>> bodyRes = check_body(s);
         if (bodyRes.isLeft()) {
             return Either.left(bodyRes.getLeft());
