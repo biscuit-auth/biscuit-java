@@ -178,13 +178,13 @@ public class Biscuit {
             publicKeys.add(symbols.publicKeys().get(i));
         }
 
-        Block authority_block = new Block(blockSymbols, context, facts, rules,
+        Block authorityBlock = new Block(blockSymbols, context, facts, rules,
                 checks, scopes, publicKeys, Option.none(), schemaVersion.version());
 
         if (this.rootKeyId.isDefined()) {
-            return org.biscuitsec.biscuit.token.Biscuit.make(this.rng, this.root, this.rootKeyId.get(), authority_block);
+            return org.biscuitsec.biscuit.token.Biscuit.make(this.rng, this.root, this.rootKeyId.get(), authorityBlock);
         } else {
-            return org.biscuitsec.biscuit.token.Biscuit.make(this.rng, this.root, authority_block);
+            return org.biscuitsec.biscuit.token.Biscuit.make(this.rng, this.root, authorityBlock);
         }
     }
 }
