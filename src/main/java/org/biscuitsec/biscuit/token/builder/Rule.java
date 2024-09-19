@@ -186,10 +186,10 @@ public class Rule implements Cloneable {
 
         Rule rule = (Rule) o;
 
-        if (head != null ? !head.equals(rule.head) : rule.head != null) return false;
-        if (body != null ? !body.equals(rule.body) : rule.body != null) return false;
-        if (scopes != null ? !scopes.equals(rule.scopes) : rule.scopes != null) return false;
-        return expressions != null ? expressions.equals(rule.expressions) : rule.expressions == null;
+        if (!Objects.equals(head, rule.head)) return false;
+        if (!Objects.equals(body, rule.body)) return false;
+        if (!Objects.equals(scopes, rule.scopes)) return false;
+        return Objects.equals(expressions, rule.expressions);
     }
 
     @Override
