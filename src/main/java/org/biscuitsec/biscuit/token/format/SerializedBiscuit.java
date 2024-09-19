@@ -437,6 +437,7 @@ public class SerializedBiscuit {
     }
 
     public Tuple2<Block, ArrayList<Block>> extractBlocks(SymbolTable symbols) throws Error {
+        @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
         ArrayList<Option<org.biscuitsec.biscuit.crypto.PublicKey>> blockExternalKeys = new ArrayList<>();
         Either<Error.FormatError, Block> authRes = Block.from_bytes(this.authority.block, Option.none());
         if (authRes.isLeft()) {
