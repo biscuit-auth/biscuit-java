@@ -632,7 +632,7 @@ public class Parser {
 
         Tuple2<String, String> t = take_while(s.substring(1), (c) -> Character.isAlphabetic(c) || Character.isDigit(c) || c == '_');
 
-        return Either.right(new Tuple2<String, Term.Variable>(t._2, (Term.Variable) Utils.var(t._1)));
+        return Either.right(new Tuple2<>(t._2, (Term.Variable) Utils.var(t._1)));
     }
 
     public static Either<Error, Tuple2<String, Term.Bool>> bool(String s) {
