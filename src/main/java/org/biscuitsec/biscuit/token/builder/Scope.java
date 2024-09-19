@@ -9,6 +9,10 @@ import static java.util.Objects.requireNonNull;
 
 public class Scope {
 
+    final Kind kind;
+    final PublicKey publicKey;
+    final String parameter;
+
     // TODO Use all-caps naming convention for enums.
     //  This convention also applies to protobuf enums.
     enum Kind {
@@ -17,10 +21,6 @@ public class Scope {
         PublicKey,
         Parameter,
     }
-
-    final Kind kind;
-    final PublicKey publicKey;
-    final String parameter;
 
     private Scope(Kind kind) {
         this.kind = kind;
@@ -42,18 +42,6 @@ public class Scope {
 
     public static Scope authority() {
         return new Scope(Kind.Authority);
-    }
-
-    public static Scope previous() {
-        return new Scope(Kind.Previous);
-    }
-
-    public static Scope publicKey(PublicKey publicKey) {
-        return new Scope(publicKey);
-    }
-
-    public static Scope parameter(String parameter) {
-        return new Scope(parameter);
     }
 
     public org.biscuitsec.biscuit.datalog.Scope convert(SymbolTable symbols) {
@@ -91,6 +79,14 @@ public class Scope {
     }
 
     @Override
+    public int hashCode() {
+        int result = kind.hashCode();
+        result = 31 * result + (publicKey != null ? publicKey.hashCode() : 0);
+        result = 31 * result + (parameter != null ? parameter.hashCode() : 0);
+        return result;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -100,14 +96,6 @@ public class Scope {
         if (kind != scope.kind) return false;
         if (!Objects.equals(publicKey, scope.publicKey)) return false;
         return Objects.equals(parameter, scope.parameter);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = kind.hashCode();
-        result = 31 * result + (publicKey != null ? publicKey.hashCode() : 0);
-        result = 31 * result + (parameter != null ? parameter.hashCode() : 0);
-        return result;
     }
 
     @Override
@@ -123,5 +111,17 @@ public class Scope {
                 return requireNonNull(this.publicKey, "publicKey cannot be null").toString();
         }
         return null;
+    }
+
+    public static Scope parameter(String parameter) {
+        return new Scope(parameter);
+    }
+
+    public static Scope previous() {
+        return new Scope(Kind.Previous);
+    }
+
+    public static Scope publicKey(PublicKey publicKey) {
+        return new Scope(publicKey);
     }
 }
