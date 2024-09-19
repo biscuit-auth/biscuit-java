@@ -121,6 +121,7 @@ public class Fact implements Cloneable{
         return predicate != null ? predicate.hashCode() : 0;
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public Fact clone(){
         Predicate p = this.predicate.clone();
