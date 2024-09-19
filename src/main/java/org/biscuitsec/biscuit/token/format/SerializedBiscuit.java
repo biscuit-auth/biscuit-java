@@ -148,7 +148,7 @@ public class SerializedBiscuit {
      * @param slice
      * @return
      */
-    static public SerializedBiscuit fromBytes(byte[] slice, org.biscuitsec.biscuit.crypto.PublicKey root)
+    public static SerializedBiscuit fromBytes(byte[] slice, org.biscuitsec.biscuit.crypto.PublicKey root)
             throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         try {
             Schema.Biscuit data = Schema.Biscuit.parseFrom(slice);
@@ -165,7 +165,7 @@ public class SerializedBiscuit {
      * @param slice
      * @return
      */
-    static public SerializedBiscuit fromBytes(byte[] slice, KeyDelegate delegate)
+    public static SerializedBiscuit fromBytes(byte[] slice, KeyDelegate delegate)
             throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         try {
             Schema.Biscuit data = Schema.Biscuit.parseFrom(slice);
@@ -187,13 +187,13 @@ public class SerializedBiscuit {
     }
 
     @SuppressWarnings("unused")
-    static public Either<Error.FormatError, SerializedBiscuit> make(final org.biscuitsec.biscuit.crypto.KeyPair root,
+    public static Either<Error.FormatError, SerializedBiscuit> make(final org.biscuitsec.biscuit.crypto.KeyPair root,
                                                                     final Block authority,
                                                                     final org.biscuitsec.biscuit.crypto.KeyPair next) {
         return make(root, Option.none(), authority, next);
     }
 
-    static public Either<Error.FormatError, SerializedBiscuit> make(final org.biscuitsec.biscuit.crypto.KeyPair root,
+    public static Either<Error.FormatError, SerializedBiscuit> make(final org.biscuitsec.biscuit.crypto.KeyPair root,
                                                                     final Option<Integer> rootKeyId,
                                                                     final Block authority,
                                                                     final org.biscuitsec.biscuit.crypto.KeyPair next) {
@@ -328,7 +328,7 @@ public class SerializedBiscuit {
      * @return SerializedBiscuit
      * @throws Error.FormatError.DeserializationError
      */
-    static public SerializedBiscuit unsafeDeserialize(byte[] slice) throws Error.FormatError.DeserializationError {
+    public static SerializedBiscuit unsafeDeserialize(byte[] slice) throws Error.FormatError.DeserializationError {
         try {
             Schema.Biscuit data = Schema.Biscuit.parseFrom(slice);
             return SerializedBiscuit.deserialize(data);
@@ -477,7 +477,7 @@ public class SerializedBiscuit {
      * @return SerializedBiscuit
      * @throws Error.FormatError.DeserializationError
      */
-    static private SerializedBiscuit deserialize(Schema.Biscuit data) throws Error.FormatError.DeserializationError {
+    private static SerializedBiscuit deserialize(Schema.Biscuit data) throws Error.FormatError.DeserializationError {
         if (data.getAuthority().hasExternalSignature()) {
             throw new Error.FormatError.DeserializationError("the authority block must not contain an external signature");
         }
