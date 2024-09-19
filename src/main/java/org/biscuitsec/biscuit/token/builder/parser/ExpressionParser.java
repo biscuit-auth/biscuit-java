@@ -579,6 +579,7 @@ public class ExpressionParser {
         return expr(space(s));
     }
 
+    @SuppressWarnings("unused")
     public static Either<Error, Tuple2<String, Expression>> unary(String s) {
         s = space(s);
 
