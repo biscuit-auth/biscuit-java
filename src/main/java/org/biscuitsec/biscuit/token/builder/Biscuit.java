@@ -19,13 +19,13 @@ import java.util.List;
 import static org.biscuitsec.biscuit.token.UnverifiedBiscuit.default_symbol_table;
 
 public class Biscuit {
-    SecureRandom rng;
-    KeyPair root;
+    final SecureRandom rng;
+    final KeyPair root;
     String context;
-    List<Fact> facts;
-    List<Rule> rules;
-    List<Check> checks;
-    List<Scope> scopes;
+    final List<Fact> facts;
+    final List<Rule> rules;
+    final List<Check> checks;
+    final List<Scope> scopes;
     Option<Integer> rootKeyId;
 
     public Biscuit(final SecureRandom rng, final KeyPair root) {
