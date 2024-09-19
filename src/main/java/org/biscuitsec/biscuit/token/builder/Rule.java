@@ -11,11 +11,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Rule implements Cloneable {
-    Predicate head;
-    List<Predicate> body;
+    final Predicate head;
+    final List<Predicate> body;
     List<Expression> expressions;
-    Option<Map<String, Option<Term>>> variables;
-    List<Scope> scopes;
+    final Option<Map<String, Option<Term>>> variables;
+    final List<Scope> scopes;
 
     public Rule(Predicate head, List<Predicate> body, List<Expression> expressions, List<Scope> scopes) {
         Map<String, Option<Term>> variables = new HashMap<>();
