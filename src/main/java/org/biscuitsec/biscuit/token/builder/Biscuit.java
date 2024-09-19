@@ -21,11 +21,11 @@ import static org.biscuitsec.biscuit.token.UnverifiedBiscuit.default_symbol_tabl
 public class Biscuit {
     final SecureRandom rng;
     final KeyPair root;
-    String context;
     final List<Fact> facts;
     final List<Rule> rules;
     final List<Check> checks;
     final List<Scope> scopes;
+    String context;
     Option<Integer> rootKeyId;
 
     public Biscuit(final SecureRandom rng, final KeyPair root) {
@@ -62,6 +62,24 @@ public class Biscuit {
         this.rules = block.rules;
         this.checks = block.checks;
         this.scopes = block.scopes;
+    }
+
+    public Biscuit addAuthorityCheck(org.biscuitsec.biscuit.token.builder.Check c) {
+        this.checks.add(c);
+        return this;
+    }
+
+    public Biscuit addAuthorityCheck(String s) throws Error.Parser {
+        Either<org.biscuitsec.biscuit.token.builder.parser.Error, Tuple2<String, org.biscuitsec.biscuit.token.builder.Check>> res =
+                Parser.check(s);
+
+        if (res.isLeft()) {
+            throw new Error.Parser(res.getLeft());
+        }
+
+        Tuple2<String, org.biscuitsec.biscuit.token.builder.Check> t = res.get();
+
+        return addAuthorityCheck(t._2);
     }
 
     public Biscuit addAuthorityFact(org.biscuitsec.biscuit.token.builder.Fact f) throws Error.Language {
@@ -102,22 +120,18 @@ public class Biscuit {
         return addAuthorityRule(t._2);
     }
 
-    public Biscuit addAuthorityCheck(org.biscuitsec.biscuit.token.builder.Check c) {
-        this.checks.add(c);
+    public Biscuit addRight(String resource, String right) throws Error.Language {
+        return this.addAuthorityFact(Utils.fact("right", Arrays.asList(Utils.string(resource), Utils.s(right))));
+    }
+
+    @SuppressWarnings("unused")
+    public Biscuit addScope(org.biscuitsec.biscuit.token.builder.Scope scope) {
+        this.scopes.add(scope);
         return this;
     }
 
-    public Biscuit addAuthorityCheck(String s) throws Error.Parser {
-        Either<org.biscuitsec.biscuit.token.builder.parser.Error, Tuple2<String, org.biscuitsec.biscuit.token.builder.Check>> res =
-                Parser.check(s);
-
-        if (res.isLeft()) {
-            throw new Error.Parser(res.getLeft());
-        }
-
-        Tuple2<String, org.biscuitsec.biscuit.token.builder.Check> t = res.get();
-
-        return addAuthorityCheck(t._2);
+    public org.biscuitsec.biscuit.token.Biscuit build() throws Error {
+        return build(default_symbol_table());
     }
 
     @SuppressWarnings("unused")
@@ -127,18 +141,8 @@ public class Biscuit {
     }
 
     @SuppressWarnings("unused")
-    public Biscuit addScope(org.biscuitsec.biscuit.token.builder.Scope scope) {
-        this.scopes.add(scope);
-        return this;
-    }
-
-    @SuppressWarnings("unused")
     public void setRootKeyId(Integer rootKeyId) {
         this.rootKeyId = Option.some(rootKeyId);
-    }
-
-    public org.biscuitsec.biscuit.token.Biscuit build() throws Error {
-        return build(default_symbol_table());
     }
 
     private org.biscuitsec.biscuit.token.Biscuit build(SymbolTable symbols) throws Error {
@@ -182,9 +186,5 @@ public class Biscuit {
         } else {
             return org.biscuitsec.biscuit.token.Biscuit.make(this.rng, this.root, authority_block);
         }
-    }
-
-    public Biscuit addRight(String resource, String right) throws Error.Language {
-        return this.addAuthorityFact(Utils.fact("right", Arrays.asList(Utils.string(resource), Utils.s(right))));
     }
 }
