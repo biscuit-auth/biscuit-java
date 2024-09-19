@@ -338,7 +338,8 @@ public class SerializedBiscuit {
         }
     }
 
-    public Either<Error, Void> verify(org.biscuitsec.biscuit.crypto.PublicKey root) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    public Either<Error, Void> verify(org.biscuitsec.biscuit.crypto.PublicKey root)
+            throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         org.biscuitsec.biscuit.crypto.PublicKey currentKey = root;
         ByteBuffer algoBuf = ByteBuffer.allocate(4).order(LITTLE_ENDIAN);
         {
