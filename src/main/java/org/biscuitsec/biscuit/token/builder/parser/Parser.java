@@ -1,12 +1,12 @@
 package org.biscuitsec.biscuit.token.builder.parser;
 
 import biscuit.format.schema.Schema;
-import io.vavr.collection.Stream;
-import org.biscuitsec.biscuit.crypto.PublicKey;
-import org.biscuitsec.biscuit.token.Policy;
 import io.vavr.Tuple2;
 import io.vavr.Tuple4;
+import io.vavr.collection.Stream;
 import io.vavr.control.Either;
+import org.biscuitsec.biscuit.crypto.PublicKey;
+import org.biscuitsec.biscuit.token.Policy;
 import org.biscuitsec.biscuit.token.builder.*;
 
 import java.time.OffsetDateTime;
@@ -18,13 +18,13 @@ public class Parser {
     /**
      * Takes a datalog string with <code>\n</code> as datalog line separator. It tries to parse
      * each line using fact, rule, check and scope sequentially.
-     *
+     * <p>
      * If one succeeds it returns Right(Block)
      * else it returns a Map[lineNumber, List[Error]]
      *
      * @param index block index
-     * @param s datalog string to parse
-     * @return Either<Map<Integer, List<Error>>, Block>
+     * @param s     datalog string to parse
+     * @return Either<Map < Integer, List < Error>>, Block>
      */
     public static Either<Map<Integer, List<Error>>, Block> datalog(@SuppressWarnings("unused") long index, String s) {
         Block blockBuilder = new Block();
@@ -42,57 +42,57 @@ public class Parser {
         Stream.of(codeLines)
                 .zipWithIndex()
                 .forEach(indexedLine -> {
-           String code = indexedLine._1.strip();
+                    String code = indexedLine._1.strip();
 
-           if (!code.isEmpty()) {
-               int lineNumber = indexedLine._2;
-               List<Error> lineErrors = new ArrayList<>();
+                    if (!code.isEmpty()) {
+                        int lineNumber = indexedLine._2;
+                        List<Error> lineErrors = new ArrayList<>();
 
-               boolean parsed;
-               parsed = rule(code).fold(e -> {
-                   lineErrors.add(e);
-                   return false;
-               }, r -> {
-                   blockBuilder.add_rule(r._2);
-                   return true;
-               });
+                        boolean parsed;
+                        parsed = rule(code).fold(e -> {
+                            lineErrors.add(e);
+                            return false;
+                        }, r -> {
+                            blockBuilder.add_rule(r._2);
+                            return true;
+                        });
 
-               if (!parsed) {
-                   parsed = fact(code).fold(e -> {
-                       lineErrors.add(e);
-                       return false;
-                   }, r -> {
-                       blockBuilder.add_fact(r._2);
-                       return true;
-                   });
-               }
+                        if (!parsed) {
+                            parsed = fact(code).fold(e -> {
+                                lineErrors.add(e);
+                                return false;
+                            }, r -> {
+                                blockBuilder.add_fact(r._2);
+                                return true;
+                            });
+                        }
 
-               if (!parsed) {
-                   parsed = check(code).fold(e -> {
-                       lineErrors.add(e);
-                       return false;
-                   }, r -> {
-                       blockBuilder.add_check(r._2);
-                       return true;
-                   });
-               }
+                        if (!parsed) {
+                            parsed = check(code).fold(e -> {
+                                lineErrors.add(e);
+                                return false;
+                            }, r -> {
+                                blockBuilder.add_check(r._2);
+                                return true;
+                            });
+                        }
 
-               if (!parsed) {
-                   parsed = scope(code).fold(e -> {
-                       lineErrors.add(e);
-                       return false;
-                   }, r -> {
-                       blockBuilder.add_scope(r._2);
-                       return true;
-                   });
-               }
+                        if (!parsed) {
+                            parsed = scope(code).fold(e -> {
+                                lineErrors.add(e);
+                                return false;
+                            }, r -> {
+                                blockBuilder.add_scope(r._2);
+                                return true;
+                            });
+                        }
 
-               if (!parsed) {
-                   lineErrors.forEach(System.out::println);
-                   errors.put(lineNumber, lineErrors);
-               }
-           }
-        });
+                        if (!parsed) {
+                            lineErrors.forEach(System.out::println);
+                            errors.put(lineNumber, lineErrors);
+                        }
+                    }
+                });
 
         if (!errors.isEmpty()) {
             return Either.left(errors);
@@ -219,7 +219,7 @@ public class Parser {
 
         s = body._1;
         //FIXME: parse scopes
-        queries.add(new Rule(new Predicate("query", new ArrayList<>()), body._2, body._3,  body._4));
+        queries.add(new Rule(new Predicate("query", new ArrayList<>()), body._2, body._3, body._4));
 
         while (true) {
             if (s.isEmpty()) {
@@ -241,7 +241,7 @@ public class Parser {
             Tuple4<String, List<Predicate>, List<Expression>, List<Scope>> body2 = bodyRes2.get();
 
             s = body2._1;
-            queries.add(new Rule(new Predicate("query", new ArrayList<>()), body2._2, body2._3,  body2._4));
+            queries.add(new Rule(new Predicate("query", new ArrayList<>()), body2._2, body2._3, body2._4));
         }
 
         return Either.right(new Tuple2<>(s, queries));
@@ -280,7 +280,7 @@ public class Parser {
         }
 
         Either<Error, Tuple2<String, List<Scope>>> res = scopes(s);
-        if(res.isLeft()) {
+        if (res.isLeft()) {
             return Either.right(new Tuple4<>(s, predicates, expressions, new ArrayList<>()));
         } else {
             Tuple2<String, List<Scope>> t = res.get();
@@ -297,7 +297,7 @@ public class Parser {
 
         s = space(s);
         if (s.isEmpty() || s.charAt(0) != '(') {
-            return Either.left(new Error(s, "opening parens not found for predicate "+name));
+            return Either.left(new Error(s, "opening parens not found for predicate " + name));
         }
         s = s.substring(1);
 
@@ -416,7 +416,7 @@ public class Parser {
 
         s = space(s);
         if (s.isEmpty() || s.charAt(0) != '(') {
-            return Either.left(new Error(s, "opening parens not found for fact "+name));
+            return Either.left(new Error(s, "opening parens not found for fact " + name));
         }
         s = s.substring(1);
 
@@ -707,17 +707,17 @@ public class Parser {
         int index = 0;
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
-            if("0123456789ABCDEFabcdef".indexOf(c) == -1) {
+            if ("0123456789ABCDEFabcdef".indexOf(c) == -1) {
                 break;
             }
 
             index += 1;
         }
 
-        String hex =  s.substring(0, index);
+        String hex = s.substring(0, index);
         byte[] bytes = Utils.hexStringToByteArray(hex);
         s = s.substring(index);
-        return new Tuple2<>(s,bytes);
+        return new Tuple2<>(s, bytes);
 
     }
 
