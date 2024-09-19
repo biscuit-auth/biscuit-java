@@ -4,7 +4,6 @@ import org.biscuitsec.biscuit.datalog.SymbolTable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -36,7 +35,7 @@ public class Predicate implements Cloneable {
         return new org.biscuitsec.biscuit.datalog.Predicate(name, terms);
     }
 
-    public static Predicate convert_from(org.biscuitsec.biscuit.datalog.Predicate p, SymbolTable symbols) {
+    public static Predicate convertFrom(org.biscuitsec.biscuit.datalog.Predicate p, SymbolTable symbols) {
         String name = symbols.printSymbol((int) p.name());
         List<Term> terms = new ArrayList<>();
         for(org.biscuitsec.biscuit.datalog.Term t: p.terms()) {

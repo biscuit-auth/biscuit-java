@@ -156,7 +156,7 @@ public class Rule implements Cloneable {
     }
 
     public static Rule convert_from(org.biscuitsec.biscuit.datalog.Rule r, SymbolTable symbols) {
-        Predicate head = Predicate.convert_from(r.head(), symbols);
+        Predicate head = Predicate.convertFrom(r.head(), symbols);
 
         ArrayList<Predicate> body = new ArrayList<>();
         ArrayList<Expression> expressions = new ArrayList<>();
@@ -164,7 +164,7 @@ public class Rule implements Cloneable {
 
 
         for (org.biscuitsec.biscuit.datalog.Predicate p : r.body()) {
-            body.add(Predicate.convert_from(p, symbols));
+            body.add(Predicate.convertFrom(p, symbols));
         }
 
         for (org.biscuitsec.biscuit.datalog.expressions.Expression e : r.expressions()) {
