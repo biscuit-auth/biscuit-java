@@ -1,9 +1,9 @@
 package org.biscuitsec.biscuit.token.builder.parser;
 
-import org.biscuitsec.biscuit.token.builder.Term;
 import io.vavr.Tuple2;
 import io.vavr.control.Either;
 import org.biscuitsec.biscuit.token.builder.Expression;
+import org.biscuitsec.biscuit.token.builder.Term;
 
 import static org.biscuitsec.biscuit.token.builder.parser.Parser.space;
 import static org.biscuitsec.biscuit.token.builder.parser.Parser.term;
@@ -36,9 +36,9 @@ public class ExpressionParser {
         s = t1._1;
         Expression e = t1._2;
 
-        while(true) {
+        while (true) {
             s = space(s);
-            if(s.isEmpty()) {
+            if (s.isEmpty()) {
                 break;
             }
 
@@ -80,9 +80,9 @@ public class ExpressionParser {
         s = t1._1;
         Expression e = t1._2;
 
-        while(true) {
+        while (true) {
             s = space(s);
-            if(s.isEmpty()) {
+            if (s.isEmpty()) {
                 break;
             }
 
@@ -164,9 +164,9 @@ public class ExpressionParser {
         s = t1._1;
         Expression e = t1._2;
 
-        while(true) {
+        while (true) {
             s = space(s);
-            if(s.isEmpty()) {
+            if (s.isEmpty()) {
                 break;
             }
 
@@ -208,9 +208,9 @@ public class ExpressionParser {
         s = t1._1;
         Expression e = t1._2;
 
-        while(true) {
+        while (true) {
             s = space(s);
-            if(s.isEmpty()) {
+            if (s.isEmpty()) {
                 break;
             }
 
@@ -252,9 +252,9 @@ public class ExpressionParser {
         s = t1._1;
         Expression e = t1._2;
 
-        while(true) {
+        while (true) {
             s = space(s);
-            if(s.isEmpty()) {
+            if (s.isEmpty()) {
                 break;
             }
 
@@ -296,9 +296,9 @@ public class ExpressionParser {
         s = t1._1;
         Expression e = t1._2;
 
-        while(true) {
+        while (true) {
             s = space(s);
-            if(s.isEmpty()) {
+            if (s.isEmpty()) {
                 break;
             }
 
@@ -340,9 +340,9 @@ public class ExpressionParser {
         s = t1._1;
         Expression e = t1._2;
 
-        while(true) {
+        while (true) {
             s = space(s);
-            if(s.isEmpty()) {
+            if (s.isEmpty()) {
                 break;
             }
 
@@ -376,7 +376,7 @@ public class ExpressionParser {
 
         s = space(s);
 
-        if(s.startsWith("!")) {
+        if (s.startsWith("!")) {
             s = space(s.substring(1));
 
             Either<Error, Tuple2<String, Expression>> res = expr9(s);
@@ -404,9 +404,9 @@ public class ExpressionParser {
         s = t1._1;
         Expression e = t1._2;
 
-        while(true) {
+        while (true) {
             s = space(s);
-            if(s.isEmpty()) {
+            if (s.isEmpty()) {
                 break;
             }
 
@@ -472,7 +472,7 @@ public class ExpressionParser {
     public static Either<Error, Tuple2<String, Expression>> unary(String s) {
         s = space(s);
 
-        if(s.startsWith("!")) {
+        if (s.startsWith("!")) {
             s = space(s.substring(1));
 
             Either<Error, Tuple2<String, Expression>> res = expr(s);
@@ -485,14 +485,14 @@ public class ExpressionParser {
         }
 
 
-        if(s.startsWith("(")) {
+        if (s.startsWith("(")) {
             Either<Error, Tuple2<String, Expression>> res = unaryParens(s);
             if (res.isLeft()) {
                 return Either.left(res.getLeft());
             }
 
             Tuple2<String, Expression> t = res.get();
-            return Either.right(new Tuple2<>(t._1,  t._2));
+            return Either.right(new Tuple2<>(t._1, t._2));
         }
 
         Expression e;
@@ -512,7 +512,7 @@ public class ExpressionParser {
             e = t._2;
         }
 
-        if(s.startsWith(".length()")) {
+        if (s.startsWith(".length()")) {
             s = space(s.substring(9));
             return Either.right(new Tuple2<>(s, new Expression.Unary(Expression.Op.Length, e)));
         } else {
@@ -521,7 +521,7 @@ public class ExpressionParser {
     }
 
     public static Either<Error, Tuple2<String, Expression>> unaryParens(String s) {
-        if(s.startsWith("(")) {
+        if (s.startsWith("(")) {
             s = space(s.substring(1));
 
             Either<Error, Tuple2<String, Expression>> res = expr(s);
@@ -532,7 +532,7 @@ public class ExpressionParser {
             Tuple2<String, Expression> t = res.get();
 
             s = space(t._1);
-            if(!s.startsWith(")")) {
+            if (!s.startsWith(")")) {
                 return Either.left(new Error(s, "missing )"));
             }
 
@@ -544,7 +544,7 @@ public class ExpressionParser {
     }
 
     public static Either<Error, Tuple2<String, Expression.Op>> binaryOp0(String s) {
-        if(s.startsWith("||")) {
+        if (s.startsWith("||")) {
             return Either.right(new Tuple2<>(s.substring(2), Expression.Op.Or));
         }
 
@@ -552,7 +552,7 @@ public class ExpressionParser {
     }
 
     public static Either<Error, Tuple2<String, Expression.Op>> binaryOp1(String s) {
-        if(s.startsWith("&&")) {
+        if (s.startsWith("&&")) {
             return Either.right(new Tuple2<>(s.substring(2), Expression.Op.And));
         }
 
@@ -560,22 +560,22 @@ public class ExpressionParser {
     }
 
     public static Either<Error, Tuple2<String, Expression.Op>> binaryOp2(String s) {
-        if(s.startsWith("<=")) {
+        if (s.startsWith("<=")) {
             return Either.right(new Tuple2<>(s.substring(2), Expression.Op.LessOrEqual));
         }
-        if(s.startsWith(">=")) {
+        if (s.startsWith(">=")) {
             return Either.right(new Tuple2<>(s.substring(2), Expression.Op.GreaterOrEqual));
         }
-        if(s.startsWith("<")) {
+        if (s.startsWith("<")) {
             return Either.right(new Tuple2<>(s.substring(1), Expression.Op.LessThan));
         }
-        if(s.startsWith(">")) {
+        if (s.startsWith(">")) {
             return Either.right(new Tuple2<>(s.substring(1), Expression.Op.GreaterThan));
         }
-        if(s.startsWith("==")) {
+        if (s.startsWith("==")) {
             return Either.right(new Tuple2<>(s.substring(2), Expression.Op.Equal));
         }
-        if(s.startsWith("!=")) {
+        if (s.startsWith("!=")) {
             return Either.right(new Tuple2<>(s.substring(2), Expression.Op.NotEqual));
         }
 
@@ -584,7 +584,7 @@ public class ExpressionParser {
 
 
     public static Either<Error, Tuple2<String, Expression.Op>> binaryOp3(String s) {
-        if(s.startsWith("^")) {
+        if (s.startsWith("^")) {
             return Either.right(new Tuple2<>(s.substring(1), Expression.Op.BitwiseXor));
         }
 
@@ -592,7 +592,7 @@ public class ExpressionParser {
     }
 
     public static Either<Error, Tuple2<String, Expression.Op>> binaryOp4(String s) {
-        if(s.startsWith("|") && !s.startsWith("||")) {
+        if (s.startsWith("|") && !s.startsWith("||")) {
             return Either.right(new Tuple2<>(s.substring(1), Expression.Op.BitwiseOr));
         }
 
@@ -600,7 +600,7 @@ public class ExpressionParser {
     }
 
     public static Either<Error, Tuple2<String, Expression.Op>> binaryOp5(String s) {
-        if(s.startsWith("&") && !s.startsWith("&&")) {
+        if (s.startsWith("&") && !s.startsWith("&&")) {
             return Either.right(new Tuple2<>(s.substring(1), Expression.Op.BitwiseAnd));
         }
 
@@ -609,10 +609,10 @@ public class ExpressionParser {
 
     public static Either<Error, Tuple2<String, Expression.Op>> binaryOp6(String s) {
 
-        if(s.startsWith("+")) {
+        if (s.startsWith("+")) {
             return Either.right(new Tuple2<>(s.substring(1), Expression.Op.Add));
         }
-        if(s.startsWith("-")) {
+        if (s.startsWith("-")) {
             return Either.right(new Tuple2<>(s.substring(1), Expression.Op.Sub));
         }
 
@@ -621,10 +621,10 @@ public class ExpressionParser {
 
 
     public static Either<Error, Tuple2<String, Expression.Op>> binaryOp7(String s) {
-        if(s.startsWith("*")) {
+        if (s.startsWith("*")) {
             return Either.right(new Tuple2<>(s.substring(1), Expression.Op.Mul));
         }
-        if(s.startsWith("/")) {
+        if (s.startsWith("/")) {
             return Either.right(new Tuple2<>(s.substring(1), Expression.Op.Div));
         }
 
@@ -632,22 +632,22 @@ public class ExpressionParser {
     }
 
     public static Either<Error, Tuple2<String, Expression.Op>> binaryOp8(String s) {
-        if(s.startsWith("intersection")) {
+        if (s.startsWith("intersection")) {
             return Either.right(new Tuple2<>(s.substring(12), Expression.Op.Intersection));
         }
-        if(s.startsWith("union")) {
+        if (s.startsWith("union")) {
             return Either.right(new Tuple2<>(s.substring(5), Expression.Op.Union));
         }
-        if(s.startsWith("contains")) {
+        if (s.startsWith("contains")) {
             return Either.right(new Tuple2<>(s.substring(8), Expression.Op.Contains));
         }
-        if(s.startsWith("starts_with")) {
+        if (s.startsWith("starts_with")) {
             return Either.right(new Tuple2<>(s.substring(11), Expression.Op.Prefix));
         }
-        if(s.startsWith("ends_with")) {
+        if (s.startsWith("ends_with")) {
             return Either.right(new Tuple2<>(s.substring(9), Expression.Op.Suffix));
         }
-        if(s.startsWith("matches")) {
+        if (s.startsWith("matches")) {
             return Either.right(new Tuple2<>(s.substring(7), Expression.Op.Regex));
         }
 
