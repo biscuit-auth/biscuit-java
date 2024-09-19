@@ -281,7 +281,7 @@ public class Authorizer {
     public Authorizer allow() {
         ArrayList<org.biscuitsec.biscuit.token.builder.Rule> q = new ArrayList<>();
 
-        q.add(Utils.constrained_rule(
+        q.add(Utils.constrainedRule(
                 "allow",
                 new ArrayList<>(),
                 new ArrayList<>(),
@@ -295,7 +295,7 @@ public class Authorizer {
     public Authorizer deny() {
         ArrayList<org.biscuitsec.biscuit.token.builder.Rule> q = new ArrayList<>();
 
-        q.add(Utils.constrained_rule(
+        q.add(Utils.constrainedRule(
                 "deny",
                 new ArrayList<>(),
                 new ArrayList<>(),

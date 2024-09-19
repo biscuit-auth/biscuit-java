@@ -161,7 +161,7 @@ public class Block {
     public Block expirationDate(Date d) {
         ArrayList<org.biscuitsec.biscuit.token.builder.Rule> queries = new ArrayList<>();
 
-        queries.add(constrained_rule(
+        queries.add(constrainedRule(
                 "expiration",
                 List.of(var("date")),
                 List.of(pred("time", List.of(var("date")))),
@@ -198,7 +198,7 @@ public class Block {
     public Block resourcePrefix(String prefix) {
         ArrayList<org.biscuitsec.biscuit.token.builder.Rule> queries = new ArrayList<>();
 
-        queries.add(constrained_rule(
+        queries.add(constrainedRule(
                 "prefix",
                 List.of(var("resource")),
                 List.of(pred("resource", List.of(var("resource")))),
@@ -212,7 +212,7 @@ public class Block {
     public Block resourceSuffix(String suffix) {
         ArrayList<org.biscuitsec.biscuit.token.builder.Rule> queries = new ArrayList<>();
 
-        queries.add(constrained_rule(
+        queries.add(constrainedRule(
                 "suffix",
                 List.of(var("resource")),
                 List.of(pred("resource", List.of(var("resource")))),

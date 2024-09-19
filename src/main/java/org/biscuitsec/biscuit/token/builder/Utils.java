@@ -10,6 +10,7 @@ import java.util.List;
 import static org.biscuitsec.biscuit.datalog.Check.Kind.One;
 
 public class Utils {
+
     public static Fact fact(String name, List<Term> ids) throws Error.Language {
         return new Fact(name, ids);
     }
@@ -18,15 +19,17 @@ public class Utils {
         return new Predicate(name, ids);
     }
 
-    public static Rule rule(String head_name, List<Term> head_ids,
+    public static Rule rule(String headName,
+                            List<Term> headIds,
                             List<Predicate> predicates) {
-        return new Rule(pred(head_name, head_ids), predicates, new ArrayList<>(), new ArrayList<>());
+        return new Rule(pred(headName, headIds), predicates, new ArrayList<>(), new ArrayList<>());
     }
 
-    public static Rule constrained_rule(String head_name, List<Term> head_ids,
-                                        List<Predicate> predicates,
-                                        List<Expression> expressions) {
-        return new Rule(pred(head_name, head_ids), predicates, expressions, new ArrayList<>());
+    public static Rule constrainedRule(String headName,
+                                       List<Term> headIds,
+                                       List<Predicate> predicates,
+                                       List<Expression> expressions) {
+        return new Rule(pred(headName, headIds), predicates, expressions, new ArrayList<>());
     }
 
     public static Check check(Rule rule) {
@@ -58,6 +61,7 @@ public class Utils {
     }
 
     public static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+    
     public static String byteArrayToHexString(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
         for (int j = 0; j < bytes.length; j++) {

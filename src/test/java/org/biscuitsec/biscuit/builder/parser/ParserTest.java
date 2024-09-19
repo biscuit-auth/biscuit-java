@@ -95,7 +95,7 @@ class ParserTest {
         Either<Error, Tuple2<String, Rule>> res =
                 Parser.rule("valid_date(\"file1\") <- time($0 ), resource( \"file1\"), $0 <= 2019-12-04T09:46:41Z");
         assertEquals(Either.right(new Tuple2<>("",
-                        Utils.constrained_rule("valid_date",
+                        Utils.constrainedRule("valid_date",
                                 List.of(Utils.string("file1")),
                                 Arrays.asList(
                                         Utils.pred("time", List.of(Utils.var("0"))),
@@ -116,7 +116,7 @@ class ParserTest {
         Either<Error, Tuple2<String, Rule>> res =
                 Parser.rule("valid_date(\"file1\") <- time($0 ), $0 <= 2019-12-04T09:46:41Z, resource(\"file1\")");
         assertEquals(Either.right(new Tuple2<>("",
-                        Utils.constrained_rule("valid_date",
+                        Utils.constrainedRule("valid_date",
                                 List.of(Utils.string("file1")),
                                 Arrays.asList(
                                         Utils.pred("time", List.of(Utils.var("0"))),
@@ -175,7 +175,7 @@ class ParserTest {
                 Parser.check("check if !false && true");
         assertEquals(Either.right(new Tuple2<>("",
                         Utils.check(
-                                Utils.constrained_rule("query",
+                                Utils.constrainedRule("query",
                                         new ArrayList<>(),
                                         new ArrayList<>(),
                                         List.of(

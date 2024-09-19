@@ -29,7 +29,7 @@ public class BuilderTest {
         Block authority_builder = new Block();
         authority_builder.addFact(Utils.fact("revocation_id", List.of(Utils.date(Date.from(Instant.now())))));
         authority_builder.addFact(Utils.fact("right", List.of(Utils.s("admin"))));
-        authority_builder.addRule(Utils.constrained_rule("right",
+        authority_builder.addRule(Utils.constrainedRule("right",
                 Arrays.asList(Utils.s("namespace"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("operation")),
                 List.of(Utils.pred("ns_operation", Arrays.asList(Utils.s("namespace"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("operation")))),
                 List.of(
@@ -43,7 +43,7 @@ public class BuilderTest {
                                 )))))
                 )
         ));
-        authority_builder.addRule(Utils.constrained_rule("right",
+        authority_builder.addRule(Utils.constrainedRule("right",
                 Arrays.asList(Utils.s("topic"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("topic"), Utils.var("operation")),
                 List.of(Utils.pred("topic_operation", Arrays.asList(Utils.s("topic"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("topic"), Utils.var("operation")))),
                 List.of(

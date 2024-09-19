@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static org.biscuitsec.biscuit.token.builder.Utils.constrained_rule;
+import static org.biscuitsec.biscuit.token.builder.Utils.constrainedRule;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -26,7 +26,7 @@ public class AuthorizerTest {
 
         authorizer.add_policy(new Policy(
                 List.of(
-                        constrained_rule(
+                        constrainedRule(
                                 "deny",
                                 new ArrayList<>(),
                                 new ArrayList<>(),
