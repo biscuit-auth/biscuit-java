@@ -57,6 +57,7 @@ public class Rule implements Cloneable {
         return new Rule(head, body, expressions, scopes);
     }
 
+    @SuppressWarnings("unused")
     public void set(String name, Term term) throws Error.Language {
         if (this.variables.isDefined()) {
             Option<Option<Term>> t = Option.of(this.variables.get().get(name));
