@@ -1,17 +1,17 @@
 package org.biscuitsec.biscuit.token;
 
+import io.vavr.Tuple2;
+import io.vavr.control.Either;
+import io.vavr.control.Option;
 import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.datalog.*;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.error.FailedCheck;
 import org.biscuitsec.biscuit.error.LogicError;
-import org.biscuitsec.biscuit.token.builder.*;
-import io.vavr.Tuple2;
-import io.vavr.control.Either;
-import io.vavr.control.Option;
-import org.biscuitsec.biscuit.datalog.Scope;
 import org.biscuitsec.biscuit.token.builder.Check;
+import org.biscuitsec.biscuit.token.builder.Expression;
 import org.biscuitsec.biscuit.token.builder.Term;
+import org.biscuitsec.biscuit.token.builder.Utils;
 import org.biscuitsec.biscuit.token.builder.parser.Parser;
 
 import java.time.Instant;
@@ -94,7 +94,7 @@ public class Authorizer {
 
     public void updateOnToken() throws Error.FailedLogic {
         if (token != null) {
-            for(long i =0; i < token.blocks.size(); i++) {
+            for (long i = 0; i < token.blocks.size(); i++) {
                 Block block = token.blocks.get((int) i);
 
                 if (block.externalKey.isDefined()) {
@@ -126,7 +126,7 @@ public class Authorizer {
                 org.biscuitsec.biscuit.datalog.Rule converted_rule = _rule.convert(this.symbols);
 
                 Either<String, org.biscuitsec.biscuit.token.builder.Rule> res = _rule.validateVariables();
-                if(res.isLeft()){
+                if (res.isLeft()) {
                     throw new Error.FailedLogic(new LogicError.InvalidBlockRule(0, token.symbols.printRule(converted_rule)));
                 }
                 TrustedOrigins ruleTrustedOrigins = TrustedOrigins.fromScopes(
@@ -138,8 +138,8 @@ public class Authorizer {
                 world.addRule((long) 0, ruleTrustedOrigins, converted_rule);
             }
 
-            for(long i =0; i < token.blocks.size(); i++) {
-                Block block = token.blocks.get((int)i);
+            for (long i = 0; i < token.blocks.size(); i++) {
+                Block block = token.blocks.get((int) i);
                 TrustedOrigins blockTrustedOrigins = TrustedOrigins.fromScopes(
                         block.scopes,
                         TrustedOrigins.defaultOrigins(),
@@ -149,7 +149,7 @@ public class Authorizer {
 
                 SymbolTable blockSymbols = token.symbols;
 
-                if(block.externalKey.isDefined()) {
+                if (block.externalKey.isDefined()) {
                     blockSymbols = new SymbolTable(block.symbols.symbols, block.publicKeys());
                 }
 
@@ -207,13 +207,13 @@ public class Authorizer {
     }
 
     public Authorizer addRule(org.biscuitsec.biscuit.token.builder.Rule rule) {
-       org.biscuitsec.biscuit.datalog.Rule r = rule.convert(symbols);
+        org.biscuitsec.biscuit.datalog.Rule r = rule.convert(symbols);
         TrustedOrigins ruleTrustedOrigins = TrustedOrigins.fromScopes(
                 r.scopes(),
                 this.authorizerTrustedOrigins(),
                 Long.MAX_VALUE,
                 this.publicKeyToBlockId
-            );
+        );
         world.addRule(Long.MAX_VALUE, ruleTrustedOrigins, r);
         return this;
     }
@@ -447,7 +447,7 @@ public class Authorizer {
                     TrustedOrigins.defaultOrigins(),
                     0,
                     this.publicKeyToBlockId
-                );
+            );
 
             for (int j = 0; j < token.authority.checks.size(); j++) {
                 boolean successful = false;
@@ -466,7 +466,7 @@ public class Authorizer {
                     );
                     switch (check.kind()) {
                         case One:
-                            res = world.queryMatch(query, (long)0, ruleTrustedOrigins, symbols);
+                            res = world.queryMatch(query, (long) 0, ruleTrustedOrigins, symbols);
                             break;
                         case All:
                             res = world.queryMatchAll(query, ruleTrustedOrigins, symbols);
@@ -524,11 +524,11 @@ public class Authorizer {
                 TrustedOrigins blockTrustedOrigins = TrustedOrigins.fromScopes(
                         b.scopes,
                         TrustedOrigins.defaultOrigins(),
-                        i+1,
+                        i + 1,
                         this.publicKeyToBlockId
                 );
                 SymbolTable blockSymbols = token.symbols;
-                if(b.externalKey.isDefined()) {
+                if (b.externalKey.isDefined()) {
                     blockSymbols = new SymbolTable(b.symbols.symbols, b.publicKeys());
                 }
 
@@ -544,12 +544,12 @@ public class Authorizer {
                         TrustedOrigins ruleTrustedOrigins = TrustedOrigins.fromScopes(
                                 query.scopes(),
                                 blockTrustedOrigins,
-                                i+1,
+                                i + 1,
                                 this.publicKeyToBlockId
                         );
                         switch (check.kind()) {
                             case One:
-                                res = world.queryMatch(query, (long)i+1, ruleTrustedOrigins, symbols);
+                                res = world.queryMatch(query, (long) i + 1, ruleTrustedOrigins, symbols);
                                 break;
                             case All:
                                 res = world.queryMatchAll(query, ruleTrustedOrigins, symbols);
@@ -591,9 +591,9 @@ public class Authorizer {
 
     public String printWorld() {
         StringBuilder facts = new StringBuilder();
-        for(Map.Entry<Origin, HashSet<org.biscuitsec.biscuit.datalog.Fact>> entry: this.world.facts().facts().entrySet()) {
+        for (Map.Entry<Origin, HashSet<org.biscuitsec.biscuit.datalog.Fact>> entry : this.world.facts().facts().entrySet()) {
             facts.append("\n\t\t").append(entry.getKey()).append(":");
-            for(org.biscuitsec.biscuit.datalog.Fact f: entry.getValue()) {
+            for (org.biscuitsec.biscuit.datalog.Fact f : entry.getValue()) {
                 facts.append("\n\t\t\t").append(this.symbols.printFact(f));
             }
         }
@@ -614,12 +614,12 @@ public class Authorizer {
                 Block b = this.token.blocks.get(i);
 
                 SymbolTable blockSymbols = token.symbols;
-                if(b.externalKey.isDefined()) {
+                if (b.externalKey.isDefined()) {
                     blockSymbols = new SymbolTable(b.symbols.symbols, b.publicKeys());
                 }
 
                 for (int j = 0; j < b.checks.size(); j++) {
-                    checks.add("Block[" + (i+1) + "][" + j + "]: " + blockSymbols.printCheck(b.checks.get(j)));
+                    checks.add("Block[" + (i + 1) + "][" + j + "]: " + blockSymbols.printCheck(b.checks.get(j)));
                 }
             }
         }
@@ -644,33 +644,33 @@ public class Authorizer {
 
     public List<Tuple2<Long, List<Check>>> checks() {
         List<Tuple2<Long, List<Check>>> allChecks = new ArrayList<>();
-        if(!this.checks.isEmpty()) {
+        if (!this.checks.isEmpty()) {
             allChecks.add(new Tuple2<>(Long.MAX_VALUE, this.checks));
         }
 
         List<Check> authorityChecks = new ArrayList<>();
-        for(org.biscuitsec.biscuit.datalog.Check check: this.token.authority.checks) {
+        for (org.biscuitsec.biscuit.datalog.Check check : this.token.authority.checks) {
             authorityChecks.add(Check.convertFrom(check, this.token.symbols));
         }
-        if(!authorityChecks.isEmpty()) {
+        if (!authorityChecks.isEmpty()) {
             allChecks.add(new Tuple2<>((long) 0, authorityChecks));
         }
 
         long count = 1;
-        for(Block block: this.token.blocks) {
+        for (Block block : this.token.blocks) {
             List<Check> blockChecks = new ArrayList<>();
 
-            if(block.externalKey.isDefined()) {
+            if (block.externalKey.isDefined()) {
                 SymbolTable blockSymbols = new SymbolTable(block.symbols.symbols, block.publicKeys());
-                for(org.biscuitsec.biscuit.datalog.Check check: block.checks) {
+                for (org.biscuitsec.biscuit.datalog.Check check : block.checks) {
                     blockChecks.add(Check.convertFrom(check, blockSymbols));
                 }
             } else {
-                for(org.biscuitsec.biscuit.datalog.Check check: block.checks) {
+                for (org.biscuitsec.biscuit.datalog.Check check : block.checks) {
                     blockChecks.add(Check.convertFrom(check, token.symbols));
                 }
             }
-            if(!blockChecks.isEmpty()) {
+            if (!blockChecks.isEmpty()) {
                 allChecks.add(new Tuple2<>(count, blockChecks));
             }
             count += 1;
