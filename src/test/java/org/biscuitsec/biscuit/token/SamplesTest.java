@@ -207,15 +207,15 @@ class SamplesTest {
             fact = fact.trim();
             if (!fact.isEmpty()) {
                 if (fact.startsWith("check if") || fact.startsWith("check all")) {
-                    authorizer.add_check(fact);
+                    authorizer.addCheck(fact);
                 } else if (fact.startsWith("allow if") || fact.startsWith("deny if")) {
-                    authorizer.add_policy(fact);
+                    authorizer.addPolicy(fact);
                 } else if (!fact.startsWith("revocation_id")) {
-                    authorizer.add_fact(fact);
+                    authorizer.addFact(fact);
                 }
             }
         }
-        out.println(authorizer.print_world());
+        out.println(authorizer.printWorld());
     }
 
     private void checkAuthorityBlockSerialization(Biscuit token) {

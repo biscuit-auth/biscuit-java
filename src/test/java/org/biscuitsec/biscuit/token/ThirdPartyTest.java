@@ -59,14 +59,14 @@ public class ThirdPartyTest {
 
         out.println("will check the token for resource=file1");
         Authorizer authorizer = deser.authorizer();
-        authorizer.add_fact("resource(\"file1\")");
-        authorizer.add_policy("allow if true");
+        authorizer.addFact("resource(\"file1\")");
+        authorizer.addPolicy("allow if true");
         authorizer.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
 
         out.println("will check the token for resource=file2");
         Authorizer authorizer2 = deser.authorizer();
-        authorizer2.add_fact("resource(\"file2\")");
-        authorizer2.add_policy("allow if true");
+        authorizer2.addFact("resource(\"file2\")");
+        authorizer2.addPolicy("allow if true");
 
         try {
             authorizer2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
@@ -141,16 +141,16 @@ public class ThirdPartyTest {
 
         out.println("will check the token for resource=file1");
         Authorizer authorizer = deser4.authorizer();
-        authorizer.add_fact("resource(\"file1\")");
-        authorizer.add_policy("allow if true");
-        out.println("Authorizer world:\n" + authorizer.print_world());
+        authorizer.addFact("resource(\"file1\")");
+        authorizer.addPolicy("allow if true");
+        out.println("Authorizer world:\n" + authorizer.printWorld());
         authorizer.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
 
         out.println("will check the token for resource=file2");
         Authorizer authorizer2 = deser4.authorizer();
-        authorizer2.add_fact("resource(\"file2\")");
-        authorizer2.add_policy("allow if true");
-        out.println("Authorizer world 2:\n" + authorizer2.print_world());
+        authorizer2.addFact("resource(\"file2\")");
+        authorizer2.addPolicy("allow if true");
+        out.println("Authorizer world 2:\n" + authorizer2.printWorld());
 
         try {
             authorizer2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
@@ -196,16 +196,16 @@ public class ThirdPartyTest {
 
         out.println("will check the token for resource=file1");
         Authorizer authorizer = deser.authorizer();
-        authorizer.add_fact("resource(\"file1\")");
-        authorizer.add_policy("allow if true");
+        authorizer.addFact("resource(\"file1\")");
+        authorizer.addPolicy("allow if true");
         authorizer.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
-        out.println("Authorizer world:\n" + authorizer.print_world());
+        out.println("Authorizer world:\n" + authorizer.printWorld());
 
 
         out.println("will check the token for resource=file2");
         Authorizer authorizer2 = deser.authorizer();
-        authorizer2.add_fact("resource(\"file2\")");
-        authorizer2.add_policy("allow if true");
+        authorizer2.addFact("resource(\"file2\")");
+        authorizer2.addPolicy("allow if true");
 
         try {
             authorizer2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));

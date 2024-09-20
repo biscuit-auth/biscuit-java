@@ -124,17 +124,17 @@ public class UnverifiedBiscuitTest {
         out.println("will check the token for resource=file1 and operation=read");
 
         Authorizer authorizer = finalBiscuit.authorizer();
-        authorizer.add_fact("resource(\"file1\")");
-        authorizer.add_fact("operation(\"read\")");
-        authorizer.add_policy("allow if true");
+        authorizer.addFact("resource(\"file1\")");
+        authorizer.addFact("operation(\"read\")");
+        authorizer.addPolicy("allow if true");
         authorizer.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
 
         out.println("will check the token for resource=file2 and operation=write");
 
         Authorizer authorizer2 = finalBiscuit.authorizer();
-        authorizer2.add_fact("resource(\"file2\")");
-        authorizer2.add_fact("operation(\"write\")");
-        authorizer2.add_policy("allow if true");
+        authorizer2.addFact("resource(\"file2\")");
+        authorizer2.addFact("operation(\"write\")");
+        authorizer2.addPolicy("allow if true");
 
         try {
             authorizer2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));

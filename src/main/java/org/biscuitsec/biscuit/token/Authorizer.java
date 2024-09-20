@@ -41,7 +41,7 @@ public class Authorizer {
         this.policies = new ArrayList<>();
         this.scopes = new ArrayList<>();
         this.publicKeyToBlockId = new HashMap<>();
-        update_on_token();
+        updateOnToken();
     }
 
     /**
@@ -59,8 +59,11 @@ public class Authorizer {
         this.publicKeyToBlockId = new HashMap<>();
     }
 
-    private Authorizer(Biscuit token, List<org.biscuitsec.biscuit.token.builder.Check> checks, List<Policy> policies,
-                       World world, SymbolTable symbols) {
+    private Authorizer(Biscuit token,
+                       List<org.biscuitsec.biscuit.token.builder.Check> checks,
+                       List<Policy> policies,
+                       World world,
+                       SymbolTable symbols) {
         this.token = token;
         this.checks = checks;
         this.policies = policies;
@@ -87,7 +90,7 @@ public class Authorizer {
                 new World(this.world), new SymbolTable(this.symbols));
     }
 
-    public void update_on_token() throws Error.FailedLogic {
+    public void updateOnToken() throws Error.FailedLogic {
         if (token != null) {
             for(long i =0; i < token.blocks.size(); i++) {
                 Block block = token.blocks.get((int) i);
@@ -173,22 +176,22 @@ public class Authorizer {
         }
     }
 
-    public Authorizer add_token(Biscuit token) throws Error.FailedLogic {
+    public Authorizer addToken(Biscuit token) throws Error.FailedLogic {
         if (this.token != null) {
             throw new Error.FailedLogic(new LogicError.AuthorizerNotEmpty());
         }
 
         this.token = token;
-        update_on_token();
+        updateOnToken();
         return this;
     }
 
-    public Authorizer add_fact(org.biscuitsec.biscuit.token.builder.Fact fact) {
+    public Authorizer addFact(org.biscuitsec.biscuit.token.builder.Fact fact) {
         world.addFact(Origin.authorizer(), fact.convert(symbols));
         return this;
     }
 
-    public Authorizer add_fact(String s) throws Error.Parser {
+    public Authorizer addFact(String s) throws Error.Parser {
         Either<org.biscuitsec.biscuit.token.builder.parser.Error, Tuple2<String, org.biscuitsec.biscuit.token.builder.Fact>> res =
                 Parser.fact(s);
 
@@ -198,10 +201,10 @@ public class Authorizer {
 
         Tuple2<String, org.biscuitsec.biscuit.token.builder.Fact> t = res.get();
 
-        return this.add_fact(t._2);
+        return this.addFact(t._2);
     }
 
-    public Authorizer add_rule(org.biscuitsec.biscuit.token.builder.Rule rule) {
+    public Authorizer addRule(org.biscuitsec.biscuit.token.builder.Rule rule) {
        org.biscuitsec.biscuit.datalog.Rule r = rule.convert(symbols);
         TrustedOrigins ruleTrustedOrigins = TrustedOrigins.fromScopes(
                 r.scopes(),
@@ -222,7 +225,7 @@ public class Authorizer {
         );
     }
 
-    public Authorizer add_rule(String s) throws Error.Parser {
+    public Authorizer addRule(String s) throws Error.Parser {
         Either<org.biscuitsec.biscuit.token.builder.parser.Error, Tuple2<String, org.biscuitsec.biscuit.token.builder.Rule>> res =
                 Parser.rule(s);
 
@@ -232,15 +235,15 @@ public class Authorizer {
 
         Tuple2<String, org.biscuitsec.biscuit.token.builder.Rule> t = res.get();
 
-        return add_rule(t._2);
+        return addRule(t._2);
     }
 
-    public Authorizer add_check(org.biscuitsec.biscuit.token.builder.Check check) {
+    public Authorizer addCheck(org.biscuitsec.biscuit.token.builder.Check check) {
         this.checks.add(check);
         return this;
     }
 
-    public Authorizer add_check(String s) throws Error.Parser {
+    public Authorizer addCheck(String s) throws Error.Parser {
         Either<org.biscuitsec.biscuit.token.builder.parser.Error, Tuple2<String, org.biscuitsec.biscuit.token.builder.Check>> res =
                 Parser.check(s);
 
@@ -250,15 +253,15 @@ public class Authorizer {
 
         Tuple2<String, org.biscuitsec.biscuit.token.builder.Check> t = res.get();
 
-        return add_check(t._2);
+        return addCheck(t._2);
     }
 
-    public Authorizer set_time() throws Error.Language {
+    public Authorizer setTime() throws Error.Language {
         world.addFact(Origin.authorizer(), Utils.fact("time", List.of(Utils.date(new Date()))).convert(symbols));
         return this;
     }
 
-    public List<String> get_revocation_ids() throws Error {
+    public List<String> getRevocationIds() throws Error {
         ArrayList<String> ids = new ArrayList<>();
 
         final org.biscuitsec.biscuit.token.builder.Rule getRevocationIds = Utils.rule(
@@ -306,7 +309,7 @@ public class Authorizer {
         return this;
     }
 
-    public Authorizer add_policy(String s) throws Error.Parser {
+    public Authorizer addPolicy(String s) throws Error.Parser {
         Either<org.biscuitsec.biscuit.token.builder.parser.Error, Tuple2<String, Policy>> res =
                 Parser.policy(s);
 
@@ -320,12 +323,12 @@ public class Authorizer {
         return this;
     }
 
-    public Authorizer add_policy(Policy p) {
+    public Authorizer addPolicy(Policy p) {
         this.policies.add(p);
         return this;
     }
 
-    public Authorizer add_scope(Scope s) {
+    public Authorizer addScope(Scope s) {
         this.scopes.add(s);
         return this;
     }
@@ -581,7 +584,7 @@ public class Authorizer {
         }
     }
 
-    public String print_world() {
+    public String printWorld() {
         StringBuilder facts = new StringBuilder();
         for(Map.Entry<Origin, HashSet<org.biscuitsec.biscuit.datalog.Fact>> entry: this.world.facts().facts().entrySet()) {
             facts.append("\n\t\t"+entry.getKey()+":");

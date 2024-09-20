@@ -24,7 +24,7 @@ public class AuthorizerTest {
         authorizer.deny();
         assertEquals(1, policies.size());
 
-        authorizer.add_policy(new Policy(
+        authorizer.addPolicy(new Policy(
                 List.of(
                         constrainedRule(
                                 "deny",
@@ -35,7 +35,7 @@ public class AuthorizerTest {
                 ), Policy.Kind.Deny));
         assertEquals(2, policies.size());
 
-        authorizer.add_policy("deny if true");
+        authorizer.addPolicy("deny if true");
         assertEquals(3, policies.size());
     }
 

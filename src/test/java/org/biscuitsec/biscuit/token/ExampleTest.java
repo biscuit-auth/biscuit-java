@@ -25,8 +25,8 @@ public class ExampleTest {
 
     public Long authorize(KeyPair root, byte[] serializedToken) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         return Biscuit.from_bytes(serializedToken, root.publicKey()).authorizer()
-                .add_fact("resource(\"/folder1/file1\")")
-                .add_fact("operation(\"read\")")
+                .addFact("resource(\"/folder1/file1\")")
+                .addFact("operation(\"read\")")
                 .allow()
                 .authorize();
     }

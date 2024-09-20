@@ -127,17 +127,17 @@ public class BiscuitTest {
         out.println("will check the token for resource=file1 and operation=read");
 
         Authorizer authorizer = final_token.authorizer();
-        authorizer.add_fact("resource(\"file1\")");
-        authorizer.add_fact("operation(\"read\")");
-        authorizer.add_policy("allow if true");
+        authorizer.addFact("resource(\"file1\")");
+        authorizer.addFact("operation(\"read\")");
+        authorizer.addPolicy("allow if true");
         authorizer.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
 
         out.println("will check the token for resource=file2 and operation=write");
 
         Authorizer authorizer2 = final_token.authorizer();
-        authorizer2.add_fact("resource(\"file2\")");
-        authorizer2.add_fact("operation(\"write\")");
-        authorizer2.add_policy("allow if true");
+        authorizer2.addFact("resource(\"file2\")");
+        authorizer2.addFact("operation(\"write\")");
+        authorizer2.addPolicy("allow if true");
 
         try {
             authorizer2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
@@ -182,14 +182,14 @@ public class BiscuitTest {
         Biscuit b2 = b.attenuate(rng, keypair2, block2);
 
         Authorizer v1 = b2.authorizer();
-        v1.add_fact("resource(\"/folder1/file1\")");
-        v1.add_fact("operation(\"read\")");
+        v1.addFact("resource(\"/folder1/file1\")");
+        v1.addFact("operation(\"read\")");
         v1.allow();
         v1.authorize();
 
         Authorizer v2 = b2.authorizer();
-        v2.add_fact("resource(\"/folder2/file3\")");
-        v2.add_fact("operation(\"read\")");
+        v2.addFact("resource(\"/folder2/file3\")");
+        v2.addFact("operation(\"read\")");
         v2.allow();
         try {
             v2.authorize();
@@ -199,14 +199,14 @@ public class BiscuitTest {
         }
 
         Authorizer v3 = b2.authorizer();
-        v3.add_fact("resource(\"/folder2/file1\")");
-        v3.add_fact("operation(\"write\")");
+        v3.addFact("resource(\"/folder2/file1\")");
+        v3.addFact("operation(\"write\")");
         v3.allow();
         try {
             v3.authorize();
             fail();
         } catch (Error e) {
-            out.println(v3.print_world());
+            out.println(v3.printWorld());
             for (FailedCheck f : e.failedChecks().get()) {
                 out.println(f.toString());
             }
@@ -281,30 +281,30 @@ public class BiscuitTest {
 
         Authorizer v2 = v1.clone();
 
-        v2.add_fact("resource(\"/folder1/file1\")");
-        v2.add_fact("operation(\"read\")");
+        v2.addFact("resource(\"/folder1/file1\")");
+        v2.addFact("operation(\"read\")");
 
 
         v2.authorize();
 
         Authorizer v3 = v1.clone();
 
-        v3.add_fact("resource(\"/folder2/file3\")");
-        v3.add_fact("operation(\"read\")");
+        v3.addFact("resource(\"/folder2/file3\")");
+        v3.addFact("operation(\"read\")");
 
         Try<Long> res = Try.of(v3::authorize);
-        out.println(v3.print_world());
+        out.println(v3.printWorld());
 
         assertTrue(res.isFailure());
 
         Authorizer v4 = v1.clone();
 
-        v4.add_fact("resource(\"/folder2/file1\")");
-        v4.add_fact("operation(\"write\")");
+        v4.addFact("resource(\"/folder2/file1\")");
+        v4.addFact("operation(\"write\")");
 
         Error e = (Error) Try.of(v4::authorize).getCause();
 
-        out.println(v4.print_world());
+        out.println(v4.printWorld());
         e.failedChecks().get().stream().forEach(fc -> out.println(fc.toString()));
         assertEquals(
                 new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
@@ -348,10 +348,10 @@ public class BiscuitTest {
 
         v1.authorize();
 
-        v1.add_token(b2);
+        v1.addToken(b2);
 
-        v1.add_fact("resource(\"/folder2/file1\")");
-        v1.add_fact("operation(\"write\")");
+        v1.addFact("resource(\"/folder2/file1\")");
+        v1.addFact("operation(\"write\")");
 
         assertTrue(Try.of(v1::authorize).isFailure());
     }
@@ -455,17 +455,17 @@ public class BiscuitTest {
         out.println("will check the token for resource=file1 and operation=read");
 
         Authorizer authorizer = final_token.authorizer();
-        authorizer.add_fact("resource(\"file1\")");
-        authorizer.add_fact("operation(\"read\")");
-        authorizer.add_policy("allow if true");
+        authorizer.addFact("resource(\"file1\")");
+        authorizer.addFact("operation(\"read\")");
+        authorizer.addPolicy("allow if true");
         authorizer.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
 
         out.println("will check the token for resource=file2 and operation=write");
 
         Authorizer authorizer2 = final_token.authorizer();
-        authorizer2.add_fact("resource(\"file2\")");
-        authorizer2.add_fact("operation(\"write\")");
-        authorizer2.add_policy("allow if true");
+        authorizer2.addFact("resource(\"file2\")");
+        authorizer2.addFact("operation(\"write\")");
+        authorizer2.addPolicy("allow if true");
 
         try {
             authorizer2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
@@ -578,17 +578,17 @@ public class BiscuitTest {
         out.println("will check the token for resource=file1 and operation=read");
 
         Authorizer authorizer = final_token.authorizer();
-        authorizer.add_fact("resource(\"file1\")");
-        authorizer.add_fact("operation(\"read\")");
-        authorizer.add_policy("allow if true");
+        authorizer.addFact("resource(\"file1\")");
+        authorizer.addFact("operation(\"read\")");
+        authorizer.addPolicy("allow if true");
         authorizer.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
 
         out.println("will check the token for resource=file2 and operation=write");
 
         Authorizer authorizer2 = final_token.authorizer();
-        authorizer2.add_fact("resource(\"file2\")");
-        authorizer2.add_fact("operation(\"write\")");
-        authorizer2.add_policy("allow if true");
+        authorizer2.addFact("resource(\"file2\")");
+        authorizer2.addFact("operation(\"write\")");
+        authorizer2.addPolicy("allow if true");
         try {
             authorizer2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
         } catch (Error e) {
@@ -661,10 +661,10 @@ public class BiscuitTest {
                 .addAuthorityCheck("check all operation($op), allowed_operations($allowed), $allowed.contains($op)")
                 .build();
         Authorizer authorizer = biscuit.verify(root.publicKey()).authorizer();
-        authorizer.add_fact("operation(\"read\")");
-        authorizer.add_fact("operation(\"write\")");
-        authorizer.add_fact("allowed_operations([\"write\"])");
-        authorizer.add_policy("allow if true");
+        authorizer.addFact("operation(\"read\")");
+        authorizer.addFact("operation(\"write\")");
+        authorizer.addFact("allowed_operations([\"write\"])");
+        authorizer.addPolicy("allow if true");
 
         try {
             authorizer.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
@@ -679,10 +679,10 @@ public class BiscuitTest {
         }
 
         Authorizer authorizer2 = biscuit.verify(root.publicKey()).authorizer();
-        authorizer2.add_fact("operation(\"read\")");
-        authorizer2.add_fact("operation(\"write\")");
-        authorizer2.add_fact("allowed_operations([\"read\", \"write\"])");
-        authorizer2.add_policy("allow if true");
+        authorizer2.addFact("operation(\"read\")");
+        authorizer2.addFact("operation(\"write\")");
+        authorizer2.addFact("allowed_operations([\"read\", \"write\"])");
+        authorizer2.addPolicy("allow if true");
 
         authorizer2.authorize(new RunLimits(500, 100, Duration.ofMillis(500)));
     }
