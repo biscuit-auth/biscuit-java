@@ -227,6 +227,7 @@ public class Authorizer {
         );
     }
 
+    @SuppressWarnings("unused")
     public Authorizer addRule(String s) throws Error.Parser {
         Either<org.biscuitsec.biscuit.token.builder.parser.Error, Tuple2<String, org.biscuitsec.biscuit.token.builder.Rule>> res =
                 Parser.rule(s);
@@ -258,11 +259,13 @@ public class Authorizer {
         return addCheck(t._2);
     }
 
+    @SuppressWarnings("unused")
     public Authorizer setTime() {
         world.addFact(Origin.authorizer(), Utils.fact("time", List.of(Utils.date(new Date()))).convert(symbols));
         return this;
     }
 
+    @SuppressWarnings("unused")
     public List<String> getRevocationIds() throws Error {
         ArrayList<String> ids = new ArrayList<>();
 
@@ -328,6 +331,7 @@ public class Authorizer {
         return this;
     }
 
+    @SuppressWarnings("unused")
     public Authorizer addScope(Scope s) {
         this.scopes.add(s);
         return this;
@@ -373,6 +377,7 @@ public class Authorizer {
         return s;
     }
 
+    @SuppressWarnings("unused")
     public Set<org.biscuitsec.biscuit.token.builder.Fact> query(String s, RunLimits limits) throws Error {
         Either<org.biscuitsec.biscuit.token.builder.parser.Error, Tuple2<String, org.biscuitsec.biscuit.token.builder.Rule>> res =
                 Parser.rule(s);
