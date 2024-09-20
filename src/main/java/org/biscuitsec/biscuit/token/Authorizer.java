@@ -171,7 +171,7 @@ public class Authorizer {
                             i + 1,
                             this.publicKeyToBlockId
                     );
-                    world.addRule((long) i + 1, ruleTrustedOrigins, converted_rule);
+                    world.addRule(i + 1, ruleTrustedOrigins, converted_rule);
                 }
             }
         }
