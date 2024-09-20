@@ -256,7 +256,7 @@ public class Authorizer {
         return addCheck(t._2);
     }
 
-    public Authorizer setTime() throws Error.Language {
+    public Authorizer setTime() {
         world.addFact(Origin.authorizer(), Utils.fact("time", List.of(Utils.date(new Date()))).convert(symbols));
         return this;
     }
