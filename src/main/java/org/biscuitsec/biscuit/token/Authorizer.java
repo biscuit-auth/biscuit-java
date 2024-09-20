@@ -24,6 +24,7 @@ import static io.vavr.API.Right;
 /**
  * Token verification class
  */
+@SuppressWarnings("JavadocDeclaration")
 public class Authorizer {
     Biscuit token;
     final List<org.biscuitsec.biscuit.token.builder.Check> checks;
