@@ -621,7 +621,7 @@ public class Authorizer {
         }
 
         return "World {\n\tfacts: [" +
-                facts.toString() +
+                facts +
                 //String.join(",\n\t\t", facts) +
                 "\n\t],\n\trules: [\n\t\t" +
                 String.join(",\n\t\t", rules) +
