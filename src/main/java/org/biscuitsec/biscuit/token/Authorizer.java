@@ -272,8 +272,8 @@ public class Authorizer {
                 List.of(Utils.pred("revocation_id", List.of(Utils.var("id"))))
         );
 
-        this.query(getRevocationIds).stream().forEach(fact -> {
-            fact.terms().stream().forEach(id -> {
+        this.query(getRevocationIds).forEach(fact -> {
+            fact.terms().forEach(id -> {
                 if (id instanceof Term.Str) {
                     ids.add(((Term.Str) id).getValue());
                 }
