@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Token verification class
@@ -594,7 +595,7 @@ public class Authorizer {
                 facts.append("\n\t\t\t").append(this.symbols.printFact(f));
             }
         }
-        final List<String> rules = this.world.rules().stream().map((r) -> this.symbols.printRule(r)).collect(Collectors.toList());
+        final List<String> rules = this.world.rules().stream().map(this.symbols::printRule).collect(toList());
 
         List<String> checks = new ArrayList<>();
 
