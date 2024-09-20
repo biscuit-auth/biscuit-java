@@ -192,7 +192,7 @@ public class Authorizer {
     public Long authorize(RunLimits limits) throws Error {
         Instant timeLimit = Instant.now().plus(limits.maxTime);
         List<FailedCheck> errors = new LinkedList<>();
-        Option<Either<Integer, Integer>> policy_result = Option.none();
+        Option<Either<Integer, Integer>> policyResult = Option.none();
 
         TrustedOrigins authorizerTrustedOrigins = this.authorizerTrustedOrigins();
 
@@ -304,9 +304,9 @@ public class Authorizer {
 
                 if (res) {
                     if (this.policies.get(i).kind == Policy.Kind.Allow) {
-                        policy_result = Option.some(Right(i));
+                        policyResult = Option.some(Right(i));
                     } else {
-                        policy_result = Option.some(Left(i));
+                        policyResult = Option.some(Left(i));
                     }
                     break policies_test;
                 }
@@ -369,8 +369,8 @@ public class Authorizer {
             }
         }
 
-        if (policy_result.isDefined()) {
-            Either<Integer, Integer> e = policy_result.get();
+        if (policyResult.isDefined()) {
+            Either<Integer, Integer> e = policyResult.get();
             if (e.isRight()) {
                 if (errors.isEmpty()) {
                     return e.get().longValue();
@@ -625,26 +625,26 @@ public class Authorizer {
             );
 
             for (org.biscuitsec.biscuit.datalog.Fact fact : token.authority.facts) {
-                org.biscuitsec.biscuit.datalog.Fact converted_fact =
+                org.biscuitsec.biscuit.datalog.Fact convertedFact =
                         org.biscuitsec.biscuit.token.builder.Fact.convertFrom(fact, token.symbols).convert(this.symbols);
-                world.addFact(new Origin(0), converted_fact);
+                world.addFact(new Origin(0), convertedFact);
             }
-            for (org.biscuitsec.biscuit.datalog.Rule rule : token.authority.rules) {
-                org.biscuitsec.biscuit.token.builder.Rule _rule =
-                        org.biscuitsec.biscuit.token.builder.Rule.convertFrom(rule, token.symbols);
-                org.biscuitsec.biscuit.datalog.Rule converted_rule = _rule.convert(this.symbols);
+            for (org.biscuitsec.biscuit.datalog.Rule datalogRule : token.authority.rules) {
+                org.biscuitsec.biscuit.token.builder.Rule builderRule =
+                        org.biscuitsec.biscuit.token.builder.Rule.convertFrom(datalogRule, token.symbols);
+                org.biscuitsec.biscuit.datalog.Rule convertedRule = builderRule.convert(this.symbols);
 
-                Either<String, org.biscuitsec.biscuit.token.builder.Rule> res = _rule.validateVariables();
+                Either<String, org.biscuitsec.biscuit.token.builder.Rule> res = builderRule.validateVariables();
                 if (res.isLeft()) {
-                    throw new Error.FailedLogic(new LogicError.InvalidBlockRule(0, token.symbols.printRule(converted_rule)));
+                    throw new Error.FailedLogic(new LogicError.InvalidBlockRule(0, token.symbols.printRule(convertedRule)));
                 }
                 TrustedOrigins ruleTrustedOrigins = TrustedOrigins.fromScopes(
-                        converted_rule.scopes(),
+                        convertedRule.scopes(),
                         authorityTrustedOrigins,
                         0,
                         this.publicKeyToBlockId
                 );
-                world.addRule((long) 0, ruleTrustedOrigins, converted_rule);
+                world.addRule((long) 0, ruleTrustedOrigins, convertedRule);
             }
 
             for (long i = 0; i < token.blocks.size(); i++) {
@@ -663,27 +663,27 @@ public class Authorizer {
                 }
 
                 for (org.biscuitsec.biscuit.datalog.Fact fact : block.facts) {
-                    org.biscuitsec.biscuit.datalog.Fact converted_fact =
+                    org.biscuitsec.biscuit.datalog.Fact convertedFact =
                             org.biscuitsec.biscuit.token.builder.Fact.convertFrom(fact, blockSymbols).convert(this.symbols);
-                    world.addFact(new Origin(i + 1), converted_fact);
+                    world.addFact(new Origin(i + 1), convertedFact);
                 }
 
-                for (org.biscuitsec.biscuit.datalog.Rule rule : block.rules) {
-                    org.biscuitsec.biscuit.token.builder.Rule _rule =
-                            org.biscuitsec.biscuit.token.builder.Rule.convertFrom(rule, blockSymbols);
-                    org.biscuitsec.biscuit.datalog.Rule converted_rule = _rule.convert(this.symbols);
+                for (org.biscuitsec.biscuit.datalog.Rule datalogRule : block.rules) {
+                    org.biscuitsec.biscuit.token.builder.Rule builderRule =
+                            org.biscuitsec.biscuit.token.builder.Rule.convertFrom(datalogRule, blockSymbols);
+                    org.biscuitsec.biscuit.datalog.Rule convertedRule = builderRule.convert(this.symbols);
 
-                    Either<String, org.biscuitsec.biscuit.token.builder.Rule> res = _rule.validateVariables();
+                    Either<String, org.biscuitsec.biscuit.token.builder.Rule> res = builderRule.validateVariables();
                     if (res.isLeft()) {
-                        throw new Error.FailedLogic(new LogicError.InvalidBlockRule(0, this.symbols.printRule(converted_rule)));
+                        throw new Error.FailedLogic(new LogicError.InvalidBlockRule(0, this.symbols.printRule(convertedRule)));
                     }
                     TrustedOrigins ruleTrustedOrigins = TrustedOrigins.fromScopes(
-                            converted_rule.scopes(),
+                            convertedRule.scopes(),
                             blockTrustedOrigins,
                             i + 1,
                             this.publicKeyToBlockId
                     );
-                    world.addRule(i + 1, ruleTrustedOrigins, converted_rule);
+                    world.addRule(i + 1, ruleTrustedOrigins, convertedRule);
                 }
             }
         }
