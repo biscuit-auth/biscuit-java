@@ -480,7 +480,7 @@ public class Authorizer {
      * @param token
      * @return Authorizer
      */
-    static public Authorizer make(Biscuit token) throws Error.FailedLogic {
+    public static Authorizer make(Biscuit token) throws Error.FailedLogic {
         return new Authorizer(token, new World());
     }
 
