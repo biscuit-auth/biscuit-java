@@ -26,12 +26,12 @@ import static io.vavr.API.Right;
  */
 public class Authorizer {
     Biscuit token;
-    List<org.biscuitsec.biscuit.token.builder.Check> checks;
-    List<Policy> policies;
-    List<Scope> scopes;
-    HashMap<Long, List<Long>> publicKeyToBlockId;
-    World world;
-    SymbolTable symbols;
+    final List<org.biscuitsec.biscuit.token.builder.Check> checks;
+    final List<Policy> policies;
+    final List<Scope> scopes;
+    final HashMap<Long, List<Long>> publicKeyToBlockId;
+    final World world;
+    final SymbolTable symbols;
 
     private Authorizer(Biscuit token, World w) throws Error.FailedLogic {
         this.token = token;
@@ -74,7 +74,7 @@ public class Authorizer {
     }
 
     /**
-     * Creates a authorizer for a token
+     * Creates an authorizer for a token
      * <p>
      * also checks that the token is valid for this root public key
      *
