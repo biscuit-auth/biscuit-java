@@ -85,6 +85,7 @@ public class Authorizer {
         return new Authorizer(token, new World());
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     public Authorizer clone() {
         return new Authorizer(this.token, new ArrayList<>(this.checks), new ArrayList<>(this.policies),
                 new World(this.world), new SymbolTable(this.symbols));
