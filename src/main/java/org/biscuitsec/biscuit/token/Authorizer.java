@@ -16,7 +16,6 @@ import org.biscuitsec.biscuit.token.builder.parser.Parser;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
