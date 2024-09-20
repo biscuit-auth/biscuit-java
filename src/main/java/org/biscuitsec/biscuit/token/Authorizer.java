@@ -588,10 +588,9 @@ public class Authorizer {
     public String printWorld() {
         StringBuilder facts = new StringBuilder();
         for(Map.Entry<Origin, HashSet<org.biscuitsec.biscuit.datalog.Fact>> entry: this.world.facts().facts().entrySet()) {
-            facts.append("\n\t\t"+entry.getKey()+":");
+            facts.append("\n\t\t").append(entry.getKey()).append(":");
             for(org.biscuitsec.biscuit.datalog.Fact f: entry.getValue()) {
-                facts.append("\n\t\t\t");
-                facts.append(this.symbols.printFact(f));
+                facts.append("\n\t\t\t").append(this.symbols.printFact(f));
             }
         }
         final List<String> rules = this.world.rules().stream().map((r) -> this.symbols.printRule(r)).collect(Collectors.toList());
