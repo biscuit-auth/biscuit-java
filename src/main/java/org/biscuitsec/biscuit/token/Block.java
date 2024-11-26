@@ -102,10 +102,10 @@ public class Block {
         s.append("Block");
         s.append(" {\n\t\tsymbols: ");
         s.append(this.symbols.symbols);
-        s.append("\n\t\tpublic keys: ");
-        s.append(this.publicKeys);
         s.append("\n\t\tsymbol public keys: ");
         s.append(this.symbols.publicKeys());
+        s.append("\n\t\tblock public keys: ");
+        s.append(this.publicKeys);
         s.append("\n\t\tcontext: ");
         s.append(this.context);
         if(this.externalKey.isDefined()) {
@@ -133,6 +133,47 @@ public class Block {
             s.append(local_symbols.print_check(c));
         }
         s.append("\n\t\t]\n\t}");
+
+        return s.toString();
+    }
+
+    public String printCode(SymbolTable symbol_table) {
+        StringBuilder s = new StringBuilder();
+
+        SymbolTable local_symbols;
+        if(this.externalKey.isDefined()) {
+            local_symbols = new SymbolTable(this.symbols);
+            for(PublicKey pk: symbol_table.publicKeys()) {
+                local_symbols.insert(pk);
+            }
+        } else {
+            local_symbols = symbol_table;
+        }
+        /*s.append("Block");
+        s.append(" {\n\t\tsymbols: ");
+        s.append(this.symbols.symbols);
+        s.append("\n\t\tsymbol public keys: ");
+        s.append(this.symbols.publicKeys());
+        s.append("\n\t\tblock public keys: ");
+        s.append(this.publicKeys);
+        s.append("\n\t\tcontext: ");
+        s.append(this.context);
+        if(this.externalKey.isDefined()) {
+            s.append("\n\t\texternal key: ");
+            s.append(this.externalKey.get().toString());
+        }*/
+        for (Scope scope : this.scopes) {
+            s.append("trusting "+local_symbols.print_scope(scope)+"\n");
+        }
+        for (Fact f : this.facts) {
+            s.append(local_symbols.print_fact(f)+";\n");
+        }
+        for (Rule r : this.rules) {
+            s.append(local_symbols.print_rule(r)+";\n");
+        }
+        for (Check c : this.checks) {
+            s.append(local_symbols.print_check(c)+";\n");
+        }
 
         return s.toString();
     }
@@ -199,8 +240,11 @@ public class Block {
             }
         }
 
-        if(containsScopes || containsCheckAll || containsV4 || this.externalKey.isDefined()) {
+        if(this.externalKey.isDefined()) {
             return SerializedBiscuit.MAX_SCHEMA_VERSION;
+
+        }else if(containsScopes || containsCheckAll || containsV4) {
+            return 4;
         } else {
             return SerializedBiscuit.MIN_SCHEMA_VERSION;
         }
@@ -286,7 +330,9 @@ public class Block {
         ArrayList<PublicKey> publicKeys = new ArrayList<>();
         for (Schema.PublicKey pk: b.getPublicKeysList()) {
             try {
-                publicKeys.add(PublicKey.deserialize(pk));
+                PublicKey key =PublicKey.deserialize(pk);
+                publicKeys.add(key);
+                symbols.publicKeys().add(key);
             } catch(Error.FormatError e) {
                 return Left(e);
             }

@@ -50,6 +50,17 @@ public class Biscuit {
         this.root_key_id = root_key_id;
     }
 
+    public Biscuit(final SecureRandom rng, final KeyPair root, Option<Integer> root_key_id, org.biscuitsec.biscuit.token.builder.Block block) {
+        this.rng = rng;
+        this.root = root;
+        this.root_key_id = root_key_id;
+        this.context = block.context;
+        this.facts = block.facts;
+        this.rules = block.rules;
+        this.checks = block.checks;
+        this.scopes = block.scopes;
+    }
+
     public Biscuit add_authority_fact(org.biscuitsec.biscuit.token.builder.Fact f) throws Error.Language {
         f.validate();
         this.facts.add(f);

@@ -22,6 +22,7 @@ import org.junit.jupiter.api.TestFactory;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -44,21 +45,19 @@ class SamplesTest {
         return sample.testcases.stream().map(t -> process_testcase(t, publicKey, keyPair));
     }
 
-    void compareBlocks(List<Block> sampleBlocks, List<org.biscuitsec.biscuit.token.Block> blocks) {
-        assertEquals(sampleBlocks.size(), blocks.size());
-        List<Tuple2<Block, org.biscuitsec.biscuit.token.Block>> comparisonList = IntStream.range(0, sampleBlocks.size())
-                .mapToObj(i -> new Tuple2<>(sampleBlocks.get(i), blocks.get(i)))
-                .collect(Collectors.toList());
+    void compareBlocks(KeyPair root, List<Block> sampleBlocks, Biscuit token) throws Error {
+        assertEquals(sampleBlocks.size(), 1+token.blocks.size());
+        Option<Biscuit> sampleToken = Option.none();
+        Biscuit b = compareBlock(root, sampleToken, 0, sampleBlocks.get(0), token.authority, token.symbols);
+        sampleToken = Option.some(b);
 
-        // for each token we start from the base symbol table
-        SymbolTable baseSymbols = new SymbolTable();
-
-        io.vavr.collection.Stream.ofAll(comparisonList).zipWithIndex().forEach(indexedItem -> {
-            compareBlock(baseSymbols, indexedItem._2, indexedItem._1._1, indexedItem._1._2);
-        });
+        for(int i=0; i < token.blocks.size(); i++) {
+            b = compareBlock(root, sampleToken, i+1, sampleBlocks.get(i+1), token.blocks.get(i), token.symbols);
+            sampleToken = Option.some(b);
+        }
     }
 
-    void compareBlock(SymbolTable baseSymbols, long sampleBlockIndex, Block sampleBlock, org.biscuitsec.biscuit.token.Block block) {
+    Biscuit compareBlock(KeyPair root, Option<Biscuit> sampleToken, long sampleBlockIndex, Block sampleBlock, org.biscuitsec.biscuit.token.Block tokenBlock, SymbolTable tokenSymbols) throws Error {
         Option<PublicKey> sampleExternalKey = sampleBlock.getExternalKey();
         List<PublicKey> samplePublicKeys = sampleBlock.getPublicKeys();
         String sampleDatalog = sampleBlock.getCode().replace("\"","\\\"");
@@ -67,40 +66,40 @@ class SamplesTest {
 
         // the invalid block rule with unbound variable cannot be parsed
         if(outputSample.isLeft()) {
-            return;
+            return sampleToken.get();
         }
 
-        SymbolTable sampleSymbols;
-        if (!block.externalKey.isDefined()) {
-            sampleSymbols = new SymbolTable(baseSymbols);
+        Biscuit newSampleToken;
+        if(!sampleToken.isDefined()) {
+            org.biscuitsec.biscuit.token.builder.Biscuit builder = new org.biscuitsec.biscuit.token.builder.Biscuit(new SecureRandom(), root, Option.none(), outputSample.get());
+            newSampleToken = builder.build();
         } else {
-            sampleSymbols = new SymbolTable();
-
-            for(PublicKey pk: baseSymbols.publicKeys()) {
-               sampleSymbols.insert(pk);
-            }
+            Biscuit s = sampleToken.get();
+            newSampleToken = s.attenuate(outputSample.get());
         }
 
-        org.biscuitsec.biscuit.token.Block generatedSampleBlock = outputSample.get().build(sampleSymbols);
-
-        if(!block.externalKey.isDefined()) {
-            generatedSampleBlock.symbols.symbols.forEach(baseSymbols::add);
+        org.biscuitsec.biscuit.token.Block generatedSampleBlock;
+        if(!sampleToken.isDefined()) {
+            generatedSampleBlock = newSampleToken.authority;
         } else {
-            generatedSampleBlock.setExternalKey(block.externalKey.get());
-            generatedSampleBlock.version = SerializedBiscuit.MAX_SCHEMA_VERSION;
-            baseSymbols.insert(block.externalKey.get());
+            generatedSampleBlock = newSampleToken.blocks.get((int)sampleBlockIndex-1);
         }
 
-        for(PublicKey pk: generatedSampleBlock.publicKeys) {
-            baseSymbols.insert(pk);
-        }
-        System.out.println(baseSymbols.symbols);
+        System.out.println("generated block: ");
+        System.out.println(generatedSampleBlock.print(newSampleToken.symbols));
+        System.out.println("deserialized block: ");
+        System.out.println(tokenBlock.print(newSampleToken.symbols));
 
-        System.out.println(generatedSampleBlock.print(baseSymbols));
-        System.out.println(block.print(baseSymbols));
-        assertEquals(generatedSampleBlock.print(baseSymbols), block.print(baseSymbols));
-        assertEquals(generatedSampleBlock, block);
-        assertArrayEquals(generatedSampleBlock.to_bytes().get(), block.to_bytes().get());
+        SymbolTable tokenBlockSymbols = tokenSymbols;
+        SymbolTable generatedBlockSymbols = newSampleToken.symbols;
+        assertEquals(generatedSampleBlock.printCode(generatedBlockSymbols), tokenBlock.printCode(tokenBlockSymbols));
+
+        /* FIXME: to generate the same sample block, we need the samples to provide the external private key
+        assertEquals(generatedSampleBlock, tokenBlock);
+        assertArrayEquals(generatedSampleBlock.to_bytes().get(), tokenBlock.to_bytes().get());
+        */
+
+        return newSampleToken;
     }
 
     DynamicTest process_testcase(final TestCase testCase, final PublicKey publicKey, final KeyPair privateKey) {
@@ -125,7 +124,7 @@ class SamplesTest {
                     allBlocks.add(token.authority);
                     allBlocks.addAll(token.blocks);
 
-                    compareBlocks(testCase.token, allBlocks);
+                    compareBlocks(privateKey, testCase.token, token);
 
                     byte[] ser_block_authority = token.authority.to_bytes().get();
                     System.out.println(Arrays.toString(ser_block_authority));

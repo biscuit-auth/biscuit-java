@@ -82,8 +82,10 @@ public class ThirdPartyTest {
 
     @Test
     public void testPublicKeyInterning() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, CloneNotSupportedException, Error {
+        // this makes a deterministic RNG
+        SecureRandom rng = SecureRandom.getInstance("SHA1PRNG");
         byte[] seed = {0, 0, 0, 0};
-        SecureRandom rng = new SecureRandom(seed);
+        rng.setSeed(seed);
 
         System.out.println("preparing the authority block");
 
