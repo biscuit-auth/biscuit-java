@@ -25,16 +25,13 @@ import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @Testcontainers
 public class KmsSignerExampleTest {
 
-    private static final DockerImageName LOCALSTACK_IMAGE = DockerImageName.parse("localstack/localstack:3.0.1");
+    private static final DockerImageName LOCALSTACK_IMAGE = DockerImageName.parse("localstack/localstack:4.0.2");
 
     @Container
     public static LocalStackContainer LOCALSTACK = new LocalStackContainer(LOCALSTACK_IMAGE)
