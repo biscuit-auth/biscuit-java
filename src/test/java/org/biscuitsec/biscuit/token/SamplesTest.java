@@ -75,7 +75,7 @@ class SamplesTest {
             newSampleToken = builder.build();
         } else {
             Biscuit s = sampleToken.get();
-            newSampleToken = s.attenuate(outputSample.get());
+            newSampleToken = s.attenuate(outputSample.get(), Schema.PublicKey.Algorithm.Ed25519);
         }
 
         org.biscuitsec.biscuit.token.Block generatedSampleBlock;
