@@ -2,7 +2,6 @@ package org.biscuitsec.biscuit.token;
 
 import biscuit.format.schema.Schema;
 import com.google.gson.*;
-import com.google.protobuf.MapEntry;
 import io.vavr.Tuple2;
 import io.vavr.control.Option;
 import org.biscuitsec.biscuit.crypto.KeyPair;
@@ -10,13 +9,10 @@ import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.datalog.Rule;
 import org.biscuitsec.biscuit.datalog.RunLimits;
 import org.biscuitsec.biscuit.datalog.SymbolTable;
-import org.biscuitsec.biscuit.datalog.TrustedOrigins;
 import org.biscuitsec.biscuit.error.Error;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 import org.biscuitsec.biscuit.token.builder.Check;
-import org.biscuitsec.biscuit.token.builder.Expression;
-import org.biscuitsec.biscuit.token.builder.parser.ExpressionParser;
 import org.biscuitsec.biscuit.token.builder.parser.Parser;
 import org.biscuitsec.biscuit.token.format.SerializedBiscuit;
 import org.biscuitsec.biscuit.token.format.SignedBlock;
@@ -45,7 +41,7 @@ class SamplesTest {
         Gson gson = new Gson();
         Sample sample = gson.fromJson(new InputStreamReader(new BufferedInputStream(inputStream)), Sample.class);
         PublicKey publicKey = new PublicKey(Schema.PublicKey.Algorithm.Ed25519, sample.root_public_key);
-        KeyPair keyPair = new KeyPair(sample.root_private_key);
+        KeyPair keyPair = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, sample.root_private_key);
         return sample.testcases.stream().map(t -> process_testcase(t, publicKey, keyPair));
     }
 
@@ -79,7 +75,7 @@ class SamplesTest {
             newSampleToken = builder.build();
         } else {
             Biscuit s = sampleToken.get();
-            newSampleToken = s.attenuate(outputSample.get());
+            newSampleToken = s.attenuate(outputSample.get(), Schema.PublicKey.Algorithm.Ed25519);
         }
 
         org.biscuitsec.biscuit.token.Block generatedSampleBlock;

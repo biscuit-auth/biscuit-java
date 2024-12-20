@@ -1,5 +1,6 @@
 package org.biscuitsec.biscuit.token;
 
+import biscuit.format.schema.Schema;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.token.builder.Block;
@@ -13,7 +14,7 @@ import java.security.SignatureException;
  */
 public class ExampleTest {
     public KeyPair root() {
-        return new KeyPair();
+        return KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519);
     }
 
     public Biscuit createToken(KeyPair root) throws Error {
@@ -34,7 +35,7 @@ public class ExampleTest {
     public Biscuit attenuate(KeyPair root, byte[] serializedToken) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         Biscuit token = Biscuit.from_bytes(serializedToken, root.public_key());
         Block block = token.create_block().add_check("check if operation(\"read\")");
-        return token.attenuate(block);
+        return token.attenuate(block, root.public_key().algorithm);
     }
 
     /*public Set<Fact> query(Authorizer authorizer) throws Error.Timeout, Error.TooManyFacts, Error.TooManyIterations, Error.Parser {
