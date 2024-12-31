@@ -206,9 +206,7 @@ public class UnverifiedBiscuit {
     }
 
     protected void addCopiedBiscuitBlocks(UnverifiedBiscuit copiedBiscuit) {
-        for (Block b : copiedBiscuit.blocks) {
-            blocks.add(b);
-        }
+        blocks.addAll(copiedBiscuit.blocks);
     }
 
     public List<RevocationIdentifier> revocationIdentifiers() {
