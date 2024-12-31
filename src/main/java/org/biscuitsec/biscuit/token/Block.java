@@ -32,7 +32,7 @@ public class Block {
     final List<Scope> scopes;
     final List<PublicKey> publicKeys;
     Option<PublicKey> externalKey;
-    long version;
+    long version;   // Should this unused variable be deprecated?
 
     /**
      * creates a new block
