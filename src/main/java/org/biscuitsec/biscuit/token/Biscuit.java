@@ -352,15 +352,10 @@ public class Biscuit extends UnverifiedBiscuit {
     public Biscuit attenuate(final SecureRandom rng, final KeyPair keypair, Block block) throws Error {
         Biscuit copiedBiscuit = this.copy();
 
-        if (!Collections.disjoint(copiedBiscuit.symbols.symbols, block.symbols.symbols)) {
-            throw new Error.SymbolTableOverlap();
-        }
+        checkSymbolTableOverlap(copiedBiscuit, block);
 
-        Either<Error.FormatError, SerializedBiscuit> containerRes =
-                copiedBiscuit.serializedBiscuit.append(keypair, block, Option.none());
-        if (containerRes.isLeft()) {
-            throw containerRes.getLeft();
-        }
+        Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.serializedBiscuit.append(keypair, block, Option.none());
+        containerResIsLeft(containerRes);
         SerializedBiscuit container = containerRes.get();
 
         SymbolTable symbols = new SymbolTable(copiedBiscuit.symbols);
@@ -374,7 +369,7 @@ public class Biscuit extends UnverifiedBiscuit {
 
         ArrayList<Block> blocks = new ArrayList<>();
         for (Block b : copiedBiscuit.blocks) {
-            blocks.add(b);
+              blocks.add(b);
         }
         blocks.add(block);
 

@@ -167,14 +167,10 @@ public class UnverifiedBiscuit {
     public UnverifiedBiscuit attenuate(final SecureRandom rng, final KeyPair keypair, Block block) throws Error {
         UnverifiedBiscuit copiedBiscuit = this.copy();
 
-        if (!Collections.disjoint(copiedBiscuit.symbols.symbols, block.symbols.symbols)) {
-            throw new Error.SymbolTableOverlap();
-        }
+        checkSymbolTableOverlap(copiedBiscuit, block);
 
         Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.serializedBiscuit.append(keypair, block, Option.none());
-        if (containerRes.isLeft()) {
-            throw containerRes.getLeft();
-        }
+        containerResIsLeft(containerRes);
         SerializedBiscuit container = containerRes.get();
 
         SymbolTable symbols = new SymbolTable(copiedBiscuit.symbols);
@@ -183,9 +179,7 @@ public class UnverifiedBiscuit {
         }
 
         ArrayList<Block> blocks = new ArrayList<>();
-        for (Block b : copiedBiscuit.blocks) {
-            blocks.add(b);
-        }
+        addCopiedBiscuitBlocks(copiedBiscuit);
         blocks.add(block);
 
         List<byte[]> revocationIds = container.revocationIdentifiers();
@@ -193,6 +187,24 @@ public class UnverifiedBiscuit {
         return new UnverifiedBiscuit(copiedBiscuit.authority, blocks, symbols, container, revocationIds);
     }
     //FIXME: attenuate 3rd Party
+
+    protected void checkSymbolTableOverlap(UnverifiedBiscuit copiedBiscuit, Block block) throws  Error {
+        if (!Collections.disjoint(copiedBiscuit.symbols.symbols, block.symbols.symbols)) {
+            throw new Error.SymbolTableOverlap();
+        }
+    }
+
+    protected void containerResIsLeft(Either<Error.FormatError, SerializedBiscuit> containerRes) throws Error {
+        if (containerRes.isLeft()) {
+            throw containerRes.getLeft();
+        }
+    }
+
+    protected void addCopiedBiscuitBlocks(UnverifiedBiscuit copiedBiscuit) {
+        for (Block b : copiedBiscuit.blocks) {
+            blocks.add(b);
+        }
+    }
 
     public List<RevocationIdentifier> revocationIdentifiers() {
         return this.revocationIds.stream()
@@ -298,9 +310,7 @@ public class UnverifiedBiscuit {
         SymbolTable symbols = new SymbolTable(copiedBiscuit.symbols);
 
         ArrayList<Block> blocks = new ArrayList<>();
-        for (Block b : copiedBiscuit.blocks) {
-            blocks.add(b);
-        }
+        addCopiedBiscuitBlocks(copiedBiscuit);
         blocks.add(block);
 
         List<byte[]> revocationIds = container.revocationIdentifiers();
