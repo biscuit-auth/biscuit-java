@@ -93,7 +93,7 @@ public class UnverifiedBiscuit {
      */
     static public UnverifiedBiscuit fromBytesWithSymbols(byte[] data, SymbolTable symbols) throws Error {
         SerializedBiscuit ser = SerializedBiscuit.unsafeDeserialize(data);
-        return UnverifiedBiscuit.from_serialized_biscuit(ser, symbols);
+        return UnverifiedBiscuit.fillUnverifiedBiscuitStructure(ser, symbols);
     }
 
     /**
@@ -101,7 +101,8 @@ public class UnverifiedBiscuit {
      *
      * @return UnverifiedBiscuit
      */
-    static private UnverifiedBiscuit from_serialized_biscuit(SerializedBiscuit ser, SymbolTable symbols) throws Error {
+    static private UnverifiedBiscuit fillUnverifiedBiscuitStructure(SerializedBiscuit ser,
+                                                                    SymbolTable symbols) throws Error {
         Tuple2<Block, ArrayList<Block>> t = ser.extractBlocks(symbols);
         Block authority = t._1;
         ArrayList<Block> blocks = t._2;
