@@ -1,22 +1,25 @@
 package org.biscuitsec.biscuit.token;
 
 import biscuit.format.schema.Schema;
-import org.biscuitsec.biscuit.crypto.KeyDelegate;
-import org.biscuitsec.biscuit.crypto.KeyPair;
-import org.biscuitsec.biscuit.crypto.PublicKey;
-import org.biscuitsec.biscuit.error.Error;
-import org.biscuitsec.biscuit.token.format.ExternalSignature;
-import org.biscuitsec.biscuit.token.format.SerializedBiscuit;
 import io.vavr.Tuple2;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
+import org.biscuitsec.biscuit.crypto.KeyDelegate;
+import org.biscuitsec.biscuit.crypto.KeyPair;
+import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.datalog.Check;
 import org.biscuitsec.biscuit.datalog.SymbolTable;
+import org.biscuitsec.biscuit.error.Error;
+import org.biscuitsec.biscuit.token.format.ExternalSignature;
+import org.biscuitsec.biscuit.token.format.SerializedBiscuit;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
@@ -188,7 +191,7 @@ public class UnverifiedBiscuit {
     }
     //FIXME: attenuate 3rd Party
 
-    protected void checkSymbolTableOverlap(UnverifiedBiscuit copiedBiscuit, Block block) throws  Error {
+    protected void checkSymbolTableOverlap(UnverifiedBiscuit copiedBiscuit, Block block) throws Error {
         if (!Collections.disjoint(copiedBiscuit.symbols.symbols, block.symbols.symbols)) {
             throw new Error.SymbolTableOverlap();
         }
@@ -251,7 +254,7 @@ public class UnverifiedBiscuit {
      */
     public ThirdPartyBlockRequest thirdPartyRequest() {
         PublicKey previousKey;
-        if(this.serializedBiscuit.blocks.isEmpty()) {
+        if (this.serializedBiscuit.blocks.isEmpty()) {
             previousKey = this.serializedBiscuit.authority.key;
         } else {
             previousKey = this.serializedBiscuit.blocks.get(this.serializedBiscuit.blocks.size() - 1).key;
@@ -278,7 +281,7 @@ public class UnverifiedBiscuit {
         sgr.update(algo_buf);
 
         PublicKey previousKey;
-        if(this.serializedBiscuit.blocks.isEmpty()) {
+        if (this.serializedBiscuit.blocks.isEmpty()) {
             previousKey = this.serializedBiscuit.authority.key;
         } else {
             previousKey = this.serializedBiscuit.blocks.get(this.serializedBiscuit.blocks.size() - 1).key;
@@ -289,7 +292,7 @@ public class UnverifiedBiscuit {
         }
 
         Either<Error.FormatError, Block> res = Block.from_bytes(blockResponse.payload, Option.some(externalKey));
-        if(res.isLeft()) {
+        if (res.isLeft()) {
             throw res.getLeft();
         }
 
@@ -366,7 +369,7 @@ public class UnverifiedBiscuit {
 
 
         Option<PublicKey> root = delegate.rootKey(rootKeyId);
-        if(root.isEmpty()) {
+        if (root.isEmpty()) {
             throw new InvalidKeyException("unknown root key id");
         }
 
