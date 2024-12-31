@@ -50,8 +50,10 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param root    root private key
      * @return
      */
-    public static org.biscuitsec.biscuit.token.builder.Biscuit builder(final SecureRandom rng, final KeyPair root, final Option<Integer> root_key_id) {
-        return new org.biscuitsec.biscuit.token.builder.Biscuit(rng, root, root_key_id);
+    public static org.biscuitsec.biscuit.token.builder.Biscuit builder(final SecureRandom rng,
+                                                                       final KeyPair root,
+                                                                       final Option<Integer> rootKeyId) {
+        return new org.biscuitsec.biscuit.token.builder.Biscuit(rng, root, rootKeyId);
     }
 
     /**
@@ -62,7 +64,9 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param authority authority block
      * @return Biscuit
      */
-    public static Biscuit make(final SecureRandom rng, final KeyPair root, final Block authority) throws Error.FormatError {
+    public static Biscuit make(final SecureRandom rng,
+                               final KeyPair root,
+                               final Block authority) throws Error.FormatError {
         return Biscuit.make(rng, root, Option.none(), authority);
     }
 
@@ -74,8 +78,11 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param authority authority block
      * @return Biscuit
      */
-    public static Biscuit make(final SecureRandom rng, final KeyPair root, final Integer root_key_id, final Block authority) throws Error.FormatError {
-        return Biscuit.make(rng, root, Option.of(root_key_id), authority);
+    public static Biscuit make(final SecureRandom rng,
+                               final KeyPair root,
+                               final Integer rootKeyId,
+                               final Block authority) throws Error.FormatError {
+        return Biscuit.make(rng, root, Option.of(rootKeyId), authority);
     }
 
     /**
@@ -86,7 +93,10 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param authority authority block
      * @return Biscuit
      */
-    static private Biscuit make(final SecureRandom rng, final KeyPair root, final Option<Integer> root_key_id, final Block authority) throws Error.FormatError {
+    static private Biscuit make(final SecureRandom rng,
+                                final KeyPair root,
+                                final Option<Integer> rootKeyId,
+                                final Block authority) throws Error.FormatError {
         ArrayList<Block> blocks = new ArrayList<>();
 
         KeyPair next = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
@@ -95,26 +105,33 @@ public class Biscuit extends UnverifiedBiscuit {
             authority.symbols.insert(pk);
         }
 
-        Either<Error.FormatError, SerializedBiscuit> container = SerializedBiscuit.make(root, root_key_id, authority, next);
+        Either<Error.FormatError, SerializedBiscuit> container = SerializedBiscuit.make(root, rootKeyId, authority, next);
         if (container.isLeft()) {
             throw container.getLeft();
         } else {
             SerializedBiscuit s = container.get();
-            List<byte[]> revocation_ids = s.revocationIdentifiers();
+            List<byte[]> revocationIds = s.revocationIdentifiers();
 
             Option<SerializedBiscuit> c = Option.some(s);
-            return new Biscuit(authority, blocks, authority.symbols, s, revocation_ids, root_key_id);
+            return new Biscuit(authority, blocks, authority.symbols, s, revocationIds, rootKeyId);
         }
     }
 
-    Biscuit(Block authority, List<Block> blocks, SymbolTable symbols, SerializedBiscuit serializedBiscuit,
-            List<byte[]> revocation_ids) {
-        super(authority, blocks, symbols, serializedBiscuit,  revocation_ids);
+    Biscuit(Block authority,
+            List<Block> blocks,
+            SymbolTable symbols,
+            SerializedBiscuit serializedBiscuit,
+            List<byte[]> revocationIds) {
+        super(authority, blocks, symbols, serializedBiscuit,  revocationIds);
     }
 
-    Biscuit(Block authority, List<Block> blocks, SymbolTable symbols, SerializedBiscuit serializedBiscuit,
-            List<byte[]> revocation_ids, Option<Integer> root_key_id) {
-        super(authority, blocks, symbols, serializedBiscuit, revocation_ids, root_key_id);
+    Biscuit(Block authority,
+            List<Block> blocks,
+            SymbolTable symbols,
+            SerializedBiscuit serializedBiscuit,
+            List<byte[]> revocationIds,
+            Option<Integer> rootKeyId) {
+        super(authority, blocks, symbols, serializedBiscuit, revocationIds, rootKeyId);
     }
 
     /**
@@ -131,7 +148,8 @@ public class Biscuit extends UnverifiedBiscuit {
      * @return
      */
     @Deprecated
-    static public Biscuit from_b64(String data, PublicKey root) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+    static public Biscuit from_b64(String data, PublicKey root)
+            throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         return Biscuit.from_bytes(Base64.getUrlDecoder().decode(data), root);
     }
 
@@ -148,7 +166,8 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param data
      * @return Biscuit
      */
-    static public Biscuit from_b64url(String data, PublicKey root) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+    static public Biscuit from_b64url(String data, PublicKey root)
+            throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         return Biscuit.from_bytes(Base64.getUrlDecoder().decode(data), root);
     }
 
@@ -165,7 +184,8 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param data
      * @return Biscuit
      */
-    static public Biscuit from_b64url(String data, KeyDelegate delegate) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+    static public Biscuit from_b64url(String data, KeyDelegate delegate)
+            throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         return Biscuit.from_bytes(Base64.getUrlDecoder().decode(data), delegate);
     }
 
@@ -182,7 +202,8 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param data
      * @return
      */
-    static public Biscuit from_bytes(byte[] data, PublicKey root) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+    static public Biscuit from_bytes(byte[] data, PublicKey root)
+            throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         return from_bytes_with_symbols(data, root, default_symbol_table());
     }
 
@@ -199,7 +220,8 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param data
      * @return
      */
-    static public Biscuit from_bytes(byte[] data, KeyDelegate delegate) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+    static public Biscuit from_bytes(byte[] data, KeyDelegate delegate)
+            throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         return from_bytes_with_symbols(data, delegate, default_symbol_table());
     }
 
@@ -214,7 +236,8 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param data
      * @return
      */
-    static public Biscuit from_bytes_with_symbols(byte[] data, PublicKey root, SymbolTable symbols) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+    static public Biscuit from_bytes_with_symbols(byte[] data, PublicKey root, SymbolTable symbols)
+            throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         //System.out.println("will deserialize and verify token");
         SerializedBiscuit ser = SerializedBiscuit.fromBytes(data, root);
         //System.out.println("deserialized token, will populate Biscuit structure");
@@ -233,7 +256,8 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param data
      * @return
      */
-    static public Biscuit from_bytes_with_symbols(byte[] data, KeyDelegate delegate, SymbolTable symbols) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+    static public Biscuit from_bytes_with_symbols(byte[] data, KeyDelegate delegate, SymbolTable symbols)
+            throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         //System.out.println("will deserialize and verify token");
         SerializedBiscuit ser = SerializedBiscuit.fromBytes(data, delegate);
         //System.out.println("deserialized token, will populate Biscuit structure");
@@ -251,9 +275,9 @@ public class Biscuit extends UnverifiedBiscuit {
         Block authority = t._1;
         ArrayList<Block> blocks = t._2;
 
-        List<byte[]> revocation_ids = ser.revocationIdentifiers();
+        List<byte[]> revocationIds = ser.revocationIdentifiers();
 
-        return new Biscuit(authority, blocks, symbols, ser, revocation_ids);
+        return new Biscuit(authority, blocks, symbols, ser, revocationIds);
     }
 
     /**
@@ -309,7 +333,9 @@ public class Biscuit extends UnverifiedBiscuit {
         return attenuate(rng, keypair, block.build(builderSymbols));
     }
 
-    public Biscuit attenuate(final SecureRandom rng, final KeyPair keypair, org.biscuitsec.biscuit.token.builder.Block block) throws Error {
+    public Biscuit attenuate(final SecureRandom rng,
+                             final KeyPair keypair,
+                             org.biscuitsec.biscuit.token.builder.Block block) throws Error {
         SymbolTable builderSymbols = new SymbolTable(this.symbols);
         return attenuate(rng, keypair, block.build(builderSymbols));
     }
@@ -329,7 +355,8 @@ public class Biscuit extends UnverifiedBiscuit {
             throw new Error.SymbolTableOverlap();
         }
 
-        Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.serializedBiscuit.append(keypair, block, Option.none());
+        Either<Error.FormatError, SerializedBiscuit> containerRes =
+                copiedBiscuit.serializedBiscuit.append(keypair, block, Option.none());
         if (containerRes.isLeft()) {
             throw containerRes.getLeft();
         }
@@ -350,9 +377,9 @@ public class Biscuit extends UnverifiedBiscuit {
         }
         blocks.add(block);
 
-        List<byte[]> revocation_ids = container.revocationIdentifiers();
+        List<byte[]> revocationIds = container.revocationIdentifiers();
 
-        return new Biscuit(copiedBiscuit.authority, blocks, symbols, container, revocation_ids);
+        return new Biscuit(copiedBiscuit.authority, blocks, symbols, container, revocationIds);
     }
 
     /**
