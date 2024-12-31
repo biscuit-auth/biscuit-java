@@ -374,9 +374,7 @@ public class Biscuit extends UnverifiedBiscuit {
         }
 
         ArrayList<Block> blocks = new ArrayList<>();
-        for (Block b : copiedBiscuit.blocks) {
-            blocks.add(b);
-        }
+        blocks.addAll(copiedBiscuit.blocks);
         blocks.add(block);
 
         List<byte[]> revocationIds = container.revocationIdentifiers();
