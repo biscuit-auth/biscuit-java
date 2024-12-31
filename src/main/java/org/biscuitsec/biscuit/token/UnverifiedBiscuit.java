@@ -216,6 +216,7 @@ public class UnverifiedBiscuit {
     }
 
     public List<List<Check>> checks() {
+        // Should this unused method be deprecated?
         ArrayList<List<Check>> l = new ArrayList<>();
         l.add(new ArrayList<>(this.authority.checks));
 
@@ -227,6 +228,7 @@ public class UnverifiedBiscuit {
     }
 
     public List<Option<String>> context() {
+        // Should this unused method be deprecated?
         ArrayList<Option<String>> res = new ArrayList<>();
         if (this.authority.context.isEmpty()) {
             res.add(Option.none());
@@ -246,6 +248,7 @@ public class UnverifiedBiscuit {
     }
 
     public Option<Integer> rootKeyId() {
+        // Should this unused method be deprecated?
         return this.rootKeyId;
     }
 
@@ -345,11 +348,6 @@ public class UnverifiedBiscuit {
      */
     static public SymbolTable defaultSymbolTable() {
         return new SymbolTable();
-    }
-
-    @Override
-    protected Object clone() throws CloneNotSupportedException {
-        return super.clone();
     }
 
     public UnverifiedBiscuit copy() throws Error {
