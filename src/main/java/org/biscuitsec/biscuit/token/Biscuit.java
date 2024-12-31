@@ -288,7 +288,7 @@ public class Biscuit extends UnverifiedBiscuit {
     }
 
     /**
-     * Creates a authorizer for this token
+     * Creates an authorizer for this token
      * <p>
      * This function checks that the root key is the one we expect
      *
