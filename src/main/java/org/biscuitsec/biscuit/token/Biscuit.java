@@ -93,7 +93,7 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param authority authority block
      * @return Biscuit
      */
-    static private Biscuit make(final SecureRandom rng,
+     private static Biscuit make(final SecureRandom rng,
                                 final KeyPair root,
                                 final Option<Integer> rootKeyId,
                                 final Block authority) throws Error.FormatError {
@@ -148,7 +148,7 @@ public class Biscuit extends UnverifiedBiscuit {
      * @return
      */
     @Deprecated
-    static public Biscuit fromB64(String data, PublicKey root)
+    public static Biscuit fromB64(String data, PublicKey root)
             throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         return Biscuit.fromBytes(Base64.getUrlDecoder().decode(data), root);
     }
@@ -166,7 +166,7 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param data
      * @return Biscuit
      */
-    static public Biscuit fromB64Url(String data, PublicKey root)
+     public static Biscuit fromB64Url(String data, PublicKey root)
             throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         return Biscuit.fromBytes(Base64.getUrlDecoder().decode(data), root);
     }
@@ -184,7 +184,7 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param data
      * @return Biscuit
      */
-    static public Biscuit fromB64Url(String data, KeyDelegate delegate)
+    public static Biscuit fromB64Url(String data, KeyDelegate delegate)
             throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         // Should this unused method be deprecated?
         return Biscuit.fromBytes(Base64.getUrlDecoder().decode(data), delegate);
@@ -203,7 +203,7 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param data
      * @return
      */
-    static public Biscuit fromBytes(byte[] data, PublicKey root)
+    public static  Biscuit fromBytes(byte[] data, PublicKey root)
             throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         return fromBytesWithSymbols(data, root, defaultSymbolTable());
     }
@@ -221,7 +221,7 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param data
      * @return
      */
-    static public Biscuit fromBytes(byte[] data, KeyDelegate delegate)
+    public static Biscuit fromBytes(byte[] data, KeyDelegate delegate)
             throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         return fromBytesWithSymbols(data, delegate, defaultSymbolTable());
     }
@@ -237,7 +237,7 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param data
      * @return
      */
-    static public Biscuit fromBytesWithSymbols(byte[] data, PublicKey root, SymbolTable symbols)
+    public static  Biscuit fromBytesWithSymbols(byte[] data, PublicKey root, SymbolTable symbols)
             throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         //System.out.println("will deserialize and verify token");
         SerializedBiscuit ser = SerializedBiscuit.fromBytes(data, root);
@@ -257,7 +257,7 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param data
      * @return
      */
-    static public Biscuit fromBytesWithSymbols(byte[] data, KeyDelegate delegate, SymbolTable symbols)
+    public static  Biscuit fromBytesWithSymbols(byte[] data, KeyDelegate delegate, SymbolTable symbols)
             throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         //System.out.println("will deserialize and verify token");
         SerializedBiscuit ser = SerializedBiscuit.fromBytes(data, delegate);
@@ -271,7 +271,7 @@ public class Biscuit extends UnverifiedBiscuit {
      *
      * @return
      */
-    static Biscuit fromSerializedBiscuit(SerializedBiscuit ser, SymbolTable symbols) throws Error {
+    protected static Biscuit fromSerializedBiscuit(SerializedBiscuit ser, SymbolTable symbols) throws Error {
         Tuple2<Block, ArrayList<Block>> t = ser.extractBlocks(symbols);
         Block authority = t._1;
         ArrayList<Block> blocks = t._2;
