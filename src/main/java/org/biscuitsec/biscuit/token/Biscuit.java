@@ -309,16 +309,6 @@ public class Biscuit extends UnverifiedBiscuit {
     }
 
     /**
-     * Serializes a token to base 64 url String using RFC4648_URLSAFE
-     *
-     * @return String
-     * @throws Error.FormatError.SerializationError
-     */
-    public String serializeB64Url() throws Error.FormatError.SerializationError {
-        return Base64.getUrlEncoder().encodeToString(serialize());
-    }
-
-    /**
      * Generates a new token from an existing one and a new block
      *
      * @param block new block (should be generated from a Block builder)
