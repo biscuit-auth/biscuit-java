@@ -26,6 +26,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * UnverifiedBiscuit auth token. UnverifiedBiscuit means it's deserialized without checking signatures.
  */
+@SuppressWarnings("JavadocDeclaration")
 public class UnverifiedBiscuit {
     final Block authority;
     final List<Block> blocks;
