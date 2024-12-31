@@ -373,8 +373,7 @@ public class Biscuit extends UnverifiedBiscuit {
             symbols.insert(pk);
         }
 
-        ArrayList<Block> blocks = new ArrayList<>();
-        blocks.addAll(copiedBiscuit.blocks);
+        ArrayList<Block> blocks = new ArrayList<>(copiedBiscuit.blocks);
         blocks.add(block);
 
         List<byte[]> revocationIds = container.revocationIdentifiers();
