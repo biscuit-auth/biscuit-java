@@ -55,7 +55,7 @@ public class BiscuitTest {
         out.println(hex(data));
 
         out.println("deserializing the first token");
-        Biscuit deser = Biscuit.from_bytes(data, root.publicKey());
+        Biscuit deser = Biscuit.fromBytes(data, root.publicKey());
 
         out.println(deser.print());
 
@@ -64,7 +64,7 @@ public class BiscuitTest {
 
         KeyPair keypair2 = new KeyPair(rng);
 
-        Block builder = deser.create_block();
+        Block builder = deser.createBlock();
         builder.addCheck(check(rule(
                 "caveat1",
                 List.of(var("resource")),
@@ -88,7 +88,7 @@ public class BiscuitTest {
         out.println(hex(data2));
 
         out.println("deserializing the second token");
-        Biscuit deser2 = Biscuit.from_bytes(data2, root.publicKey());
+        Biscuit deser2 = Biscuit.fromBytes(data2, root.publicKey());
 
         out.println(deser2.print());
 
@@ -97,7 +97,7 @@ public class BiscuitTest {
 
         KeyPair keypair3 = new KeyPair(rng);
 
-        Block builder3 = deser2.create_block();
+        Block builder3 = deser2.createBlock();
         builder3.addCheck(check(rule(
                 "caveat2",
                 List.of(s("file1")),
@@ -119,7 +119,7 @@ public class BiscuitTest {
         out.println(hex(data3));
 
         out.println("deserializing the third token");
-        Biscuit final_token = Biscuit.from_bytes(data3, root.publicKey());
+        Biscuit final_token = Biscuit.fromBytes(data3, root.publicKey());
 
         out.println(final_token.print());
 
@@ -174,7 +174,7 @@ public class BiscuitTest {
 
         out.println(b.print());
 
-        Block block2 = b.create_block();
+        Block block2 = b.createBlock();
         block2.resourcePrefix("/folder1/");
         block2.checkRight("read");
 
@@ -230,21 +230,21 @@ public class BiscuitTest {
 
         Biscuit biscuit = Biscuit.make(rng, root, authority_builder.build());
 
-        Block builder = biscuit.create_block();
+        Block builder = biscuit.createBlock();
         builder.addFact(fact(
                 "right",
                 Arrays.asList(s("topic"), s("tenant"), s("namespace"), s("topic"), s("produce"))
         ));
 
-        String attenuatedB64 = biscuit.attenuate(rng, new KeyPair(rng), builder).serialize_b64url();
+        String attenuatedB64 = biscuit.attenuate(rng, new KeyPair(rng), builder).serializeB64Url();
 
         out.println("attenuated: " + attenuatedB64);
 
-        Biscuit.from_b64url(attenuatedB64, root.publicKey());
-        String attenuated2B64 = biscuit.attenuate(rng, new KeyPair(rng), builder).serialize_b64url();
+        Biscuit.fromB64Url(attenuatedB64, root.publicKey());
+        String attenuated2B64 = biscuit.attenuate(rng, new KeyPair(rng), builder).serializeB64Url();
 
         out.println("attenuated2: " + attenuated2B64);
-        Biscuit.from_b64url(attenuated2B64, root.publicKey());
+        Biscuit.fromB64Url(attenuated2B64, root.publicKey());
     }
 
     @Test
@@ -269,7 +269,7 @@ public class BiscuitTest {
 
         out.println(b.print());
 
-        Block block2 = b.create_block();
+        Block block2 = b.createBlock();
         block2.resourcePrefix("/folder1/");
         block2.checkRight("read");
 
@@ -336,7 +336,7 @@ public class BiscuitTest {
 
         out.println(b.print());
 
-        Block block2 = b.create_block();
+        Block block2 = b.createBlock();
         block2.resourcePrefix("/folder1/");
         block2.checkRight("read");
 
@@ -383,7 +383,7 @@ public class BiscuitTest {
         out.println(hex(data));
 
         out.println("deserializing the first token");
-        Biscuit deser = Biscuit.from_bytes(data, root.publicKey());
+        Biscuit deser = Biscuit.fromBytes(data, root.publicKey());
 
         out.println(deser.print());
 
@@ -392,7 +392,7 @@ public class BiscuitTest {
 
         KeyPair keypair2 = new KeyPair(rng);
 
-        Block builder = deser.create_block();
+        Block builder = deser.createBlock();
         builder.addCheck(check(rule(
                 "caveat1",
                 List.of(var("resource")),
@@ -416,7 +416,7 @@ public class BiscuitTest {
         out.println(hex(data2));
 
         out.println("deserializing the second token");
-        Biscuit deser2 = Biscuit.from_bytes(data2, root.publicKey());
+        Biscuit deser2 = Biscuit.fromBytes(data2, root.publicKey());
 
         out.println(deser2.print());
 
@@ -425,7 +425,7 @@ public class BiscuitTest {
 
         KeyPair keypair3 = new KeyPair(rng);
 
-        Block builder3 = deser2.create_block();
+        Block builder3 = deser2.createBlock();
         builder3.addCheck(check(rule(
                 "caveat2",
                 List.of(s("file1")),
@@ -447,7 +447,7 @@ public class BiscuitTest {
         out.println(hex(data3));
 
         out.println("deserializing the third token");
-        Biscuit final_token = Biscuit.from_bytes(data3, root.publicKey());
+        Biscuit final_token = Biscuit.fromBytes(data3, root.publicKey());
 
         out.println(final_token.print());
 
@@ -506,7 +506,7 @@ public class BiscuitTest {
         out.println(hex(data));
 
         out.println("deserializing the first token");
-        Biscuit deser = Biscuit.from_bytes(data, root.publicKey());
+        Biscuit deser = Biscuit.fromBytes(data, root.publicKey());
 
         out.println(deser.print());
 
@@ -515,7 +515,7 @@ public class BiscuitTest {
 
         KeyPair keypair2 = new KeyPair(rng);
 
-        Block builder = deser.create_block();
+        Block builder = deser.createBlock();
         builder.addCheck(check(rule(
                 "caveat1",
                 List.of(var("resource")),
@@ -539,7 +539,7 @@ public class BiscuitTest {
         out.println(hex(data2));
 
         out.println("deserializing the second token");
-        Biscuit deser2 = Biscuit.from_bytes(data2, root.publicKey());
+        Biscuit deser2 = Biscuit.fromBytes(data2, root.publicKey());
 
         out.println(deser2.print());
 
@@ -548,7 +548,7 @@ public class BiscuitTest {
 
         KeyPair keypair3 = new KeyPair(rng);
 
-        Block builder3 = deser2.create_block();
+        Block builder3 = deser2.createBlock();
         builder3.addCheck(check(rule(
                 "caveat2",
                 List.of(s("file1")),
@@ -570,7 +570,7 @@ public class BiscuitTest {
         out.println(hex(data3));
 
         out.println("deserializing the third token");
-        Biscuit final_token = Biscuit.from_bytes(data3, root.publicKey());
+        Biscuit final_token = Biscuit.fromBytes(data3, root.publicKey());
 
         out.println(final_token.print());
 
@@ -631,15 +631,15 @@ public class BiscuitTest {
 
         out.println("deserializing the first token");
 
-        assertThrows(InvalidKeyException.class, () -> Biscuit.from_bytes(data, key_id -> Option.none()));
+        assertThrows(InvalidKeyException.class, () -> Biscuit.fromBytes(data, key_id -> Option.none()));
 
 
-        assertThrows(Error.FormatError.Signature.InvalidSignature.class, () -> Biscuit.from_bytes(data, key_id -> {
+        assertThrows(Error.FormatError.Signature.InvalidSignature.class, () -> Biscuit.fromBytes(data, key_id -> {
             KeyPair root1 = new KeyPair(rng);
             return Option.some(root1.publicKey());
         }));
 
-        Biscuit.from_bytes(data, key_id -> {
+        Biscuit.fromBytes(data, key_id -> {
             if (key_id.get() == 1) {
                 return Option.some(root.publicKey());
             } else {

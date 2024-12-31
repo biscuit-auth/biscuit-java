@@ -24,7 +24,7 @@ public class BuilderTest {
     public void testBuild() throws Error.Language, Error.FormatError {
         SecureRandom rng = new SecureRandom();
         KeyPair root = new KeyPair(rng);
-        SymbolTable symbols = Biscuit.default_symbol_table();
+        SymbolTable symbols = Biscuit.defaultSymbolTable();
 
         Block authority_builder = new Block();
         authority_builder.addFact(Utils.fact("revocation_id", List.of(Utils.date(Date.from(Instant.now())))));

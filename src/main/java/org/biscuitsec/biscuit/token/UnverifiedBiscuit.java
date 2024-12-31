@@ -17,7 +17,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.*;
 import java.util.*;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * UnverifiedBiscuit auth token. UnverifiedBiscuit means it's deserialized without checking signatures.
@@ -27,28 +28,34 @@ public class UnverifiedBiscuit {
     final List<Block> blocks;
     final SymbolTable symbols;
     final SerializedBiscuit serializedBiscuit;
-    final List<byte[]> revocation_ids;
-    final Option<Integer> root_key_id;
+    final List<byte[]> revocationIds;
+    final Option<Integer> rootKeyId;
 
-    UnverifiedBiscuit(Block authority, List<Block> blocks, SymbolTable symbols, SerializedBiscuit serializedBiscuit,
-                       List<byte[]> revocation_ids) {
+    UnverifiedBiscuit(Block authority,
+                      List<Block> blocks,
+                      SymbolTable symbols,
+                      SerializedBiscuit serializedBiscuit,
+                      List<byte[]> revocationIds) {
         this.authority = authority;
         this.blocks = blocks;
         this.symbols = symbols;
         this.serializedBiscuit = serializedBiscuit;
-        this.revocation_ids = revocation_ids;
-        this.root_key_id = Option.none();
+        this.revocationIds = revocationIds;
+        this.rootKeyId = Option.none();
     }
 
-    UnverifiedBiscuit(Block authority, List<Block> blocks, SymbolTable symbols, SerializedBiscuit serializedBiscuit,
-                      List<byte[]> revocation_ids,
-                      Option<Integer> root_key_id) {
+    UnverifiedBiscuit(Block authority,
+                      List<Block> blocks,
+                      SymbolTable symbols,
+                      SerializedBiscuit serializedBiscuit,
+                      List<byte[]> revocationIds,
+                      Option<Integer> rootKeyId) {
         this.authority = authority;
         this.blocks = blocks;
         this.symbols = symbols;
         this.serializedBiscuit = serializedBiscuit;
-        this.revocation_ids = revocation_ids;
-        this.root_key_id = root_key_id;
+        this.revocationIds = revocationIds;
+        this.rootKeyId = rootKeyId;
     }
 
     /**
@@ -59,8 +66,8 @@ public class UnverifiedBiscuit {
      * @param data
      * @return Biscuit
      */
-    static public UnverifiedBiscuit from_b64url(String data) throws Error {
-        return UnverifiedBiscuit.from_bytes(Base64.getUrlDecoder().decode(data));
+    static public UnverifiedBiscuit fromB64Url(String data) throws Error {
+        return UnverifiedBiscuit.fromBytes(Base64.getUrlDecoder().decode(data));
     }
 
     /**
@@ -71,8 +78,8 @@ public class UnverifiedBiscuit {
      * @param data
      * @return
      */
-    static public UnverifiedBiscuit from_bytes(byte[] data) throws Error {
-        return UnverifiedBiscuit.from_bytes_with_symbols(data, default_symbol_table());
+    static public UnverifiedBiscuit fromBytes(byte[] data) throws Error {
+        return UnverifiedBiscuit.fromBytesWithSymbols(data, defaultSymbolTable());
     }
 
     /**
@@ -81,7 +88,7 @@ public class UnverifiedBiscuit {
      * @param data
      * @return UnverifiedBiscuit
      */
-    static public UnverifiedBiscuit from_bytes_with_symbols(byte[] data, SymbolTable symbols) throws Error {
+    static public UnverifiedBiscuit fromBytesWithSymbols(byte[] data, SymbolTable symbols) throws Error {
         SerializedBiscuit ser = SerializedBiscuit.unsafeDeserialize(data);
         return UnverifiedBiscuit.from_serialized_biscuit(ser, symbols);
     }
@@ -96,9 +103,9 @@ public class UnverifiedBiscuit {
         Block authority = t._1;
         ArrayList<Block> blocks = t._2;
 
-        List<byte[]> revocation_ids = ser.revocationIdentifiers();
+        List<byte[]> revocationIds = ser.revocationIdentifiers();
 
-        return new UnverifiedBiscuit(authority, blocks, symbols, ser, revocation_ids);
+        return new UnverifiedBiscuit(authority, blocks, symbols, ser, revocationIds);
     }
 
     /**
@@ -116,7 +123,7 @@ public class UnverifiedBiscuit {
      * @return String
      * @throws Error.FormatError.SerializationError
      */
-    public String serialize_b64url() throws Error.FormatError.SerializationError {
+    public String serializeB64Url() throws Error.FormatError.SerializationError {
         return Base64.getUrlEncoder().encodeToString(serialize());
     }
 
@@ -125,7 +132,7 @@ public class UnverifiedBiscuit {
      *
      * @return
      */
-    public org.biscuitsec.biscuit.token.builder.Block create_block() {
+    public org.biscuitsec.biscuit.token.builder.Block createBlock() {
         return new org.biscuitsec.biscuit.token.builder.Block();
     }
 
@@ -142,7 +149,9 @@ public class UnverifiedBiscuit {
         return attenuate(rng, keypair, block.build(builderSymbols));
     }
 
-    public UnverifiedBiscuit attenuate(final SecureRandom rng, final KeyPair keypair, org.biscuitsec.biscuit.token.builder.Block block) throws Error {
+    public UnverifiedBiscuit attenuate(final SecureRandom rng,
+                                       final KeyPair keypair,
+                                       org.biscuitsec.biscuit.token.builder.Block block) throws Error {
         SymbolTable builderSymbols = new SymbolTable(this.symbols);
         return attenuate(rng, keypair, block.build(builderSymbols));
     }
@@ -179,16 +188,16 @@ public class UnverifiedBiscuit {
         }
         blocks.add(block);
 
-        List<byte[]> revocation_ids = container.revocationIdentifiers();
+        List<byte[]> revocationIds = container.revocationIdentifiers();
 
-        return new UnverifiedBiscuit(copiedBiscuit.authority, blocks, symbols, container, revocation_ids);
+        return new UnverifiedBiscuit(copiedBiscuit.authority, blocks, symbols, container, revocationIds);
     }
     //FIXME: attenuate 3rd Party
 
-    public List<RevocationIdentifier> revocation_identifiers() {
-        return this.revocation_ids.stream()
+    public List<RevocationIdentifier> revocationIdentifiers() {
+        return this.revocationIds.stream()
                 .map(RevocationIdentifier::from_bytes)
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     public List<List<Check>> checks() {
@@ -221,8 +230,8 @@ public class UnverifiedBiscuit {
         return res;
     }
 
-    public Option<Integer> root_key_id() {
-        return this.root_key_id;
+    public Option<Integer> rootKeyId() {
+        return this.rootKeyId;
     }
 
     /**
@@ -278,7 +287,8 @@ public class UnverifiedBiscuit {
 
         UnverifiedBiscuit copiedBiscuit = this.copy();
 
-        Either<Error.FormatError, SerializedBiscuit> containerRes = copiedBiscuit.serializedBiscuit.append(nextKeyPair, block, Option.some(externalSignature));
+        Either<Error.FormatError, SerializedBiscuit> containerRes =
+                copiedBiscuit.serializedBiscuit.append(nextKeyPair, block, Option.some(externalSignature));
         if (containerRes.isLeft()) {
             throw containerRes.getLeft();
         }
@@ -293,8 +303,8 @@ public class UnverifiedBiscuit {
         }
         blocks.add(block);
 
-        List<byte[]> revocation_ids = container.revocationIdentifiers();
-        return new UnverifiedBiscuit(copiedBiscuit.authority, blocks, symbols, container, revocation_ids);
+        List<byte[]> revocationIds = container.revocationIdentifiers();
+        return new UnverifiedBiscuit(copiedBiscuit.authority, blocks, symbols, container, revocationIds);
     }
 
     /**
@@ -320,7 +330,7 @@ public class UnverifiedBiscuit {
     /**
      * Default symbols list
      */
-    static public SymbolTable default_symbol_table() {
+    static public SymbolTable defaultSymbolTable() {
         return new SymbolTable();
     }
 
@@ -330,25 +340,27 @@ public class UnverifiedBiscuit {
     }
 
     public UnverifiedBiscuit copy() throws Error {
-        return UnverifiedBiscuit.from_bytes(this.serialize());
+        return UnverifiedBiscuit.fromBytes(this.serialize());
     }
 
-    public Biscuit verify(PublicKey publicKey) throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public Biscuit verify(PublicKey publicKey)
+            throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         SerializedBiscuit serializedBiscuit = this.serializedBiscuit;
         serializedBiscuit.verify(publicKey);
-        return Biscuit.from_serialized_biscuit(serializedBiscuit, this.symbols);
+        return Biscuit.fromSerializedBiscuit(serializedBiscuit, this.symbols);
     }
 
-    public Biscuit verify(KeyDelegate delegate) throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public Biscuit verify(KeyDelegate delegate)
+            throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         SerializedBiscuit serializedBiscuit = this.serializedBiscuit;
 
 
-        Option<PublicKey> root = delegate.rootKey(root_key_id);
+        Option<PublicKey> root = delegate.rootKey(rootKeyId);
         if(root.isEmpty()) {
             throw new InvalidKeyException("unknown root key id");
         }
 
         serializedBiscuit.verify(root.get());
-        return Biscuit.from_serialized_biscuit(serializedBiscuit, this.symbols);
+        return Biscuit.fromSerializedBiscuit(serializedBiscuit, this.symbols);
     }
 }

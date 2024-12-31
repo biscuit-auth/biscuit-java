@@ -53,7 +53,7 @@ public class Authorizer {
      */
     public Authorizer() {
         this.world = new World();
-        this.symbols = Biscuit.default_symbol_table();
+        this.symbols = Biscuit.defaultSymbolTable();
         this.checks = new ArrayList<>();
         this.policies = new ArrayList<>();
         this.scopes = new ArrayList<>();

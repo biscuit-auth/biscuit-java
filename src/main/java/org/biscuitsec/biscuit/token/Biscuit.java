@@ -148,9 +148,9 @@ public class Biscuit extends UnverifiedBiscuit {
      * @return
      */
     @Deprecated
-    static public Biscuit from_b64(String data, PublicKey root)
+    static public Biscuit fromB64(String data, PublicKey root)
             throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
-        return Biscuit.from_bytes(Base64.getUrlDecoder().decode(data), root);
+        return Biscuit.fromBytes(Base64.getUrlDecoder().decode(data), root);
     }
 
     /**
@@ -166,9 +166,9 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param data
      * @return Biscuit
      */
-    static public Biscuit from_b64url(String data, PublicKey root)
+    static public Biscuit fromB64Url(String data, PublicKey root)
             throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
-        return Biscuit.from_bytes(Base64.getUrlDecoder().decode(data), root);
+        return Biscuit.fromBytes(Base64.getUrlDecoder().decode(data), root);
     }
 
     /**
@@ -184,9 +184,10 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param data
      * @return Biscuit
      */
-    static public Biscuit from_b64url(String data, KeyDelegate delegate)
+    static public Biscuit fromB64Url(String data, KeyDelegate delegate)
             throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
-        return Biscuit.from_bytes(Base64.getUrlDecoder().decode(data), delegate);
+        // Should this unused method be deprecated?
+        return Biscuit.fromBytes(Base64.getUrlDecoder().decode(data), delegate);
     }
 
     /**
@@ -202,9 +203,9 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param data
      * @return
      */
-    static public Biscuit from_bytes(byte[] data, PublicKey root)
+    static public Biscuit fromBytes(byte[] data, PublicKey root)
             throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
-        return from_bytes_with_symbols(data, root, default_symbol_table());
+        return fromBytesWithSymbols(data, root, defaultSymbolTable());
     }
 
     /**
@@ -220,9 +221,9 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param data
      * @return
      */
-    static public Biscuit from_bytes(byte[] data, KeyDelegate delegate)
+    static public Biscuit fromBytes(byte[] data, KeyDelegate delegate)
             throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
-        return from_bytes_with_symbols(data, delegate, default_symbol_table());
+        return fromBytesWithSymbols(data, delegate, defaultSymbolTable());
     }
 
     /**
@@ -236,13 +237,13 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param data
      * @return
      */
-    static public Biscuit from_bytes_with_symbols(byte[] data, PublicKey root, SymbolTable symbols)
+    static public Biscuit fromBytesWithSymbols(byte[] data, PublicKey root, SymbolTable symbols)
             throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         //System.out.println("will deserialize and verify token");
         SerializedBiscuit ser = SerializedBiscuit.fromBytes(data, root);
         //System.out.println("deserialized token, will populate Biscuit structure");
 
-        return Biscuit.from_serialized_biscuit(ser, symbols);
+        return Biscuit.fromSerializedBiscuit(ser, symbols);
     }
 
     /**
@@ -256,13 +257,13 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param data
      * @return
      */
-    static public Biscuit from_bytes_with_symbols(byte[] data, KeyDelegate delegate, SymbolTable symbols)
+    static public Biscuit fromBytesWithSymbols(byte[] data, KeyDelegate delegate, SymbolTable symbols)
             throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
         //System.out.println("will deserialize and verify token");
         SerializedBiscuit ser = SerializedBiscuit.fromBytes(data, delegate);
         //System.out.println("deserialized token, will populate Biscuit structure");
 
-        return Biscuit.from_serialized_biscuit(ser, symbols);
+        return Biscuit.fromSerializedBiscuit(ser, symbols);
     }
 
     /**
@@ -270,7 +271,7 @@ public class Biscuit extends UnverifiedBiscuit {
      *
      * @return
      */
-    static Biscuit from_serialized_biscuit(SerializedBiscuit ser, SymbolTable symbols) throws Error {
+    static Biscuit fromSerializedBiscuit(SerializedBiscuit ser, SymbolTable symbols) throws Error {
         Tuple2<Block, ArrayList<Block>> t = ser.extractBlocks(symbols);
         Block authority = t._1;
         ArrayList<Block> blocks = t._2;
@@ -316,7 +317,7 @@ public class Biscuit extends UnverifiedBiscuit {
      * @return String
      * @throws Error.FormatError.SerializationError
      */
-    public String serialize_b64url() throws Error.FormatError.SerializationError {
+    public String serializeB64Url() throws Error.FormatError.SerializationError {
         return Base64.getUrlEncoder().encodeToString(serialize());
     }
 
@@ -390,7 +391,7 @@ public class Biscuit extends UnverifiedBiscuit {
        UnverifiedBiscuit b = super.appendThirdPartyBlock(externalKey, blockResponse);
 
        // no need to verify again, we are already working from a verified token
-        return Biscuit.from_serialized_biscuit(b.serializedBiscuit, b.symbols);
+        return Biscuit.fromSerializedBiscuit(b.serializedBiscuit, b.symbols);
     }
 
     /**
@@ -420,6 +421,6 @@ public class Biscuit extends UnverifiedBiscuit {
     }
 
     public Biscuit copy() throws Error {
-        return Biscuit.from_serialized_biscuit(this.serializedBiscuit, this.symbols);
+        return Biscuit.fromSerializedBiscuit(this.serializedBiscuit, this.symbols);
     }
 }

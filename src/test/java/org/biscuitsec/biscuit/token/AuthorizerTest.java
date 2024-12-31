@@ -52,7 +52,7 @@ public class AuthorizerTest {
                 .addAuthorityFact("perms([1,2,3])")
                 .build();
 
-        Authorizer authorizer = Biscuit.from_b64url(token.serialize_b64url(), keypair.publicKey())
+        Authorizer authorizer = Biscuit.fromB64Url(token.serializeB64Url(), keypair.publicKey())
                 .verify(keypair.publicKey())
                 .authorizer();
 

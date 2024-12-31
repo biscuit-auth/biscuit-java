@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.biscuitsec.biscuit.token.UnverifiedBiscuit.default_symbol_table;
+import static org.biscuitsec.biscuit.token.UnverifiedBiscuit.defaultSymbolTable;
 
 public class Biscuit {
     final SecureRandom rng;
@@ -131,7 +131,7 @@ public class Biscuit {
     }
 
     public org.biscuitsec.biscuit.token.Biscuit build() throws Error {
-        return build(default_symbol_table());
+        return build(defaultSymbolTable());
     }
 
     @SuppressWarnings("unused")

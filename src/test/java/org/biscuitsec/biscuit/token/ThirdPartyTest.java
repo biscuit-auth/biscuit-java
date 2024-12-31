@@ -54,7 +54,7 @@ public class ThirdPartyTest {
         Biscuit b2 = b1.appendThirdPartyBlock(external.publicKey(), blockResponse);
 
         byte[] data = b2.serialize();
-        Biscuit deser = Biscuit.from_bytes(data, root.publicKey());
+        Biscuit deser = Biscuit.fromBytes(data, root.publicKey());
         assertEquals(b2.print(), deser.print());
 
         out.println("will check the token for resource=file1");
@@ -112,7 +112,7 @@ public class ThirdPartyTest {
         ThirdPartyBlockContents blockResponse = request1.createBlock(external1, builder).get();
         Biscuit b2 = b1.appendThirdPartyBlock(external1.publicKey(), blockResponse);
         byte[] data = b2.serialize();
-        Biscuit deser2 = Biscuit.from_bytes(data, root.publicKey());
+        Biscuit deser2 = Biscuit.fromBytes(data, root.publicKey());
         assertEquals(b2.print(), deser2.print());
         out.println("TOKEN: " + deser2.print());
 
@@ -123,7 +123,7 @@ public class ThirdPartyTest {
         ThirdPartyBlockContents blockResponse2 = request2.createBlock(external2, builder2).get();
         Biscuit b3 = deser2.appendThirdPartyBlock(external2.publicKey(), blockResponse2);
         byte[] data2 = b3.serialize();
-        Biscuit deser3 = Biscuit.from_bytes(data2, root.publicKey());
+        Biscuit deser3 = Biscuit.fromBytes(data2, root.publicKey());
         assertEquals(b3.print(), deser3.print());
         out.println("TOKEN: " + deser3.print());
 
@@ -135,7 +135,7 @@ public class ThirdPartyTest {
         ThirdPartyBlockContents blockResponse3 = request3.createBlock(external1, builder3).get();
         Biscuit b4 = deser3.appendThirdPartyBlock(external1.publicKey(), blockResponse3);
         byte[] data3 = b4.serialize();
-        Biscuit deser4 = Biscuit.from_bytes(data3, root.publicKey());
+        Biscuit deser4 = Biscuit.fromBytes(data3, root.publicKey());
         assertEquals(b4.print(), deser4.print());
         out.println("TOKEN: " + deser4.print());
 
@@ -191,7 +191,7 @@ public class ThirdPartyTest {
         Biscuit b2 = b1.appendThirdPartyBlock(external.publicKey(), blockResponse);
 
         byte[] data = b2.serialize();
-        Biscuit deser = Biscuit.from_bytes(data, root.publicKey());
+        Biscuit deser = Biscuit.fromBytes(data, root.publicKey());
         assertEquals(b2.print(), deser.print());
 
         out.println("will check the token for resource=file1");

@@ -13,7 +13,7 @@ import org.biscuitsec.biscuit.token.builder.parser.Parser;
 import java.util.*;
 
 import static org.biscuitsec.biscuit.datalog.Check.Kind.One;
-import static org.biscuitsec.biscuit.token.UnverifiedBiscuit.default_symbol_table;
+import static org.biscuitsec.biscuit.token.UnverifiedBiscuit.defaultSymbolTable;
 import static org.biscuitsec.biscuit.token.builder.Utils.*;
 
 public class Block {
@@ -91,12 +91,12 @@ public class Block {
     }
 
     public org.biscuitsec.biscuit.token.Block build() {
-        return build(default_symbol_table(), Option.none());
+        return build(defaultSymbolTable(), Option.none());
     }
 
     @SuppressWarnings("unused")
     public org.biscuitsec.biscuit.token.Block build(final Option<PublicKey> externalKey) {
-        return build(default_symbol_table(), externalKey);
+        return build(defaultSymbolTable(), externalKey);
     }
 
     public org.biscuitsec.biscuit.token.Block build(SymbolTable symbols) {

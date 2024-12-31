@@ -76,7 +76,7 @@ class SamplesTest {
 
                     Either<Throwable, Long> authorizerResult = Try.of(() -> {
                         int ignoreNumBytesRead = inputStream.read(data);
-                        Biscuit token = Biscuit.from_bytes(data, publicKey);
+                        Biscuit token = Biscuit.fromBytes(data, publicKey);
                         assertArrayEquals(token.serialize(), data);
 
                         compareBlocks(privateKey, testCase.token, token);
@@ -228,7 +228,7 @@ class SamplesTest {
     }
 
     private void checkRevocationIdentifiers(Biscuit token, JsonObject validation) {
-        List<RevocationIdentifier> revocationIds = token.revocation_identifiers();
+        List<RevocationIdentifier> revocationIds = token.revocationIdentifiers();
         JsonArray validationRevocationIds = validation.getAsJsonArray("revocation_ids");
         assertEquals(revocationIds.size(), validationRevocationIds.size());
         IntStream.range(0, revocationIds.size()).forEach(idx ->
