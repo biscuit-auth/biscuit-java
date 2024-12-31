@@ -297,16 +297,7 @@ public class Biscuit extends UnverifiedBiscuit {
     public Authorizer authorizer() throws Error.FailedLogic {
         return Authorizer.make(this);
     }
-
-    /**
-     * Serializes a token to a byte array
-     *
-     * @return
-     */
-    public byte[] serialize() throws Error.FormatError.SerializationError {
-        return this.serializedBiscuit.serialize();
-    }
-
+    
     /**
      * Serializes a token to a base 64 String
      *
