@@ -22,6 +22,7 @@ import java.util.List;
 /**
  * Biscuit auth token
  */
+@SuppressWarnings("JavadocDeclaration")
 public class Biscuit extends UnverifiedBiscuit {
     /**
      * Creates a token builder
