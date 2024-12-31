@@ -59,6 +59,7 @@ public class Biscuit extends UnverifiedBiscuit {
     public static org.biscuitsec.biscuit.token.builder.Biscuit builder(final SecureRandom rng,
                                                                        final KeyPair root,
                                                                        final Option<Integer> rootKeyId) {
+        // Should this unused method be deprecated?
         return new org.biscuitsec.biscuit.token.builder.Biscuit(rng, root, rootKeyId);
     }
 
@@ -117,8 +118,7 @@ public class Biscuit extends UnverifiedBiscuit {
         } else {
             SerializedBiscuit s = container.get();
             List<byte[]> revocationIds = s.revocationIdentifiers();
-
-            Option<SerializedBiscuit> c = Option.some(s);
+            
             return new Biscuit(authority, blocks, authority.symbols, s, revocationIds, rootKeyId);
         }
     }
