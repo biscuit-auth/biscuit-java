@@ -276,7 +276,7 @@ public class UnverifiedBiscuit {
 
         sgr.update(blockResponse.payload);
         ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-        algo_buf.putInt(Integer.valueOf(Schema.PublicKey.Algorithm.Ed25519.getNumber()));
+        algo_buf.putInt(Schema.PublicKey.Algorithm.Ed25519.getNumber());
         algo_buf.flip();
         sgr.update(algo_buf);
 
