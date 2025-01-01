@@ -324,7 +324,7 @@ public class Authorizer {
                 );
                 SymbolTable blockSymbols = token.symbols;
                 if (b.externalKey.isDefined()) {
-                    blockSymbols = new SymbolTable(b.symbols.symbols, b.publicKeys());
+                    blockSymbols = new SymbolTable(b.symbolTable.symbols, b.publicKeys());
                 }
 
                 for (int j = 0; j < b.checks.size(); j++) {
@@ -413,7 +413,7 @@ public class Authorizer {
             List<Check> blockChecks = new ArrayList<>();
 
             if (block.externalKey.isDefined()) {
-                SymbolTable blockSymbols = new SymbolTable(block.symbols.symbols, block.publicKeys());
+                SymbolTable blockSymbols = new SymbolTable(block.symbolTable.symbols, block.publicKeys());
                 for (org.biscuitsec.biscuit.datalog.Check check : block.checks) {
                     blockChecks.add(Check.convertFrom(check, blockSymbols));
                 }
@@ -516,7 +516,7 @@ public class Authorizer {
 
                 SymbolTable blockSymbols = token.symbols;
                 if (b.externalKey.isDefined()) {
-                    blockSymbols = new SymbolTable(b.symbols.symbols, b.publicKeys());
+                    blockSymbols = new SymbolTable(b.symbolTable.symbols, b.publicKeys());
                 }
 
                 for (int j = 0; j < b.checks.size(); j++) {
@@ -659,7 +659,7 @@ public class Authorizer {
                 SymbolTable blockSymbols = token.symbols;
 
                 if (block.externalKey.isDefined()) {
-                    blockSymbols = new SymbolTable(block.symbols.symbols, block.publicKeys());
+                    blockSymbols = new SymbolTable(block.symbolTable.symbols, block.publicKeys());
                 }
 
                 for (org.biscuitsec.biscuit.datalog.Fact fact : block.facts) {

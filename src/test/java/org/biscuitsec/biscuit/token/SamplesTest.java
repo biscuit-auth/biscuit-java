@@ -38,7 +38,7 @@ import static java.lang.Thread.currentThread;
 import static java.util.Collections.sort;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.biscuitsec.biscuit.token.Block.from_bytes;
+import static org.biscuitsec.biscuit.token.Block.fromBytes;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SamplesTest {
@@ -222,7 +222,7 @@ class SamplesTest {
         byte[] serBlockAuthority = token.authority.to_bytes().get();
         out.println(Arrays.toString(serBlockAuthority));
         out.println(Arrays.toString(token.serializedBiscuit.authority.block));
-        org.biscuitsec.biscuit.token.Block deserBlockAuthority = from_bytes(serBlockAuthority, token.authority.externalKey).get();
+        org.biscuitsec.biscuit.token.Block deserBlockAuthority = fromBytes(serBlockAuthority, token.authority.externalKey).get();
         assertEquals(token.authority.print(token.symbols), deserBlockAuthority.print(token.symbols));
         assertArrayEquals(serBlockAuthority, token.serializedBiscuit.authority.block);
     }
@@ -240,7 +240,7 @@ class SamplesTest {
             org.biscuitsec.biscuit.token.Block block = token.blocks.get(idx);
             SignedBlock signedBlock = token.serializedBiscuit.blocks.get(idx);
             byte[] serBlock = block.to_bytes().get();
-            org.biscuitsec.biscuit.token.Block deserBlock = from_bytes(serBlock, block.externalKey).get();
+            org.biscuitsec.biscuit.token.Block deserBlock = fromBytes(serBlock, block.externalKey).get();
             assertEquals(block.print(token.symbols), deserBlock.print(token.symbols));
             assertArrayEquals(serBlock, signedBlock.block);
         });

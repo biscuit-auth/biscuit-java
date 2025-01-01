@@ -109,7 +109,7 @@ public class Biscuit extends UnverifiedBiscuit {
         KeyPair next = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
 
         for (PublicKey pk : authority.publicKeys) {
-            authority.symbols.insert(pk);
+            authority.symbolTable.insert(pk);
         }
 
         Either<Error.FormatError, SerializedBiscuit> container = SerializedBiscuit.make(root, rootKeyId, authority, next);
@@ -119,7 +119,7 @@ public class Biscuit extends UnverifiedBiscuit {
             SerializedBiscuit s = container.get();
             List<byte[]> revocationIds = s.revocationIdentifiers();
             
-            return new Biscuit(authority, blocks, authority.symbols, s, revocationIds, rootKeyId);
+            return new Biscuit(authority, blocks, authority.symbolTable, s, revocationIds, rootKeyId);
         }
     }
 
@@ -346,7 +346,7 @@ public class Biscuit extends UnverifiedBiscuit {
         SerializedBiscuit container = containerRes.get();
 
         SymbolTable symbols = new SymbolTable(copiedBiscuit.symbols);
-        for (String s : block.symbols.symbols) {
+        for (String s : block.symbolTable.symbols) {
             symbols.add(s);
         }
 
@@ -388,7 +388,7 @@ public class Biscuit extends UnverifiedBiscuit {
         for (Block b : this.blocks) {
             s.append("\t\t");
             if (b.externalKey.isDefined()) {
-                s.append(b.print(b.symbols));
+                s.append(b.print(b.symbolTable));
             } else {
                 s.append(b.print(this.symbols));
             }

@@ -179,7 +179,7 @@ public class UnverifiedBiscuit {
         SerializedBiscuit container = containerRes.get();
 
         SymbolTable symbols = new SymbolTable(copiedBiscuit.symbols);
-        for (String s : block.symbols.symbols) {
+        for (String s : block.symbolTable.symbols) {
             symbols.add(s);
         }
 
@@ -194,7 +194,7 @@ public class UnverifiedBiscuit {
     //FIXME: attenuate 3rd Party
 
     protected void checkSymbolTableOverlap(UnverifiedBiscuit copiedBiscuit, Block block) throws Error {
-        if (!Collections.disjoint(copiedBiscuit.symbols.symbols, block.symbols.symbols)) {
+        if (!Collections.disjoint(copiedBiscuit.symbols.symbols, block.symbolTable.symbols)) {
             throw new Error.SymbolTableOverlap();
         }
     }
@@ -294,7 +294,7 @@ public class UnverifiedBiscuit {
             throw new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied");
         }
 
-        Either<Error.FormatError, Block> res = Block.from_bytes(blockResponse.payload, Option.some(externalKey));
+        Either<Error.FormatError, Block> res = Block.fromBytes(blockResponse.payload, Option.some(externalKey));
         if (res.isLeft()) {
             throw res.getLeft();
         }

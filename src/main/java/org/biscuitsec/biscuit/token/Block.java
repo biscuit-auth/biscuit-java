@@ -24,7 +24,7 @@ import static io.vavr.API.Right;
  * Represents a token's block with its checks
  */
 public class Block {
-    final SymbolTable symbols;
+    final SymbolTable symbolTable;
     final String context;
     final List<Fact> facts;
     final List<Rule> rules;
@@ -37,10 +37,10 @@ public class Block {
     /**
      * creates a new block
      *
-     * @param base_symbols
+     * @param baseSymbolTable
      */
-    public Block(SymbolTable base_symbols) {
-        this.symbols = base_symbols;
+    public Block(SymbolTable baseSymbolTable) {
+        this.symbolTable = baseSymbolTable;
         this.context = "";
         this.facts = new ArrayList<>();
         this.rules = new ArrayList<>();
@@ -53,13 +53,20 @@ public class Block {
     /**
      * creates a new block
      *
-     * @param base_symbols
+     * @param baseSymbolTable
      * @param facts
      * @param checks
      */
-    public Block(SymbolTable base_symbols, String context, List<Fact> facts, List<Rule> rules, List<Check> checks,
-                 List<Scope> scopes, List<PublicKey> publicKeys, Option<PublicKey> externalKey, int version) {
-        this.symbols = base_symbols;
+    public Block(SymbolTable baseSymbolTable,
+                 String context,
+                 List<Fact> facts,
+                 List<Rule> rules,
+                 List<Check> checks,
+                 List<Scope> scopes,
+                 List<PublicKey> publicKeys,
+                 Option<PublicKey> externalKey,
+                 int version) {
+        this.symbolTable = baseSymbolTable;
         this.context = context;
         this.facts = facts;
         this.rules = rules;
@@ -70,7 +77,7 @@ public class Block {
     }
 
     public SymbolTable symbols() {
-        return symbols;
+        return symbolTable;
     }
 
     public List<PublicKey> publicKeys() {
@@ -84,26 +91,26 @@ public class Block {
     /**
      * pretty printing for a block
      *
-     * @param symbol_table
+     * @param symbolTable
      * @return
      */
-    public String print(SymbolTable symbol_table) {
+    public String print(SymbolTable symbolTable) {
         StringBuilder s = new StringBuilder();
 
-        SymbolTable local_symbols;
+        SymbolTable localSymbols;
         if(this.externalKey.isDefined()) {
-            local_symbols = new SymbolTable(this.symbols);
-            for(PublicKey pk: symbol_table.publicKeys()) {
-                local_symbols.insert(pk);
+            localSymbols = new SymbolTable(this.symbolTable);
+            for(PublicKey pk: symbolTable.publicKeys()) {
+                localSymbols.insert(pk);
             }
         } else {
-            local_symbols = symbol_table;
+            localSymbols = symbolTable;
         }
         s.append("Block");
         s.append(" {\n\t\tsymbols: ");
-        s.append(this.symbols.symbols);
+        s.append(this.symbolTable.symbols);
         s.append("\n\t\tsymbol public keys: ");
-        s.append(this.symbols.publicKeys());
+        s.append(this.symbolTable.publicKeys());
         s.append("\n\t\tblock public keys: ");
         s.append(this.publicKeys);
         s.append("\n\t\tcontext: ");
@@ -115,39 +122,39 @@ public class Block {
         s.append("\n\t\tscopes: [");
         for (Scope scope : this.scopes) {
             s.append("\n\t\t\t");
-            s.append(symbol_table.printScope(scope));
+            s.append(symbolTable.printScope(scope));
         }
         s.append("\n\t\t]\n\t\tfacts: [");
         for (Fact f : this.facts) {
             s.append("\n\t\t\t");
-            s.append(local_symbols.printFact(f));
+            s.append(localSymbols.printFact(f));
         }
         s.append("\n\t\t]\n\t\trules: [");
         for (Rule r : this.rules) {
             s.append("\n\t\t\t");
-            s.append(local_symbols.printRule(r));
+            s.append(localSymbols.printRule(r));
         }
         s.append("\n\t\t]\n\t\tchecks: [");
         for (Check c : this.checks) {
             s.append("\n\t\t\t");
-            s.append(local_symbols.printCheck(c));
+            s.append(localSymbols.printCheck(c));
         }
         s.append("\n\t\t]\n\t}");
 
         return s.toString();
     }
 
-    public String printCode(SymbolTable symbol_table) {
+    public String printCode(SymbolTable symbolTable) {
         StringBuilder s = new StringBuilder();
 
-        SymbolTable local_symbols;
+        SymbolTable localSymbols;
         if(this.externalKey.isDefined()) {
-            local_symbols = new SymbolTable(this.symbols);
-            for(PublicKey pk: symbol_table.publicKeys()) {
-                local_symbols.insert(pk);
+            localSymbols = new SymbolTable(this.symbolTable);
+            for(PublicKey pk: symbolTable.publicKeys()) {
+                localSymbols.insert(pk);
             }
         } else {
-            local_symbols = symbol_table;
+            localSymbols = symbolTable;
         }
         /*s.append("Block");
         s.append(" {\n\t\tsymbols: ");
@@ -163,16 +170,16 @@ public class Block {
             s.append(this.externalKey.get().toString());
         }*/
         for (Scope scope : this.scopes) {
-            s.append("trusting "+local_symbols.printScope(scope)+"\n");
+            s.append("trusting "+localSymbols.printScope(scope)+"\n");
         }
         for (Fact f : this.facts) {
-            s.append(local_symbols.printFact(f)+";\n");
+            s.append(localSymbols.printFact(f)+";\n");
         }
         for (Rule r : this.rules) {
-            s.append(local_symbols.printRule(r)+";\n");
+            s.append(localSymbols.printRule(r)+";\n");
         }
         for (Check c : this.checks) {
-            s.append(local_symbols.printCheck(c)+";\n");
+            s.append(localSymbols.printCheck(c)+";\n");
         }
 
         return s.toString();
@@ -186,8 +193,8 @@ public class Block {
     public Schema.Block serialize() {
         Schema.Block.Builder b = Schema.Block.newBuilder();
 
-        for (int i = 0; i < this.symbols.symbols.size(); i++) {
-            b.addSymbols(this.symbols.symbols.get(i));
+        for (int i = 0; i < this.symbolTable.symbols.size(); i++) {
+            b.addSymbols(this.symbolTable.symbols.get(i));
         }
 
         if (!this.context.isEmpty()) {
@@ -275,9 +282,9 @@ public class Block {
             return Left(new Error.FormatError.Version(SerializedBiscuit.MIN_SCHEMA_VERSION, SerializedBiscuit.MAX_SCHEMA_VERSION, version));
         }
 
-        SymbolTable symbols = new SymbolTable();
+        SymbolTable symbolTable = new SymbolTable();
         for (String s : b.getSymbolsList()) {
-            symbols.add(s);
+            symbolTable.add(s);
         }
 
         ArrayList<Fact> facts = new ArrayList<>();
@@ -294,7 +301,6 @@ public class Block {
             }
         }
 
-
         for (Schema.RuleV2 rule : b.getRulesV2List()) {
             Either<Error.FormatError, Rule> res = Rule.deserializeV2(rule);
             if (res.isLeft()) {
@@ -304,7 +310,6 @@ public class Block {
                 rules.add(res.get());
             }
         }
-
 
         for (Schema.CheckV2 check : b.getChecksV2List()) {
             Either<Error.FormatError, Check> res = Check.deserializeV2(check);
@@ -332,7 +337,7 @@ public class Block {
             try {
                 PublicKey key =PublicKey.deserialize(pk);
                 publicKeys.add(key);
-                symbols.publicKeys().add(key);
+                symbolTable.publicKeys().add(key);
             } catch(Error.FormatError e) {
                 return Left(e);
             }
@@ -345,7 +350,7 @@ public class Block {
             return Left(e);
         }
 
-        return Right(new Block(symbols, b.getContext(), facts, rules, checks, scopes, publicKeys, externalKey, version));
+        return Right(new Block(symbolTable, b.getContext(), facts, rules, checks, scopes, publicKeys, externalKey, version));
     }
 
     /**
@@ -354,7 +359,7 @@ public class Block {
      * @param slice
      * @return
      */
-    static public Either<Error.FormatError, Block> from_bytes(byte[] slice, Option<PublicKey> externalKey) {
+    static public Either<Error.FormatError, Block> fromBytes(byte[] slice, Option<PublicKey> externalKey) {
         try {
             Schema.Block data = Schema.Block.parseFrom(slice);
             return Block.deserialize(data, externalKey);
@@ -366,9 +371,9 @@ public class Block {
     public Either<Error.FormatError, byte[]> to_bytes() {
         Schema.Block b = this.serialize();
         try {
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            b.writeTo(stream);
-            byte[] data = stream.toByteArray();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            b.writeTo(baos);
+            byte[] data = baos.toByteArray();
             return Right(data);
         } catch (IOException e) {
             return Left(new Error.FormatError.SerializationError(e.toString()));
@@ -382,7 +387,7 @@ public class Block {
 
         Block block = (Block) o;
 
-        if (!Objects.equals(symbols, block.symbols)) return false;
+        if (!Objects.equals(symbolTable, block.symbolTable)) return false;
         if (!Objects.equals(context, block.context)) return false;
         if (!Objects.equals(facts, block.facts)) return false;
         if (!Objects.equals(rules, block.rules)) return false;
@@ -394,7 +399,7 @@ public class Block {
 
     @Override
     public int hashCode() {
-        int result = symbols != null ? symbols.hashCode() : 0;
+        int result = symbolTable != null ? symbolTable.hashCode() : 0;
         result = 31 * result + (context != null ? context.hashCode() : 0);
         result = 31 * result + (facts != null ? facts.hashCode() : 0);
         result = 31 * result + (rules != null ? rules.hashCode() : 0);
@@ -408,7 +413,7 @@ public class Block {
     @Override
     public String toString() {
         return "Block{" +
-                "symbols=" + symbols +
+                "symbols=" + symbolTable +
                 ", context='" + context + '\'' +
                 ", facts=" + facts +
                 ", rules=" + rules +

@@ -96,7 +96,7 @@ public class SerializedBiscuit {
     public Tuple2<Block, ArrayList<Block>> extractBlocks(SymbolTable symbols) throws Error {
         @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
         ArrayList<Option<org.biscuitsec.biscuit.crypto.PublicKey>> blockExternalKeys = new ArrayList<>();
-        Either<Error.FormatError, Block> authRes = Block.from_bytes(this.authority.block, Option.none());
+        Either<Error.FormatError, Block> authRes = Block.fromBytes(this.authority.block, Option.none());
         if (authRes.isLeft()) {
             throw authRes.getLeft();
         }
@@ -116,7 +116,7 @@ public class SerializedBiscuit {
             if (blockData.externalSignature.isDefined()) {
                 externalKey = Option.some(blockData.externalSignature.get().key);
             }
-            Either<Error.FormatError, Block> blockRes = Block.from_bytes(blockData.block, externalKey);
+            Either<Error.FormatError, Block> blockRes = Block.fromBytes(blockData.block, externalKey);
             if (blockRes.isLeft()) {
                 throw blockRes.getLeft();
             }
