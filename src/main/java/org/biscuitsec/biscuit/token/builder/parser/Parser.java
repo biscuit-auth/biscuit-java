@@ -364,14 +364,14 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<String, Policy>> policy(String s) {
-        Policy.Kind p = Policy.Kind.Allow;
+        Policy.Kind p = Policy.Kind.ALLOW;
 
         String allow = "allow if";
         String deny = "deny if";
         if (s.startsWith(allow)) {
             s = s.substring(allow.length());
         } else if (s.startsWith(deny)) {
-            p = Policy.Kind.Deny;
+            p = Policy.Kind.DENY;
             s = s.substring(deny.length());
         } else {
             return Either.left(new Error(s, "missing policy prefix"));

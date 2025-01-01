@@ -4,14 +4,13 @@ import org.biscuitsec.biscuit.token.builder.Rule;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
 public class Policy {
     public enum Kind {
-        Allow,
-        Deny,
+        ALLOW,
+        DENY,
     }
 
     public final List<Rule> queries;
@@ -36,9 +35,9 @@ public class Policy {
         final List<String> qs = queries.stream().map(Rule::bodyToString).collect(toList());
 
         switch(this.kind) {
-            case Allow:
+            case ALLOW:
                 return "allow if "+String.join(" or ", qs);
-            case Deny:
+            case DENY:
                 return "deny if "+String.join(" or ", qs);
         }
         return null;

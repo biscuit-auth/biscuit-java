@@ -181,7 +181,7 @@ public class Authorizer {
                 List.of(new Expression.Value(new Term.Bool(true)))
         ));
 
-        this.policies.add(new Policy(q, Policy.Kind.Allow));
+        this.policies.add(new Policy(q, Policy.Kind.ALLOW));
         return this;
     }
 
@@ -303,7 +303,7 @@ public class Authorizer {
                 }
 
                 if (res) {
-                    if (this.policies.get(i).kind == Policy.Kind.Allow) {
+                    if (this.policies.get(i).kind == Policy.Kind.ALLOW) {
                         policyResult = Option.some(Right(i));
                     } else {
                         policyResult = Option.some(Left(i));
@@ -447,7 +447,7 @@ public class Authorizer {
                 List.of(new Expression.Value(new Term.Bool(true)))
         ));
 
-        this.policies.add(new Policy(q, Policy.Kind.Deny));
+        this.policies.add(new Policy(q, Policy.Kind.DENY));
         return this;
     }
 
