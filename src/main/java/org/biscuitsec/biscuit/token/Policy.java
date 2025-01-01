@@ -13,7 +13,7 @@ public class Policy {
     }
 
     public final List<Rule> queries;
-    public Kind kind;
+    public final Kind kind;
 
     public Policy(List<Rule> queries, Kind kind) {
         this.queries = queries;
