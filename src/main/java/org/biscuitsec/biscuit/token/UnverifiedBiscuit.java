@@ -211,7 +211,7 @@ public class UnverifiedBiscuit {
 
     public List<RevocationIdentifier> revocationIdentifiers() {
         return this.revocationIds.stream()
-                .map(RevocationIdentifier::from_bytes)
+                .map(RevocationIdentifier::fromBytes)
                 .collect(toList());
     }
 
