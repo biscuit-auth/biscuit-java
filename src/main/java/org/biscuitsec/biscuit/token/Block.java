@@ -174,16 +174,16 @@ public class Block {
             s.append(this.externalKey.get().toString());
         }*/
         for (Scope scope : this.scopes) {
-            s.append("trusting " + localSymbols.printScope(scope) + "\n");
+            s.append("trusting ").append(localSymbols.printScope(scope)).append("\n");
         }
         for (Fact f : this.facts) {
-            s.append(localSymbols.printFact(f) + ";\n");
+            s.append(localSymbols.printFact(f)).append(";\n");
         }
         for (Rule r : this.rules) {
-            s.append(localSymbols.printRule(r) + ";\n");
+            s.append(localSymbols.printRule(r)).append(";\n");
         }
         for (Check c : this.checks) {
-            s.append(localSymbols.printCheck(c) + ";\n");
+            s.append(localSymbols.printCheck(c)).append(";\n");
         }
 
         return s.toString();
