@@ -23,6 +23,7 @@ import static io.vavr.API.Right;
 /**
  * Represents a token's block with its checks
  */
+@SuppressWarnings("JavadocDeclaration")
 public class Block {
     final SymbolTable symbolTable;
     final String context;
