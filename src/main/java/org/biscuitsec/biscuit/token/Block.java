@@ -68,7 +68,7 @@ public class Block {
                  List<Scope> scopes,
                  List<PublicKey> publicKeys,
                  Option<PublicKey> externalKey,
-                 int version) {
+                 @SuppressWarnings("unused") int version) {
         this.symbolTable = baseSymbolTable;
         this.context = context;
         this.facts = facts;
