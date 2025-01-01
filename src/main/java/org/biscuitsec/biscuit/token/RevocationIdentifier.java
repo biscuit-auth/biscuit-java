@@ -16,6 +16,7 @@ public class RevocationIdentifier {
      * @param b64url serialized revocation identifier
      * @return RevocationIdentifier
      */
+    @SuppressWarnings("unused")
     public static RevocationIdentifier fromB64Url(String b64url) {
         return new RevocationIdentifier(Base64.getDecoder().decode(b64url));
     }
@@ -24,6 +25,7 @@ public class RevocationIdentifier {
      * Serializes a revocation identifier as base64 url (RFC4648_URLSAFE)
      * @return String
      */
+    @SuppressWarnings("unused")
     public String serializeB64Url() {
         return Base64.getEncoder().encodeToString(this.bytes);
     }
@@ -36,6 +38,7 @@ public class RevocationIdentifier {
         return new RevocationIdentifier(bytes);
     }
 
+    @SuppressWarnings("unused")
     public byte[] getBytes() {
         return this.bytes;
     }
