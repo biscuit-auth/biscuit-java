@@ -202,16 +202,16 @@ public class Block {
             b.setContext(this.context);
         }
 
-        for (int i = 0; i < this.facts.size(); i++) {
-            b.addFactsV2(this.facts.get(i).serialize());
+        for (Fact fact : this.facts) {
+            b.addFactsV2(fact.serialize());
         }
 
-        for (int i = 0; i < this.rules.size(); i++) {
-            b.addRulesV2(this.rules.get(i).serialize());
+        for (Rule rule : this.rules) {
+            b.addRulesV2(rule.serialize());
         }
 
-        for (int i = 0; i < this.checks.size(); i++) {
-            b.addChecksV2(this.checks.get(i).serialize());
+        for (Check check : this.checks) {
+            b.addChecksV2(check.serialize());
         }
 
         for (Scope scope : this.scopes) {
