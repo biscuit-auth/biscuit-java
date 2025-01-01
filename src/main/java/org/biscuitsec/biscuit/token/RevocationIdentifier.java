@@ -13,6 +13,7 @@ public class RevocationIdentifier {
 
     /**
      * Creates a RevocationIdentifier from base64 url (RFC4648_URLSAFE)
+     *
      * @param b64url serialized revocation identifier
      * @return RevocationIdentifier
      */
@@ -23,6 +24,7 @@ public class RevocationIdentifier {
 
     /**
      * Serializes a revocation identifier as base64 url (RFC4648_URLSAFE)
+     *
      * @return String
      */
     @SuppressWarnings("unused")
