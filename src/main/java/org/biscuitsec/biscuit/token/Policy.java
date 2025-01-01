@@ -20,6 +20,7 @@ public class Policy {
         this.kind = kind;
     }
 
+    @SuppressWarnings("unused")
     public Policy(Rule query, Kind kind) {
         ArrayList<Rule> r = new ArrayList<>();
         r.add(query);
