@@ -1,15 +1,15 @@
 package org.biscuitsec.biscuit.token;
 
 import biscuit.format.schema.Schema;
-import org.biscuitsec.biscuit.crypto.PublicKey;
-import org.biscuitsec.biscuit.datalog.expressions.Expression;
-import org.biscuitsec.biscuit.datalog.expressions.Op;
-import org.biscuitsec.biscuit.error.Error;
-import org.biscuitsec.biscuit.datalog.*;
-import org.biscuitsec.biscuit.token.format.SerializedBiscuit;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
+import org.biscuitsec.biscuit.crypto.PublicKey;
+import org.biscuitsec.biscuit.datalog.*;
+import org.biscuitsec.biscuit.datalog.expressions.Expression;
+import org.biscuitsec.biscuit.datalog.expressions.Op;
+import org.biscuitsec.biscuit.error.Error;
+import org.biscuitsec.biscuit.token.format.SerializedBiscuit;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -98,9 +98,9 @@ public class Block {
         StringBuilder s = new StringBuilder();
 
         SymbolTable localSymbols;
-        if(this.externalKey.isDefined()) {
+        if (this.externalKey.isDefined()) {
             localSymbols = new SymbolTable(this.symbolTable);
-            for(PublicKey pk: symbolTable.publicKeys()) {
+            for (PublicKey pk : symbolTable.publicKeys()) {
                 localSymbols.insert(pk);
             }
         } else {
@@ -115,7 +115,7 @@ public class Block {
         s.append(this.publicKeys);
         s.append("\n\t\tcontext: ");
         s.append(this.context);
-        if(this.externalKey.isDefined()) {
+        if (this.externalKey.isDefined()) {
             s.append("\n\t\texternal key: ");
             s.append(this.externalKey.get().toString());
         }
@@ -148,9 +148,9 @@ public class Block {
         StringBuilder s = new StringBuilder();
 
         SymbolTable localSymbols;
-        if(this.externalKey.isDefined()) {
+        if (this.externalKey.isDefined()) {
             localSymbols = new SymbolTable(this.symbolTable);
-            for(PublicKey pk: symbolTable.publicKeys()) {
+            for (PublicKey pk : symbolTable.publicKeys()) {
                 localSymbols.insert(pk);
             }
         } else {
@@ -170,16 +170,16 @@ public class Block {
             s.append(this.externalKey.get().toString());
         }*/
         for (Scope scope : this.scopes) {
-            s.append("trusting "+localSymbols.printScope(scope)+"\n");
+            s.append("trusting " + localSymbols.printScope(scope) + "\n");
         }
         for (Fact f : this.facts) {
-            s.append(localSymbols.printFact(f)+";\n");
+            s.append(localSymbols.printFact(f) + ";\n");
         }
         for (Rule r : this.rules) {
-            s.append(localSymbols.printRule(r)+";\n");
+            s.append(localSymbols.printRule(r) + ";\n");
         }
         for (Check c : this.checks) {
-            s.append(localSymbols.printCheck(c)+";\n");
+            s.append(localSymbols.printCheck(c) + ";\n");
         }
 
         return s.toString();
@@ -213,11 +213,11 @@ public class Block {
             b.addChecksV2(this.checks.get(i).serialize());
         }
 
-        for (Scope scope: this.scopes) {
+        for (Scope scope : this.scopes) {
             b.addScope(scope.serialize());
         }
 
-        for(PublicKey pk: this.publicKeys) {
+        for (PublicKey pk : this.publicKeys) {
             b.addPublicKeys(pk.serialize());
         }
 
@@ -230,27 +230,27 @@ public class Block {
         boolean containsCheckAll = false;
         boolean containsV4 = false;
 
-        for (Rule r: this.rules) {
+        for (Rule r : this.rules) {
             containsScopes |= !r.scopes().isEmpty();
-            for(Expression e: r.expressions()) {
+            for (Expression e : r.expressions()) {
                 containsV4 |= containsV4Op(e);
             }
         }
-        for(Check c: this.checks) {
+        for (Check c : this.checks) {
             containsCheckAll |= c.kind() == Check.Kind.All;
 
-            for (Rule q: c.queries()) {
+            for (Rule q : c.queries()) {
                 containsScopes |= !q.scopes().isEmpty();
-                for(Expression e: q.expressions()) {
+                for (Expression e : q.expressions()) {
                     containsV4 |= containsV4Op(e);
                 }
             }
         }
 
-        if(this.externalKey.isDefined()) {
+        if (this.externalKey.isDefined()) {
             return SerializedBiscuit.MAX_SCHEMA_VERSION;
 
-        }else if(containsScopes || containsCheckAll || containsV4) {
+        } else if (containsScopes || containsCheckAll || containsV4) {
             return 4;
         } else {
             return SerializedBiscuit.MIN_SCHEMA_VERSION;
@@ -258,7 +258,7 @@ public class Block {
     }
 
     boolean containsV4Op(Expression e) {
-        for (Op op: e.getOps()) {
+        for (Op op : e.getOps()) {
             if (op instanceof Op.Binary) {
                 Op.BinaryOp o = ((Op.Binary) op).getOp();
                 if (o == Op.BinaryOp.BitwiseAnd || o == Op.BinaryOp.BitwiseOr || o == Op.BinaryOp.BitwiseXor || o == Op.BinaryOp.NotEqual) {
@@ -322,9 +322,9 @@ public class Block {
         }
 
         ArrayList<Scope> scopes = new ArrayList<>();
-        for (Schema.Scope scope: b.getScopeList()) {
+        for (Schema.Scope scope : b.getScopeList()) {
             Either<Error.FormatError, Scope> res = Scope.deserialize(scope);
-            if(res.isLeft()) {
+            if (res.isLeft()) {
                 Error.FormatError e = res.getLeft();
                 return Left(e);
             } else {
@@ -333,12 +333,12 @@ public class Block {
         }
 
         ArrayList<PublicKey> publicKeys = new ArrayList<>();
-        for (Schema.PublicKey pk: b.getPublicKeysList()) {
+        for (Schema.PublicKey pk : b.getPublicKeysList()) {
             try {
-                PublicKey key =PublicKey.deserialize(pk);
+                PublicKey key = PublicKey.deserialize(pk);
                 publicKeys.add(key);
                 symbolTable.publicKeys().add(key);
-            } catch(Error.FormatError e) {
+            } catch (Error.FormatError e) {
                 return Left(e);
             }
         }
