@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 public class Policy {
     public enum Kind {
         Allow,
@@ -31,7 +33,7 @@ public class Policy {
 
     @Override
     public String toString() {
-        final List<String> qs = queries.stream().map(Rule::bodyToString).collect(Collectors.toList());
+        final List<String> qs = queries.stream().map(Rule::bodyToString).collect(toList());
 
         switch(this.kind) {
             case Allow:
