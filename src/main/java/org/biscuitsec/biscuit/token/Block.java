@@ -33,6 +33,7 @@ public class Block {
     final List<Scope> scopes;
     final List<PublicKey> publicKeys;
     Option<PublicKey> externalKey;
+    @SuppressWarnings("unused")
     long version;   // Should this unused variable be deprecated?
 
     /**
@@ -40,6 +41,7 @@ public class Block {
      *
      * @param baseSymbolTable
      */
+    @SuppressWarnings("unused")
     public Block(SymbolTable baseSymbolTable) {
         this.symbolTable = baseSymbolTable;
         this.context = "";
@@ -85,6 +87,7 @@ public class Block {
         return publicKeys;
     }
 
+    @SuppressWarnings("unused")
     public void setExternalKey(PublicKey externalKey) {
         this.externalKey = Option.some(externalKey);
     }
