@@ -563,7 +563,7 @@ public class Authorizer {
                 this.publicKeyToBlockId
         );
 
-        FactSet facts = world.query_rule(rule, Long.MAX_VALUE,
+        FactSet facts = world.queryRule(rule, Long.MAX_VALUE,
                 ruleTrustedorigins, symbolTable);
         Set<org.biscuitsec.biscuit.token.builder.Fact> s = new HashSet<>();
 

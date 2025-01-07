@@ -109,10 +109,10 @@ public class World implements Serializable {
     }
 
     @SuppressWarnings("unchecked")
-    public final FactSet query_rule(final Rule rule,
-                                    Long origin,
-                                    TrustedOrigins scope,
-                                    SymbolTable symbolTable) throws Error {
+    public final FactSet queryRule(final Rule rule,
+                                   Long origin,
+                                   TrustedOrigins scope,
+                                   SymbolTable symbolTable) throws Error {
         final FactSet newFacts = new FactSet();
 
         Supplier<Stream<Tuple2<Origin, Fact>>> factsSupplier = () -> this.facts.stream(scope);
