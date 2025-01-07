@@ -12,9 +12,12 @@ import org.biscuitsec.biscuit.token.builder.Block;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.security.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.util.Objects;
 
 public class ThirdPartyBlockRequest {
@@ -29,7 +32,7 @@ public class ThirdPartyBlockRequest {
         org.biscuitsec.biscuit.token.Block block = blockBuilder.build(symbolTable, Option.some(keyPair.publicKey()));
 
         Either<Error.FormatError, byte[]> res = block.to_bytes();
-        if(res.isLeft()) {
+        if (res.isLeft()) {
             return Either.left(res.getLeft());
         }
 
