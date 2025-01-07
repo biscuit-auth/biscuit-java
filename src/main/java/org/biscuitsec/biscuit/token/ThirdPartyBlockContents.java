@@ -22,7 +22,7 @@ public class ThirdPartyBlockContents {
         this.publicKey = publicKey;
     }
 
-    public Schema.ThirdPartyBlockContents serialize() throws Error.FormatError.SerializationError {
+    public Schema.ThirdPartyBlockContents serialize() {
         Schema.ThirdPartyBlockContents.Builder b = Schema.ThirdPartyBlockContents.newBuilder();
         b.setPayload(ByteString.copyFrom(this.payload));
         b.setExternalSignature(b.getExternalSignatureBuilder()
