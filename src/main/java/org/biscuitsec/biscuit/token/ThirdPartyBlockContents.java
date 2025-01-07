@@ -49,9 +49,9 @@ public class ThirdPartyBlockContents {
 
     public byte[] toBytes() throws IOException, Error.FormatError.SerializationError {
         Schema.ThirdPartyBlockContents b = this.serialize();
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        b.writeTo(stream);
-        return stream.toByteArray();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        b.writeTo(baos);
+        return baos.toByteArray();
     }
 
     @Override
