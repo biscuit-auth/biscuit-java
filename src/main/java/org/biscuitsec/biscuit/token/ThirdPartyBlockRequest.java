@@ -25,8 +25,8 @@ public class ThirdPartyBlockRequest {
     }
 
     public Either<Error.FormatError, ThirdPartyBlockContents> createBlock(KeyPair keyPair, Block blockBuilder) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-        SymbolTable symbols = new SymbolTable();
-        org.biscuitsec.biscuit.token.Block block = blockBuilder.build(symbols, Option.some(keyPair.publicKey()));
+        SymbolTable symbolTable = new SymbolTable();
+        org.biscuitsec.biscuit.token.Block block = blockBuilder.build(symbolTable, Option.some(keyPair.publicKey()));
 
         Either<Error.FormatError, byte[]> res = block.to_bytes();
         if(res.isLeft()) {
@@ -40,10 +40,10 @@ public class ThirdPartyBlockRequest {
         sgr.initSign(keyPair.privateKey);
         sgr.update(serializedBlock);
 
-        ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-        algo_buf.putInt(Integer.valueOf(Schema.PublicKey.Algorithm.Ed25519.getNumber()));
-        algo_buf.flip();
-        sgr.update(algo_buf);
+        ByteBuffer algoBuf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
+        algoBuf.putInt(Integer.valueOf(Schema.PublicKey.Algorithm.Ed25519.getNumber()));
+        algoBuf.flip();
+        sgr.update(algoBuf);
         sgr.update(previousKey.toBytes());
         byte[] signature = sgr.sign();
 
@@ -70,9 +70,9 @@ public class ThirdPartyBlockRequest {
 
     public byte[] toBytes() throws IOException, Error.FormatError.SerializationError {
         Schema.ThirdPartyBlockRequest b = this.serialize();
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        b.writeTo(stream);
-        return stream.toByteArray();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        b.writeTo(baos);
+        return baos.toByteArray();
     }
 
     @Override
