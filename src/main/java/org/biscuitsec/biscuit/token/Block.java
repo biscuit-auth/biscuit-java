@@ -372,7 +372,7 @@ public class Block {
         }
     }
 
-    public Either<Error.FormatError, byte[]> to_bytes() {
+    public Either<Error.FormatError, byte[]> toBytes() {
         Schema.Block b = this.serialize();
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
