@@ -36,13 +36,13 @@ public class BiscuitTest {
 
         KeyPair root = new KeyPair(rng);
 
-        Block authority_builder = new Block();
+        Block authorityBuilder = new Block();
 
-        authority_builder.addFact(fact("right", Arrays.asList(s("file1"), s("read"))));
-        authority_builder.addFact(fact("right", Arrays.asList(s("file2"), s("read"))));
-        authority_builder.addFact(fact("right", Arrays.asList(s("file1"), s("write"))));
+        authorityBuilder.addFact(fact("right", Arrays.asList(s("file1"), s("read"))));
+        authorityBuilder.addFact(fact("right", Arrays.asList(s("file2"), s("read"))));
+        authorityBuilder.addFact(fact("right", Arrays.asList(s("file1"), s("write"))));
 
-        Biscuit b = Biscuit.make(rng, root, authority_builder.build());
+        Biscuit b = Biscuit.make(rng, root, authorityBuilder.build());
 
         out.println(b.print());
 
@@ -119,14 +119,14 @@ public class BiscuitTest {
         out.println(hex(data3));
 
         out.println("deserializing the third token");
-        Biscuit final_token = Biscuit.fromBytes(data3, root.publicKey());
+        Biscuit finalToken = Biscuit.fromBytes(data3, root.publicKey());
 
-        out.println(final_token.print());
+        out.println(finalToken.print());
 
         // check
         out.println("will check the token for resource=file1 and operation=read");
 
-        Authorizer authorizer = final_token.authorizer();
+        Authorizer authorizer = finalToken.authorizer();
         authorizer.addFact("resource(\"file1\")");
         authorizer.addFact("operation(\"read\")");
         authorizer.addPolicy("allow if true");
@@ -134,7 +134,7 @@ public class BiscuitTest {
 
         out.println("will check the token for resource=file2 and operation=write");
 
-        Authorizer authorizer2 = final_token.authorizer();
+        Authorizer authorizer2 = finalToken.authorizer();
         authorizer2.addFact("resource(\"file2\")");
         authorizer2.addFact("operation(\"write\")");
         authorizer2.addPolicy("allow if true");
@@ -224,11 +224,11 @@ public class BiscuitTest {
         SecureRandom rng = new SecureRandom();
         KeyPair root = new KeyPair(rng);
 
-        Block authority_builder = new Block();
+        Block authorityBuilder = new Block();
         Date date = Date.from(Instant.now());
-        authority_builder.addFact(fact("revocation_id", List.of(date(date))));
+        authorityBuilder.addFact(fact("revocation_id", List.of(date(date))));
 
-        Biscuit biscuit = Biscuit.make(rng, root, authority_builder.build());
+        Biscuit biscuit = Biscuit.make(rng, root, authorityBuilder.build());
 
         Block builder = biscuit.createBlock();
         builder.addFact(fact(
@@ -305,7 +305,7 @@ public class BiscuitTest {
         Error e = (Error) Try.of(v4::authorize).getCause();
 
         out.println(v4.printWorld());
-        e.failedChecks().get().stream().forEach(fc -> out.println(fc.toString()));
+        e.failedChecks().get().forEach(fc -> out.println(fc.toString()));
         assertEquals(
                 new Error.FailedLogic(new LogicError.Unauthorized(new LogicError.MatchedPolicy.Allow(0), Arrays.asList(
                         new FailedCheck.FailedBlock(1, 0, "check if resource($resource), $resource.starts_with(\"/folder1/\")"),
@@ -365,12 +365,12 @@ public class BiscuitTest {
 
         KeyPair root = new KeyPair(rng);
 
-        Block authority_builder = new Block();
+        Block authorityBuilder = new Block();
 
-        authority_builder.addFact(fact("namespace:right", Arrays.asList(s("file1"), s("read"))));
-        authority_builder.addFact(fact("namespace:right", Arrays.asList(s("file1"), s("write"))));
-        authority_builder.addFact(fact("namespace:right", Arrays.asList(s("file2"), s("read"))));
-        Biscuit b = Biscuit.make(rng, root, authority_builder.build());
+        authorityBuilder.addFact(fact("namespace:right", Arrays.asList(s("file1"), s("read"))));
+        authorityBuilder.addFact(fact("namespace:right", Arrays.asList(s("file1"), s("write"))));
+        authorityBuilder.addFact(fact("namespace:right", Arrays.asList(s("file2"), s("read"))));
+        Biscuit b = Biscuit.make(rng, root, authorityBuilder.build());
 
         out.println(b.print());
 
@@ -447,14 +447,14 @@ public class BiscuitTest {
         out.println(hex(data3));
 
         out.println("deserializing the third token");
-        Biscuit final_token = Biscuit.fromBytes(data3, root.publicKey());
+        Biscuit finalToken = Biscuit.fromBytes(data3, root.publicKey());
 
-        out.println(final_token.print());
+        out.println(finalToken.print());
 
         // check
         out.println("will check the token for resource=file1 and operation=read");
 
-        Authorizer authorizer = final_token.authorizer();
+        Authorizer authorizer = finalToken.authorizer();
         authorizer.addFact("resource(\"file1\")");
         authorizer.addFact("operation(\"read\")");
         authorizer.addPolicy("allow if true");
@@ -462,7 +462,7 @@ public class BiscuitTest {
 
         out.println("will check the token for resource=file2 and operation=write");
 
-        Authorizer authorizer2 = final_token.authorizer();
+        Authorizer authorizer2 = finalToken.authorizer();
         authorizer2.addFact("resource(\"file2\")");
         authorizer2.addFact("operation(\"write\")");
         authorizer2.addPolicy("allow if true");
@@ -570,14 +570,14 @@ public class BiscuitTest {
         out.println(hex(data3));
 
         out.println("deserializing the third token");
-        Biscuit final_token = Biscuit.fromBytes(data3, root.publicKey());
+        Biscuit finalToken = Biscuit.fromBytes(data3, root.publicKey());
 
-        out.println(final_token.print());
+        out.println(finalToken.print());
 
         // check
         out.println("will check the token for resource=file1 and operation=read");
 
-        Authorizer authorizer = final_token.authorizer();
+        Authorizer authorizer = finalToken.authorizer();
         authorizer.addFact("resource(\"file1\")");
         authorizer.addFact("operation(\"read\")");
         authorizer.addPolicy("allow if true");
@@ -585,7 +585,7 @@ public class BiscuitTest {
 
         out.println("will check the token for resource=file2 and operation=write");
 
-        Authorizer authorizer2 = final_token.authorizer();
+        Authorizer authorizer2 = finalToken.authorizer();
         authorizer2.addFact("resource(\"file2\")");
         authorizer2.addFact("operation(\"write\")");
         authorizer2.addPolicy("allow if true");
@@ -611,13 +611,13 @@ public class BiscuitTest {
 
         KeyPair root = new KeyPair(rng);
 
-        Block authority_builder = new Block();
+        Block authorityBuilder = new Block();
 
-        authority_builder.addFact(fact("right", Arrays.asList(s("file1"), s("read"))));
-        authority_builder.addFact(fact("right", Arrays.asList(s("file2"), s("read"))));
-        authority_builder.addFact(fact("right", Arrays.asList(s("file1"), s("write"))));
+        authorityBuilder.addFact(fact("right", Arrays.asList(s("file1"), s("read"))));
+        authorityBuilder.addFact(fact("right", Arrays.asList(s("file2"), s("read"))));
+        authorityBuilder.addFact(fact("right", Arrays.asList(s("file1"), s("write"))));
 
-        Biscuit b = Biscuit.make(rng, root, 1, authority_builder.build());
+        Biscuit b = Biscuit.make(rng, root, 1, authorityBuilder.build());
 
         out.println(b.print());
 
@@ -631,16 +631,16 @@ public class BiscuitTest {
 
         out.println("deserializing the first token");
 
-        assertThrows(InvalidKeyException.class, () -> Biscuit.fromBytes(data, key_id -> Option.none()));
+        assertThrows(InvalidKeyException.class, () -> Biscuit.fromBytes(data, keyId -> Option.none()));
 
 
-        assertThrows(Error.FormatError.Signature.InvalidSignature.class, () -> Biscuit.fromBytes(data, key_id -> {
+        assertThrows(Error.FormatError.Signature.InvalidSignature.class, () -> Biscuit.fromBytes(data, keyId -> {
             KeyPair root1 = new KeyPair(rng);
             return Option.some(root1.publicKey());
         }));
 
-        Biscuit.fromBytes(data, key_id -> {
-            if (key_id.get() == 1) {
+        Biscuit.fromBytes(data, keyId -> {
+            if (keyId.get() == 1) {
                 return Option.some(root.publicKey());
             } else {
                 return Option.none();

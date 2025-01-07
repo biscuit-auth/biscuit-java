@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.util.*;
 
 import static java.lang.System.out;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BuilderTest {
@@ -26,10 +27,10 @@ public class BuilderTest {
         KeyPair root = new KeyPair(rng);
         SymbolTable symbols = Biscuit.defaultSymbolTable();
 
-        Block authority_builder = new Block();
-        authority_builder.addFact(Utils.fact("revocation_id", List.of(Utils.date(Date.from(Instant.now())))));
-        authority_builder.addFact(Utils.fact("right", List.of(Utils.s("admin"))));
-        authority_builder.addRule(Utils.constrainedRule("right",
+        Block authorityBuilder = new Block();
+        authorityBuilder.addFact(Utils.fact("revocation_id", List.of(Utils.date(Date.from(Instant.now())))));
+        authorityBuilder.addFact(Utils.fact("right", List.of(Utils.s("admin"))));
+        authorityBuilder.addRule(Utils.constrainedRule("right",
                 Arrays.asList(Utils.s("namespace"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("operation")),
                 List.of(Utils.pred("ns_operation", Arrays.asList(Utils.s("namespace"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("operation")))),
                 List.of(
@@ -43,7 +44,7 @@ public class BuilderTest {
                                 )))))
                 )
         ));
-        authority_builder.addRule(Utils.constrainedRule("right",
+        authorityBuilder.addRule(Utils.constrainedRule("right",
                 Arrays.asList(Utils.s("topic"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("topic"), Utils.var("operation")),
                 List.of(Utils.pred("topic_operation", Arrays.asList(Utils.s("topic"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("topic"), Utils.var("operation")))),
                 List.of(
@@ -56,7 +57,7 @@ public class BuilderTest {
                 )
         ));
 
-        org.biscuitsec.biscuit.token.Block authority = authority_builder.build(symbols);
+        org.biscuitsec.biscuit.token.Block authority = authorityBuilder.build(symbols);
         Biscuit rootBiscuit = Biscuit.make(rng, root, authority);
 
         out.println(rootBiscuit.print());
@@ -91,13 +92,13 @@ public class BuilderTest {
 
     @Test
     public void testStringValueOfAByteArrayTermIsJustTheArrayReferenceNotTheContents() {
-        String string = new Term.Bytes("Hello".getBytes(StandardCharsets.UTF_8)).toString();
+        String string = new Term.Bytes("Hello".getBytes(UTF_8)).toString();
         assertTrue(string.startsWith("hex:"), "starts with hex prefix");
     }
 
     @Test
     public void testArrayValueIsCopy() {
-        byte[] someBytes = "Hello".getBytes(StandardCharsets.UTF_8);
+        byte[] someBytes = "Hello".getBytes(UTF_8);
         Term.Bytes term = new Term.Bytes(someBytes);
         assertArrayEquals(someBytes, term.getValue(), "content not the same");
         assertNotEquals(System.identityHashCode(someBytes), System.identityHashCode(term.getValue()), "objects not different");

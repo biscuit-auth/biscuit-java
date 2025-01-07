@@ -99,9 +99,9 @@ public class ThirdPartyTest {
         authorityBuilder.addFact("right(\"read\")");
         authorityBuilder.addCheck("check if first(\"admin\") trusting ed25519/" + external1.publicKey().toHex());
 
-        org.biscuitsec.biscuit.token.Block authority_block = authorityBuilder.build();
-        out.println(authority_block);
-        Biscuit b1 = Biscuit.make(rng, root, authority_block);
+        org.biscuitsec.biscuit.token.Block authorityBlock = authorityBuilder.build();
+        out.println(authorityBlock);
+        Biscuit b1 = Biscuit.make(rng, root, authorityBlock);
         out.println("TOKEN: " + b1.print());
 
         ThirdPartyBlockRequest request1 = b1.thirdPartyRequest();
