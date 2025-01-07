@@ -106,7 +106,7 @@ public class SerializedBiscuit {
         }
         blockExternalKeys.add(Option.none());
 
-        for (String s : authority.symbols().symbols) {
+        for (String s : authority.symbolTable().symbols) {
             symbolTable.add(s);
         }
 
@@ -124,11 +124,11 @@ public class SerializedBiscuit {
 
             // blocks with external signatures keep their own symbol table
             if (blockData.externalSignature.isDefined()) {
-                //symbols.insert(blockData.externalSignature.get().key);
+                //symbolTable.insert(blockData.externalSignature.get().key);
                 blockExternalKeys.add(Option.some(blockData.externalSignature.get().key));
             } else {
                 blockExternalKeys.add(Option.none());
-                for (String s : block.symbols().symbols) {
+                for (String s : block.symbolTable().symbols) {
                     symbolTable.add(s);
                 }
                 for (org.biscuitsec.biscuit.crypto.PublicKey pk : block.publicKeys()) {

@@ -79,9 +79,8 @@ public class Block {
         this.externalKey = externalKey;
     }
 
-    // TODO Rename method?  symbolTable()
-    public SymbolTable symbols() {
-        return symbolTable;
+    public SymbolTable symbolTable() {
+        return this.symbolTable;
     }
 
     public List<PublicKey> publicKeys() {
