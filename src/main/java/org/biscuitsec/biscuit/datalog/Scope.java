@@ -1,22 +1,23 @@
 package org.biscuitsec.biscuit.datalog;
 
 import biscuit.format.schema.Schema;
-import org.biscuitsec.biscuit.error.Error;
 import io.vavr.control.Either;
-
+import org.biscuitsec.biscuit.error.Error;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
 
 public class Scope {
+    // TODO Use all-caps naming convention for enums.
+    //  This convention also applies to protobuf enums.
     public enum Kind {
         Authority,
         Previous,
         PublicKey
     }
 
-    Kind kind;
-    long publicKey;
+    final Kind kind;
+    final long publicKey;
 
     private Scope(Kind kind, long publicKey) {
         this.kind = kind;
@@ -60,7 +61,7 @@ public class Scope {
         return b.build();
     }
 
-    static public Either<Error.FormatError, Scope> deserialize(Schema.Scope scope) {
+    public static Either<Error.FormatError, Scope> deserialize(Schema.Scope scope) {
         if (scope.hasPublicKey()) {
             long publicKey = scope.getPublicKey();
             return Right(Scope.publicKey(publicKey));

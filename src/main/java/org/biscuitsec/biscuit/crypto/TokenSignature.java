@@ -20,7 +20,7 @@ public class TokenSignature {
         ArrayList<RistrettoElement> l = new ArrayList<>();
         l.add(A);
         Scalar d = hash_points(l);
-        Scalar e = hash_message(keypair.public_key, message);
+        Scalar e = hash_message(keypair.publicKey, message);
 
         Scalar z = r.multiply(d).subtract(e.multiply(keypair.private_key));
 
@@ -43,7 +43,7 @@ public class TokenSignature {
         ArrayList<RistrettoElement> l = new ArrayList<>();
         l.add(A);
         Scalar d = hash_points(l);
-        Scalar e = hash_message(keypair.public_key, message);
+        Scalar e = hash_message(keypair.publicKey, message);
 
         Scalar z = r.multiply(d).subtract(e.multiply(keypair.private_key));
 

@@ -1,15 +1,20 @@
 package org.biscuitsec.biscuit.error;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import io.vavr.control.Option;
+
 import java.util.List;
 import java.util.Objects;
 
-import com.google.gson.*;
-import io.vavr.control.Option;
-
 public class LogicError {
-    public Option<List<FailedCheck>> failed_checks() {
+
+    public Option<List<FailedCheck>> failedChecks() {
         return Option.none();
     }
+
     public JsonElement toJson() {
         return new JsonObject();
     }
@@ -22,6 +27,11 @@ public class LogicError {
         }
 
         @Override
+        public int hashCode() {
+            return Objects.hash(e);
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
@@ -30,13 +40,8 @@ public class LogicError {
         }
 
         @Override
-        public int hashCode() {
-            return Objects.hash(e);
-        }
-
-        @Override
         public String toString() {
-            return "LogicError.InvalidAuthorityFact{ error: "+ e + " }";
+            return "LogicError.InvalidAuthorityFact{ error: " + e + " }";
         }
 
         @Override
@@ -54,6 +59,11 @@ public class LogicError {
         }
 
         @Override
+        public int hashCode() {
+            return Objects.hash(e);
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
@@ -62,13 +72,8 @@ public class LogicError {
         }
 
         @Override
-        public int hashCode() {
-            return Objects.hash(e);
-        }
-
-        @Override
         public String toString() {
-            return "LogicError.InvalidAmbientFact{ error: "+ e + " }";
+            return "LogicError.InvalidAmbientFact{ error: " + e + " }";
         }
 
         @Override
@@ -91,6 +96,11 @@ public class LogicError {
         }
 
         @Override
+        public int hashCode() {
+            return Objects.hash(id, e);
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
@@ -99,19 +109,14 @@ public class LogicError {
         }
 
         @Override
-        public int hashCode() {
-            return Objects.hash(id, e);
-        }
-
-        @Override
         public String toString() {
-            return "LogicError.InvalidBlockFact{ id: "+id+", error: "+  e + " }";
+            return "LogicError.InvalidBlockFact{ id: " + id + ", error: " + e + " }";
         }
 
         @Override
         public JsonElement toJson() {
             JsonObject child = new JsonObject();
-            child.addProperty("id",this.id);
+            child.addProperty("id", this.id);
             child.addProperty("error", this.e);
             JsonObject root = new JsonObject();
             root.add("InvalidBlockFact", child);
@@ -131,6 +136,11 @@ public class LogicError {
         }
 
         @Override
+        public int hashCode() {
+            return Objects.hash(id, e);
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
@@ -139,13 +149,8 @@ public class LogicError {
         }
 
         @Override
-        public int hashCode() {
-            return Objects.hash(id, e);
-        }
-
-        @Override
         public String toString() {
-            return "LogicError.InvalidBlockRule{ id: "+id+", error: "+  e + " }";
+            return "LogicError.InvalidBlockRule{ id: " + id + ", error: " + e + " }";
         }
 
         @Override
@@ -170,34 +175,8 @@ public class LogicError {
             this.policy = policy;
         }
 
-        public Option<List<FailedCheck>> failed_checks() {
+        public Option<List<FailedCheck>> failedChecks() {
             return Option.some(errors);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Unauthorized other = (Unauthorized) o;
-            if(errors.size() != other.errors.size()) {
-                return false;
-            }
-            for(int i = 0; i < errors.size(); i++) {
-                if(!errors.get(i).equals(other.errors.get(i))) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(errors);
-        }
-
-        @Override
-        public String toString() {
-            return "Unauthorized( policy = "+policy+ " errors = " + errors +")";
         }
 
         @Override
@@ -206,19 +185,12 @@ public class LogicError {
             JsonObject unauthorized = new JsonObject();
             unauthorized.add("policy", this.policy.toJson());
             JsonArray ja = new JsonArray();
-            for (FailedCheck t: this.errors) {
+            for (FailedCheck t : this.errors) {
                 ja.add(t.toJson());
             }
             unauthorized.add("checks", ja);
             jo.add("Unauthorized", unauthorized);
             return jo;
-        }
-    }
-
-    public static class NoMatchingPolicy extends LogicError {
-        final public List<FailedCheck> errors;
-        public NoMatchingPolicy(List<FailedCheck> errors) {
-            this.errors = errors;
         }
 
         @Override
@@ -227,53 +199,82 @@ public class LogicError {
         }
 
         @Override
-        public Option<List<FailedCheck>> failed_checks() {
-            return Option.some(errors);
-        }
-
-        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Unauthorized other = (Unauthorized) o;
-            if(errors.size() != other.errors.size()) {
+            if (errors.size() != other.errors.size()) {
                 return false;
             }
-            for(int i = 0; i < errors.size(); i++) {
-                if(!errors.get(i).equals(other.errors.get(i))) {
+            for (int i = 0; i < errors.size(); i++) {
+                if (!errors.get(i).equals(other.errors.get(i))) {
                     return false;
                 }
             }
             return true;
         }
 
-
         @Override
         public String toString() {
-            return "NoMatchingPolicy{}";
+            return "Unauthorized( policy = " + policy + " errors = " + errors + ")";
+        }
+    }
+
+    public static class NoMatchingPolicy extends LogicError {
+        final public List<FailedCheck> errors;
+
+        public NoMatchingPolicy(List<FailedCheck> errors) {
+            this.errors = errors;
+        }
+
+        @Override
+        public Option<List<FailedCheck>> failedChecks() {
+            return Option.some(errors);
         }
 
         @Override
         public JsonElement toJson() {
             JsonObject jo = new JsonObject();
             JsonArray ja = new JsonArray();
-            for (FailedCheck t: this.errors) {
+            for (FailedCheck t : this.errors) {
                 ja.add(t.toJson());
             }
             jo.add("NoMatchingPolicy", ja);
             return jo;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(errors);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            // TODO Fix probably bug indicated by IDE code analysis:
+            //  Casting 'o' to 'Unauthorized' will produce 'ClassCastException' for any non-null value
+            Unauthorized other = (Unauthorized) o;
+            if (errors.size() != other.errors.size()) {
+                return false;
+            }
+            for (int i = 0; i < errors.size(); i++) {
+                if (!errors.get(i).equals(other.errors.get(i))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return "NoMatchingPolicy{}";
         }
     }
 
     public static class AuthorizerNotEmpty extends LogicError {
 
         public AuthorizerNotEmpty() {
-
-        }
-
-        @Override
-        public int hashCode() {
-            return super.hashCode();
         }
 
         @Override
@@ -292,37 +293,39 @@ public class LogicError {
 
         public static class Allow extends MatchedPolicy {
             final public long nb;
-            public Allow(long nb){
+
+            public Allow(long nb) {
                 this.nb = nb;
             }
 
-            @Override
-            public String toString(){
-                return "Allow("+this.nb+")";
-            }
-
-            public JsonElement toJson(){
+            public JsonElement toJson() {
                 JsonObject jo = new JsonObject();
                 jo.addProperty("Allow", this.nb);
                 return jo;
+            }
+
+            @Override
+            public String toString() {
+                return "Allow(" + this.nb + ")";
             }
         }
 
         public static class Deny extends MatchedPolicy {
             public final long nb;
-            public Deny(long nb){
+
+            public Deny(long nb) {
                 this.nb = nb;
             }
 
-            @Override
-            public String toString(){
-                return "Deny("+this.nb+")";
-            }
-
-            public JsonElement toJson(){
+            public JsonElement toJson() {
                 JsonObject jo = new JsonObject();
                 jo.addProperty("Deny", this.nb);
                 return jo;
+            }
+
+            @Override
+            public String toString() {
+                return "Deny(" + this.nb + ")";
             }
         }
     }

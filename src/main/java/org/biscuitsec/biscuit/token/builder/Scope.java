@@ -5,7 +5,16 @@ import org.biscuitsec.biscuit.datalog.SymbolTable;
 
 import java.util.Objects;
 
+import static java.util.Objects.requireNonNull;
+
 public class Scope {
+
+    final Kind kind;
+    final PublicKey publicKey;
+    final String parameter;
+
+    // TODO Use all-caps naming convention for enums.
+    //  This convention also applies to protobuf enums.
     enum Kind {
         Authority,
         Previous,
@@ -13,24 +22,20 @@ public class Scope {
         Parameter,
     }
 
-    Kind kind;
-    PublicKey publicKey;
-    String parameter;
-
     private Scope(Kind kind) {
         this.kind = kind;
         this.publicKey = null;
         this.parameter = "";
     }
 
-    private Scope(Kind kind, PublicKey publicKey) {
-        this.kind = kind;
+    private Scope(PublicKey publicKey) {
+        this.kind = Kind.PublicKey;
         this.publicKey = publicKey;
         this.parameter = "";
     }
 
-    private Scope(Kind kind, String parameter) {
-        this.kind = kind;
+    private Scope(String parameter) {
+        this.kind = Kind.Parameter;
         this.publicKey = null;
         this.parameter = parameter;
     }
@@ -39,19 +44,7 @@ public class Scope {
         return new Scope(Kind.Authority);
     }
 
-    public static Scope previous() {
-        return new Scope(Kind.Previous);
-    }
-
-    public static Scope publicKey(PublicKey publicKey) {
-        return new Scope(Kind.PublicKey, publicKey);
-    }
-
-    public static Scope parameter(String parameter) {
-        return new Scope(Kind.Parameter, parameter);
-    }
-
-    public org.biscuitsec.biscuit.datalog.Scope convert(SymbolTable symbols) {
+    public org.biscuitsec.biscuit.datalog.Scope convert(SymbolTable symbolTable) {
         switch (this.kind) {
             case Authority:
                 return org.biscuitsec.biscuit.datalog.Scope.authority();
@@ -62,13 +55,13 @@ public class Scope {
                 return null;
             //throw new Exception("Remaining parameter: "+this.parameter);
             case PublicKey:
-                return org.biscuitsec.biscuit.datalog.Scope.publicKey(symbols.insert(this.publicKey));
+                return org.biscuitsec.biscuit.datalog.Scope.publicKey(symbolTable.insert(this.publicKey));
         }
         //FIXME
         return null;
     }
 
-    public static Scope convert_from(org.biscuitsec.biscuit.datalog.Scope scope, SymbolTable symbols) {
+    public static Scope convertFrom(org.biscuitsec.biscuit.datalog.Scope scope, SymbolTable symbolTable) {
         switch (scope.kind()) {
             case Authority:
                 return new Scope(Kind.Authority);
@@ -76,13 +69,21 @@ public class Scope {
                 return new Scope(Kind.Previous);
             case PublicKey:
                 //FIXME error management should bubble up here
-                return new Scope(Kind.PublicKey, symbols.get_pk((int) scope.publicKey()).get());
+                return new Scope(symbolTable.getPk((int) scope.publicKey()).get());
         }
 
         //FIXME error management should bubble up here
         //throw new Exception("panic");
         return null;
 
+    }
+
+    @Override
+    public int hashCode() {
+        int result = kind.hashCode();
+        result = 31 * result + (publicKey != null ? publicKey.hashCode() : 0);
+        result = 31 * result + (parameter != null ? parameter.hashCode() : 0);
+        return result;
     }
 
     @Override
@@ -98,14 +99,6 @@ public class Scope {
     }
 
     @Override
-    public int hashCode() {
-        int result = kind.hashCode();
-        result = 31 * result + (publicKey != null ? publicKey.hashCode() : 0);
-        result = 31 * result + (parameter != null ? parameter.hashCode() : 0);
-        return result;
-    }
-
-    @Override
     public String toString() {
         switch (this.kind) {
             case Authority:
@@ -115,8 +108,20 @@ public class Scope {
             case Parameter:
                 return "{" + this.parameter + "}";
             case PublicKey:
-                return this.publicKey.toString();
+                return requireNonNull(this.publicKey, "publicKey cannot be null").toString();
         }
         return null;
+    }
+
+    public static Scope parameter(String parameter) {
+        return new Scope(parameter);
+    }
+
+    public static Scope previous() {
+        return new Scope(Kind.Previous);
+    }
+
+    public static Scope publicKey(PublicKey publicKey) {
+        return new Scope(publicKey);
     }
 }

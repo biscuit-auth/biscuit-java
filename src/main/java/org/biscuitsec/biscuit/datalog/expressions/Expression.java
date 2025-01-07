@@ -1,12 +1,13 @@
 package org.biscuitsec.biscuit.datalog.expressions;
 
 import biscuit.format.schema.Schema;
-import org.biscuitsec.biscuit.datalog.TemporarySymbolTable;
-import org.biscuitsec.biscuit.datalog.Term;
-import org.biscuitsec.biscuit.datalog.SymbolTable;
-import org.biscuitsec.biscuit.error.Error;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
+import org.biscuitsec.biscuit.datalog.SymbolTable;
+import org.biscuitsec.biscuit.datalog.TemporarySymbolTable;
+import org.biscuitsec.biscuit.datalog.Term;
+import org.biscuitsec.biscuit.error.Error;
+import org.biscuitsec.biscuit.error.Error.FormatError;
 
 import java.util.*;
 
@@ -25,24 +26,24 @@ public class Expression {
     }
 
     //FIXME: should return a Result<Term, error::Expression>
-    public Term evaluate(Map<Long, Term> variables, TemporarySymbolTable symbols) throws Error.Execution {
-        Deque<Term> stack = new ArrayDeque<Term>(16); //Default value
-        for(Op op: ops){
-            op.evaluate(stack,variables, symbols);
+    public Term evaluate(Map<Long, Term> variables, TemporarySymbolTable tmpSymbolTable) throws Error.Execution {
+        Deque<Term> stack = new ArrayDeque<>(16); //Default value
+        for (Op op : ops) {
+            op.evaluate(stack, variables, tmpSymbolTable);
         }
-        if(stack.size() == 1){
+        if (stack.size() == 1) {
             return stack.pop();
         } else {
             throw new Error.Execution(this, "execution");
         }
     }
 
-    public Option<String> print(SymbolTable symbols) {
+    public Option<String> print(SymbolTable symbolTable) {
         Deque<String> stack = new ArrayDeque<>();
-        for (Op op : ops){
-            op.print(stack, symbols);
+        for (Op op : ops) {
+            op.print(stack, symbolTable);
         }
-        if(stack.size() == 1){
+        if (stack.size() == 1) {
             return Option.some(stack.remove());
         } else {
             return Option.none();
@@ -52,21 +53,21 @@ public class Expression {
     public Schema.ExpressionV2 serialize() {
         Schema.ExpressionV2.Builder b = Schema.ExpressionV2.newBuilder();
 
-        for(Op op: this.ops) {
+        for (Op op : this.ops) {
             b.addOps(op.serialize());
         }
 
         return b.build();
     }
 
-    static public Either<Error.FormatError, Expression> deserializeV2(Schema.ExpressionV2 e) {
+    static public Either<FormatError, Expression> deserializeV2(Schema.ExpressionV2 e) {
         ArrayList<Op> ops = new ArrayList<>();
 
-        for(Schema.Op op: e.getOpsList()) {
-            Either<Error.FormatError, Op> res = Op.deserializeV2(op);
+        for (Schema.Op op : e.getOpsList()) {
+            Either<FormatError, Op> res = Op.deserializeV2(op);
 
-            if(res.isLeft()) {
-                Error.FormatError err = res.getLeft();
+            if (res.isLeft()) {
+                FormatError err = res.getLeft();
                 return Left(err);
             } else {
                 ops.add(res.get());

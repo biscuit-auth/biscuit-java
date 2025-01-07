@@ -8,15 +8,13 @@ import org.biscuitsec.biscuit.error.Error;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 public class ThirdPartyBlockContents {
-    byte[] payload;
-    byte[] signature;
-    PublicKey publicKey;
+    final byte[] payload;
+    final byte[] signature;
+    final PublicKey publicKey;
 
     ThirdPartyBlockContents(byte[] payload, byte[] signature, PublicKey publicKey) {
         this.payload = payload;
@@ -24,7 +22,7 @@ public class ThirdPartyBlockContents {
         this.publicKey = publicKey;
     }
 
-    public Schema.ThirdPartyBlockContents serialize() throws Error.FormatError.SerializationError {
+    public Schema.ThirdPartyBlockContents serialize() {
         Schema.ThirdPartyBlockContents.Builder b = Schema.ThirdPartyBlockContents.newBuilder();
         b.setPayload(ByteString.copyFrom(this.payload));
         b.setExternalSignature(b.getExternalSignatureBuilder()
@@ -47,11 +45,11 @@ public class ThirdPartyBlockContents {
         return ThirdPartyBlockContents.deserialize(Schema.ThirdPartyBlockContents.parseFrom(slice));
     }
 
-    public byte[] toBytes() throws IOException, Error.FormatError.SerializationError {
+    public byte[] toBytes() throws IOException {
         Schema.ThirdPartyBlockContents b = this.serialize();
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        b.writeTo(stream);
-        return stream.toByteArray();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        b.writeTo(baos);
+        return baos.toByteArray();
     }
 
     @Override

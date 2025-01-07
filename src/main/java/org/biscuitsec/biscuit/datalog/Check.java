@@ -1,8 +1,8 @@
 package org.biscuitsec.biscuit.datalog;
 
 import biscuit.format.schema.Schema;
-import org.biscuitsec.biscuit.error.Error;
 import io.vavr.control.Either;
+import org.biscuitsec.biscuit.error.Error;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,8 +45,8 @@ public class Check {
                 break;
         }
 
-        for(int i = 0; i < this.queries.size(); i++) {
-            b.addQueries(this.queries.get(i).serialize());
+        for (Rule query : this.queries) {
+            b.addQueries(query.serialize());
         }
 
         return b.build();
@@ -57,20 +57,18 @@ public class Check {
 
         Kind kind;
         switch (check.getKind()) {
-            case One:
-                kind = Kind.One;
-                break;
             case All:
                 kind = Kind.All;
                 break;
+            case One:
             default:
                 kind = Kind.One;
                 break;
         }
 
-        for (Schema.RuleV2 query: check.getQueriesList()) {
+        for (Schema.RuleV2 query : check.getQueriesList()) {
             Either<Error.FormatError, Rule> res = Rule.deserializeV2(query);
-            if(res.isLeft()) {
+            if (res.isLeft()) {
                 Error.FormatError e = res.getLeft();
                 return Left(e);
             } else {

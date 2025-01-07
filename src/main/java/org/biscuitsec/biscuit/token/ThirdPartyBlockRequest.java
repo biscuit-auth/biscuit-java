@@ -4,59 +4,59 @@ import biscuit.format.schema.Schema;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
-import net.i2p.crypto.eddsa.EdDSAEngine;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.token.builder.Block;
-import org.biscuitsec.biscuit.token.format.SerializedBiscuit;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.security.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.util.Objects;
 
 public class ThirdPartyBlockRequest {
-    PublicKey previousKey;
+    final PublicKey previousKey;
 
     ThirdPartyBlockRequest(PublicKey previousKey) {
         this.previousKey = previousKey;
     }
 
-    public Either<Error.FormatError, ThirdPartyBlockContents> createBlock(KeyPair keyPair, Block blockBuilder) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-        SymbolTable symbols = new SymbolTable();
-        org.biscuitsec.biscuit.token.Block block = blockBuilder.build(symbols, Option.some(keyPair.public_key()));
+    public Either<Error.FormatError, ThirdPartyBlockContents> createBlock(KeyPair keyPair, Block blockBuilder)
+            throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        SymbolTable symbolTable = new SymbolTable();
+        org.biscuitsec.biscuit.token.Block block = blockBuilder.build(symbolTable, Option.some(keyPair.publicKey()));
 
-        Either<Error.FormatError, byte[]> res = block.to_bytes();
-        if(res.isLeft()) {
+        Either<Error.FormatError, byte[]> res = block.toBytes();
+        if (res.isLeft()) {
             return Either.left(res.getLeft());
         }
 
         byte[] serializedBlock = res.get();
 
-        Signature sgr = KeyPair.generateSignature(keyPair.public_key().algorithm);
+        Signature sgr = KeyPair.generateSignature(keyPair.publicKey().algorithm);
 
-        sgr.initSign(keyPair.private_key);
+        sgr.initSign(keyPair.privateKey);
         sgr.update(serializedBlock);
 
-        ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-        algo_buf.putInt(Integer.valueOf(Schema.PublicKey.Algorithm.Ed25519.getNumber()));
-        algo_buf.flip();
-        sgr.update(algo_buf);
+        ByteBuffer algoBuf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
+        algoBuf.putInt(Schema.PublicKey.Algorithm.Ed25519.getNumber());
+        algoBuf.flip();
+        sgr.update(algoBuf);
         sgr.update(previousKey.toBytes());
         byte[] signature = sgr.sign();
 
-        PublicKey publicKey = keyPair.public_key();
+        PublicKey publicKey = keyPair.publicKey();
 
         return Either.right(new ThirdPartyBlockContents(serializedBlock, signature, publicKey));
     }
 
-    public Schema.ThirdPartyBlockRequest serialize() throws Error.FormatError.SerializationError {
+    public Schema.ThirdPartyBlockRequest serialize() {
         Schema.ThirdPartyBlockRequest.Builder b = Schema.ThirdPartyBlockRequest.newBuilder();
         b.setPreviousKey(this.previousKey.serialize());
 
@@ -72,11 +72,11 @@ public class ThirdPartyBlockRequest {
         return ThirdPartyBlockRequest.deserialize(Schema.ThirdPartyBlockRequest.parseFrom(slice));
     }
 
-    public byte[] toBytes() throws IOException, Error.FormatError.SerializationError {
+    public byte[] toBytes() throws IOException {
         Schema.ThirdPartyBlockRequest b = this.serialize();
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        b.writeTo(stream);
-        return stream.toByteArray();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        b.writeTo(baos);
+        return baos.toByteArray();
     }
 
     @Override

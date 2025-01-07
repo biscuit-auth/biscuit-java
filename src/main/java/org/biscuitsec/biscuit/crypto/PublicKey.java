@@ -15,8 +15,8 @@ public class PublicKey {
     public final EdDSAPublicKey key;
     public final Algorithm algorithm;
 
-    public PublicKey(Algorithm algorithm, EdDSAPublicKey public_key) {
-        this.key = public_key;
+    public PublicKey(Algorithm algorithm, EdDSAPublicKey publicKey) {
+        this.key = publicKey;
         this.algorithm = algorithm;
     }
 

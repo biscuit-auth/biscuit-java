@@ -26,7 +26,7 @@ public class ExpressionTest {
                 new Op.Value(new Term.Integer(1)),
                 new Op.Value(new Term.Variable(SymbolTable.DEFAULT_SYMBOLS_OFFSET + 2)),
                 new Op.Binary(Op.BinaryOp.LessThan),
-                new Op.Unary(Op.UnaryOp.Negate)
+                new Op.Unary(Op.UnaryOp.NEGATE)
         )));
 
         assertEquals(
@@ -103,7 +103,7 @@ public class ExpressionTest {
                 new Op.Value(new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET)),
                 new Op.Value(new Term.Str(SymbolTable.DEFAULT_SYMBOLS_OFFSET + 1)),
                 new Op.Binary(Op.BinaryOp.Contains),
-                new Op.Unary(Op.UnaryOp.Negate)
+                new Op.Unary(Op.UnaryOp.NEGATE)
         )));
 
         assertEquals(

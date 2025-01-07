@@ -1,13 +1,13 @@
 package org.biscuitsec.biscuit.token.format;
 
-import org.biscuitsec.biscuit.crypto.PublicKey;
 import io.vavr.control.Option;
+import org.biscuitsec.biscuit.crypto.PublicKey;
 
 public class SignedBlock {
-    public byte[] block;
-    public PublicKey key;
-    public byte[] signature;
-    public Option<ExternalSignature> externalSignature;
+    public final byte[] block;
+    public final PublicKey key;
+    public final byte[] signature;
+    public final Option<ExternalSignature> externalSignature;
 
     public SignedBlock(byte[] block, PublicKey key, byte[] signature, Option<ExternalSignature> externalSignature) {
         this.block = block;

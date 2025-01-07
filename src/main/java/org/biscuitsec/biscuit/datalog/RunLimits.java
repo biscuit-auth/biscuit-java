@@ -3,11 +3,12 @@ package org.biscuitsec.biscuit.datalog;
 import java.time.Duration;
 
 public class RunLimits {
-    public int maxFacts = 1000;
-    public int maxIterations = 100;
-    public Duration maxTime = Duration.ofMillis(5);
+    public final int maxFacts;
+    public final int maxIterations;
+    public final Duration maxTime;
 
     public RunLimits() {
+        this(1000, 100, Duration.ofMillis(5));
     }
 
     public RunLimits(int maxFacts, int maxIterations, Duration maxTime) {

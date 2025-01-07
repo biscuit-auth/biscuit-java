@@ -4,13 +4,15 @@ import org.biscuitsec.biscuit.datalog.SymbolTable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
+import static java.lang.String.join;
+import static java.util.stream.Collectors.toList;
 import static org.biscuitsec.biscuit.datalog.Check.Kind.One;
 
 public class Check {
+    final List<Rule> queries;
     private final org.biscuitsec.biscuit.datalog.Check.Kind kind;
-    List<Rule> queries;
 
     public Check(org.biscuitsec.biscuit.datalog.Check.Kind kind, List<Rule> queries) {
         this.kind = kind;
@@ -25,34 +27,28 @@ public class Check {
         queries = r;
     }
 
-    public org.biscuitsec.biscuit.datalog.Check convert(SymbolTable symbols) {
+    public org.biscuitsec.biscuit.datalog.Check convert(SymbolTable symbolTable) {
         ArrayList<org.biscuitsec.biscuit.datalog.Rule> queries = new ArrayList<>();
 
-        for(Rule q: this.queries) {
-            queries.add(q.convert(symbols));
+        for (Rule q : this.queries) {
+            queries.add(q.convert(symbolTable));
         }
         return new org.biscuitsec.biscuit.datalog.Check(this.kind, queries);
     }
 
-    public static Check convert_from(org.biscuitsec.biscuit.datalog.Check r, SymbolTable symbols) {
+    public static Check convertFrom(org.biscuitsec.biscuit.datalog.Check r, SymbolTable symbolTable) {
         ArrayList<Rule> queries = new ArrayList<>();
 
-        for(org.biscuitsec.biscuit.datalog.Rule q: r.queries()) {
-            queries.add(Rule.convert_from(q, symbols));
+        for (org.biscuitsec.biscuit.datalog.Rule q : r.queries()) {
+            queries.add(Rule.convertFrom(q, symbolTable));
         }
 
         return new Check(r.kind(), queries);
     }
 
     @Override
-    public String toString() {
-        final List<String> qs = queries.stream().map((q) -> q.bodyToString()).collect(Collectors.toList());
-
-        if(kind == One) {
-            return "check if " + String.join(" or ", qs);
-        } else {
-            return "check all " + String.join(" or ", qs);
-        }
+    public int hashCode() {
+        return queries != null ? queries.hashCode() : 0;
     }
 
     @Override
@@ -62,11 +58,17 @@ public class Check {
 
         Check check = (Check) o;
 
-        return queries != null ? queries.equals(check.queries) : check.queries == null;
+        return Objects.equals(queries, check.queries);
     }
 
     @Override
-    public int hashCode() {
-        return queries != null ? queries.hashCode() : 0;
+    public String toString() {
+        final List<String> qs = queries.stream().map(Rule::bodyToString).collect(toList());
+
+        if (kind == One) {
+            return "check if " + join(" or ", qs);
+        } else {
+            return "check all " + join(" or ", qs);
+        }
     }
 }

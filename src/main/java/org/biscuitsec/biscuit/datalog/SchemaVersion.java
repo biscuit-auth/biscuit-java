@@ -1,9 +1,9 @@
 package org.biscuitsec.biscuit.datalog;
 
+import io.vavr.control.Either;
 import org.biscuitsec.biscuit.datalog.expressions.Expression;
 import org.biscuitsec.biscuit.datalog.expressions.Op;
 import org.biscuitsec.biscuit.error.Error;
-import io.vavr.control.Either;
 import org.biscuitsec.biscuit.token.format.SerializedBiscuit;
 
 import java.util.List;
@@ -16,7 +16,10 @@ public class SchemaVersion {
     private boolean containsCheckAll;
     private boolean containsV4;
 
-    public SchemaVersion(List<Fact> facts, List<Rule> rules, List<Check> checks, List<Scope> scopes) {
+    public SchemaVersion(@SuppressWarnings("unused") List<Fact> facts,
+                         List<Rule> rules,
+                         List<Check> checks,
+                         List<Scope> scopes) {
         containsScopes = !scopes.isEmpty();
 
         if (!containsScopes) {
@@ -98,5 +101,4 @@ public class SchemaVersion {
         }
         return false;
     }
-
 }

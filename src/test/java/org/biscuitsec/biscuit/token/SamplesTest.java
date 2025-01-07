@@ -38,7 +38,7 @@ import static java.lang.Thread.currentThread;
 import static java.util.Collections.sort;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.biscuitsec.biscuit.token.Block.from_bytes;
+import static org.biscuitsec.biscuit.token.Block.fromBytes;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SamplesTest {
@@ -76,7 +76,7 @@ class SamplesTest {
 
                     Either<Throwable, Long> authorizerResult = Try.of(() -> {
                         int ignoreNumBytesRead = inputStream.read(data);
-                        Biscuit token = Biscuit.from_bytes(data, publicKey);
+                        Biscuit token = Biscuit.fromBytes(data, publicKey);
                         assertArrayEquals(token.serialize(), data);
 
                         compareBlocks(privateKey, testCase.token, token);
@@ -107,11 +107,11 @@ class SamplesTest {
     private void compareBlocks(KeyPair root, List<Block> sampleBlocks, Biscuit token) throws Error {
         assertEquals(sampleBlocks.size(), 1 + token.blocks.size());
         Option<Biscuit> sampleToken = Option.none();
-        Biscuit b = compareBlock(root, sampleToken, 0, sampleBlocks.get(0), token.authority, token.symbols);
+        Biscuit b = compareBlock(root, sampleToken, 0, sampleBlocks.get(0), token.authority, token.symbolTable);
         sampleToken = Option.some(b);
 
         for (int i = 0; i < token.blocks.size(); i++) {
-            b = compareBlock(root, sampleToken, i + 1, sampleBlocks.get(i + 1), token.blocks.get(i), token.symbols);
+            b = compareBlock(root, sampleToken, i + 1, sampleBlocks.get(i + 1), token.blocks.get(i), token.symbolTable);
             sampleToken = Option.some(b);
         }
     }
@@ -147,11 +147,11 @@ class SamplesTest {
         }
 
         out.println("generated block: ");
-        out.println(generatedSampleBlock.print(newSampleToken.symbols));
+        out.println(generatedSampleBlock.print(newSampleToken.symbolTable));
         out.println("deserialized block: ");
-        out.println(tokenBlock.print(newSampleToken.symbols));
+        out.println(tokenBlock.print(newSampleToken.symbolTable));
 
-        SymbolTable generatedBlockSymbols = newSampleToken.symbols;
+        SymbolTable generatedBlockSymbols = newSampleToken.symbolTable;
         assertEquals(generatedSampleBlock.printCode(generatedBlockSymbols), tokenBlock.printCode(tokenSymbols));
 
         /* FIXME: to generate the same sample block, we need the samples to provide the external private key
@@ -207,28 +207,28 @@ class SamplesTest {
             fact = fact.trim();
             if (!fact.isEmpty()) {
                 if (fact.startsWith("check if") || fact.startsWith("check all")) {
-                    authorizer.add_check(fact);
+                    authorizer.addCheck(fact);
                 } else if (fact.startsWith("allow if") || fact.startsWith("deny if")) {
-                    authorizer.add_policy(fact);
+                    authorizer.addPolicy(fact);
                 } else if (!fact.startsWith("revocation_id")) {
-                    authorizer.add_fact(fact);
+                    authorizer.addFact(fact);
                 }
             }
         }
-        out.println(authorizer.print_world());
+        out.println(authorizer.printWorld());
     }
 
     private void checkAuthorityBlockSerialization(Biscuit token) {
-        byte[] serBlockAuthority = token.authority.to_bytes().get();
+        byte[] serBlockAuthority = token.authority.toBytes().get();
         out.println(Arrays.toString(serBlockAuthority));
         out.println(Arrays.toString(token.serializedBiscuit.authority.block));
-        org.biscuitsec.biscuit.token.Block deserBlockAuthority = from_bytes(serBlockAuthority, token.authority.externalKey).get();
-        assertEquals(token.authority.print(token.symbols), deserBlockAuthority.print(token.symbols));
+        org.biscuitsec.biscuit.token.Block deserBlockAuthority = fromBytes(serBlockAuthority, token.authority.externalKey).get();
+        assertEquals(token.authority.print(token.symbolTable), deserBlockAuthority.print(token.symbolTable));
         assertArrayEquals(serBlockAuthority, token.serializedBiscuit.authority.block);
     }
 
     private void checkRevocationIdentifiers(Biscuit token, JsonObject validation) {
-        List<RevocationIdentifier> revocationIds = token.revocation_identifiers();
+        List<RevocationIdentifier> revocationIds = token.revocationIdentifiers();
         JsonArray validationRevocationIds = validation.getAsJsonArray("revocation_ids");
         assertEquals(revocationIds.size(), validationRevocationIds.size());
         IntStream.range(0, revocationIds.size()).forEach(idx ->
@@ -239,9 +239,9 @@ class SamplesTest {
         IntStream.range(0, token.blocks.size()).forEach(idx -> {
             org.biscuitsec.biscuit.token.Block block = token.blocks.get(idx);
             SignedBlock signedBlock = token.serializedBiscuit.blocks.get(idx);
-            byte[] serBlock = block.to_bytes().get();
-            org.biscuitsec.biscuit.token.Block deserBlock = from_bytes(serBlock, block.externalKey).get();
-            assertEquals(block.print(token.symbols), deserBlock.print(token.symbols));
+            byte[] serBlock = block.toBytes().get();
+            org.biscuitsec.biscuit.token.Block deserBlock = fromBytes(serBlock, block.externalKey).get();
+            assertEquals(block.print(token.symbolTable), deserBlock.print(token.symbolTable));
             assertArrayEquals(serBlock, signedBlock.block);
         });
     }
@@ -319,7 +319,7 @@ class SamplesTest {
                 ArrayList<Long> origin = new ArrayList<>(entry.getKey().inner);
                 sort(origin);
                 ArrayList<String> facts = entry.getValue().stream()
-                        .map(f -> authorizer.symbols.print_fact(f))
+                        .map(f -> authorizer.symbolTable.printFact(f))
                         .sorted()
                         .collect(Collectors.toCollection(ArrayList::new));
                 return new FactSet(origin, facts);
@@ -331,7 +331,7 @@ class SamplesTest {
                     if (!rules.containsKey(t._1)) {
                         rules.put(t._1, new ArrayList<>());
                     }
-                    rules.get(t._1).add(authorizer.symbols.print_rule(t._2));
+                    rules.get(t._1).add(authorizer.symbolTable.printRule(t._2));
                 }
             }
             for (Map.Entry<Long, List<String>> entry : rules.entrySet()) {

@@ -2,9 +2,7 @@ package org.biscuitsec.biscuit.token.builder;
 
 import org.biscuitsec.biscuit.datalog.SymbolTable;
 
-import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -13,9 +11,11 @@ import java.util.HashSet;
 import java.util.Objects;
 
 public abstract class Term {
-    abstract public org.biscuitsec.biscuit.datalog.Term convert(SymbolTable symbols);
-    static public Term convert_from(org.biscuitsec.biscuit.datalog.Term id, SymbolTable symbols) {
-        return id.toTerm(symbols);
+
+    public abstract org.biscuitsec.biscuit.datalog.Term convert(SymbolTable symbolTable);
+
+    static public Term convertFrom(org.biscuitsec.biscuit.datalog.Term id, SymbolTable symbolTable) {
+        return id.toTerm(symbolTable);
     }
 
     public static class Str extends Term {
@@ -26,8 +26,8 @@ public abstract class Term {
         }
 
         @Override
-        public org.biscuitsec.biscuit.datalog.Term convert(SymbolTable symbols) {
-            return new org.biscuitsec.biscuit.datalog.Term.Str(symbols.insert(this.value));
+        public org.biscuitsec.biscuit.datalog.Term convert(SymbolTable symbolTable) {
+            return new org.biscuitsec.biscuit.datalog.Term.Str(symbolTable.insert(this.value));
         }
 
         public String getValue() {
@@ -35,8 +35,8 @@ public abstract class Term {
         }
 
         @Override
-        public String toString() {
-            return "\""+value+"\"";
+        public int hashCode() {
+            return value.hashCode();
         }
 
         @Override
@@ -48,8 +48,8 @@ public abstract class Term {
         }
 
         @Override
-        public int hashCode() {
-            return value.hashCode();
+        public String toString() {
+            return "\"" + value + "\"";
         }
     }
 
@@ -61,17 +61,18 @@ public abstract class Term {
         }
 
         @Override
-        public org.biscuitsec.biscuit.datalog.Term convert(SymbolTable symbols) {
-            return new org.biscuitsec.biscuit.datalog.Term.Variable(symbols.insert(this.value));
+        public org.biscuitsec.biscuit.datalog.Term convert(SymbolTable symbolTable) {
+            return new org.biscuitsec.biscuit.datalog.Term.Variable(symbolTable.insert(this.value));
         }
 
+        @SuppressWarnings("unused")
         public String getValue() {
             return value;
         }
 
         @Override
-        public String toString() {
-            return "$"+value;
+        public int hashCode() {
+            return value.hashCode();
         }
 
         @Override
@@ -85,8 +86,8 @@ public abstract class Term {
         }
 
         @Override
-        public int hashCode() {
-            return value.hashCode();
+        public String toString() {
+            return "$" + value;
         }
     }
 
@@ -97,18 +98,18 @@ public abstract class Term {
             this.value = value;
         }
 
+        @Override
+        public org.biscuitsec.biscuit.datalog.Term convert(SymbolTable symbolTable) {
+            return new org.biscuitsec.biscuit.datalog.Term.Integer(this.value);
+        }
+
         public long getValue() {
             return value;
         }
 
         @Override
-        public org.biscuitsec.biscuit.datalog.Term convert(SymbolTable symbols) {
-            return new org.biscuitsec.biscuit.datalog.Term.Integer(this.value);
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
+        public int hashCode() {
+            return Long.hashCode(value);
         }
 
         @Override
@@ -122,8 +123,8 @@ public abstract class Term {
         }
 
         @Override
-        public int hashCode() {
-            return Long.hashCode(value);
+        public String toString() {
+            return String.valueOf(value);
         }
     }
 
@@ -135,7 +136,7 @@ public abstract class Term {
         }
 
         @Override
-        public org.biscuitsec.biscuit.datalog.Term convert(SymbolTable symbols) {
+        public org.biscuitsec.biscuit.datalog.Term convert(SymbolTable symbolTable) {
             return new org.biscuitsec.biscuit.datalog.Term.Bytes(this.value);
         }
 
@@ -144,8 +145,8 @@ public abstract class Term {
         }
 
         @Override
-        public String toString() {
-            return "hex:" + Utils.byteArrayToHexString(value).toLowerCase();
+        public int hashCode() {
+            return Arrays.hashCode(value);
         }
 
         @Override
@@ -159,8 +160,8 @@ public abstract class Term {
         }
 
         @Override
-        public int hashCode() {
-            return Arrays.hashCode(value);
+        public String toString() {
+            return "hex:" + Utils.byteArrayToHexString(value).toLowerCase();
         }
     }
 
@@ -172,18 +173,18 @@ public abstract class Term {
         }
 
         @Override
-        public org.biscuitsec.biscuit.datalog.Term convert(SymbolTable symbols) {
+        public org.biscuitsec.biscuit.datalog.Term convert(SymbolTable symbolTable) {
             return new org.biscuitsec.biscuit.datalog.Term.Date(this.value);
         }
 
+        @SuppressWarnings("unused")
         public long getValue() {
             return value;
         }
 
         @Override
-        public String toString() {
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_INSTANT;
-            return Instant.ofEpochSecond(value).atOffset(ZoneOffset.ofTotalSeconds(0)).format(dateTimeFormatter);
+        public int hashCode() {
+            return Long.hashCode(value);
         }
 
         @Override
@@ -197,8 +198,9 @@ public abstract class Term {
         }
 
         @Override
-        public int hashCode() {
-            return Long.hashCode(value);
+        public String toString() {
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_INSTANT;
+            return Instant.ofEpochSecond(value).atOffset(ZoneOffset.ofTotalSeconds(0)).format(dateTimeFormatter);
         }
     }
 
@@ -210,7 +212,7 @@ public abstract class Term {
         }
 
         @Override
-        public org.biscuitsec.biscuit.datalog.Term convert(SymbolTable symbols) {
+        public org.biscuitsec.biscuit.datalog.Term convert(SymbolTable symbolTable) {
             return new org.biscuitsec.biscuit.datalog.Term.Bool(this.value);
         }
 
@@ -219,12 +221,8 @@ public abstract class Term {
         }
 
         @Override
-        public String toString() {
-            if(value) {
-                return "true";
-            } else {
-                return "false";
-            }
+        public int hashCode() {
+            return Boolean.hashCode(value);
         }
 
         @Override
@@ -238,8 +236,12 @@ public abstract class Term {
         }
 
         @Override
-        public int hashCode() {
-            return Boolean.hashCode(value);
+        public String toString() {
+            if (value) {
+                return "true";
+            } else {
+                return "false";
+            }
         }
     }
 
@@ -251,11 +253,11 @@ public abstract class Term {
         }
 
         @Override
-        public org.biscuitsec.biscuit.datalog.Term convert(SymbolTable symbols) {
+        public org.biscuitsec.biscuit.datalog.Term convert(SymbolTable symbolTable) {
             HashSet<org.biscuitsec.biscuit.datalog.Term> s = new HashSet<>();
 
-            for(Term t: this.value) {
-                s.add(t.convert(symbols));
+            for (Term t : this.value) {
+                s.add(t.convert(symbolTable));
             }
 
             return new org.biscuitsec.biscuit.datalog.Term.Set(s);
@@ -266,8 +268,8 @@ public abstract class Term {
         }
 
         @Override
-        public String toString() {
-            return value.toString();
+        public int hashCode() {
+            return value != null ? value.hashCode() : 0;
         }
 
         @Override
@@ -281,8 +283,8 @@ public abstract class Term {
         }
 
         @Override
-        public int hashCode() {
-            return value != null ? value.hashCode() : 0;
+        public String toString() {
+            return value.toString();
         }
     }
 }

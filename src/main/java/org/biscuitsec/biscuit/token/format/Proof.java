@@ -1,7 +1,7 @@
 package org.biscuitsec.biscuit.token.format;
 
-import org.biscuitsec.biscuit.crypto.KeyPair;
 import io.vavr.control.Option;
+import org.biscuitsec.biscuit.crypto.KeyPair;
 
 public class Proof {
     public Option<KeyPair> secretKey;

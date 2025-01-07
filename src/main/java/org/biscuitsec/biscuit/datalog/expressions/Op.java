@@ -1,37 +1,38 @@
 package org.biscuitsec.biscuit.datalog.expressions;
 
 import biscuit.format.schema.Schema;
-import org.biscuitsec.biscuit.datalog.TemporarySymbolTable;
-import org.biscuitsec.biscuit.datalog.Term;
-import org.biscuitsec.biscuit.datalog.SymbolTable;
-import org.biscuitsec.biscuit.error.Error;
 import com.google.re2j.Matcher;
 import com.google.re2j.Pattern;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
+import org.biscuitsec.biscuit.datalog.SymbolTable;
+import org.biscuitsec.biscuit.datalog.TemporarySymbolTable;
+import org.biscuitsec.biscuit.datalog.Term;
+import org.biscuitsec.biscuit.error.Error;
+import org.biscuitsec.biscuit.error.Error.FormatError.DeserializationError;
 
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public abstract class Op {
-    public abstract void evaluate(Deque<Term> stack, Map<Long, Term> variables, TemporarySymbolTable symbols) throws Error.Execution;
+    public abstract void evaluate(Deque<Term> stack, Map<Long, Term> variables, TemporarySymbolTable tmpSymbolTable) throws Error.Execution;
 
-    public abstract String print(Deque<String> stack, SymbolTable symbols);
+    public abstract String print(Deque<String> stack, SymbolTable symbolTable);
 
     public abstract Schema.Op serialize();
 
     static public Either<Error.FormatError, Op> deserializeV2(Schema.Op op) {
         if (op.hasValue()) {
-            return Term.deserialize_enumV2(op.getValue()).map(v -> new Op.Value(v));
+            return Term.deserializeEnumV2(op.getValue()).map(Value::new);
         } else if (op.hasUnary()) {
             return Op.Unary.deserializeV2(op.getUnary());
         } else if (op.hasBinary()) {
             return Op.Binary.deserializeV1(op.getBinary());
         } else {
-            return Left(new Error.FormatError.DeserializationError("invalid unary operation"));
+            return Left(new DeserializationError("invalid unary operation"));
         }
     }
 
@@ -47,14 +48,16 @@ public abstract class Op {
         }
 
         @Override
-        public void evaluate(Deque<Term> stack, Map<Long, Term> variables, TemporarySymbolTable symbols) throws Error.Execution {
+        public void evaluate(Deque<Term> stack,
+                             Map<Long, Term> variables,
+                             TemporarySymbolTable tmpSymbolTable) throws Error.Execution {
             if (value instanceof Term.Variable) {
                 Term.Variable var = (Term.Variable) value;
                 Term valueVar = variables.get(var.value());
                 if (valueVar != null) {
                     stack.push(valueVar);
                 } else {
-                    throw new Error.Execution( "cannot find a variable for index "+value);
+                    throw new Error.Execution("cannot find a variable for index " + value);
                 }
             } else {
                 stack.push(value);
@@ -63,8 +66,8 @@ public abstract class Op {
         }
 
         @Override
-        public String print(Deque<String> stack, SymbolTable symbols) {
-            String s = symbols.print_term(value);
+        public String print(Deque<String> stack, SymbolTable symbolTable) {
+            String s = symbolTable.printTerm(value);
             stack.push(s);
             return s;
         }
@@ -100,9 +103,9 @@ public abstract class Op {
     }
 
     public enum UnaryOp {
-        Negate,
-        Parens,
-        Length,
+        NEGATE,
+        PARENS,
+        LENGTH,
     }
 
     public final static class Unary extends Op {
@@ -117,10 +120,12 @@ public abstract class Op {
         }
 
         @Override
-        public void evaluate(Deque<Term> stack, Map<Long, Term> variables, TemporarySymbolTable symbols) throws Error.Execution {
+        public void evaluate(Deque<Term> stack,
+                             Map<Long, Term> variables,
+                             TemporarySymbolTable tmpSymbolTable) throws Error.Execution {
             Term value = stack.pop();
             switch (this.op) {
-                case Negate:
+                case NEGATE:
                     if (value instanceof Term.Bool) {
                         Term.Bool b = (Term.Bool) value;
                         stack.push(new Term.Bool(!b.value()));
@@ -128,20 +133,16 @@ public abstract class Op {
                         throw new Error.Execution("invalid type for negate op, expected boolean");
                     }
                     break;
-                case Parens:
+                case PARENS:
                     stack.push(value);
                     break;
-                case Length:
+                case LENGTH:
                     if (value instanceof Term.Str) {
-                        Option<String> s = symbols.get_s((int)((Term.Str) value).value());
-                        if(s.isEmpty()) {
-                            throw new Error.Execution("string not found in symbols for id"+value);
+                        Option<String> s = tmpSymbolTable.getS((int) ((Term.Str) value).value());
+                        if (s.isEmpty()) {
+                            throw new Error.Execution("string not found in symbols for id" + value);
                         } else {
-                            try {
-                                stack.push(new Term.Integer(s.get().getBytes("UTF-8").length));
-                            } catch (UnsupportedEncodingException e) {
-                                throw new Error.Execution("cannot calculate string length: "+e.toString());
-                            }
+                            stack.push(new Term.Integer(s.get().getBytes(UTF_8).length));
                         }
                     } else if (value instanceof Term.Bytes) {
                         stack.push(new Term.Integer(((Term.Bytes) value).value().length));
@@ -154,24 +155,24 @@ public abstract class Op {
         }
 
         @Override
-        public String print(Deque<String> stack, SymbolTable symbols) {
+        public String print(Deque<String> stack, SymbolTable symbolTable) {
             String prec = stack.pop();
-            String _s = "";
+            String s = "";
             switch (this.op) {
-                case Negate:
-                    _s = "!" + prec;
-                    stack.push(_s);
+                case NEGATE:
+                    s = "!" + prec;
+                    stack.push(s);
                     break;
-                case Parens:
-                    _s = "(" + prec + ")";
-                    stack.push(_s);
+                case PARENS:
+                    s = "(" + prec + ")";
+                    stack.push(s);
                     break;
-                case Length:
-                    _s = prec+".length()";
-                    stack.push(_s);
+                case LENGTH:
+                    s = prec + ".length()";
+                    stack.push(s);
                     break;
             }
-            return _s;
+            return s;
         }
 
         @Override
@@ -181,13 +182,13 @@ public abstract class Op {
             Schema.OpUnary.Builder b1 = Schema.OpUnary.newBuilder();
 
             switch (this.op) {
-                case Negate:
+                case NEGATE:
                     b1.setKind(Schema.OpUnary.Kind.Negate);
                     break;
-                case Parens:
+                case PARENS:
                     b1.setKind(Schema.OpUnary.Kind.Parens);
                     break;
-                case Length:
+                case LENGTH:
                     b1.setKind(Schema.OpUnary.Kind.Length);
                     break;
             }
@@ -199,20 +200,21 @@ public abstract class Op {
 
         static public Either<Error.FormatError, Op> deserializeV2(Schema.OpUnary op) {
             switch (op.getKind()) {
+                // TODO Java based protobuf enums should be made ALL_CAPS.
                 case Negate:
-                    return Right(new Op.Unary(UnaryOp.Negate));
+                    return Right(new Op.Unary(UnaryOp.NEGATE));
                 case Parens:
-                    return Right(new Op.Unary(UnaryOp.Parens));
+                    return Right(new Op.Unary(UnaryOp.PARENS));
                 case Length:
-                    return Right(new Op.Unary(UnaryOp.Length));
+                    return Right(new Op.Unary(UnaryOp.LENGTH));
             }
 
-            return Left(new Error.FormatError.DeserializationError("invalid unary operation"));
+            return Left(new DeserializationError("invalid unary operation"));
         }
 
         @Override
         public String toString() {
-            return "Unary."+op;
+            return "Unary." + op;
         }
 
         @Override
@@ -231,6 +233,10 @@ public abstract class Op {
         }
     }
 
+    // TODO In Java, enum declarations should be ALL_CAPS (snake_case to separate words).
+    //  E.g., LESS_THAN, GREATER_THAN, BITWISE_AND, BITWISE_XOR, etc.
+    //  Also, Protobuf Enums should also be declared using PascalCase, i.e, CAPITALS_WITH_UNDERSCORES.
+    //  See the protobuf reference:   https://protobuf.dev/programming-guides/style/#enums
     public enum BinaryOp {
         LessThan,
         GreaterThan,
@@ -267,7 +273,9 @@ public abstract class Op {
         }
 
         @Override
-        public void evaluate(Deque<Term> stack, Map<Long, Term> variables, TemporarySymbolTable symbols) throws Error.Execution {
+        public void evaluate(Deque<Term> stack,
+                             Map<Long, Term> variables,
+                             TemporarySymbolTable tmpSymbolTable) throws Error.Execution {
             Term right = stack.pop();
             Term left = stack.pop();
 
@@ -323,7 +331,7 @@ public abstract class Op {
                     if (right instanceof Term.Set && left instanceof Term.Set) {
                         Set<Term> leftSet = ((Term.Set) left).value();
                         Set<Term> rightSet = ((Term.Set) right).value();
-                        stack.push(new Term.Bool( leftSet.size() == rightSet.size() && leftSet.containsAll(rightSet)));
+                        stack.push(new Term.Bool(leftSet.size() == rightSet.size() && leftSet.containsAll(rightSet)));
                     }
                     break;
                 case NotEqual:
@@ -345,7 +353,7 @@ public abstract class Op {
                     if (right instanceof Term.Set && left instanceof Term.Set) {
                         Set<Term> leftSet = ((Term.Set) left).value();
                         Set<Term> rightSet = ((Term.Set) right).value();
-                        stack.push(new Term.Bool( leftSet.size() != rightSet.size() || !leftSet.containsAll(rightSet)));
+                        stack.push(new Term.Bool(leftSet.size() != rightSet.size() || !leftSet.containsAll(rightSet)));
                     }
                     break;
                 case Contains:
@@ -364,14 +372,14 @@ public abstract class Op {
                         stack.push(new Term.Bool(leftSet.containsAll(rightSet)));
                     }
                     if (left instanceof Term.Str && right instanceof Term.Str) {
-                        Option<String> left_s = symbols.get_s((int)((Term.Str) left).value());
-                        Option<String> right_s = symbols.get_s((int)((Term.Str) right).value());
+                        Option<String> left_s = tmpSymbolTable.getS((int) ((Term.Str) left).value());
+                        Option<String> right_s = tmpSymbolTable.getS((int) ((Term.Str) right).value());
 
-                        if(left_s.isEmpty()) {
-                            throw new Error.Execution("cannot find string in symbols for index "+((Term.Str) left).value());
+                        if (left_s.isEmpty()) {
+                            throw new Error.Execution("cannot find string in symbols for index " + ((Term.Str) left).value());
                         }
-                        if(right_s.isEmpty()) {
-                            throw new Error.Execution("cannot find string in symbols for index "+((Term.Str) right).value());
+                        if (right_s.isEmpty()) {
+                            throw new Error.Execution("cannot find string in symbols for index " + ((Term.Str) right).value());
                         }
 
 
@@ -380,44 +388,44 @@ public abstract class Op {
                     break;
                 case Prefix:
                     if (right instanceof Term.Str && left instanceof Term.Str) {
-                        Option<String> left_s = symbols.get_s((int)((Term.Str) left).value());
-                        Option<String> right_s = symbols.get_s((int)((Term.Str) right).value());
-                        if(left_s.isEmpty()) {
-                            throw new Error.Execution("cannot find string in symbols for index "+((Term.Str) left).value());
+                        Option<String> leftS = tmpSymbolTable.getS((int) ((Term.Str) left).value());
+                        Option<String> rightS = tmpSymbolTable.getS((int) ((Term.Str) right).value());
+                        if (leftS.isEmpty()) {
+                            throw new Error.Execution("cannot find string in symbols for index " + ((Term.Str) left).value());
                         }
-                        if(right_s.isEmpty()) {
-                            throw new Error.Execution("cannot find string in symbols for index "+((Term.Str) right).value());
+                        if (rightS.isEmpty()) {
+                            throw new Error.Execution("cannot find string in symbols for index " + ((Term.Str) right).value());
                         }
 
-                        stack.push(new Term.Bool(left_s.get().startsWith(right_s.get())));
+                        stack.push(new Term.Bool(leftS.get().startsWith(rightS.get())));
                     }
                     break;
                 case Suffix:
                     if (right instanceof Term.Str && left instanceof Term.Str) {
-                        Option<String> left_s = symbols.get_s((int)((Term.Str) left).value());
-                        Option<String> right_s = symbols.get_s((int)((Term.Str) right).value());
-                        if(left_s.isEmpty()) {
-                            throw new Error.Execution("cannot find string in symbols for index "+((Term.Str) left).value());
+                        Option<String> leftS = tmpSymbolTable.getS((int) ((Term.Str) left).value());
+                        Option<String> rightS = tmpSymbolTable.getS((int) ((Term.Str) right).value());
+                        if (leftS.isEmpty()) {
+                            throw new Error.Execution("cannot find string in symbols for index " + ((Term.Str) left).value());
                         }
-                        if(right_s.isEmpty()) {
-                            throw new Error.Execution("cannot find string in symbols for index "+((Term.Str) right).value());
+                        if (rightS.isEmpty()) {
+                            throw new Error.Execution("cannot find string in symbols for index " + ((Term.Str) right).value());
                         }
-                        stack.push(new Term.Bool(left_s.get().endsWith(right_s.get())));
+                        stack.push(new Term.Bool(leftS.get().endsWith(rightS.get())));
                     }
                     break;
                 case Regex:
                     if (right instanceof Term.Str && left instanceof Term.Str) {
-                        Option<String> left_s = symbols.get_s((int)((Term.Str) left).value());
-                        Option<String> right_s = symbols.get_s((int)((Term.Str) right).value());
-                        if(left_s.isEmpty()) {
-                            throw new Error.Execution("cannot find string in symbols for index "+((Term.Str) left).value());
+                        Option<String> leftS = tmpSymbolTable.getS((int) ((Term.Str) left).value());
+                        Option<String> rightS = tmpSymbolTable.getS((int) ((Term.Str) right).value());
+                        if (leftS.isEmpty()) {
+                            throw new Error.Execution("cannot find string in symbols for index " + ((Term.Str) left).value());
                         }
-                        if(right_s.isEmpty()) {
-                            throw new Error.Execution("cannot find string in symbols for index "+((Term.Str) right).value());
+                        if (rightS.isEmpty()) {
+                            throw new Error.Execution("cannot find string in symbols for index " + ((Term.Str) right).value());
                         }
 
-                        Pattern p = Pattern.compile(right_s.get());
-                        Matcher m = p.matcher(left_s.get());
+                        Pattern p = Pattern.compile(rightS.get());
+                        Matcher m = p.matcher(leftS.get());
                         stack.push(new Term.Bool(m.find()));
                     }
                     break;
@@ -432,18 +440,18 @@ public abstract class Op {
                         }
                     }
                     if (right instanceof Term.Str && left instanceof Term.Str) {
-                        Option<String> left_s = symbols.get_s((int)((Term.Str) left).value());
-                        Option<String> right_s = symbols.get_s((int)((Term.Str) right).value());
+                        Option<String> leftS = tmpSymbolTable.getS((int) ((Term.Str) left).value());
+                        Option<String> rightS = tmpSymbolTable.getS((int) ((Term.Str) right).value());
 
-                        if(left_s.isEmpty()) {
-                            throw new Error.Execution("cannot find string in symbols for index "+((Term.Str) left).value());
+                        if (leftS.isEmpty()) {
+                            throw new Error.Execution("cannot find string in symbols for index " + ((Term.Str) left).value());
                         }
-                        if(right_s.isEmpty()) {
-                            throw new Error.Execution("cannot find string in symbols for index "+((Term.Str) right).value());
+                        if (rightS.isEmpty()) {
+                            throw new Error.Execution("cannot find string in symbols for index " + ((Term.Str) right).value());
                         }
 
-                        String concatenation = left_s.get() + right_s.get();
-                        long index = symbols.insert(concatenation);
+                        String concatenation = leftS.get() + rightS.get();
+                        long index = tmpSymbolTable.insert(concatenation);
                         stack.push(new Term.Str(index));
                     }
                     break;
@@ -489,7 +497,7 @@ public abstract class Op {
                     break;
                 case Intersection:
                     if (right instanceof Term.Set && left instanceof Term.Set) {
-                        HashSet<Term> intersec = new HashSet<Term>();
+                        HashSet<Term> intersec = new HashSet<>();
                         HashSet<Term> _right = ((Term.Set) right).value();
                         HashSet<Term> _left = ((Term.Set) left).value();
                         for (Term _id : _right) {
@@ -502,7 +510,7 @@ public abstract class Op {
                     break;
                 case Union:
                     if (right instanceof Term.Set && left instanceof Term.Set) {
-                        HashSet<Term> union = new HashSet<Term>();
+                        HashSet<Term> union = new HashSet<>();
                         HashSet<Term> _right = ((Term.Set) right).value();
                         HashSet<Term> _left = ((Term.Set) left).value();
                         union.addAll(_right);
@@ -532,103 +540,103 @@ public abstract class Op {
                     }
                     break;
                 default:
-                    throw new Error.Execution("binary exec error for op"+this);
+                    throw new Error.Execution("binary exec error for op" + this);
             }
         }
 
         @Override
-        public String print(Deque<String> stack, SymbolTable symbols) {
+        public String print(Deque<String> stack, SymbolTable symbolTable) {
             String right = stack.pop();
             String left = stack.pop();
-            String _s = "";
+            String s = "";
             switch (this.op) {
                 case LessThan:
-                    _s = left + " < " + right;
-                    stack.push(_s);
+                    s = left + " < " + right;
+                    stack.push(s);
                     break;
                 case GreaterThan:
-                    _s = left + " > " + right;
-                    stack.push(_s);
+                    s = left + " > " + right;
+                    stack.push(s);
                     break;
                 case LessOrEqual:
-                    _s = left + " <= " + right;
-                    stack.push(_s);
+                    s = left + " <= " + right;
+                    stack.push(s);
                     break;
                 case GreaterOrEqual:
-                    _s = left + " >= " + right;
-                    stack.push(_s);
+                    s = left + " >= " + right;
+                    stack.push(s);
                     break;
                 case Equal:
-                    _s = left + " == " + right;
-                    stack.push(_s);
+                    s = left + " == " + right;
+                    stack.push(s);
                     break;
                 case NotEqual:
-                    _s = left + " != " + right;
-                    stack.push(_s);
+                    s = left + " != " + right;
+                    stack.push(s);
                     break;
                 case Contains:
-                    _s = left + ".contains(" + right + ")";
-                    stack.push(_s);
+                    s = left + ".contains(" + right + ")";
+                    stack.push(s);
                     break;
                 case Prefix:
-                    _s = left + ".starts_with(" + right + ")";
-                    stack.push(_s);
+                    s = left + ".starts_with(" + right + ")";
+                    stack.push(s);
                     break;
                 case Suffix:
-                    _s = left + ".ends_with(" + right + ")";
-                    stack.push(_s);
+                    s = left + ".ends_with(" + right + ")";
+                    stack.push(s);
                     break;
                 case Regex:
-                    _s = left + ".matches(" + right + ")";
-                    stack.push(_s);
+                    s = left + ".matches(" + right + ")";
+                    stack.push(s);
                     break;
                 case Add:
-                    _s = left + " + " + right;
-                    stack.push(_s);
+                    s = left + " + " + right;
+                    stack.push(s);
                     break;
                 case Sub:
-                    _s = left + " - " + right;
-                    stack.push(_s);
+                    s = left + " - " + right;
+                    stack.push(s);
                     break;
                 case Mul:
-                    _s = left + " * " + right;
-                    stack.push(_s);
+                    s = left + " * " + right;
+                    stack.push(s);
                     break;
                 case Div:
-                    _s = left + " / " + right;
-                    stack.push(_s);
+                    s = left + " / " + right;
+                    stack.push(s);
                     break;
                 case And:
-                    _s = left + " && " + right;
-                    stack.push(_s);
+                    s = left + " && " + right;
+                    stack.push(s);
                     break;
                 case Or:
-                    _s = left + " || " + right;
-                    stack.push(_s);
+                    s = left + " || " + right;
+                    stack.push(s);
                     break;
                 case Intersection:
-                    _s = left + ".intersection("+right+")";
-                    stack.push(_s);
+                    s = left + ".intersection(" + right + ")";
+                    stack.push(s);
                     break;
                 case Union:
-                    _s = left + ".union("+right+")";
-                    stack.push(_s);
+                    s = left + ".union(" + right + ")";
+                    stack.push(s);
                     break;
                 case BitwiseAnd:
-                    _s = left + " & " + right;
-                    stack.push(_s);
+                    s = left + " & " + right;
+                    stack.push(s);
                     break;
                 case BitwiseOr:
-                    _s = left + " | " + right;
-                    stack.push(_s);
+                    s = left + " | " + right;
+                    stack.push(s);
                     break;
                 case BitwiseXor:
-                    _s = left + " ^ " + right;
-                    stack.push(_s);
+                    s = left + " ^ " + right;
+                    stack.push(s);
                     break;
             }
 
-            return _s;
+            return s;
         }
 
         @Override
@@ -754,12 +762,12 @@ public abstract class Op {
                     return Right(new Op.Binary(BinaryOp.BitwiseXor));
             }
 
-            return Left(new Error.FormatError.DeserializationError("invalid binary operation: "+op.getKind()));
+            return Left(new DeserializationError("invalid binary operation: " + op.getKind()));
         }
 
         @Override
         public String toString() {
-            return "Binary."+ op;
+            return "Binary." + op;
         }
 
         @Override

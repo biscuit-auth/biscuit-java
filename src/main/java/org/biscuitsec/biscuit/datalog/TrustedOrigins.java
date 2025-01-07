@@ -25,6 +25,7 @@ public class TrustedOrigins {
         this.inner = inner;
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     public TrustedOrigins clone() {
         return new TrustedOrigins(this.inner.clone());
     }

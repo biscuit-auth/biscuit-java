@@ -4,10 +4,13 @@ package org.biscuitsec.biscuit.crypto;
 import biscuit.format.schema.Schema;
 import biscuit.format.schema.Schema.PublicKey.Algorithm;
 import net.i2p.crypto.eddsa.EdDSAEngine;
-import org.biscuitsec.biscuit.token.builder.Utils;
 import net.i2p.crypto.eddsa.EdDSAPrivateKey;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
-import net.i2p.crypto.eddsa.spec.*;
+import net.i2p.crypto.eddsa.spec.EdDSANamedCurveSpec;
+import net.i2p.crypto.eddsa.spec.EdDSANamedCurveTable;
+import net.i2p.crypto.eddsa.spec.EdDSAPrivateKeySpec;
+import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
+import org.biscuitsec.biscuit.token.builder.Utils;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -18,12 +21,9 @@ import java.security.Signature;
  * Private and public key
  */
 public final class KeyPair {
-    public final EdDSAPrivateKey private_key;
-    public final EdDSAPublicKey public_key;
+    public final EdDSAPrivateKey privateKey;
+    public final EdDSAPublicKey publicKey;
 
-    private static final int ED25519_PUBLIC_KEYSIZE = 32;
-    private static final int ED25519_PRIVATE_KEYSIZE = 64;
-    private static final int ED25519_SEED_SIZE = 32;
     public static final EdDSANamedCurveSpec ed25519 = EdDSANamedCurveTable.getByName(EdDSANamedCurveTable.ED_25519);
 
     public KeyPair() {
@@ -40,8 +40,8 @@ public final class KeyPair {
         EdDSAPublicKeySpec pubKeySpec = new EdDSAPublicKeySpec(privKey.getA(), ed25519);
         EdDSAPublicKey pubKey = new EdDSAPublicKey(pubKeySpec);
 
-        this.private_key = privKey;
-        this.public_key = pubKey;
+        this.privateKey = privKey;
+        this.publicKey = pubKey;
     }
 
     public static KeyPair generate(Algorithm algorithm) {
@@ -65,7 +65,7 @@ public final class KeyPair {
     }
 
     public byte[] toBytes() {
-        return this.private_key.getSeed();
+        return this.privateKey.getSeed();
     }
 
     public KeyPair(byte[] b) {
@@ -75,8 +75,8 @@ public final class KeyPair {
         EdDSAPublicKeySpec pubKeySpec = new EdDSAPublicKeySpec(privKey.getA(), ed25519);
         EdDSAPublicKey pubKey = new EdDSAPublicKey(pubKeySpec);
 
-        this.private_key = privKey;
-        this.public_key = pubKey;
+        this.privateKey = privKey;
+        this.publicKey = pubKey;
     }
 
     public String toHex() {
@@ -92,15 +92,15 @@ public final class KeyPair {
         EdDSAPublicKeySpec pubKeySpec = new EdDSAPublicKeySpec(privKey.getA(), ed25519);
         EdDSAPublicKey pubKey = new EdDSAPublicKey(pubKeySpec);
 
-        this.private_key = privKey;
-        this.public_key = pubKey;
+        this.privateKey = privKey;
+        this.publicKey = pubKey;
     }
 
     public static Signature getSignature() throws NoSuchAlgorithmException {
         return new EdDSAEngine(MessageDigest.getInstance(ed25519.getHashAlgorithm()));
     }
 
-    public PublicKey public_key() {
-        return new PublicKey(Schema.PublicKey.Algorithm.Ed25519, this.public_key);
+    public PublicKey publicKey() {
+        return new PublicKey(Schema.PublicKey.Algorithm.Ed25519, this.publicKey);
     }
 }

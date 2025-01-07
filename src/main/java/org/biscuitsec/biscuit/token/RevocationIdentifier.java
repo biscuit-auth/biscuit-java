@@ -13,18 +13,22 @@ public class RevocationIdentifier {
 
     /**
      * Creates a RevocationIdentifier from base64 url (RFC4648_URLSAFE)
+     *
      * @param b64url serialized revocation identifier
      * @return RevocationIdentifier
      */
-    public static RevocationIdentifier from_b64url(String b64url) {
+    @SuppressWarnings("unused")
+    public static RevocationIdentifier fromB64Url(String b64url) {
         return new RevocationIdentifier(Base64.getDecoder().decode(b64url));
     }
 
     /**
      * Serializes a revocation identifier as base64 url (RFC4648_URLSAFE)
+     *
      * @return String
      */
-    public String serialize_b64url() {
+    @SuppressWarnings("unused")
+    public String serializeB64Url() {
         return Base64.getEncoder().encodeToString(this.bytes);
     }
 
@@ -32,10 +36,11 @@ public class RevocationIdentifier {
         return Utils.byteArrayToHexString(this.bytes).toLowerCase();
     }
 
-    public static RevocationIdentifier from_bytes(byte[] bytes) {
+    public static RevocationIdentifier fromBytes(byte[] bytes) {
         return new RevocationIdentifier(bytes);
     }
 
+    @SuppressWarnings("unused")
     public byte[] getBytes() {
         return this.bytes;
     }
