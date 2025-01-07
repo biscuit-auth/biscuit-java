@@ -55,7 +55,7 @@ public class ThirdPartyBlockRequest {
         return Either.right(new ThirdPartyBlockContents(serializedBlock, signature, publicKey));
     }
 
-    public Schema.ThirdPartyBlockRequest serialize() throws Error.FormatError.SerializationError {
+    public Schema.ThirdPartyBlockRequest serialize() {
         Schema.ThirdPartyBlockRequest.Builder b = Schema.ThirdPartyBlockRequest.newBuilder();
         b.setPreviousKey(this.previousKey.serialize());
 
