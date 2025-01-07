@@ -12,9 +12,9 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class ThirdPartyBlockContents {
-    byte[] payload;
-    byte[] signature;
-    PublicKey publicKey;
+    final byte[] payload;
+    final byte[] signature;
+    final PublicKey publicKey;
 
     ThirdPartyBlockContents(byte[] payload, byte[] signature, PublicKey publicKey) {
         this.payload = payload;
