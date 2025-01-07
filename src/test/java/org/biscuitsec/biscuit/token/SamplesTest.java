@@ -219,7 +219,7 @@ class SamplesTest {
     }
 
     private void checkAuthorityBlockSerialization(Biscuit token) {
-        byte[] serBlockAuthority = token.authority.to_bytes().get();
+        byte[] serBlockAuthority = token.authority.toBytes().get();
         out.println(Arrays.toString(serBlockAuthority));
         out.println(Arrays.toString(token.serializedBiscuit.authority.block));
         org.biscuitsec.biscuit.token.Block deserBlockAuthority = fromBytes(serBlockAuthority, token.authority.externalKey).get();
@@ -239,7 +239,7 @@ class SamplesTest {
         IntStream.range(0, token.blocks.size()).forEach(idx -> {
             org.biscuitsec.biscuit.token.Block block = token.blocks.get(idx);
             SignedBlock signedBlock = token.serializedBiscuit.blocks.get(idx);
-            byte[] serBlock = block.to_bytes().get();
+            byte[] serBlock = block.toBytes().get();
             org.biscuitsec.biscuit.token.Block deserBlock = fromBytes(serBlock, block.externalKey).get();
             assertEquals(block.print(token.symbolTable), deserBlock.print(token.symbolTable));
             assertArrayEquals(serBlock, signedBlock.block);
