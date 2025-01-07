@@ -49,14 +49,14 @@ public class Fact implements Cloneable {
         return this;
     }
 
-    public org.biscuitsec.biscuit.datalog.Fact convert(SymbolTable symbols) {
+    public org.biscuitsec.biscuit.datalog.Fact convert(SymbolTable symbolTable) {
         Fact f = this.clone();
         f.applyVariables();
-        return new org.biscuitsec.biscuit.datalog.Fact(f.predicate.convert(symbols));
+        return new org.biscuitsec.biscuit.datalog.Fact(f.predicate.convert(symbolTable));
     }
 
-    public static Fact convertFrom(org.biscuitsec.biscuit.datalog.Fact f, SymbolTable symbols) {
-        return new Fact(Predicate.convertFrom(f.predicate(), symbols));
+    public static Fact convertFrom(org.biscuitsec.biscuit.datalog.Fact f, SymbolTable symbolTable) {
+        return new Fact(Predicate.convertFrom(f.predicate(), symbolTable));
     }
 
     @Override

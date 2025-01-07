@@ -8,13 +8,13 @@ import java.util.List;
 import static org.biscuitsec.biscuit.datalog.SymbolTable.DEFAULT_SYMBOLS_OFFSET;
 
 public class TemporarySymbolTable {
-    final SymbolTable base;
+    final SymbolTable baseSymbolTable;
     final int offset;
     final List<String> symbols;
 
-    public TemporarySymbolTable(SymbolTable base) {
-        this.offset = DEFAULT_SYMBOLS_OFFSET + base.currentOffset();
-        this.base = base;
+    public TemporarySymbolTable(SymbolTable baseSymbolTable) {
+        this.offset = DEFAULT_SYMBOLS_OFFSET + baseSymbolTable.currentOffset();
+        this.baseSymbolTable = baseSymbolTable;
         this.symbols = new ArrayList<>();
     }
 
@@ -26,12 +26,12 @@ public class TemporarySymbolTable {
                 return Option.none();
             }
         } else {
-            return this.base.getS(i);
+            return this.baseSymbolTable.getS(i);
         }
     }
 
     public long insert(final String symbol) {
-        Option<Long> opt = this.base.get(symbol);
+        Option<Long> opt = this.baseSymbolTable.get(symbol);
         if (opt.isDefined()) {
             return opt.get();
         }

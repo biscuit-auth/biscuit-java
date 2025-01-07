@@ -56,10 +56,10 @@ public final class Rule implements Serializable {
 
     @SuppressWarnings("unchecked")
     public Stream<Either<Error, Tuple2<Origin, Fact>>> apply(
-            final Supplier<Stream<Tuple2<Origin, Fact>>> factsSupplier, Long ruleOrigin, SymbolTable symbols) {
+            final Supplier<Stream<Tuple2<Origin, Fact>>> factsSupplier, Long ruleOrigin, SymbolTable symbolTable) {
         MatchedVariables variables = variablesSet();
 
-        Combinator combinator = new Combinator(variables, this.body, factsSupplier, symbols);
+        Combinator combinator = new Combinator(variables, this.body, factsSupplier, symbolTable);
         Spliterator<Tuple2<Origin, Map<Long, Term>>> splitItr = Spliterators
                 .spliteratorUnknownSize(combinator, Spliterator.ORDERED);
         Stream<Tuple2<Origin, Map<Long, Term>>> stream = StreamSupport.stream(splitItr, false);
@@ -68,10 +68,10 @@ public final class Rule implements Serializable {
         return stream.map(t -> {
                     Origin origin = t._1;
                     Map<Long, Term> generatedVariables = t._2;
-                    TemporarySymbolTable temporarySymbols = new TemporarySymbolTable(symbols);
+                    TemporarySymbolTable tmpSymbolTable = new TemporarySymbolTable(symbolTable);
                     for (Expression e : this.expressions) {
                         try {
-                            Term term = e.evaluate(generatedVariables, temporarySymbols);
+                            Term term = e.evaluate(generatedVariables, tmpSymbolTable);
 
                             if (term instanceof Term.Bool) {
                                 Term.Bool b = (Term.Bool) term;
@@ -123,16 +123,16 @@ public final class Rule implements Serializable {
     }
 
     // do not produce new facts, only find one matching set of facts
-    public boolean findMatch(final FactSet facts, Long origin, TrustedOrigins scope, SymbolTable symbols) throws Error {
+    public boolean findMatch(final FactSet facts, Long origin, TrustedOrigins scope, SymbolTable symbolTable) throws Error {
         MatchedVariables variables = variablesSet();
 
         if (this.body.isEmpty()) {
-            return variables.check_expressions(this.expressions, symbols).isDefined();
+            return variables.check_expressions(this.expressions, symbolTable).isDefined();
         }
 
         @SuppressWarnings("unchecked")
         Supplier<Stream<Tuple2<Origin, Fact>>> factsSupplier = () -> facts.stream(scope);
-        Stream<Either<Error, Tuple2<Origin, Fact>>> stream = this.apply(factsSupplier, origin, symbols);
+        Stream<Either<Error, Tuple2<Origin, Fact>>> stream = this.apply(factsSupplier, origin, symbolTable);
 
         Iterator<Either<Error, Tuple2<Origin, Fact>>> it = stream.iterator();
 
@@ -149,16 +149,16 @@ public final class Rule implements Serializable {
     }
 
     // verifies that the expressions return true for every matching set of facts
-    public boolean checkMatchAll(final FactSet facts, TrustedOrigins scope, SymbolTable symbols) throws Error {
+    public boolean checkMatchAll(final FactSet facts, TrustedOrigins scope, SymbolTable symbolTable) throws Error {
         MatchedVariables variables = variablesSet();
 
         if (this.body.isEmpty()) {
-            return variables.check_expressions(this.expressions, symbols).isDefined();
+            return variables.check_expressions(this.expressions, symbolTable).isDefined();
         }
 
         @SuppressWarnings("unchecked")
         Supplier<Stream<Tuple2<Origin, Fact>>> factsSupplier = () -> facts.stream(scope);
-        Combinator combinator = new Combinator(variables, this.body, factsSupplier, symbols);
+        Combinator combinator = new Combinator(variables, this.body, factsSupplier, symbolTable);
         boolean found = false;
 
         for (Combinator it = combinator; it.hasNext(); ) {
@@ -166,10 +166,10 @@ public final class Rule implements Serializable {
             Map<Long, Term> generatedVariables = t._2;
             found = true;
 
-            TemporarySymbolTable temporarySymbols = new TemporarySymbolTable(symbols);
+            TemporarySymbolTable tmpSymbolTable = new TemporarySymbolTable(symbolTable);
             for (Expression e : this.expressions) {
 
-                Term term = e.evaluate(generatedVariables, temporarySymbols);
+                Term term = e.evaluate(generatedVariables, tmpSymbolTable);
                 if (term instanceof Term.Bool) {
                     Term.Bool b = (Term.Bool) term;
                     if (!b.value()) {

@@ -109,32 +109,32 @@ public class Rule implements Cloneable {
         return res;
     }
 
-    public org.biscuitsec.biscuit.datalog.Rule convert(SymbolTable symbols) {
+    public org.biscuitsec.biscuit.datalog.Rule convert(SymbolTable symbolTable) {
         Rule r = this.clone();
         r.applyVariables();
-        org.biscuitsec.biscuit.datalog.Predicate head = r.head.convert(symbols);
+        org.biscuitsec.biscuit.datalog.Predicate head = r.head.convert(symbolTable);
         ArrayList<org.biscuitsec.biscuit.datalog.Predicate> body = new ArrayList<>();
         ArrayList<org.biscuitsec.biscuit.datalog.expressions.Expression> expressions = new ArrayList<>();
         ArrayList<org.biscuitsec.biscuit.datalog.Scope> scopes = new ArrayList<>();
 
 
         for (Predicate p : r.body) {
-            body.add(p.convert(symbols));
+            body.add(p.convert(symbolTable));
         }
 
         for (Expression e : r.expressions) {
-            expressions.add(e.convert(symbols));
+            expressions.add(e.convert(symbolTable));
         }
 
         for (Scope s : r.scopes) {
-            scopes.add(s.convert(symbols));
+            scopes.add(s.convert(symbolTable));
         }
 
         return new org.biscuitsec.biscuit.datalog.Rule(head, body, expressions, scopes);
     }
 
-    public static Rule convertFrom(org.biscuitsec.biscuit.datalog.Rule r, SymbolTable symbols) {
-        Predicate head = Predicate.convertFrom(r.head(), symbols);
+    public static Rule convertFrom(org.biscuitsec.biscuit.datalog.Rule r, SymbolTable symbolTable) {
+        Predicate head = Predicate.convertFrom(r.head(), symbolTable);
 
         ArrayList<Predicate> body = new ArrayList<>();
         ArrayList<Expression> expressions = new ArrayList<>();
@@ -142,15 +142,15 @@ public class Rule implements Cloneable {
 
 
         for (org.biscuitsec.biscuit.datalog.Predicate p : r.body()) {
-            body.add(Predicate.convertFrom(p, symbols));
+            body.add(Predicate.convertFrom(p, symbolTable));
         }
 
         for (org.biscuitsec.biscuit.datalog.expressions.Expression e : r.expressions()) {
-            expressions.add(Expression.convertFrom(e, symbols));
+            expressions.add(Expression.convertFrom(e, symbolTable));
         }
 
         for (org.biscuitsec.biscuit.datalog.Scope s : r.scopes()) {
-            scopes.add(Scope.convertFrom(s, symbols));
+            scopes.add(Scope.convertFrom(s, symbolTable));
         }
 
         return new Rule(head, body, expressions, scopes);

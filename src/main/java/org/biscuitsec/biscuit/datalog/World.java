@@ -49,12 +49,12 @@ public class World implements Serializable {
         this.rules.clear();
     }
 
-    public void run(final SymbolTable symbols) throws Error {
-        this.run(new RunLimits(), symbols);
+    public void run(final SymbolTable symbolTable) throws Error {
+        this.run(new RunLimits(), symbolTable);
     }
 
     @SuppressWarnings("unchecked")
-    public void run(RunLimits limits, final SymbolTable symbols) throws Error {
+    public void run(RunLimits limits, final SymbolTable symbolTable) throws Error {
         int iterations = 0;
         Instant limit = Instant.now().plus(limits.maxTime);
 
@@ -65,7 +65,7 @@ public class World implements Serializable {
                 for (Tuple2<Long, Rule> t : entry.getValue()) {
                     Supplier<Stream<Tuple2<Origin, Fact>>> factsSupplier = () -> this.facts.stream(entry.getKey());
 
-                    Stream<Either<Error, Tuple2<Origin, Fact>>> stream = t._2.apply(factsSupplier, t._1, symbols);
+                    Stream<Either<Error, Tuple2<Origin, Fact>>> stream = t._2.apply(factsSupplier, t._1, symbolTable);
                     for (Iterator<Either<Error, Tuple2<Origin, Fact>>> it = stream.iterator(); it.hasNext(); ) {
                         Either<Error, Tuple2<Origin, Fact>> res = it.next();
                         if (Instant.now().compareTo(limit) >= 0) {
@@ -109,12 +109,15 @@ public class World implements Serializable {
     }
 
     @SuppressWarnings("unchecked")
-    public final FactSet query_rule(final Rule rule, Long origin, TrustedOrigins scope, SymbolTable symbols) throws Error {
+    public final FactSet query_rule(final Rule rule,
+                                    Long origin,
+                                    TrustedOrigins scope,
+                                    SymbolTable symbolTable) throws Error {
         final FactSet newFacts = new FactSet();
 
         Supplier<Stream<Tuple2<Origin, Fact>>> factsSupplier = () -> this.facts.stream(scope);
 
-        Stream<Either<Error, Tuple2<Origin, Fact>>> stream = rule.apply(factsSupplier, origin, symbols);
+        Stream<Either<Error, Tuple2<Origin, Fact>>> stream = rule.apply(factsSupplier, origin, symbolTable);
         for (Iterator<Either<Error, Tuple2<Origin, Fact>>> it = stream.iterator(); it.hasNext(); ) {
             Either<Error, Tuple2<Origin, Fact>> res = it.next();
 
@@ -129,29 +132,32 @@ public class World implements Serializable {
         return newFacts;
     }
 
-    public final boolean queryMatch(final Rule rule, Long origin, TrustedOrigins scope, SymbolTable symbols) throws Error {
-        return rule.findMatch(this.facts, origin, scope, symbols);
+    public final boolean queryMatch(final Rule rule,
+                                    Long origin,
+                                    TrustedOrigins scope,
+                                    SymbolTable symbolTable) throws Error {
+        return rule.findMatch(this.facts, origin, scope, symbolTable);
     }
 
-    public final boolean queryMatchAll(final Rule rule, TrustedOrigins scope, SymbolTable symbols) throws Error {
-        return rule.checkMatchAll(this.facts, scope, symbols);
+    public final boolean queryMatchAll(final Rule rule, TrustedOrigins scope, SymbolTable symbolTable) throws Error {
+        return rule.checkMatchAll(this.facts, scope, symbolTable);
     }
 
-    public String print(SymbolTable symbol_table) {
+    public String print(SymbolTable symbolTable) {
         StringBuilder s = new StringBuilder();
 
         s.append("World {\n\t\tfacts: [");
         for (Map.Entry<Origin, HashSet<Fact>> entry : this.facts.facts().entrySet()) {
             s.append("\n\t\t\t").append(entry.getKey()).append(":");
             for (Fact f : entry.getValue()) {
-                s.append("\n\t\t\t\t").append(symbol_table.printFact(f));
+                s.append("\n\t\t\t\t").append(symbolTable.printFact(f));
             }
         }
 
         s.append("\n\t\t]\n\t\trules: [");
         for (Iterator<Rule> it = this.rules.stream().iterator(); it.hasNext(); ) {
             Rule r = it.next();
-            s.append("\n\t\t\t").append(symbol_table.printRule(r));
+            s.append("\n\t\t\t").append(symbolTable.printRule(r));
         }
 
         s.append("\n\t\t]\n\t}");

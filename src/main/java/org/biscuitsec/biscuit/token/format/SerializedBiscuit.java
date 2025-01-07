@@ -93,7 +93,7 @@ public class SerializedBiscuit {
         }
     }
 
-    public Tuple2<Block, ArrayList<Block>> extractBlocks(SymbolTable symbols) throws Error {
+    public Tuple2<Block, ArrayList<Block>> extractBlocks(SymbolTable symbolTable) throws Error {
         @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
         ArrayList<Option<org.biscuitsec.biscuit.crypto.PublicKey>> blockExternalKeys = new ArrayList<>();
         Either<Error.FormatError, Block> authRes = Block.fromBytes(this.authority.block, Option.none());
@@ -102,12 +102,12 @@ public class SerializedBiscuit {
         }
         Block authority = authRes.get();
         for (org.biscuitsec.biscuit.crypto.PublicKey pk : authority.publicKeys()) {
-            symbols.insert(pk);
+            symbolTable.insert(pk);
         }
         blockExternalKeys.add(Option.none());
 
         for (String s : authority.symbols().symbols) {
-            symbols.add(s);
+            symbolTable.add(s);
         }
 
         ArrayList<Block> blocks = new ArrayList<>();
@@ -129,10 +129,10 @@ public class SerializedBiscuit {
             } else {
                 blockExternalKeys.add(Option.none());
                 for (String s : block.symbols().symbols) {
-                    symbols.add(s);
+                    symbolTable.add(s);
                 }
                 for (org.biscuitsec.biscuit.crypto.PublicKey pk : block.publicKeys()) {
-                    symbols.insert(pk);
+                    symbolTable.insert(pk);
                 }
             }
 

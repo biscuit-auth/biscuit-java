@@ -26,10 +26,10 @@ public class Expression {
     }
 
     //FIXME: should return a Result<Term, error::Expression>
-    public Term evaluate(Map<Long, Term> variables, TemporarySymbolTable symbols) throws Error.Execution {
+    public Term evaluate(Map<Long, Term> variables, TemporarySymbolTable tmpSymbolTable) throws Error.Execution {
         Deque<Term> stack = new ArrayDeque<>(16); //Default value
         for (Op op : ops) {
-            op.evaluate(stack, variables, symbols);
+            op.evaluate(stack, variables, tmpSymbolTable);
         }
         if (stack.size() == 1) {
             return stack.pop();
@@ -38,10 +38,10 @@ public class Expression {
         }
     }
 
-    public Option<String> print(SymbolTable symbols) {
+    public Option<String> print(SymbolTable symbolTable) {
         Deque<String> stack = new ArrayDeque<>();
         for (Op op : ops) {
-            op.print(stack, symbols);
+            op.print(stack, symbolTable);
         }
         if (stack.size() == 1) {
             return Option.some(stack.remove());

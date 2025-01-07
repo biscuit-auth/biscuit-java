@@ -38,7 +38,7 @@ public abstract class Term implements Serializable {
         }
     }
 
-    public abstract org.biscuitsec.biscuit.token.builder.Term toTerm(SymbolTable symbols);
+    public abstract org.biscuitsec.biscuit.token.builder.Term toTerm(SymbolTable symbolTable);
 
     public final static class Date extends Term implements Serializable {
         private final long value;
@@ -92,7 +92,7 @@ public abstract class Term implements Serializable {
             }
         }
 
-        public org.biscuitsec.biscuit.token.builder.Term toTerm(SymbolTable symbols) {
+        public org.biscuitsec.biscuit.token.builder.Term toTerm(SymbolTable symbolTable) {
             return new org.biscuitsec.biscuit.token.builder.Term.Date(this.value);
         }
     }
@@ -151,7 +151,7 @@ public abstract class Term implements Serializable {
             }
         }
 
-        public org.biscuitsec.biscuit.token.builder.Term toTerm(SymbolTable symbols) {
+        public org.biscuitsec.biscuit.token.builder.Term toTerm(SymbolTable symbolTable) {
             return new org.biscuitsec.biscuit.token.builder.Term.Integer(this.value);
         }
     }
@@ -210,7 +210,7 @@ public abstract class Term implements Serializable {
             }
         }
 
-        public org.biscuitsec.biscuit.token.builder.Term toTerm(SymbolTable symbols) {
+        public org.biscuitsec.biscuit.token.builder.Term toTerm(SymbolTable symbolTable) {
             return new org.biscuitsec.biscuit.token.builder.Term.Bytes(this.value);
         }
     }
@@ -264,8 +264,8 @@ public abstract class Term implements Serializable {
             }
         }
 
-        public org.biscuitsec.biscuit.token.builder.Term toTerm(SymbolTable symbols) {
-            return new org.biscuitsec.biscuit.token.builder.Term.Str(symbols.printSymbol((int) this.value));
+        public org.biscuitsec.biscuit.token.builder.Term toTerm(SymbolTable symbolTable) {
+            return new org.biscuitsec.biscuit.token.builder.Term.Str(symbolTable.printSymbol((int) this.value));
         }
     }
 
@@ -317,8 +317,8 @@ public abstract class Term implements Serializable {
             }
         }
 
-        public org.biscuitsec.biscuit.token.builder.Term toTerm(SymbolTable symbols) {
-            return new org.biscuitsec.biscuit.token.builder.Term.Variable(symbols.printSymbol((int) this.value));
+        public org.biscuitsec.biscuit.token.builder.Term toTerm(SymbolTable symbolTable) {
+            return new org.biscuitsec.biscuit.token.builder.Term.Variable(symbolTable.printSymbol((int) this.value));
         }
     }
 
@@ -376,7 +376,7 @@ public abstract class Term implements Serializable {
             }
         }
 
-        public org.biscuitsec.biscuit.token.builder.Term toTerm(SymbolTable symbols) {
+        public org.biscuitsec.biscuit.token.builder.Term toTerm(SymbolTable symbolTable) {
             return new org.biscuitsec.biscuit.token.builder.Term.Bool(this.value);
         }
     }
@@ -465,11 +465,11 @@ public abstract class Term implements Serializable {
             }
         }
 
-        public org.biscuitsec.biscuit.token.builder.Term toTerm(SymbolTable symbols) {
+        public org.biscuitsec.biscuit.token.builder.Term toTerm(SymbolTable symbolTable) {
             HashSet<org.biscuitsec.biscuit.token.builder.Term> s = new HashSet<>();
 
             for (Term i : this.value) {
-                s.add(i.toTerm(symbols));
+                s.add(i.toTerm(symbolTable));
             }
 
             return new org.biscuitsec.biscuit.token.builder.Term.Set(s);

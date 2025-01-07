@@ -107,11 +107,11 @@ class SamplesTest {
     private void compareBlocks(KeyPair root, List<Block> sampleBlocks, Biscuit token) throws Error {
         assertEquals(sampleBlocks.size(), 1 + token.blocks.size());
         Option<Biscuit> sampleToken = Option.none();
-        Biscuit b = compareBlock(root, sampleToken, 0, sampleBlocks.get(0), token.authority, token.symbols);
+        Biscuit b = compareBlock(root, sampleToken, 0, sampleBlocks.get(0), token.authority, token.symbolTable);
         sampleToken = Option.some(b);
 
         for (int i = 0; i < token.blocks.size(); i++) {
-            b = compareBlock(root, sampleToken, i + 1, sampleBlocks.get(i + 1), token.blocks.get(i), token.symbols);
+            b = compareBlock(root, sampleToken, i + 1, sampleBlocks.get(i + 1), token.blocks.get(i), token.symbolTable);
             sampleToken = Option.some(b);
         }
     }
@@ -147,11 +147,11 @@ class SamplesTest {
         }
 
         out.println("generated block: ");
-        out.println(generatedSampleBlock.print(newSampleToken.symbols));
+        out.println(generatedSampleBlock.print(newSampleToken.symbolTable));
         out.println("deserialized block: ");
-        out.println(tokenBlock.print(newSampleToken.symbols));
+        out.println(tokenBlock.print(newSampleToken.symbolTable));
 
-        SymbolTable generatedBlockSymbols = newSampleToken.symbols;
+        SymbolTable generatedBlockSymbols = newSampleToken.symbolTable;
         assertEquals(generatedSampleBlock.printCode(generatedBlockSymbols), tokenBlock.printCode(tokenSymbols));
 
         /* FIXME: to generate the same sample block, we need the samples to provide the external private key
@@ -223,7 +223,7 @@ class SamplesTest {
         out.println(Arrays.toString(serBlockAuthority));
         out.println(Arrays.toString(token.serializedBiscuit.authority.block));
         org.biscuitsec.biscuit.token.Block deserBlockAuthority = fromBytes(serBlockAuthority, token.authority.externalKey).get();
-        assertEquals(token.authority.print(token.symbols), deserBlockAuthority.print(token.symbols));
+        assertEquals(token.authority.print(token.symbolTable), deserBlockAuthority.print(token.symbolTable));
         assertArrayEquals(serBlockAuthority, token.serializedBiscuit.authority.block);
     }
 
@@ -241,7 +241,7 @@ class SamplesTest {
             SignedBlock signedBlock = token.serializedBiscuit.blocks.get(idx);
             byte[] serBlock = block.to_bytes().get();
             org.biscuitsec.biscuit.token.Block deserBlock = fromBytes(serBlock, block.externalKey).get();
-            assertEquals(block.print(token.symbols), deserBlock.print(token.symbols));
+            assertEquals(block.print(token.symbolTable), deserBlock.print(token.symbolTable));
             assertArrayEquals(serBlock, signedBlock.block);
         });
     }
@@ -319,7 +319,7 @@ class SamplesTest {
                 ArrayList<Long> origin = new ArrayList<>(entry.getKey().inner);
                 sort(origin);
                 ArrayList<String> facts = entry.getValue().stream()
-                        .map(f -> authorizer.symbols.printFact(f))
+                        .map(f -> authorizer.symbolTable.printFact(f))
                         .sorted()
                         .collect(Collectors.toCollection(ArrayList::new));
                 return new FactSet(origin, facts);
@@ -331,7 +331,7 @@ class SamplesTest {
                     if (!rules.containsKey(t._1)) {
                         rules.put(t._1, new ArrayList<>());
                     }
-                    rules.get(t._1).add(authorizer.symbols.printRule(t._2));
+                    rules.get(t._1).add(authorizer.symbolTable.printRule(t._2));
                 }
             }
             for (Map.Entry<Long, List<String>> entry : rules.entrySet()) {

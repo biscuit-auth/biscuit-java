@@ -65,11 +65,11 @@ public final class SymbolTable implements Serializable {
     }
 
 
-    public SymbolTable(SymbolTable s) {
+    public SymbolTable(SymbolTable symbolTable) {
         this.symbols = new ArrayList<>();
-        symbols.addAll(s.symbols);
+        symbols.addAll(symbolTable.symbols);
         this.publicKeys = new ArrayList<>();
-        publicKeys.addAll(s.publicKeys);
+        publicKeys.addAll(symbolTable.publicKeys);
     }
 
     @SuppressWarnings("unused")

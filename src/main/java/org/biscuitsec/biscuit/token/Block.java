@@ -79,6 +79,7 @@ public class Block {
         this.externalKey = externalKey;
     }
 
+    // TODO Rename method?  symbolTable()
     public SymbolTable symbols() {
         return symbolTable;
     }
@@ -101,14 +102,14 @@ public class Block {
     public String print(SymbolTable symbolTable) {
         StringBuilder s = new StringBuilder();
 
-        SymbolTable localSymbols;
+        SymbolTable localSymbolTable;
         if (this.externalKey.isDefined()) {
-            localSymbols = new SymbolTable(this.symbolTable);
+            localSymbolTable = new SymbolTable(this.symbolTable);
             for (PublicKey pk : symbolTable.publicKeys()) {
-                localSymbols.insert(pk);
+                localSymbolTable.insert(pk);
             }
         } else {
-            localSymbols = symbolTable;
+            localSymbolTable = symbolTable;
         }
         s.append("Block");
         s.append(" {\n\t\tsymbols: ");
@@ -131,17 +132,17 @@ public class Block {
         s.append("\n\t\t]\n\t\tfacts: [");
         for (Fact f : this.facts) {
             s.append("\n\t\t\t");
-            s.append(localSymbols.printFact(f));
+            s.append(localSymbolTable.printFact(f));
         }
         s.append("\n\t\t]\n\t\trules: [");
         for (Rule r : this.rules) {
             s.append("\n\t\t\t");
-            s.append(localSymbols.printRule(r));
+            s.append(localSymbolTable.printRule(r));
         }
         s.append("\n\t\t]\n\t\tchecks: [");
         for (Check c : this.checks) {
             s.append("\n\t\t\t");
-            s.append(localSymbols.printCheck(c));
+            s.append(localSymbolTable.printCheck(c));
         }
         s.append("\n\t\t]\n\t}");
 
@@ -151,14 +152,14 @@ public class Block {
     public String printCode(SymbolTable symbolTable) {
         StringBuilder s = new StringBuilder();
 
-        SymbolTable localSymbols;
+        SymbolTable localSymbolTable;
         if (this.externalKey.isDefined()) {
-            localSymbols = new SymbolTable(this.symbolTable);
+            localSymbolTable = new SymbolTable(this.symbolTable);
             for (PublicKey pk : symbolTable.publicKeys()) {
-                localSymbols.insert(pk);
+                localSymbolTable.insert(pk);
             }
         } else {
-            localSymbols = symbolTable;
+            localSymbolTable = symbolTable;
         }
         /*s.append("Block");
         s.append(" {\n\t\tsymbols: ");
@@ -174,16 +175,16 @@ public class Block {
             s.append(this.externalKey.get().toString());
         }*/
         for (Scope scope : this.scopes) {
-            s.append("trusting ").append(localSymbols.printScope(scope)).append("\n");
+            s.append("trusting ").append(localSymbolTable.printScope(scope)).append("\n");
         }
         for (Fact f : this.facts) {
-            s.append(localSymbols.printFact(f)).append(";\n");
+            s.append(localSymbolTable.printFact(f)).append(";\n");
         }
         for (Rule r : this.rules) {
-            s.append(localSymbols.printRule(r)).append(";\n");
+            s.append(localSymbolTable.printRule(r)).append(";\n");
         }
         for (Check c : this.checks) {
-            s.append(localSymbols.printCheck(c)).append(";\n");
+            s.append(localSymbolTable.printCheck(c)).append(";\n");
         }
 
         return s.toString();

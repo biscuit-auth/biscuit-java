@@ -145,40 +145,40 @@ public class Biscuit {
         this.rootKeyId = Option.some(rootKeyId);
     }
 
-    private org.biscuitsec.biscuit.token.Biscuit build(SymbolTable symbols) throws Error {
-        int symbolStart = symbols.currentOffset();
-        int publicKeyStart = symbols.currentPublicKeyOffset();
+    private org.biscuitsec.biscuit.token.Biscuit build(SymbolTable symbolTable) throws Error {
+        int symbolStart = symbolTable.currentOffset();
+        int publicKeyStart = symbolTable.currentPublicKeyOffset();
 
         List<org.biscuitsec.biscuit.datalog.Fact> facts = new ArrayList<>();
         for (Fact f : this.facts) {
-            facts.add(f.convert(symbols));
+            facts.add(f.convert(symbolTable));
         }
         List<org.biscuitsec.biscuit.datalog.Rule> rules = new ArrayList<>();
         for (Rule r : this.rules) {
-            rules.add(r.convert(symbols));
+            rules.add(r.convert(symbolTable));
         }
         List<org.biscuitsec.biscuit.datalog.Check> checks = new ArrayList<>();
         for (Check c : this.checks) {
-            checks.add(c.convert(symbols));
+            checks.add(c.convert(symbolTable));
         }
         List<org.biscuitsec.biscuit.datalog.Scope> scopes = new ArrayList<>();
         for (Scope s : this.scopes) {
-            scopes.add(s.convert(symbols));
+            scopes.add(s.convert(symbolTable));
         }
         SchemaVersion schemaVersion = new SchemaVersion(facts, rules, checks, scopes);
 
-        SymbolTable blockSymbols = new SymbolTable();
+        SymbolTable blockSymbolTable = new SymbolTable();
 
-        for (int i = symbolStart; i < symbols.symbols.size(); i++) {
-            blockSymbols.add(symbols.symbols.get(i));
+        for (int i = symbolStart; i < symbolTable.symbols.size(); i++) {
+            blockSymbolTable.add(symbolTable.symbols.get(i));
         }
 
         List<PublicKey> publicKeys = new ArrayList<>();
-        for (int i = publicKeyStart; i < symbols.currentPublicKeyOffset(); i++) {
-            publicKeys.add(symbols.publicKeys().get(i));
+        for (int i = publicKeyStart; i < symbolTable.currentPublicKeyOffset(); i++) {
+            publicKeys.add(symbolTable.publicKeys().get(i));
         }
 
-        Block authorityBlock = new Block(blockSymbols, context, facts, rules,
+        Block authorityBlock = new Block(blockSymbolTable, context, facts, rules,
                 checks, scopes, publicKeys, Option.none(), schemaVersion.version());
 
         if (this.rootKeyId.isDefined()) {
