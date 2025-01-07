@@ -27,7 +27,8 @@ public class ThirdPartyBlockRequest {
         this.previousKey = previousKey;
     }
 
-    public Either<Error.FormatError, ThirdPartyBlockContents> createBlock(KeyPair keyPair, Block blockBuilder) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    public Either<Error.FormatError, ThirdPartyBlockContents> createBlock(KeyPair keyPair, Block blockBuilder)
+            throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         SymbolTable symbolTable = new SymbolTable();
         org.biscuitsec.biscuit.token.Block block = blockBuilder.build(symbolTable, Option.some(keyPair.publicKey()));
 
