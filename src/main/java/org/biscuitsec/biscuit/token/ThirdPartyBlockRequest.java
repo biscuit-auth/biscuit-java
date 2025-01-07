@@ -44,7 +44,7 @@ public class ThirdPartyBlockRequest {
         sgr.update(serializedBlock);
 
         ByteBuffer algoBuf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-        algoBuf.putInt(Integer.valueOf(Schema.PublicKey.Algorithm.Ed25519.getNumber()));
+        algoBuf.putInt(Schema.PublicKey.Algorithm.Ed25519.getNumber());
         algoBuf.flip();
         sgr.update(algoBuf);
         sgr.update(previousKey.toBytes());
