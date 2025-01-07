@@ -32,7 +32,7 @@ public class ThirdPartyBlockRequest {
         SymbolTable symbolTable = new SymbolTable();
         org.biscuitsec.biscuit.token.Block block = blockBuilder.build(symbolTable, Option.some(keyPair.publicKey()));
 
-        Either<Error.FormatError, byte[]> res = block.to_bytes();
+        Either<Error.FormatError, byte[]> res = block.toBytes();
         if (res.isLeft()) {
             return Either.left(res.getLeft());
         }
