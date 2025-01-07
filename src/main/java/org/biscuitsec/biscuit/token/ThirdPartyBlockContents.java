@@ -45,7 +45,7 @@ public class ThirdPartyBlockContents {
         return ThirdPartyBlockContents.deserialize(Schema.ThirdPartyBlockContents.parseFrom(slice));
     }
 
-    public byte[] toBytes() throws IOException, Error.FormatError.SerializationError {
+    public byte[] toBytes() throws IOException {
         Schema.ThirdPartyBlockContents b = this.serialize();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         b.writeTo(baos);
