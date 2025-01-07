@@ -215,6 +215,7 @@ public class UnverifiedBiscuit {
                 .collect(toList());
     }
 
+    @SuppressWarnings("unused")
     public List<List<Check>> checks() {
         // Should this unused method be deprecated?
         ArrayList<List<Check>> l = new ArrayList<>();
@@ -227,6 +228,7 @@ public class UnverifiedBiscuit {
         return l;
     }
 
+    @SuppressWarnings("unused")
     public List<Option<String>> context() {
         // Should this unused method be deprecated?
         ArrayList<Option<String>> res = new ArrayList<>();
@@ -247,6 +249,7 @@ public class UnverifiedBiscuit {
         return res;
     }
 
+    @SuppressWarnings("unused")
     public Option<Integer> rootKeyId() {
         // Should this unused method be deprecated?
         return this.rootKeyId;
@@ -361,6 +364,7 @@ public class UnverifiedBiscuit {
         return Biscuit.fromSerializedBiscuit(serializedBiscuit, this.symbols);
     }
 
+    @SuppressWarnings("unused")
     public Biscuit verify(KeyDelegate delegate)
             throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         SerializedBiscuit serializedBiscuit = this.serializedBiscuit;
