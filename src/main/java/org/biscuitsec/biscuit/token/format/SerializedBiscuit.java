@@ -10,7 +10,6 @@ import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.token.Block;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import io.vavr.Tuple3;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 
@@ -378,16 +377,9 @@ public class SerializedBiscuit {
         org.biscuitsec.biscuit.crypto.PublicKey next_key = signedBlock.key;
         byte[] signature = signedBlock.signature;
 
-        if (publicKey.algorithm == Schema.PublicKey.Algorithm.Ed25519) {
-            if (signature.length != 64) {
-                return Either.left(new Error.FormatError.Signature.InvalidSignatureSize(signature.length));
-            }
-        } else if (publicKey.algorithm == Schema.PublicKey.Algorithm.SECP256R1) {
-            if (signature.length < 68 || signature.length > 72) {
-                return Either.left(new Error.FormatError.Signature.InvalidSignatureSize(signature.length));
-            }
-        } else {
-            return Left(new Error.FormatError.Signature.InvalidSignature("unsupported algorithm"));
+        var signatureLengthError = PublicKey.validateSignatureLength(publicKey.algorithm, signature.length);
+        if (signatureLengthError.isPresent()) {
+            return Left(signatureLengthError.get());
         }
 
         ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);

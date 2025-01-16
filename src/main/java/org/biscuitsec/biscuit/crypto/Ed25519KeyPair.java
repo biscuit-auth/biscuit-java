@@ -18,6 +18,8 @@ import java.security.Signature;
 
 class Ed25519KeyPair extends KeyPair {
 
+    static final int SIGNATURE_LENGTH = 64;
+
     private final EdDSAPrivateKey privateKey;
     private final EdDSAPublicKey publicKey;
 

@@ -17,7 +17,10 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
 
-class SECP256R1KeyPair extends KeyPair {
+final class SECP256R1KeyPair extends KeyPair {
+
+    static final int MINIMUM_SIGNATURE_LENGTH = 68;
+    static final int MAXIMUM_SIGNATURE_LENGTH = 72;
 
     private final BCECPrivateKey privateKey;
     private final BCECPublicKey publicKey;

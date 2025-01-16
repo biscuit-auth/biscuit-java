@@ -8,15 +8,15 @@ import org.biscuitsec.biscuit.token.builder.Utils;
 import com.google.protobuf.ByteString;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 
-import java.util.List;
-
+import java.util.Optional;
+import java.util.Set;
 
 public class PublicKey {
 
     public final java.security.PublicKey key;
     public final Algorithm algorithm;
 
-    private static final List<Algorithm> SUPPORTED_ALGORITHMS = List.of(Algorithm.Ed25519, Algorithm.SECP256R1);
+    private static final Set<Algorithm> SUPPORTED_ALGORITHMS = Set.of(Algorithm.Ed25519, Algorithm.SECP256R1);
 
     public PublicKey(Algorithm algorithm, java.security.PublicKey public_key) {
         this.key = public_key;
@@ -72,6 +72,22 @@ public class PublicKey {
             throw new Error.FormatError.DeserializationError("Invalid public key");
         }
         return new PublicKey(pk.getAlgorithm(), pk.getKey().toByteArray());
+    }
+
+    public static Optional<Error> validateSignatureLength(Algorithm algorithm, int length) {
+        Optional<Error> error = Optional.empty();
+        if (algorithm == Algorithm.Ed25519) {
+            if (length != Ed25519KeyPair.SIGNATURE_LENGTH) {
+                error = Optional.of(new Error.FormatError.Signature.InvalidSignatureSize(length));
+            }
+        } else if (algorithm == Algorithm.SECP256R1) {
+            if (length < SECP256R1KeyPair.MINIMUM_SIGNATURE_LENGTH || length > SECP256R1KeyPair.MAXIMUM_SIGNATURE_LENGTH) {
+                error = Optional.of(new Error.FormatError.Signature.InvalidSignatureSize(length));
+            }
+        } else {
+            error = Optional.of(new Error.FormatError.Signature.InvalidSignature("unsupported algorithm"));
+        }
+        return error;
     }
 
     @Override
