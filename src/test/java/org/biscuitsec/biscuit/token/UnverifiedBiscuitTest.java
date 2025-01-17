@@ -1,5 +1,6 @@
 package org.biscuitsec.biscuit.token;
 
+import biscuit.format.schema.Schema;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.datalog.RunLimits;
 import org.biscuitsec.biscuit.datalog.SymbolTable;
@@ -19,7 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class UnverifiedBiscuitTest {
 
@@ -30,7 +30,7 @@ public class UnverifiedBiscuitTest {
 
         System.out.println("preparing the authority block, block0");
 
-        KeyPair keypair0 = new KeyPair(rng);
+        KeyPair keypair0 = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
 
        // org.biscuitsec.biscuit.token.builder.Block block0 = new org.biscuitsec.biscuit.token.builder.Block(0);
        org.biscuitsec.biscuit.token.builder.Biscuit block0 = Biscuit.builder(rng, keypair0);
@@ -57,7 +57,7 @@ public class UnverifiedBiscuitTest {
         // SECOND BLOCK
         System.out.println("preparing the second block");
 
-        KeyPair keypair1 = new KeyPair(rng);
+        KeyPair keypair1 = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
         org.biscuitsec.biscuit.token.builder.Block block1 = deser0.create_block();
         block1.add_check(Utils.check(Utils.rule(
                 "caveat1",
@@ -88,7 +88,7 @@ public class UnverifiedBiscuitTest {
         // THIRD BLOCK
         System.out.println("preparing the third block");
 
-        KeyPair keypair2 = new KeyPair(rng);
+        KeyPair keypair2 = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
 
         Block block2 = unverifiedBiscuit1.create_block();
         block2.add_check(Utils.check(Utils.rule(

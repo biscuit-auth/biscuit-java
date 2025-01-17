@@ -6,7 +6,6 @@ import org.biscuitsec.biscuit.error.Error;
 import io.vavr.Tuple2;
 import io.vavr.Tuple3;
 import io.vavr.control.Either;
-import io.vavr.control.Option;
 
 import java.io.Serializable;
 import java.util.*;

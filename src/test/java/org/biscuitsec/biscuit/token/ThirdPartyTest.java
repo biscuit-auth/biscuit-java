@@ -1,5 +1,6 @@
 package org.biscuitsec.biscuit.token;
 
+import biscuit.format.schema.Schema;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.datalog.RunLimits;
 import org.biscuitsec.biscuit.error.Error;
@@ -27,8 +28,8 @@ public class ThirdPartyTest {
 
         System.out.println("preparing the authority block");
 
-        KeyPair root = new KeyPair(rng);
-        KeyPair external = new KeyPair(rng);
+        KeyPair root = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
+        KeyPair external = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
         System.out.println("external: ed25519/"+external.public_key().toHex());
 
         Block authority_builder = new Block();
@@ -88,10 +89,10 @@ public class ThirdPartyTest {
 
         System.out.println("preparing the authority block");
 
-        KeyPair root = new KeyPair(rng);
-        KeyPair external1 = new KeyPair(rng);
-        KeyPair external2 = new KeyPair(rng);
-        KeyPair external3 = new KeyPair(rng);
+        KeyPair root = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
+        KeyPair external1 = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
+        KeyPair external2 = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
+        KeyPair external3 = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
         //System.out.println("external: ed25519/"+external.public_key().toHex());
 
         Block authority_builder = new Block();
@@ -171,8 +172,8 @@ public class ThirdPartyTest {
 
         System.out.println("preparing the authority block");
 
-        KeyPair root = new KeyPair(rng);
-        KeyPair external = new KeyPair(rng);
+        KeyPair root = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
+        KeyPair external = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
         System.out.println("external: ed25519/"+external.public_key().toHex());
 
         Block authority_builder = new Block();

@@ -3,7 +3,6 @@ package org.biscuitsec.biscuit.token.builder.parser;
 import biscuit.format.schema.Schema;
 import io.vavr.collection.Stream;
 import org.biscuitsec.biscuit.crypto.PublicKey;
-import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.token.Policy;
 import io.vavr.Tuple2;
 import io.vavr.Tuple4;
@@ -405,13 +404,17 @@ public class Parser {
     }
 
     public static Either<Error, Tuple2<String, PublicKey>> publicKey(String s) {
-        if (!s.startsWith("ed25519/")) {
+        if (s.startsWith("ed25519/")) {
+            s = s.substring("ed25519/".length());
+            Tuple2<String, byte[]> t = hex(s);
+            return Either.right(new Tuple2(t._1, new PublicKey(Schema.PublicKey.Algorithm.Ed25519, t._2)));
+        } else if (s.startsWith("secp256r1/")) {
+            s = s.substring("secp256r1/".length());
+            Tuple2<String, byte[]> t = hex(s);
+            return Either.right(new Tuple2(t._1, new PublicKey(Schema.PublicKey.Algorithm.SECP256R1, t._2)));
+        } else {
             return Either.left(new Error(s, "unrecognized public key prefix"));
         }
-
-        s = s.substring("ed25519/".length());
-        Tuple2<String, byte[]> t = hex(s);
-        return Either.right(new Tuple2<>(t._1, new PublicKey(Schema.PublicKey.Algorithm.Ed25519, t._2)));
     }
 
     public static Either<Error, Tuple2<String, Predicate>> fact_predicate(String s) {

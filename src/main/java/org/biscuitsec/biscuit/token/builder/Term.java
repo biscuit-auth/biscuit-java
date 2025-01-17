@@ -2,9 +2,7 @@ package org.biscuitsec.biscuit.token.builder;
 
 import org.biscuitsec.biscuit.datalog.SymbolTable;
 
-import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;

@@ -1,6 +1,7 @@
 package org.biscuitsec.biscuit.token;
 
 import biscuit.format.schema.Schema;
+import biscuit.format.schema.Schema.PublicKey.Algorithm;
 import org.biscuitsec.biscuit.crypto.KeyDelegate;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.crypto.PublicKey;
@@ -133,11 +134,12 @@ public class UnverifiedBiscuit {
      * Generates a new token from an existing one and a new block
      *
      * @param block new block (should be generated from a Block builder)
+     * @param algorithm algorithm to use for the ephemeral key pair
      * @return
      */
-    public UnverifiedBiscuit attenuate(org.biscuitsec.biscuit.token.builder.Block block) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
+    public UnverifiedBiscuit attenuate(org.biscuitsec.biscuit.token.builder.Block block, Algorithm algorithm) throws Error {
         SecureRandom rng = new SecureRandom();
-        KeyPair keypair = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519, rng);
+        KeyPair keypair = KeyPair.generate(algorithm, rng);
         SymbolTable builderSymbols = new SymbolTable(this.symbols);
         return attenuate(rng, keypair, block.build(builderSymbols));
     }
@@ -335,20 +337,25 @@ public class UnverifiedBiscuit {
 
     public Biscuit verify(PublicKey publicKey) throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         SerializedBiscuit serializedBiscuit = this.serializedBiscuit;
-        serializedBiscuit.verify(publicKey);
+        var result = serializedBiscuit.verify(publicKey);
+        if (result.isLeft()) {
+            throw result.getLeft();
+        }
         return Biscuit.from_serialized_biscuit(serializedBiscuit, this.symbols);
     }
 
     public Biscuit verify(KeyDelegate delegate) throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         SerializedBiscuit serializedBiscuit = this.serializedBiscuit;
 
-
         Option<PublicKey> root = delegate.root_key(root_key_id);
         if(root.isEmpty()) {
             throw new InvalidKeyException("unknown root key id");
         }
 
-        serializedBiscuit.verify(root.get());
+        var result = serializedBiscuit.verify(root.get());
+        if (result.isLeft()) {
+            throw result.getLeft();
+        }
         return Biscuit.from_serialized_biscuit(serializedBiscuit, this.symbols);
     }
 }

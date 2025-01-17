@@ -1,7 +1,6 @@
 package org.biscuitsec.biscuit.datalog;
 
 import org.biscuitsec.biscuit.crypto.PublicKey;
-import org.biscuitsec.biscuit.crypto.TokenSignature;
 import org.biscuitsec.biscuit.datalog.expressions.Expression;
 import org.biscuitsec.biscuit.token.builder.Utils;
 import io.vavr.control.Option;

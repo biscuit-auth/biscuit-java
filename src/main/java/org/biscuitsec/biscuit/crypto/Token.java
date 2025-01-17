@@ -2,7 +2,6 @@ package org.biscuitsec.biscuit.crypto;
 
 import org.biscuitsec.biscuit.error.Error;
 import io.vavr.control.Either;
-import net.i2p.crypto.eddsa.EdDSAEngine;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -19,11 +18,11 @@ class Token {
     public final KeyPair next;
 
     public Token(KeyPair rootKeyPair, byte[] message, KeyPair next) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-        Signature sgr = new EdDSAEngine(MessageDigest.getInstance(KeyPair.ed25519.getHashAlgorithm()));
+        Signature sgr = KeyPair.generateSignature(next.public_key().algorithm);
         ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
         algo_buf.putInt(Integer.valueOf(next.public_key().algorithm.getNumber()));
         algo_buf.flip();
-        sgr.initSign(rootKeyPair.private_key);
+        sgr.initSign(rootKeyPair.private_key());
         sgr.update(message);
         sgr.update(algo_buf);
         sgr.update(next.public_key().toBytes());
@@ -48,8 +47,8 @@ class Token {
     }
 
     public Token append(KeyPair keyPair, byte[] message) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        Signature sgr = new EdDSAEngine(MessageDigest.getInstance(KeyPair.ed25519.getHashAlgorithm()));
-        sgr.initSign(this.next.private_key);
+        Signature sgr = KeyPair.generateSignature(next.public_key().algorithm);
+        sgr.initSign(this.next.private_key());
         ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
         algo_buf.putInt(Integer.valueOf(next.public_key().algorithm.getNumber()));
         algo_buf.flip();
@@ -75,10 +74,10 @@ class Token {
             PublicKey next_key  = this.keys.get(i);
             byte[] signature = this.signatures.get(i);
 
-            Signature sgr = new EdDSAEngine(MessageDigest.getInstance(KeyPair.ed25519.getHashAlgorithm()));
             ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
             algo_buf.putInt(Integer.valueOf(next.public_key().algorithm.getNumber()));
             algo_buf.flip();
+            Signature sgr = KeyPair.generateSignature(next.public_key().algorithm);
             sgr.initVerify(current_key.key);
             sgr.update(block);
             sgr.update(algo_buf);
@@ -91,7 +90,7 @@ class Token {
             }
         }
 
-        if(this.next.public_key == current_key.key) {
+        if(this.next.publicKey() == current_key.key) {
             return Right(null);
         } else {
             return Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"));
