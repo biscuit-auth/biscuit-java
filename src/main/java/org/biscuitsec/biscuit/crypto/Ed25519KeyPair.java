@@ -16,7 +16,7 @@ import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 
-class Ed25519KeyPair extends KeyPair {
+final class Ed25519KeyPair extends KeyPair {
 
     static final int SIGNATURE_LENGTH = 64;
 
