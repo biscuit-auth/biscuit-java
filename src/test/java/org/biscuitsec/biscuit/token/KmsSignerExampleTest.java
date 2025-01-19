@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 @Testcontainers
 public class KmsSignerExampleTest {
 
-    private static final DockerImageName LOCALSTACK_IMAGE = DockerImageName.parse("localstack/localstack:4.0.2");
+    private static final DockerImageName LOCALSTACK_IMAGE = DockerImageName.parse("localstack/localstack:4.0.3");
 
     @Container
     public static LocalStackContainer LOCALSTACK = new LocalStackContainer(LOCALSTACK_IMAGE)
