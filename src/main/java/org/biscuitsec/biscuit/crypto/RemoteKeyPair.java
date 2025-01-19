@@ -4,9 +4,8 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.SignatureException;
-import java.util.Optional;
 
-public class RemoteKeyPair extends KeyPair {
+final class RemoteKeyPair extends KeyPair {
 
     private final org.biscuitsec.biscuit.crypto.PublicKey publicKey;
     private final Signer signer;

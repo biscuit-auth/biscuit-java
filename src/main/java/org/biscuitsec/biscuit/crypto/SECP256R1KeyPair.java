@@ -16,7 +16,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
-import java.util.Optional;
 
 final class SECP256R1KeyPair extends KeyPair {
 

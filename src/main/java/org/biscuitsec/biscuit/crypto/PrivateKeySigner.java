@@ -7,7 +7,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SignatureException;
 
-public class PrivateKeySigner implements Signer {
+public final class PrivateKeySigner implements Signer {
 
     private final Algorithm algorithm;
     private final PrivateKey privateKey;
