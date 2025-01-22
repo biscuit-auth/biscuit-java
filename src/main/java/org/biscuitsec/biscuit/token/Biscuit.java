@@ -104,18 +104,13 @@ public class Biscuit extends UnverifiedBiscuit {
             List<byte[]> revocation_ids = s.revocation_identifiers();
 
             Option<SerializedBiscuit> c = Option.some(s);
-            return new Biscuit(authority, blocks, authority.symbols, s, revocation_ids, root_key_id);
+            return new Biscuit(authority, blocks, authority.symbols, s, revocation_ids);
         }
     }
 
     Biscuit(Block authority, List<Block> blocks, SymbolTable symbols, SerializedBiscuit serializedBiscuit,
             List<byte[]> revocation_ids) {
         super(authority, blocks, symbols, serializedBiscuit,  revocation_ids);
-    }
-
-    Biscuit(Block authority, List<Block> blocks, SymbolTable symbols, SerializedBiscuit serializedBiscuit,
-            List<byte[]> revocation_ids, Option<Integer> root_key_id) {
-        super(authority, blocks, symbols, serializedBiscuit, revocation_ids, root_key_id);
     }
 
     /**
