@@ -161,7 +161,9 @@ public class SerializedBiscuit {
         }
         Proof proof = new Proof(secretKey, signature);
 
-        return new SerializedBiscuit(authority, blocks, proof);
+        Option<Integer> rootKeyId = data.hasRootKeyId() ? Option.some(data.getRootKeyId()) : Option.none();
+
+        return new SerializedBiscuit(authority, blocks, proof, rootKeyId);
     }
 
 

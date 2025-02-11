@@ -29,7 +29,6 @@ public class UnverifiedBiscuit {
     final SymbolTable symbols;
     final SerializedBiscuit serializedBiscuit;
     final List<byte[]> revocation_ids;
-    final Option<Integer> root_key_id;
 
     UnverifiedBiscuit(Block authority, List<Block> blocks, SymbolTable symbols, SerializedBiscuit serializedBiscuit,
                        List<byte[]> revocation_ids) {
@@ -38,18 +37,6 @@ public class UnverifiedBiscuit {
         this.symbols = symbols;
         this.serializedBiscuit = serializedBiscuit;
         this.revocation_ids = revocation_ids;
-        this.root_key_id = Option.none();
-    }
-
-    UnverifiedBiscuit(Block authority, List<Block> blocks, SymbolTable symbols, SerializedBiscuit serializedBiscuit,
-                      List<byte[]> revocation_ids,
-                      Option<Integer> root_key_id) {
-        this.authority = authority;
-        this.blocks = blocks;
-        this.symbols = symbols;
-        this.serializedBiscuit = serializedBiscuit;
-        this.revocation_ids = revocation_ids;
-        this.root_key_id = root_key_id;
     }
 
     /**
@@ -224,7 +211,7 @@ public class UnverifiedBiscuit {
     }
 
     public Option<Integer> root_key_id() {
-        return this.root_key_id;
+        return this.serializedBiscuit.root_key_id;
     }
 
     /**
@@ -347,7 +334,7 @@ public class UnverifiedBiscuit {
     public Biscuit verify(KeyDelegate delegate) throws Error, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         SerializedBiscuit serializedBiscuit = this.serializedBiscuit;
 
-        Option<PublicKey> root = delegate.root_key(root_key_id);
+        Option<PublicKey> root = delegate.root_key(serializedBiscuit.root_key_id);
         if(root.isEmpty()) {
             throw new InvalidKeyException("unknown root key id");
         }
