@@ -234,14 +234,14 @@ public class UnverifiedBiscuit {
      */
     public UnverifiedBiscuit appendThirdPartyBlock(PublicKey externalKey, ThirdPartyBlockContents blockResponse)
             throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
-        KeyPair nextKeyPair = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519);
+        KeyPair nextKeyPair = KeyPair.generate(externalKey.algorithm);
 
         Signature sgr = KeyPair.generateSignature(externalKey.algorithm);
         sgr.initVerify(externalKey.key);
 
         sgr.update(blockResponse.payload);
         ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-        algo_buf.putInt(Integer.valueOf(Schema.PublicKey.Algorithm.Ed25519.getNumber()));
+        algo_buf.putInt(Integer.valueOf(externalKey.algorithm.getNumber()));
         algo_buf.flip();
         sgr.update(algo_buf);
 

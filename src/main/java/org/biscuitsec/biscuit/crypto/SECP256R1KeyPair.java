@@ -1,6 +1,6 @@
 package org.biscuitsec.biscuit.crypto;
 
-import biscuit.format.schema.Schema;
+import biscuit.format.schema.Schema.PublicKey.Algorithm;
 import org.biscuitsec.biscuit.token.builder.Utils;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
@@ -11,11 +11,11 @@ import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.util.BigIntegers;
 
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.security.Signature;
+import java.security.SignatureException;
 
 final class SECP256R1KeyPair extends KeyPair {
 
@@ -24,38 +24,37 @@ final class SECP256R1KeyPair extends KeyPair {
 
     private final BCECPrivateKey privateKey;
     private final BCECPublicKey publicKey;
+    private final Signer signer;
 
     private static final String ALGORITHM = "ECDSA";
     private static final String CURVE = "secp256r1";
-    private static final ECNamedCurveParameterSpec SECP256R1 = ECNamedCurveTable.getParameterSpec(CURVE);
-
-    static {
-        Security.addProvider(new BouncyCastleProvider());
-    }
+    private static final ECNamedCurveParameterSpec CURVE_SPEC = ECNamedCurveTable.getParameterSpec(CURVE);
 
     public SECP256R1KeyPair(byte[] bytes) {
-        var privateKeySpec = new ECPrivateKeySpec(BigIntegers.fromUnsignedByteArray(bytes), SECP256R1);
+        var privateKeySpec = new ECPrivateKeySpec(BigIntegers.fromUnsignedByteArray(bytes), CURVE_SPEC);
         var privateKey = new BCECPrivateKey(ALGORITHM, privateKeySpec, BouncyCastleProvider.CONFIGURATION);
 
-        var publicKeySpec = new ECPublicKeySpec(SECP256R1.getG().multiply(privateKeySpec.getD()), SECP256R1);
+        var publicKeySpec = new ECPublicKeySpec(CURVE_SPEC.getG().multiply(privateKeySpec.getD()), CURVE_SPEC);
         var publicKey = new BCECPublicKey(ALGORITHM, publicKeySpec, BouncyCastleProvider.CONFIGURATION);
 
         this.privateKey = privateKey;
         this.publicKey = publicKey;
+        this.signer = new PrivateKeySigner(Algorithm.SECP256R1, privateKey);
     }
 
     public SECP256R1KeyPair(SecureRandom rng) {
         byte[] bytes = new byte[32];
         rng.nextBytes(bytes);
 
-        var privateKeySpec = new ECPrivateKeySpec(BigIntegers.fromUnsignedByteArray(bytes), SECP256R1);
+        var privateKeySpec = new ECPrivateKeySpec(BigIntegers.fromUnsignedByteArray(bytes), CURVE_SPEC);
         var privateKey = new BCECPrivateKey(ALGORITHM, privateKeySpec, BouncyCastleProvider.CONFIGURATION);
 
-        var publicKeySpec = new ECPublicKeySpec(SECP256R1.getG().multiply(privateKeySpec.getD()), SECP256R1);
+        var publicKeySpec = new ECPublicKeySpec(CURVE_SPEC.getG().multiply(privateKeySpec.getD()), CURVE_SPEC);
         var publicKey = new BCECPublicKey(ALGORITHM, publicKeySpec, BouncyCastleProvider.CONFIGURATION);
 
         this.privateKey = privateKey;
         this.publicKey = publicKey;
+        this.signer = new PrivateKeySigner(Algorithm.SECP256R1, privateKey);
     }
 
     public SECP256R1KeyPair(String hex) {
@@ -88,12 +87,22 @@ final class SECP256R1KeyPair extends KeyPair {
     }
 
     @Override
-    public PrivateKey private_key() {
-        return privateKey;
+    public byte[] sign(byte[] block, byte[] publicKey) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        return signer.signStandard(block, Algorithm.SECP256R1, publicKey);
+    }
+
+    @Override
+    public byte[] signExternal(byte[] block, byte[] publicKey, byte[] external) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        return signer.signExternal(block, Algorithm.SECP256R1, publicKey, external);
+    }
+
+    @Override
+    public byte[] signSealed(byte[] block, byte[] publicKey, byte[] seal) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        return signer.signSealed(block, Algorithm.SECP256R1, publicKey, seal);
     }
 
     @Override
     public PublicKey public_key() {
-        return new PublicKey(Schema.PublicKey.Algorithm.SECP256R1, publicKey);
+        return new PublicKey(Algorithm.SECP256R1, publicKey);
     }
 }

@@ -4,9 +4,14 @@ package org.biscuitsec.biscuit.crypto;
 import biscuit.format.schema.Schema.PublicKey.Algorithm;
 import net.i2p.crypto.eddsa.Utils;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.Signature;
+import java.security.SignatureException;
+import java.util.Optional;
 
 /**
  * Private and public key.
@@ -41,6 +46,10 @@ public abstract class KeyPair {
         }
     }
 
+    public static KeyPair generate(PublicKey publicKey, Signer signer) {
+        return new RemoteKeyPair(publicKey, signer);
+    }
+
     public static Signature generateSignature(Algorithm algorithm) throws NoSuchAlgorithmException {
         if (algorithm == Algorithm.Ed25519) {
             return Ed25519KeyPair.getSignature();
@@ -57,7 +66,11 @@ public abstract class KeyPair {
 
     public abstract java.security.PublicKey publicKey();
 
-    public abstract java.security.PrivateKey private_key();
-
     public abstract PublicKey public_key();
+
+    public abstract byte[] sign(byte[] block, byte[] publicKey) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException;
+
+    public abstract byte[] signExternal(byte[] block, byte[] publicKey, byte[] external) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException;
+
+    public abstract byte[] signSealed(byte[] block, byte[] publicKey, byte[] seal) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException;
 }

@@ -18,17 +18,7 @@ class Token {
     public final KeyPair next;
 
     public Token(KeyPair rootKeyPair, byte[] message, KeyPair next) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-        Signature sgr = KeyPair.generateSignature(next.public_key().algorithm);
-        ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-        algo_buf.putInt(Integer.valueOf(next.public_key().algorithm.getNumber()));
-        algo_buf.flip();
-        sgr.initSign(rootKeyPair.private_key());
-        sgr.update(message);
-        sgr.update(algo_buf);
-        sgr.update(next.public_key().toBytes());
-
-        byte[] signature = sgr.sign();
-
+        byte[] signature = rootKeyPair.sign(message, next.public_key().toBytes());
         this.blocks = new ArrayList<>();
         this.blocks.add(message);
         this.keys = new ArrayList<>();
@@ -38,8 +28,7 @@ class Token {
         this.next = next;
     }
 
-    public Token(final ArrayList<byte[]> blocks, final ArrayList<PublicKey> keys, final ArrayList<byte[]> signatures,
-                 final KeyPair next) {
+    public Token(final ArrayList<byte[]> blocks, final ArrayList<PublicKey> keys, final ArrayList<byte[]> signatures, final KeyPair next) {
         this.signatures = signatures;
         this.blocks = blocks;
         this.keys = keys;
@@ -47,17 +36,7 @@ class Token {
     }
 
     public Token append(KeyPair keyPair, byte[] message) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        Signature sgr = KeyPair.generateSignature(next.public_key().algorithm);
-        sgr.initSign(this.next.private_key());
-        ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-        algo_buf.putInt(Integer.valueOf(next.public_key().algorithm.getNumber()));
-        algo_buf.flip();
-        sgr.update(message);
-        sgr.update(algo_buf);
-        sgr.update(keyPair.public_key().toBytes());
-
-        byte[] signature = sgr.sign();
-
+        byte[] signature = next.sign(message, keyPair.public_key().toBytes());
         Token token = new Token(this.blocks, this.keys, this.signatures, keyPair);
         token.blocks.add(message);
         token.signatures.add(signature);
