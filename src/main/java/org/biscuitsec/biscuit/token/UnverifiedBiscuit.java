@@ -1,7 +1,7 @@
 package org.biscuitsec.biscuit.token;
 
-import biscuit.format.schema.Schema;
 import biscuit.format.schema.Schema.PublicKey.Algorithm;
+import org.biscuitsec.biscuit.crypto.BlockBuffer;
 import org.biscuitsec.biscuit.crypto.KeyDelegate;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.crypto.PublicKey;
@@ -14,8 +14,6 @@ import io.vavr.control.Option;
 import org.biscuitsec.biscuit.datalog.Check;
 import org.biscuitsec.biscuit.datalog.SymbolTable;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.security.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -234,25 +232,15 @@ public class UnverifiedBiscuit {
      */
     public UnverifiedBiscuit appendThirdPartyBlock(PublicKey externalKey, ThirdPartyBlockContents blockResponse)
             throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, Error {
-        KeyPair nextKeyPair = KeyPair.generate(Schema.PublicKey.Algorithm.Ed25519);
-
-        Signature sgr = KeyPair.generateSignature(externalKey.algorithm);
-        sgr.initVerify(externalKey.key);
-
-        sgr.update(blockResponse.payload);
-        ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-        algo_buf.putInt(Integer.valueOf(Schema.PublicKey.Algorithm.Ed25519.getNumber()));
-        algo_buf.flip();
-        sgr.update(algo_buf);
-
         PublicKey previousKey;
         if(this.serializedBiscuit.blocks.isEmpty()) {
             previousKey = this.serializedBiscuit.authority.key;
         } else {
             previousKey = this.serializedBiscuit.blocks.get(this.serializedBiscuit.blocks.size() - 1).key;
         }
-        sgr.update(previousKey.toBytes());
-        if (!sgr.verify(blockResponse.signature)) {
+        KeyPair nextKeyPair = KeyPair.generate(previousKey.algorithm);
+        byte[] payload = BlockBuffer.getBufferSignature(previousKey, blockResponse.payload);
+        if (!KeyPair.verify(externalKey, payload, blockResponse.signature)) {
             throw new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied");
         }
 

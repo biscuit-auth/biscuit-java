@@ -1,6 +1,5 @@
 package org.biscuitsec.biscuit.token;
 
-import biscuit.format.schema.Schema;
 import biscuit.format.schema.Schema.PublicKey.Algorithm;
 import org.biscuitsec.biscuit.crypto.KeyDelegate;
 import org.biscuitsec.biscuit.crypto.KeyPair;
@@ -27,7 +26,7 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param root root private key
      * @return
      */
-    public static org.biscuitsec.biscuit.token.builder.Biscuit builder(final KeyPair root) {
+    public static org.biscuitsec.biscuit.token.builder.Biscuit builder(final org.biscuitsec.biscuit.crypto.Signer root) {
         return new org.biscuitsec.biscuit.token.builder.Biscuit(new SecureRandom(), root);
     }
 
@@ -47,11 +46,11 @@ public class Biscuit extends UnverifiedBiscuit {
     /**
      * Creates a token builder
      *
-     * @param rng     random number generator
-     * @param root    root private key
+     * @param rng  random number generator
+     * @param root root private key
      * @return
      */
-    public static org.biscuitsec.biscuit.token.builder.Biscuit builder(final SecureRandom rng, final KeyPair root, final Option<Integer> root_key_id) {
+    public static org.biscuitsec.biscuit.token.builder.Biscuit builder(final SecureRandom rng, final org.biscuitsec.biscuit.crypto.Signer root, final Option<Integer> root_key_id) {
         return new org.biscuitsec.biscuit.token.builder.Biscuit(rng, root, root_key_id);
     }
 
@@ -63,7 +62,7 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param authority authority block
      * @return Biscuit
      */
-    public static Biscuit make(final SecureRandom rng, final KeyPair root, final Block authority) throws Error.FormatError {
+    public static Biscuit make(final SecureRandom rng, final org.biscuitsec.biscuit.crypto.Signer root, final Block authority) throws Error.FormatError {
         return Biscuit.make(rng, root, Option.none(), authority);
     }
 
@@ -75,7 +74,7 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param authority authority block
      * @return Biscuit
      */
-    public static Biscuit make(final SecureRandom rng, final KeyPair root, final Integer root_key_id, final Block authority) throws Error.FormatError {
+    public static Biscuit make(final SecureRandom rng, final org.biscuitsec.biscuit.crypto.Signer root, final Integer root_key_id, final Block authority) throws Error.FormatError {
         return Biscuit.make(rng, root, Option.of(root_key_id), authority);
     }
 
@@ -87,7 +86,7 @@ public class Biscuit extends UnverifiedBiscuit {
      * @param authority authority block
      * @return Biscuit
      */
-    static private Biscuit make(final SecureRandom rng, final KeyPair root, final Option<Integer> root_key_id, final Block authority) throws Error.FormatError {
+    static private Biscuit make(final SecureRandom rng, final org.biscuitsec.biscuit.crypto.Signer root, final Option<Integer> root_key_id, final Block authority) throws Error.FormatError {
         ArrayList<Block> blocks = new ArrayList<>();
 
         KeyPair next = KeyPair.generate(root.public_key().algorithm, rng);

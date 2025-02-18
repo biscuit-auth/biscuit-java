@@ -4,21 +4,16 @@ import biscuit.format.schema.Schema;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
-import net.i2p.crypto.eddsa.EdDSAEngine;
-import org.biscuitsec.biscuit.crypto.KeyPair;
+import org.biscuitsec.biscuit.crypto.BlockBuffer;
 import org.biscuitsec.biscuit.crypto.PublicKey;
+import org.biscuitsec.biscuit.crypto.Signer;
 import org.biscuitsec.biscuit.datalog.SymbolTable;
 import org.biscuitsec.biscuit.error.Error;
 import org.biscuitsec.biscuit.token.builder.Block;
-import org.biscuitsec.biscuit.token.format.SerializedBiscuit;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Objects;
 
 public class ThirdPartyBlockRequest {
@@ -28,29 +23,20 @@ public class ThirdPartyBlockRequest {
         this.previousKey = previousKey;
     }
 
-    public Either<Error.FormatError, ThirdPartyBlockContents> createBlock(KeyPair keyPair, Block blockBuilder) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    public Either<Error.FormatError, ThirdPartyBlockContents> createBlock(final Signer externalSigner, Block blockBuilder) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         SymbolTable symbols = new SymbolTable();
-        org.biscuitsec.biscuit.token.Block block = blockBuilder.build(symbols, Option.some(keyPair.public_key()));
+        org.biscuitsec.biscuit.token.Block block = blockBuilder.build(symbols, Option.some(externalSigner.public_key()));
 
         Either<Error.FormatError, byte[]> res = block.to_bytes();
-        if(res.isLeft()) {
+        if (res.isLeft()) {
             return Either.left(res.getLeft());
         }
 
         byte[] serializedBlock = res.get();
+        byte[] payload = BlockBuffer.getBufferSignature(this.previousKey, serializedBlock);
+        byte[] signature = externalSigner.sign(payload);
 
-        Signature sgr = KeyPair.generateSignature(keyPair.public_key().algorithm);
-        sgr.initSign(keyPair.private_key());
-        sgr.update(serializedBlock);
-
-        ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-        algo_buf.putInt(Integer.valueOf(Schema.PublicKey.Algorithm.Ed25519.getNumber()));
-        algo_buf.flip();
-        sgr.update(algo_buf);
-        sgr.update(previousKey.toBytes());
-        byte[] signature = sgr.sign();
-
-        PublicKey publicKey = keyPair.public_key();
+        PublicKey publicKey = externalSigner.public_key();
 
         return Either.right(new ThirdPartyBlockContents(serializedBlock, signature, publicKey));
     }

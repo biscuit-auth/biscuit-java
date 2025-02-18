@@ -11,11 +11,12 @@ import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.util.BigIntegers;
 
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
+import java.security.SignatureException;
 
 final class SECP256R1KeyPair extends KeyPair {
 
@@ -73,6 +74,14 @@ final class SECP256R1KeyPair extends KeyPair {
     }
 
     @Override
+    public byte[] sign(byte[] data) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        Signature sgr = KeyPair.generateSignature(Schema.PublicKey.Algorithm.SECP256R1);
+        sgr.initSign(privateKey);
+        sgr.update(data);
+        return sgr.sign();
+    }
+
+    @Override
     public byte[] toBytes() {
         return BigIntegers.asUnsignedByteArray(privateKey.getD());
     }
@@ -83,17 +92,8 @@ final class SECP256R1KeyPair extends KeyPair {
     }
 
     @Override
-    public java.security.PublicKey publicKey() {
-        return publicKey;
-    }
-
-    @Override
-    public PrivateKey private_key() {
-        return privateKey;
-    }
-
-    @Override
     public PublicKey public_key() {
         return new PublicKey(Schema.PublicKey.Algorithm.SECP256R1, publicKey);
     }
+
 }

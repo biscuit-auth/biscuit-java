@@ -4,14 +4,16 @@ package org.biscuitsec.biscuit.crypto;
 import biscuit.format.schema.Schema.PublicKey.Algorithm;
 import net.i2p.crypto.eddsa.Utils;
 
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.Signature;
+import java.security.SignatureException;
 
 /**
  * Private and public key.
  */
-public abstract class KeyPair {
+public abstract class KeyPair implements Signer {
 
     public static KeyPair generate(Algorithm algorithm) {
         return generate(algorithm, new SecureRandom());
@@ -51,13 +53,17 @@ public abstract class KeyPair {
         }
     }
 
+    public static boolean verify(PublicKey publicKey, byte[] data, byte[] signature) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        Signature sgr = KeyPair.generateSignature(publicKey.algorithm);
+        sgr.initVerify(publicKey.key);
+        sgr.update(data);
+        return sgr.verify(signature);
+    }
+
     public abstract byte[] toBytes();
 
     public abstract String toHex();
 
-    public abstract java.security.PublicKey publicKey();
-
-    public abstract java.security.PrivateKey private_key();
-
+    @Override
     public abstract PublicKey public_key();
 }
