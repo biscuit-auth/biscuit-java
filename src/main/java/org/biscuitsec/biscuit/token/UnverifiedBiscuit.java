@@ -1,7 +1,7 @@
 package org.biscuitsec.biscuit.token;
 
 import biscuit.format.schema.Schema.PublicKey.Algorithm;
-import org.biscuitsec.biscuit.crypto.BlockBuffer;
+import org.biscuitsec.biscuit.crypto.BlockSignatureBuffer;
 import org.biscuitsec.biscuit.crypto.KeyDelegate;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.crypto.PublicKey;
@@ -239,7 +239,7 @@ public class UnverifiedBiscuit {
             previousKey = this.serializedBiscuit.blocks.get(this.serializedBiscuit.blocks.size() - 1).key;
         }
         KeyPair nextKeyPair = KeyPair.generate(previousKey.algorithm);
-        byte[] payload = BlockBuffer.getBufferSignature(previousKey, blockResponse.payload);
+        byte[] payload = BlockSignatureBuffer.getBufferSignature(previousKey, blockResponse.payload);
         if (!KeyPair.verify(externalKey, payload, blockResponse.signature)) {
             throw new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied");
         }

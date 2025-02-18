@@ -19,7 +19,7 @@ class Token {
 
     public Token(final Signer rootSigner, byte[] message, KeyPair next) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
 
-        byte[] payload = BlockBuffer.getBufferSignature(next.public_key(), message);
+        byte[] payload = BlockSignatureBuffer.getBufferSignature(next.public_key(), message);
 
         byte[] signature = rootSigner.sign(payload);
 
@@ -41,7 +41,7 @@ class Token {
     }
 
     public Token append(KeyPair keyPair, byte[] message) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        byte[] payload = BlockBuffer.getBufferSignature(keyPair.public_key(), message);
+        byte[] payload = BlockSignatureBuffer.getBufferSignature(keyPair.public_key(), message);
         byte[] signature = this.next.sign(payload);
 
         Token token = new Token(this.blocks, this.keys, this.signatures, keyPair);
@@ -60,7 +60,7 @@ class Token {
             PublicKey next_key  = this.keys.get(i);
             byte[] signature = this.signatures.get(i);
 
-            byte[] payload = BlockBuffer.getBufferSignature(next_key, block);
+            byte[] payload = BlockSignatureBuffer.getBufferSignature(next_key, block);
             if (KeyPair.verify(current_key, payload, signature)) {
                 current_key = next_key;
             } else {

@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Optional;
 
-public class BlockBuffer {
+public class BlockSignatureBuffer {
     public static byte[] getBufferSignature(PublicKey nextPubKey, byte[] data) {
         return getBufferSignature(nextPubKey, data, Optional.empty());
     }

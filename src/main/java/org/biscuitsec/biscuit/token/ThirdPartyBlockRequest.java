@@ -4,7 +4,7 @@ import biscuit.format.schema.Schema;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
-import org.biscuitsec.biscuit.crypto.BlockBuffer;
+import org.biscuitsec.biscuit.crypto.BlockSignatureBuffer;
 import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.crypto.Signer;
 import org.biscuitsec.biscuit.datalog.SymbolTable;
@@ -33,7 +33,7 @@ public class ThirdPartyBlockRequest {
         }
 
         byte[] serializedBlock = res.get();
-        byte[] payload = BlockBuffer.getBufferSignature(this.previousKey, serializedBlock);
+        byte[] payload = BlockSignatureBuffer.getBufferSignature(this.previousKey, serializedBlock);
         byte[] signature = externalSigner.sign(payload);
 
         PublicKey publicKey = externalSigner.public_key();
