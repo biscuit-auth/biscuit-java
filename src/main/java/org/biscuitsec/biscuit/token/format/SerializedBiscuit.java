@@ -2,6 +2,7 @@ package org.biscuitsec.biscuit.token.format;
 
 import biscuit.format.schema.Schema;
 import io.vavr.Tuple2;
+import org.biscuitsec.biscuit.crypto.BlockSignatureBuffer;
 import org.biscuitsec.biscuit.crypto.KeyDelegate;
 import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.crypto.PublicKey;
@@ -230,7 +231,7 @@ public class SerializedBiscuit {
         return make(root, Option.none(), authority, next);
     }
 
-    static public Either<Error.FormatError, SerializedBiscuit> make(final org.biscuitsec.biscuit.crypto.KeyPair root, final Option<Integer> root_key_id,
+    static public Either<Error.FormatError, SerializedBiscuit> make(final org.biscuitsec.biscuit.crypto.Signer rootSigner, final Option<Integer> root_key_id,
                                                                     final Block authority, final org.biscuitsec.biscuit.crypto.KeyPair next) {
         Schema.Block b = authority.serialize();
         try {
@@ -238,17 +239,8 @@ public class SerializedBiscuit {
             b.writeTo(stream);
             byte[] block = stream.toByteArray();
             org.biscuitsec.biscuit.crypto.PublicKey next_key = next.public_key();
-            ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-            algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
-            algo_buf.flip();
-
-            Signature sgr = KeyPair.generateSignature(root.public_key().algorithm);
-            sgr.initSign(root.private_key());
-            sgr.update(block);
-            sgr.update(algo_buf);
-            sgr.update(next_key.toBytes());
-            byte[] signature = sgr.sign();
-
+            byte[] payload = BlockSignatureBuffer.getBufferSignature(next_key, block);
+            byte[] signature = rootSigner.sign(payload);
             SignedBlock signedBlock = new SignedBlock(block, next_key, signature, Option.none());
             Proof proof = new Proof(next);
 
@@ -270,20 +262,11 @@ public class SerializedBiscuit {
             b.writeTo(stream);
 
             byte[] block = stream.toByteArray();
+            KeyPair secretKey = this.proof.secretKey.get();
             org.biscuitsec.biscuit.crypto.PublicKey next_key = next.public_key();
-            ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-            algo_buf.putInt(Integer.valueOf(next_key.algorithm.getNumber()));
-            algo_buf.flip();
 
-            Signature sgr = KeyPair.generateSignature(next_key.algorithm);
-            sgr.initSign(this.proof.secretKey.get().private_key());
-            sgr.update(block);
-            if(externalSignature.isDefined()) {
-                sgr.update(externalSignature.get().signature);
-            }
-            sgr.update(algo_buf);
-            sgr.update(next_key.toBytes());
-            byte[] signature = sgr.sign();
+            byte[] payload = BlockSignatureBuffer.getBufferSignature(next_key, block, externalSignature.toJavaOptional());
+            byte[] signature = this.proof.secretKey.get().sign(payload);
 
             SignedBlock signedBlock = new SignedBlock(block, next_key, signature, externalSignature);
 
@@ -303,7 +286,6 @@ public class SerializedBiscuit {
 
     public Either<Error, Void> verify(org.biscuitsec.biscuit.crypto.PublicKey root) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         org.biscuitsec.biscuit.crypto.PublicKey current_key = root;
-        ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
         {
             Either<Error, org.biscuitsec.biscuit.crypto.PublicKey> res = verifyBlockSignature(this.authority, current_key);
             if(res.isRight()) {
@@ -352,18 +334,10 @@ public class SerializedBiscuit {
             byte[] block = b.block;
             org.biscuitsec.biscuit.crypto.PublicKey next_key = b.key;
             byte[] signature = b.signature;
-            algo_buf.clear();
-            algo_buf.putInt(next_key.algorithm.getNumber());
-            algo_buf.flip();
 
-            Signature sgr = KeyPair.generateSignature(next_key.algorithm);
-            sgr.initVerify(current_key.key);
-            sgr.update(block);
-            sgr.update(algo_buf);
-            sgr.update(next_key.toBytes());
-            sgr.update(signature);
+            byte[] payload = BlockSignatureBuffer.getBufferSealedSignature(next_key, block, signature);
 
-            if (sgr.verify(finalSignature)) {
+            if (KeyPair.verify(current_key, payload, finalSignature)) {
                 return Right(null);
             } else {
                 return Left(new Error.FormatError.Signature.SealedSignature());
@@ -396,22 +370,16 @@ public class SerializedBiscuit {
         }
         sgr.update(algo_buf);
         sgr.update(next_key.toBytes());
-        if (!sgr.verify(signature)) {
+        byte[] payload = BlockSignatureBuffer.getBufferSignature(next_key, block, signedBlock.externalSignature.toJavaOptional());
+        if (!KeyPair.verify(publicKey, payload, signature)) {
             return Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied"));
         }
 
-        if(signedBlock.externalSignature.isDefined()) {
-            ByteBuffer algo_buf2 = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-            algo_buf2.putInt(Integer.valueOf(publicKey.algorithm.getNumber()));
-            algo_buf2.flip();
+        if (signedBlock.externalSignature.isDefined()) {
+            byte[] externalPayload = BlockSignatureBuffer.getBufferSignature(publicKey, block);
+            ExternalSignature externalSignature = signedBlock.externalSignature.get();
 
-            Signature sgr2 = KeyPair.generateSignature(publicKey.algorithm);
-            sgr2.initVerify(signedBlock.externalSignature.get().key.key);
-            sgr2.update(block);
-            sgr2.update(algo_buf2);
-            sgr2.update(publicKey.toBytes());
-
-            if (!sgr2.verify(signedBlock.externalSignature.get().signature)) {
+            if (!KeyPair.verify(externalSignature.key, externalPayload, externalSignature.signature)) {
                 return Left(new Error.FormatError.Signature.InvalidSignature("external signature error: Verification equation was not satisfied"));
             }
         }
@@ -479,19 +447,9 @@ public class SerializedBiscuit {
             block = this.blocks.get(this.blocks.size() - 1);
         }
 
-        Signature sgr = KeyPair.generateSignature(block.key.algorithm);
-        ByteBuffer algo_buf = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-        algo_buf.putInt(Integer.valueOf(block.key.algorithm.getNumber()));
-        algo_buf.flip();
-
-
-        sgr.initSign(this.proof.secretKey.get().private_key());
-        sgr.update(block.block);
-        sgr.update(algo_buf);
-        sgr.update(block.key.toBytes());
-        sgr.update(block.signature);
-
-        byte[] signature = sgr.sign();
+        KeyPair secretKey = this.proof.secretKey.get();
+        byte[] payload = BlockSignatureBuffer.getBufferSealedSignature(block.key, block.block, block.signature);
+        byte[] signature = secretKey.sign(payload);
 
         this.proof.secretKey = Option.none();
         this.proof.signature = Option.some(signature);

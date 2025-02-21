@@ -75,20 +75,20 @@ public class SignatureTest {
         KeyPair root = KeyPair.generate(algorithm, rng);
         KeyPair keypair2 = KeyPair.generate(algorithm, rng);
         Token token1 = new Token(root, message1.getBytes(), keypair2);
-        assertEquals(Right(null), token1.verify(new PublicKey(algorithm, root.publicKey())));
+        assertEquals(Right(null), token1.verify(new PublicKey(algorithm, root.public_key().key)));
 
         String message2 = "world";
         KeyPair keypair3 = KeyPair.generate(algorithm, rng);
         Token token2 = token1.append(keypair3, message2.getBytes());
         token2.blocks.set(1, "you".getBytes());
         assertEquals(Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied")),
-                token2.verify(new PublicKey(algorithm, root.publicKey())));
+                token2.verify(new PublicKey(algorithm, root.public_key().key)));
 
         String message3 = "!!";
         KeyPair keypair4 = KeyPair.generate(algorithm, rng);
         Token token3 = token2.append(keypair4, message3.getBytes());
         assertEquals(Left(new Error.FormatError.Signature.InvalidSignature("signature error: Verification equation was not satisfied")),
-                token3.verify(new PublicKey(algorithm, root.publicKey())));
+                token3.verify(new PublicKey(algorithm, root.public_key().key)));
     }
 
     private static void testThreeMessages(Schema.PublicKey.Algorithm algorithm) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
@@ -121,9 +121,9 @@ public class SignatureTest {
     public void testSerializeBiscuit() throws Error {
         var root = KeyPair.generate(SECP256R1);
         var biscuit = Biscuit.builder(root)
-            .add_authority_fact("user(\"1234\")")
-            .add_authority_check("check if operation(\"read\")")
-            .build();
+                .add_authority_fact("user(\"1234\")")
+                .add_authority_check("check if operation(\"read\")")
+                .build();
         var serialized = biscuit.serialize();
         var unverified = Biscuit.from_bytes(serialized);
         assertDoesNotThrow(() -> unverified.verify(root.public_key()));

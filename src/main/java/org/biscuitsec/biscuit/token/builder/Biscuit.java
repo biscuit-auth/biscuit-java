@@ -1,6 +1,5 @@
 package org.biscuitsec.biscuit.token.builder;
 
-import org.biscuitsec.biscuit.crypto.KeyPair;
 import org.biscuitsec.biscuit.crypto.PublicKey;
 import org.biscuitsec.biscuit.datalog.SchemaVersion;
 import org.biscuitsec.biscuit.datalog.SymbolTable;
@@ -20,7 +19,7 @@ import static org.biscuitsec.biscuit.token.UnverifiedBiscuit.default_symbol_tabl
 
 public class Biscuit {
     SecureRandom rng;
-    KeyPair root;
+    org.biscuitsec.biscuit.crypto.Signer root;
     String context;
     List<Fact> facts;
     List<Rule> rules;
@@ -28,7 +27,7 @@ public class Biscuit {
     List<Scope> scopes;
     Option<Integer> root_key_id;
 
-    public Biscuit(final SecureRandom rng, final KeyPair root) {
+    public Biscuit(final SecureRandom rng, final org.biscuitsec.biscuit.crypto.Signer root) {
         this.rng = rng;
         this.root = root;
         this.context = "";
@@ -39,7 +38,7 @@ public class Biscuit {
         this.root_key_id = Option.none();
     }
 
-    public Biscuit(final SecureRandom rng, final KeyPair root, Option<Integer> root_key_id) {
+    public Biscuit(final SecureRandom rng, final org.biscuitsec.biscuit.crypto.Signer root, Option<Integer> root_key_id) {
         this.rng = rng;
         this.root = root;
         this.context = "";
@@ -50,7 +49,7 @@ public class Biscuit {
         this.root_key_id = root_key_id;
     }
 
-    public Biscuit(final SecureRandom rng, final KeyPair root, Option<Integer> root_key_id, org.biscuitsec.biscuit.token.builder.Block block) {
+    public Biscuit(final SecureRandom rng, final org.biscuitsec.biscuit.crypto.Signer root, Option<Integer> root_key_id, org.biscuitsec.biscuit.token.builder.Block block) {
         this.rng = rng;
         this.root = root;
         this.root_key_id = root_key_id;

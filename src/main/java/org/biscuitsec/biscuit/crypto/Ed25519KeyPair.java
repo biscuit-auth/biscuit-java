@@ -10,11 +10,12 @@ import net.i2p.crypto.eddsa.spec.EdDSAPrivateKeySpec;
 import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
 import org.biscuitsec.biscuit.token.builder.Utils;
 
+import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Signature;
+import java.security.SignatureException;
 
 final class Ed25519KeyPair extends KeyPair {
 
@@ -63,6 +64,14 @@ final class Ed25519KeyPair extends KeyPair {
     }
 
     @Override
+    public byte[] sign(byte[] data) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        Signature sgr = KeyPair.generateSignature(Schema.PublicKey.Algorithm.Ed25519);
+        sgr.initSign(privateKey);
+        sgr.update(data);
+        return sgr.sign();
+    }
+
+    @Override
     public byte[] toBytes() {
         return privateKey.getSeed();
     }
@@ -73,17 +82,8 @@ final class Ed25519KeyPair extends KeyPair {
     }
 
     @Override
-    public java.security.PublicKey publicKey() {
-        return publicKey;
-    }
-
-    @Override
-    public PrivateKey private_key() {
-        return privateKey;
-    }
-
-    @Override
     public PublicKey public_key() {
         return new PublicKey(Schema.PublicKey.Algorithm.Ed25519, this.publicKey);
     }
+
 }
